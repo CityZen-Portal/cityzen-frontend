@@ -7,7 +7,7 @@ import Grievance_Management from "views/citizen/grievance-management";
 // Admin Views
 import AdminDashboard from "./views/admin/dashboard/index.jsx";
 import AdminTables from "views/admin/tables";
-import AdminProfile from "views/admin/profile";
+import AdminProfile from "./views/admin/profile/Profile";
 import AdminServices from "views/admin/services/index.jsx";
 // Staff Views
 import StaffDashboard from "views/staff/dashboard";
@@ -56,7 +56,7 @@ const routes = [
   },
   // Admin Routes
   {
-    name: "Admin Dashboard",
+    name: " Dashboard",
     layout: "/admin",
     path: "default",
     icon: <MdDashboard className="h-6 w-6" />,
@@ -64,11 +64,18 @@ const routes = [
   },
 
   {
-    name: "Admin Services",
+    name: "Services",
     layout: "/admin",
     path: "services",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <AdminServices />,
+  },
+   {
+    name: "Profile",
+    layout: "/admin",
+    path: "profile",
+    icon: <MdDashboard className="h-6 w-6" />,
+    component: <AdminProfile />,
   },
 
   // Staff Routes
