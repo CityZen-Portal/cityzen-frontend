@@ -42,7 +42,7 @@ import NewsUpdate from "views/citizen/news/components/NewsUpdate"
 
 // Auth Views
 import SignIn from "views/auth/SignIn";
-
+import GetStarted from "views/auth/SignUp/get-started";
 // Icons
 
 import {
@@ -57,7 +57,12 @@ import {
   MdAssignment,
   MdBallot,
 } from "react-icons/md";
+
+import SignupCitizen from "views/auth/SignUp/SignUpClient";
+import SignupStaff from "views/auth/SignUp/SignUpStaff";
+
 import ServiceForm from "views/citizen/services/components/ServiceForm";
+
 
 const routes = [
   // Citizen Routes
@@ -264,6 +269,26 @@ const routes = [
     icon: <MdLock className="h-6 w-6" />,
     component: <SignIn />,
   },
+  // {
+  //   path: "signup",
+  //   layout: "/auth",
+  //   component: <GetStarted />,
+  // },
+  {
+    path: "signup/get-started",
+    layout: "/auth",
+    component: <GetStarted />,
+  },
+  {
+    path: "signup/get-started/citizen",
+    layout: "/auth",
+    component: <SignupCitizen />,
+  },
+  {
+    path: "signup/get-started/staff",
+    layout: "/auth",  
+    component: <SignupStaff />,
+  }
 ];
 
 export default routes;
