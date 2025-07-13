@@ -1,11 +1,8 @@
 import React from 'react'
+import ComplaintLog from './pages/ComplaintLog'
 
-const index = () => {
-  return (
-    <div>
-        
-    </div>
-  )
+const ComplaintTracker = () => {
+  return (<ComplaintLog />)
 }
 
-export default index
+export default ComplaintTracker

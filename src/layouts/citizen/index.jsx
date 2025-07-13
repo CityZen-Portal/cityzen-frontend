@@ -26,27 +26,48 @@ export default function Citizen(props) {
 
   const getActiveRoute = (routes) => {
     for (let i = 0; i < routes.length; i++) {
-      if (window.location.href.includes("/" + routes[i].path)) {
+      if (
+        window.location.href.indexOf(
+          routes[i].layout + "/" + routes[i].path
+        ) !== -1
+      ) {
         setCurrentRoute(routes[i].name);
-        break;
       }
     }
   };
 
+  
   const getActiveNavbar = (routes) => {
+    let activeNavbar = false;
     for (let i = 0; i < routes.length; i++) {
-      if (window.location.href.includes("/" + routes[i].path)) {
+      if (
+        window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
+      ) {
         return routes[i].secondary;
       }
     }
-    return false;
+    return activeNavbar;
   };
 
   const getRoutes = (routes) => {
-    return routes.map((route, key) => {
-      if (route.layout === "/citizen") {
+    return routes.map((prop, key) => {
+      if (prop.layout === "/citizen") {
         return (
-          <Route path={`/${route.path}`} element={route.component} key={key} />
+          <React.Fragment key={key}>
+            <Route path={`/${prop.path}`} element={prop.component} />
+            {prop.children && prop.children.map((childRoute, childKey) => {
+              if (childRoute.layout === "/citizen") {
+                return (
+                  <Route 
+                    path={`/${childRoute.path}`} 
+                    element={childRoute.component} 
+                    key={`${key}-${childKey}`} 
+                  />
+                );
+              }
+              return null;
+            })}
+          </React.Fragment>
         );
       } else {
         return null;

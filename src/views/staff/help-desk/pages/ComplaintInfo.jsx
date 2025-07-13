@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaMapMarkerAlt, FaExclamationCircle, FaHistory } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const ComplaintDetails = () => {
+const ComplaintInfo = () => {
   const navigate = useNavigate()
   
   const [showImageModal, setShowImageModal] = useState(false);
@@ -163,7 +163,7 @@ const ComplaintDetails = () => {
         <div className="mt-8">
           <button
             onClick={() => {
-              navigate(`/citizen/help-desk/complaint/log`)
+              navigate('/staff/complaints')
               window.scrollTo(0,0)
             }}
             className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors dark:bg-white dark:text-navy-900 dark:hover:bg-gray-200"
@@ -198,4 +198,4 @@ const ComplaintDetails = () => {
   );
 };
 
-export default ComplaintDetails;
+export default ComplaintInfo;

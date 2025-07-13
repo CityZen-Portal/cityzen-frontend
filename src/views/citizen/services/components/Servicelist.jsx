@@ -1,9 +1,11 @@
-import React from "react";
+import React  from "react";
 import img1 from "../../../../assets/img/service/govimg-2.jpeg";
 import data from "../variables/data"; 
 import ServiceForm from "./ServiceForm";
-
+import { useNavigate } from "react-router-dom";
 function Servicelist() {
+  const navigate = useNavigate();
+  console.log(data);
   return (
     <>
       <div
@@ -38,7 +40,7 @@ function Servicelist() {
               </div>
             </div>
             <div className="flex justify-center pb-4">
-              <button className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+              <button  onClick={()=>navigate(`/citizen/Services/form/${item.nameOfService}`)} className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
                 Get service
               </button>
             </div>
@@ -46,7 +48,7 @@ function Servicelist() {
         ))}
 
       </div>
-      <ServiceForm/>
+      {/* <ServiceForm/> */}
     </>
   );
 }

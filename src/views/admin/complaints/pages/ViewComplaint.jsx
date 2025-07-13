@@ -47,74 +47,74 @@ const ComplaintDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <FaExclamationCircle className="text-3xl text-blue-600" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <FaExclamationCircle className="text-2xl sm:text-3xl text-blue-600 flex-shrink-0" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 Complaint #{complaintData.id}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-sm">Manage your complaint details</p>
             </div>
           </div>
-          <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(complaintData.status)}`}>
+          <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(complaintData.status)} self-start sm:self-auto`}>
             {getStatusText(complaintData.status)}
           </span>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Left Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 {/* Location Details */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <FaMapMarkerAlt className="mr-2 text-blue-600" /> Location Details
+                    <FaMapMarkerAlt className="mr-2 text-blue-600 flex-shrink-0" /> Location Details
                   </h2>
                   {['complaintant', 'location', 'address', 'wardNumber', 'pincode'].map((field) => (
-                    <div key={field}>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
+                    <div key={field} className="break-words">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize mb-1">
                         {field.replace(/([A-Z])/g, ' $1').trim()}
                       </label>
-                      <p className="mt-1 text-gray-900 dark:text-white">{complaintData[field]}</p>
+                      <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData[field]}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Complaint Details */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <FaExclamationCircle className="mr-2 text-blue-600" /> Complaint Title & Details
+                    <FaExclamationCircle className="mr-2 text-blue-600 flex-shrink-0" /> Complaint Title & Details
                   </h2>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Complaint Type</label>
-                    <p className="mt-1 text-gray-900 dark:text-white">{complaintData.complaintType}</p>
+                  <div className="break-words">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Complaint Type</label>
+                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData.complaintType}</p>
+                  </div>
+                  <div className="break-words">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Issue</label>
+                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData.Issue}</p>
+                  </div>
+                  <div className="break-words">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData.description}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
-                    <p className="mt-1 text-gray-900 dark:text-white">{complaintData.Issue}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                    <p className="mt-1 text-gray-900 dark:text-white">{complaintData.description}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image</label>
                     <div className="mt-1">
                       {complaintData.imageUrl ? (
                         <img
                           src={complaintData.imageUrl}
                           alt="Complaint"
-                          className="max-w-xs rounded-md cursor-pointer hover:opacity-80"
+                          className="max-w-full sm:max-w-xs rounded-md cursor-pointer hover:opacity-80 transition-opacity"
                           onClick={() => setShowImageModal(true)}
                         />
                       ) : (
-                        <p className="text-gray-500 dark:text-gray-400 italic">No image uploaded</p>
+                        <p className="text-gray-500 dark:text-gray-400 italic text-sm">No image uploaded</p>
                       )}
                     </div>
                   </div>
@@ -125,34 +125,34 @@ const ComplaintDetails = () => {
 
           {/* Right Sidebar */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
+            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <FaHistory className="mr-2 text-blue-600" /> Status History
+                <FaHistory className="mr-2 text-blue-600 flex-shrink-0" /> Status History
               </h2>
               <div className="space-y-4">
                 {complaintData.statusHistory.map((entry, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="h-2 w-2 bg-blue-600 rounded-full mt-1.5"></div>
+                    <div className="flex-shrink-0 mt-1.5">
+                      <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{entry.status}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{entry.date}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{entry.note}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white break-words">{entry.status}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{entry.date}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 break-words">{entry.note}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
+            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Additional Information</h2>
               {['department', 'dateLogged'].map((field) => (
-                <div key={field} className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
+                <div key={field} className="mb-4 break-words">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize mb-1">
                     {field.replace(/([A-Z])/g, ' $1').trim()}
                   </label>
-                  <p className="mt-1 text-gray-900 dark:text-white">{complaintData[field]}</p>
+                  <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData[field]}</p>
                 </div>
               ))}
             </div>
@@ -160,13 +160,13 @@ const ComplaintDetails = () => {
         </div>
 
         {/* Back Button */}
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           <button
             onClick={() => {
-              navigate(`/citizen/help-desk/complaint/log`)
+              navigate('/admin/complaints')
               window.scrollTo(0,0)
             }}
-            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors dark:bg-white dark:text-navy-900 dark:hover:bg-gray-200"
+            className="w-full sm:w-auto px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors dark:bg-white dark:text-navy-900 dark:hover:bg-gray-200"
           >
             Back to Complaint Log
           </button>
@@ -175,13 +175,13 @@ const ComplaintDetails = () => {
 
       {/* Image Modal */}
       {showImageModal && complaintData.imageUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-navy-800 rounded-xl p-4 max-w-3xl w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-navy-800 rounded-xl p-4 max-w-3xl w-full max-h-[90vh] overflow-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Image Preview</h3>
               <button
                 onClick={() => setShowImageModal(false)}
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white text-xl p-1"
               >
                 ✕
               </button>

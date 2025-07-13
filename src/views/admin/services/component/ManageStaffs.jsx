@@ -37,9 +37,9 @@ function ManageStaffs() {
   };
 
   return (
-    <div className='mt-12 mb-8 flex flex-col gap-12'>
-      <div className='bg-white shadow-lg rounded-xl'>
-        <div className='bg-blue-600 p-6 rounded-t-xl'>
+    <div className='dark:bg-navy-800 mt-12 mb-8 flex flex-col gap-12'>
+      <div className='dark:bg-navy-800 bg-white shadow-lg rounded-xl'>
+        <div className='dark:bg-navy-500 bg-blue-600 p-6 rounded-t-xl'>
           <button onClick={() => navigate('/admin/services')} className="text-white hover:text-gray-200 transition-colors flex items-center gap-1 mb-2">
             <span>←</span> Back
           </button>
@@ -58,10 +58,10 @@ function ManageStaffs() {
           <table className='min-w-full text-left border border-gray-200'>
             <thead>
               <tr className='bg-gray-100 text-xs uppercase text-gray-500'>
-                <th className='py-3 px-5'>Name</th>
-                <th className='py-3 px-5'>Role</th>
-                <th className='py-3 px-5'>Contact</th>
-                <th className='py-3 px-5'>Actions</th>
+                <th className='dark:bg-navy-500 py-3 px-5'>Name</th>
+                <th className='dark:bg-navy-500 py-3 px-5'>Role</th>
+                <th className='dark:bg-navy-500 py-3 px-5'>Contact</th>
+                <th className='dark:bg-navy-500 py-3 px-5'>Actions</th>
               </tr>
             </thead>
             <tbody>

@@ -69,8 +69,8 @@ function ViewTasks() {
   };
 
   return (
-    <div className="mt-12 mb-8 flex flex-col gap-12 px-4">
-      <div className="bg-white shadow rounded-lg">
+    <div className=" mt-12 mb-8 flex flex-col gap-12 px-4">
+      <div className="dark:bg-navy-800 bg-white shadow rounded-lg">
         <div className="bg-blue-600 p-4 rounded-t-lg">
           <button onClick={() => navigate('/admin/services')} className="text-white hover:text-gray-200 transition-colors flex items-center gap-1 mb-2">
             <span>←</span> Back

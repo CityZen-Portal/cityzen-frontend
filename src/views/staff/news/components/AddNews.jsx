@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import Card from 'components/card';
-import InputField from 'components/fields/InputField';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   MdAdd,
   MdSave,
   MdCancel
 } from 'react-icons/md';
-
-import { newsItems as staticNewsItems } from '../variables/data';
+import { newsData } from '../variables/data';
 
 const AddNews = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [newsItems, setNewsItems] = useState(staticNewsItems);
+  const [newsItems, setNewsItems] = useState(newsData);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -22,6 +20,7 @@ const AddNews = () => {
     isBreaking: false,
     isTrending: false
   });
+  const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
@@ -39,9 +38,9 @@ const AddNews = () => {
         setIsEditing(true);
         setCurrentId(item.id);
       } else {
-        navigate('../manage');
+        navigate('../news');
       }
-    } else {
+    } else {  
       setFormData({
         title: '',
         content: '',
@@ -54,9 +53,19 @@ const AddNews = () => {
     }
   }, [id, newsItems, navigate]);
 
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.title.trim()) errors.title = "Title is required";
+    if (!formData.content.trim()) errors.content = "Content is required";
+    if (!formData.author.trim()) errors.author = "Author is required";
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleCheckboxChange = (e) => {
@@ -65,33 +74,29 @@ const AddNews = () => {
   };
 
   const handleAddNews = () => {
-    if (!formData.title || !formData.content) return;
-
+    if (!validateForm()) return;
     const newItem = {
       id: newsItems.length > 0 ? Math.max(...newsItems.map(item => item.id)) + 1 : 1,
       title: formData.title,
       content: formData.content,
-      author: formData.author || 'Staff',
+      author: formData.author,
       isBreaking: formData.isBreaking,
       isTrending: formData.isTrending,
       date: new Date().toISOString().split('T')[0],
       votes: 0,
       comments: []
     };
-
     setNewsItems([newItem, ...newsItems]);
     navigate('/staff/news');
   };
 
   const handleUpdateNews = () => {
-    if (!formData.title || !formData.content || currentId === null) return;
-
+    if (!validateForm() || currentId === null) return;
     const updatedItems = newsItems.map(item =>
       item.id === currentId
         ? { ...item, ...formData }
         : item
     );
-
     setNewsItems(updatedItems);
     navigate('/staff/news');
   };
@@ -119,9 +124,8 @@ const AddNews = () => {
           </p>
         </div>
 
-        {/* Title */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1 text-navy-700 dark:text-white">
+          <label className={`block text-sm font-medium mb-1 ${formErrors.title ? 'text-red-500' : 'text-navy-700 dark:text-white'}`}>
             Title
           </label>
           <input
@@ -130,13 +134,13 @@ const AddNews = () => {
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Enter a catchy title"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white"
+            className={`w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
           />
+          {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
         </div>
 
-        {/* Content */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1 text-navy-700 dark:text-white">
+          <label className={`block text-sm font-medium mb-1 ${formErrors.content ? 'text-red-500' : 'text-navy-700 dark:text-white'}`}>
             Content
           </label>
           <textarea
@@ -144,13 +148,13 @@ const AddNews = () => {
             value={formData.content}
             onChange={handleInputChange}
             placeholder="Share the details of your news..."
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm h-28 resize-none focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white"
+            className={`w-full px-4 py-2 border rounded-xl text-sm h-28 resize-none focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.content ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
           />
+          {formErrors.content && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
         </div>
 
-        {/* Author */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1 text-navy-700 dark:text-white">
+          <label className={`block text-sm font-medium mb-1 ${formErrors.author ? 'text-red-500' : 'text-navy-700 dark:text-white'}`}>
             Author / Department
           </label>
           <input
@@ -159,11 +163,11 @@ const AddNews = () => {
             value={formData.author}
             onChange={handleInputChange}
             placeholder="Your name or department"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white"
+            className={`w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.author ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
           />
+          {formErrors.author && <p className="text-red-500 text-xs mt-1">{formErrors.author}</p>}
         </div>
 
-        {/* Checkboxes */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
           <label className="flex items-center space-x-2 text-sm text-navy-700 dark:text-white">
             <input
@@ -187,7 +191,6 @@ const AddNews = () => {
           </label>
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-end gap-3 mt-4">
           {isEditing ? (
             <>

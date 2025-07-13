@@ -7,8 +7,6 @@ import FeedbackAnalytics from './component/FeedbackAnalytics';
 const AdminServices = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Check if we're on the main services page
   const isMainView = location.pathname === '/admin/services';
 
   return (
@@ -21,7 +19,7 @@ const AdminServices = () => {
             onViewTasks={() => navigate('/admin/services/tasks')}
             onViewSchedule={() => navigate('/admin/services/schedule')}
           />
-          <FeedbackAnalytics />
+          <FeedbackAnalytics onFeedback={() => navigate('/admin/services/feedback')} />
         </>
       )}
     </div>

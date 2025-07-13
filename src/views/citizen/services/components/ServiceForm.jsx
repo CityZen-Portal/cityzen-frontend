@@ -1,11 +1,25 @@
 import React from 'react'
-
+import { useParams, useNavigate } from 'react-router-dom';
 function ServiceForm() {
+  const { serviceName } = useParams();
+  const navigate = useNavigate();
+  console.log(serviceName);
   return (
     <>
       <form>
+
         <div class="flex items-center justify-center pt-12 md:p-12">
           <div class="mx-auto w-full max-w-[700px] bg-white">
+            <div>
+              <div className='flex items-center justify-between px-4 pt-4'>
+                <button
+                  onClick={() => navigate('/citizen/Services')}
+                  className="text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1 mb-2"
+                >
+                  <span>←</span> Back
+                </button>
+              </div>
+            </div>
             <form>
               <div class="m-8">
                 <label
