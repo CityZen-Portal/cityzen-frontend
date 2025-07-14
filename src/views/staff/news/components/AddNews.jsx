@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Card from 'components/card';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  MdAdd,
-  MdSave,
-  MdCancel
-} from 'react-icons/md';
+import { MdAdd, MdSave, MdCancel } from 'react-icons/md';
 import { newsData } from '../variables/data';
 
 const AddNews = () => {
@@ -17,6 +13,9 @@ const AddNews = () => {
     title: '',
     content: '',
     author: '',
+    location: '',
+    category: '',
+    image: '',
     isBreaking: false,
     isTrending: false
   });
@@ -32,6 +31,8 @@ const AddNews = () => {
           title: item.title,
           content: item.content,
           author: item.author,
+          location: item.location || '',
+          category: item.category || '',
           isBreaking: item.isBreaking,
           isTrending: item.isTrending
         });
@@ -40,11 +41,13 @@ const AddNews = () => {
       } else {
         navigate('../news');
       }
-    } else {  
+    } else {
       setFormData({
         title: '',
         content: '',
         author: '',
+        location: '',
+        category: '',
         isBreaking: false,
         isTrending: false
       });
@@ -80,6 +83,8 @@ const AddNews = () => {
       title: formData.title,
       content: formData.content,
       author: formData.author,
+      location: formData.location,
+      category: formData.category,
       isBreaking: formData.isBreaking,
       isTrending: formData.isTrending,
       date: new Date().toISOString().split('T')[0],
@@ -134,7 +139,7 @@ const AddNews = () => {
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Enter a catchy title"
-            className={`w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+            className={`w-full px-4 py-2 border dark:bg-navy-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
           />
           {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
         </div>
@@ -148,7 +153,7 @@ const AddNews = () => {
             value={formData.content}
             onChange={handleInputChange}
             placeholder="Share the details of your news..."
-            className={`w-full px-4 py-2 border rounded-xl text-sm h-28 resize-none focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.content ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+            className={`w-full px-4 py-2 border rounded-xl text-sm h-28 resize-none focus:ring-2 dark:bg-navy-700 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.content ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
           />
           {formErrors.content && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
         </div>
@@ -163,9 +168,44 @@ const AddNews = () => {
             value={formData.author}
             onChange={handleInputChange}
             placeholder="Your name or department"
-            className={`w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.author ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+            className={`w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white dark:bg-navy-700 ${formErrors.author ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
           />
           {formErrors.author && <p className="text-red-500 text-xs mt-1">{formErrors.author}</p>}
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-navy-700 dark:text-white">
+            Location
+          </label>
+          <select
+            name="location"
+            value={formData.location}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 border dark:bg-navy-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white border-gray-300 dark:border-gray-600"
+          >
+            <option value="">Select Location</option>
+            <option value="Townhall">Townhall</option>
+            <option value="Sai Baba Colony">Sai Baba Colony</option>
+            <option value="Ukkadam">Ukkadam</option>
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-navy-700 dark:text-white">
+            Category
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 dark:bg-navy-700 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white border-gray-300 dark:border-gray-600"
+          >
+            <option value="">Select Category</option>
+            <option value="Sports">Sports</option>
+            <option value="Business">Business</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Tech">Tech</option>
+          </select>
         </div>
 
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
