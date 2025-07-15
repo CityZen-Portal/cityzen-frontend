@@ -10,9 +10,9 @@ import ComplaintFeedback from "views/citizen/help-desk/pages/ComplaintFeedback";
 import ComplaintDetails from "views/citizen/help-desk/pages/ComplaintDetails";
 
 // Admin Views
-import AdminDashboard from "views/admin/default";
+import AdminDashboard from "views/admin/dashboard/index";
 import AdminTables from "views/admin/tables";
-import AdminProfile from "views/admin/profile";
+import AdminProfile from "views/admin/profile/Profile";
 import AdminServices from "views/admin/services/index.jsx";
 import ManageStaffs from "views/admin/services/component/ManageStaffs";
 import ViewTasks from "views/admin/services/component/ViewTasks";
@@ -223,6 +223,14 @@ const routes = [
       },
     ]
   },
+     {
+    name: "Profile",
+    layout: "/admin",
+    path: "profile",
+    icon: <MdPerson className="h-6 w-6" />,
+    component: <AdminProfile />,
+  },
+    
 
   // Staff Routes
   {

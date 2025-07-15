@@ -21,6 +21,18 @@ export default function Citizen(props) {
   }, []);
 
   React.useEffect(() => {
+    if (window.innerWidth >= 1200 || !open) return;
+
+    const handleScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [open]);
+
+
+  React.useEffect(() => {
     getActiveRoute(routes);
   }, [location.pathname]);
 
@@ -79,7 +91,18 @@ export default function Citizen(props) {
 
   return (
     <div className="flex h-full w-full">
+      {/* Overlay for mobile screens */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-30 xl:hidden"
+          onClick={() => setOpen(false)}
+        ></div>
+      )}
+
+      {/* Sidebar */}
       <CitizenSidebar open={open} onClose={() => setOpen(false)} />
+
+      {/* Main content */}
       <div className="h-full w-full bg-lightPrimary dark:!bg-navy-900">
         <main className="mx-[12px] h-full flex-none transition-all md:pr-2 xl:ml-[313px]">
           <div className="h-full">
@@ -104,4 +127,5 @@ export default function Citizen(props) {
       </div>
     </div>
   );
+
 }
