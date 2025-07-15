@@ -21,32 +21,65 @@ export default function Citizen(props) {
   }, []);
 
   React.useEffect(() => {
+    if (window.innerWidth >= 1200 || !open) return;
+
+    const handleScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [open]);
+
+
+  React.useEffect(() => {
     getActiveRoute(routes);
   }, [location.pathname]);
 
   const getActiveRoute = (routes) => {
     for (let i = 0; i < routes.length; i++) {
-      if (window.location.href.includes("/" + routes[i].path)) {
+      if (
+        window.location.href.indexOf(
+          routes[i].layout + "/" + routes[i].path
+        ) !== -1
+      ) {
         setCurrentRoute(routes[i].name);
-        break;
       }
     }
   };
 
+  
   const getActiveNavbar = (routes) => {
+    let activeNavbar = false;
     for (let i = 0; i < routes.length; i++) {
-      if (window.location.href.includes("/" + routes[i].path)) {
+      if (
+        window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
+      ) {
         return routes[i].secondary;
       }
     }
-    return false;
+    return activeNavbar;
   };
 
   const getRoutes = (routes) => {
-    return routes.map((route, key) => {
-      if (route.layout === "/citizen") {
+    return routes.map((prop, key) => {
+      if (prop.layout === "/citizen") {
         return (
-          <Route path={`/${route.path}`} element={route.component} key={key} />
+          <React.Fragment key={key}>
+            <Route path={`/${prop.path}`} element={prop.component} />
+            {prop.children && prop.children.map((childRoute, childKey) => {
+              if (childRoute.layout === "/citizen") {
+                return (
+                  <Route 
+                    path={`/${childRoute.path}`} 
+                    element={childRoute.component} 
+                    key={`${key}-${childKey}`} 
+                  />
+                );
+              }
+              return null;
+            })}
+          </React.Fragment>
         );
       } else {
         return null;
@@ -58,7 +91,18 @@ export default function Citizen(props) {
 
   return (
     <div className="flex h-full w-full">
+      {/* Overlay for mobile screens */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-30 xl:hidden"
+          onClick={() => setOpen(false)}
+        ></div>
+      )}
+
+      {/* Sidebar */}
       <CitizenSidebar open={open} onClose={() => setOpen(false)} />
+
+      {/* Main content */}
       <div className="h-full w-full bg-lightPrimary dark:!bg-navy-900">
         <main className="mx-[12px] h-full flex-none transition-all md:pr-2 xl:ml-[313px]">
           <div className="h-full">
@@ -83,4 +127,5 @@ export default function Citizen(props) {
       </div>
     </div>
   );
+
 }

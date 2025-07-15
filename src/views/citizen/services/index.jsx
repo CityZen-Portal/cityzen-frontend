@@ -5,6 +5,7 @@ const Service = () => {
   return (
     <>
    <Servicelist/>
+   
     </>
   )
 }

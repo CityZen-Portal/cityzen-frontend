@@ -6,7 +6,6 @@ const StaffService = () => {
   const [requests, setRequests] = useState(initialRequests);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [photo, setPhoto] = useState(null);
-  console.log(photo);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [formData, setFormData] = useState({
     staffName: "",
@@ -15,6 +14,7 @@ const StaffService = () => {
   });
   const [viewMode, setViewMode] = useState("all");
   const [viewingDetails, setViewingDetails] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -22,18 +22,27 @@ const StaffService = () => {
       ...prev,
       [id]: value
     }));
+    setErrors(prev => ({
+      ...prev,
+      [id]: ""
+    }));
   };
 
   const handlePhotoChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setPhoto(selectedFile);
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setPhotoPreview(e.target.result);
       };
       reader.readAsDataURL(selectedFile);
+
+      setErrors(prev => ({
+        ...prev,
+        photo: ""
+      }));
     }
   };
 
@@ -48,6 +57,7 @@ const StaffService = () => {
     setPhoto(null);
     setPhotoPreview(null);
     setViewingDetails(null);
+    setErrors({});
   };
 
   const handleViewDetails = (request) => {
@@ -57,8 +67,14 @@ const StaffService = () => {
 
   const handleSubmitCompletion = (e) => {
     e.preventDefault();
-    if (!selectedRequest || !formData.staffName || !photoPreview) {
-      alert("Please fill all required fields and upload a photo");
+
+    const newErrors = {};
+    if (!formData.staffName.trim()) newErrors.staffName = "Staff name is required.";
+    if (!formData.completionDate) newErrors.completionDate = "Completion date is required.";
+    if (!photoPreview) newErrors.photo = "Completion photo is required.";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -85,6 +101,7 @@ const StaffService = () => {
       completionDate: new Date().toISOString().split('T')[0],
       suggestion: ""
     });
+    setErrors({});
   };
 
   const filteredRequests = viewMode === "all" 
@@ -102,7 +119,7 @@ const StaffService = () => {
         handleViewDetails={handleViewDetails}
         handleComplete={handleComplete}
       />
-       <CompletionForm 
+      <CompletionForm 
         selectedRequest={selectedRequest}
         setSelectedRequest={setSelectedRequest}
         formData={formData}
@@ -110,13 +127,14 @@ const StaffService = () => {
         handlePhotoChange={handlePhotoChange}
         photoPreview={photoPreview}
         handleSubmitCompletion={handleSubmitCompletion}
+        errors={errors}
       />
-       <RequestDetails 
+      <RequestDetails 
         viewingDetails={viewingDetails} 
         setViewingDetails={setViewingDetails} 
       />
     </div>
-  )
-}
+  );
+};
 
-export default StaffService
+export default StaffService;

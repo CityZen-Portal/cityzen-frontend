@@ -12,10 +12,25 @@ export default function Admin(props) {
   const [currentRoute, setCurrentRoute] = React.useState("Main Dashboard");
 
   React.useEffect(() => {
-    window.addEventListener("resize", () =>
-      window.innerWidth < 1200 ? setOpen(false) : setOpen(true)
-    );
+    const handleResize = () => {
+      window.innerWidth < 1200 ? setOpen(false) : setOpen(true);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Set initial value
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
+  
+  React.useEffect(() => {
+    if (window.innerWidth >= 1200 || !open) return;
+
+    const handleScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [open]);
+
   React.useEffect(() => {
     getActiveRoute(routes);
   }, [location.pathname]);
@@ -47,6 +62,22 @@ export default function Admin(props) {
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
       if (prop.layout === "/admin") {
+        // Handle nested routes if they exist
+        if (prop.children) {
+          return (
+            <React.Fragment key={key}>
+              <Route path={`/${prop.path}`} element={prop.component} />
+              {prop.children.map((childRoute, childKey) => (
+                <Route 
+                  path={`/${childRoute.path}`} 
+                  element={childRoute.component} 
+                  key={`${key}-${childKey}`} 
+                />
+              ))}
+            </React.Fragment>
+          );
+        }
+        // Regular route without children
         return (
           <Route path={`/${prop.path}`} element={prop.component} key={key} />
         );

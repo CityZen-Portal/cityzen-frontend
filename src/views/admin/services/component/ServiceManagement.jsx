@@ -2,9 +2,9 @@ import React from 'react';
 
 const ServiceManagement = ({ onManageClick }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8">
+    <div className="bg-white dark:bg-navy-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-        <span className="material-icons mr-2">settings</span>
+        <span className="material-icons mr-2">Settings</span>
         Service Management
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

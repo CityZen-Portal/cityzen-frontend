@@ -19,6 +19,18 @@ export default function Staff(props) {
     handleResize(); // Set initial value
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  
+  React.useEffect(() => {
+    if (window.innerWidth >= 1200 || !open) return;
+
+    const handleScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [open]);
+  
 
   React.useEffect(() => {
     getActiveRoute(routes);
@@ -52,7 +64,21 @@ export default function Staff(props) {
     return routes.map((prop, key) => {
       if (prop.layout === "/staff") {
         return (
-          <Route path={`/${prop.path}`} element={prop.component} key={key} />
+          <React.Fragment key={key}>
+            <Route path={`/${prop.path}`} element={prop.component} />
+            {prop.children && prop.children.map((childRoute, childKey) => {
+              if (childRoute.layout === "/staff") {
+                return (
+                  <Route 
+                    path={`/${childRoute.path}`} 
+                    element={childRoute.component} 
+                    key={`${key}-${childKey}`} 
+                  />
+                );
+              }
+              return null;
+            })}
+          </React.Fragment>
         );
       } else {
         return null;

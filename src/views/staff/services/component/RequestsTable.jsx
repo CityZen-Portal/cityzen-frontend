@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import Card from "components/card";
-import { 
-  MdOutlineAssignment, 
-  MdCheckCircleOutline, 
+import Pagination from 'components/pagination';
+import {
+  MdOutlineAssignment,
+  MdCheckCircleOutline,
   MdPendingActions,
   MdArrowUpward,
   MdArrowDownward,
@@ -13,11 +14,11 @@ import {
   MdSort
 } from "react-icons/md";
 
-const RequestsTable = ({ 
-  viewMode, 
-  filteredRequests, 
-  handleViewDetails, 
-  handleComplete 
+const RequestsTable = ({
+  viewMode,
+  filteredRequests,
+  handleViewDetails,
+  handleComplete
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -62,11 +63,11 @@ const RequestsTable = ({
         return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
       }
       if (typeof a[sortField] === 'string') {
-        return sortDirection === 'asc' 
+        return sortDirection === 'asc'
           ? a[sortField].localeCompare(b[sortField])
           : b[sortField].localeCompare(a[sortField]);
       }
-      return sortDirection === 'asc' 
+      return sortDirection === 'asc'
         ? a[sortField] - b[sortField]
         : b[sortField] - a[sortField];
     });
@@ -82,15 +83,15 @@ const RequestsTable = ({
             <MdOutlineAssignment className="h-6 w-6" />
           </div>
           <h5 className="text-xl font-bold text-navy-700 dark:text-white">
-            {viewMode === "all" ? "All Service Requests" : 
-             viewMode === "pending" ? "Pending Requests" : "Completed Requests"}
+            {viewMode === "all" ? "All Service Requests" :
+              viewMode === "pending" ? "Pending Requests" : "Completed Requests"}
           </h5>
         </div>
 
         <div className="flex flex-wrap justify-between items-center mb-4">
           <div className="flex items-center space-x-2 mb-2 sm:mb-0">
             <label className="text-sm text-gray-600 dark:text-gray-400">Show</label>
-            <select 
+            <select
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
@@ -104,7 +105,7 @@ const RequestsTable = ({
             </select>
             <span className="text-sm text-gray-600 dark:text-gray-400">entries</span>
           </div>
-          
+
           <div className="relative">
             <input
               type="text"
@@ -151,11 +152,11 @@ const RequestsTable = ({
                     { label: "Service", key: "service" },
                     { label: "Date", key: "date" },
                     { label: "Status", key: "status" },
-                    ...(viewMode === "completed" 
-                      ? [{ label: "Completed", key: "completedDate" }, { label: "Staff", key: "staffName" }] 
+                    ...(viewMode === "completed"
+                      ? [{ label: "Completed", key: "completedDate" }, { label: "Staff", key: "staffName" }]
                       : []),
                   ].map(col => (
-                    <th 
+                    <th
                       key={col.key}
                       className="py-4 px-4 text-left text-sm font-bold text-navy-700 dark:text-white cursor-pointer select-none"
                       onClick={() => handleSort(col.key)}
@@ -173,8 +174,8 @@ const RequestsTable = ({
               </thead>
               <tbody>
                 {paginatedRequests.map((request, index) => (
-                  <tr 
-                    key={request.id} 
+                  <tr
+                    key={request.id}
                     className={`border-b border-gray-200 dark:border-navy-700 hover:bg-gray-50 dark:hover:bg-navy-900 transition-colors ${index % 2 === 0 ? 'bg-white dark:bg-navy-800' : 'bg-gray-50/50 dark:bg-navy-700/50'}`}
                   >
                     <td className="py-4 px-4 text-sm font-medium text-navy-700 dark:text-white">{request.id}</td>
@@ -182,7 +183,7 @@ const RequestsTable = ({
                     <td className="py-4 px-4 text-sm text-gray-600 dark:text-gray-300">{request.service}</td>
                     <td className="py-4 px-4 text-sm text-gray-600 dark:text-gray-300">{request.date}</td>
                     <td className="py-4 px-4 text-sm">
-                      <span 
+                      <span
                         className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'}`}
                       >
                         {request.status === 'pending' ? (
@@ -206,7 +207,7 @@ const RequestsTable = ({
                     )}
                     <td className="py-4 px-4 text-sm">
                       <div className="flex space-x-2">
-                        <button 
+                        <button
                           onClick={() => handleViewDetails(request)}
                           className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 text-xs font-medium hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors flex items-center gap-1 shadow-sm"
                         >
@@ -217,7 +218,7 @@ const RequestsTable = ({
                           <span>View</span>
                         </button>
                         {request.status === 'pending' && (
-                          <button 
+                          <button
                             onClick={() => handleComplete(request.id)}
                             className="px-3 py-1.5 rounded-xl bg-brand-500 text-white text-xs font-medium hover:bg-brand-600 transition-colors flex items-center gap-1 shadow-sm"
                           >
@@ -235,29 +236,22 @@ const RequestsTable = ({
         )}
 
         {filteredRequests.length > 0 && (
-          <div className="flex flex-wrap justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-navy-700">
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
-              Showing {searchedRequests.length > 0 ? Math.min((currentPage - 1) * itemsPerPage + 1, searchedRequests.length) : 0} to {Math.min(currentPage * itemsPerPage, searchedRequests.length)} of {searchedRequests.length} entries
-              {searchTerm && <span> (filtered from {filteredRequests.length} total entries)</span>}
-            </div>
-            <div className="flex items-center space-x-1">
-              <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className={`p-2 rounded-lg ${currentPage === 1 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-navy-700 dark:text-white hover:bg-gray-100 dark:hover:bg-navy-700'}`}><MdFirstPage className="h-5 w-5" /></button>
-              <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className={`p-2 rounded-lg ${currentPage === 1 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-navy-700 dark:text-white hover:bg-gray-100 dark:hover:bg-navy-700'}`}><MdChevronLeft className="h-5 w-5" /></button>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) pageNum = i + 1;
-                else if (currentPage <= 3) pageNum = i + 1;
-                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                else pageNum = currentPage - 2 + i;
-                return (
-                  <button key={pageNum} onClick={() => setCurrentPage(pageNum)} className={`w-10 h-10 rounded-lg ${currentPage === pageNum ? 'bg-brand-500 text-white' : 'text-navy-700 dark:text-white hover:bg-gray-100 dark:hover:bg-navy-700'}`}>{pageNum}</button>
-                );
-              })}
-              <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className={`p-2 rounded-lg ${currentPage === totalPages ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-navy-700 dark:text-white hover:bg-gray-100 dark:hover:bg-navy-700'}`}><MdChevronRight className="h-5 w-5" /></button>
-              <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className={`p-2 rounded-lg ${currentPage === totalPages ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-navy-700 dark:text-white hover:bg-gray-100 dark:hover:bg-navy-700'}`}><MdLastPage className="h-5 w-5" /></button>
-            </div>
-          </div>
+         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-navy-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+         <div className="text-sm text-gray-600 dark:text-gray-400">
+           Showing {searchedRequests.length > 0 ? Math.min((currentPage - 1) * itemsPerPage + 1, searchedRequests.length) : 0} 
+           to {Math.min(currentPage * itemsPerPage, searchedRequests.length)} of {searchedRequests.length} entries
+           {searchTerm && <span> (filtered from {filteredRequests.length} total entries)</span>}
+         </div>
+      
+         <Pagination 
+           currentPage={currentPage}
+           totalPages={totalPages}
+           onPageChange={(page) => setCurrentPage(page)}
+         />
+       </div>
+       
         )}
+
       </div>
     </Card>
   );

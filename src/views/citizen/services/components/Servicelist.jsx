@@ -1,12 +1,15 @@
-import React from "react";
+import React  from "react";
 import img1 from "../../../../assets/img/service/govimg-2.jpeg";
 import data from "../variables/data"; 
-
+import ServiceForm from "./ServiceForm";
+import { useNavigate } from "react-router-dom";
 function Servicelist() {
+  const navigate = useNavigate();
+  console.log(data);
   return (
     <>
       <div
-        className="border-r-lg border bg-cover bg-center md:h-60"
+        className="border-r-lg border bg-cover bg-center md:h-60 dark:border-navy-900"
         style={{ backgroundImage: `url(${img1})` }}
       >
         <h1 className="flex items-center justify-center pt-6 text-4xl font-bold text-white">
@@ -24,7 +27,7 @@ function Servicelist() {
         {data.map((item, index) => (
           <div
             key={index}
-            className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg md:max-w-lg"
+            className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-900 dark:text-white dark:border-navy-900"
           >
             <img
               src={item.img}
@@ -37,13 +40,15 @@ function Servicelist() {
               </div>
             </div>
             <div className="flex justify-center pb-4">
-              <button className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+              <button  onClick={()=>navigate(`/citizen/Services/form/${item.nameOfService}`)} className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
                 Get service
               </button>
             </div>
           </div>
         ))}
+
       </div>
+      {/* <ServiceForm/> */}
     </>
   );
 }
