@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { HiX } from "react-icons/hi";
 import Links from "./components/Links";
 import routes from "routes.js";
@@ -7,9 +7,30 @@ import brandIcon from "../../assets/img/dashboards/brand-logo.png";
 const StaffSidebar = ({ open, onClose }) => {
   // Filter routes for staff only
   const staffRoutes = routes.filter(route => route.layout === "/staff");
+  
+  const sidebarRef = useRef();
+
+  // Detect outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        window.innerWidth < 1200 &&
+        open
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open, onClose]);
+  
 
   return (
     <div
+      ref={sidebarRef}
       className={`sm:none duration-175 linear fixed !z-50 flex min-h-full flex-col bg-white pb-10 shadow-2xl shadow-white/5 transition-all dark:!bg-navy-800 dark:text-white md:!z-50 lg:!z-50 xl:!z-0 ${
         open ? "translate-x-0" : "-translate-x-96"
       }`}
