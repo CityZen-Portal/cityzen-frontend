@@ -4,16 +4,14 @@ import React from "react";
 import CitizenDashboard from "./views/citizen/dashboard/index";
 import Service from "views/citizen/services";
 import Grievance_Management from "views/citizen/grievance-management";
+
 // Admin Views
 import AdminDashboard from "./views/admin/dashboard/index.jsx";
-import AdminTables from "views/admin/tables";
-import AdminProfile from "./views/admin/profile/Profile";
+import AdminProfile from "views/admin/profile/Profile";
 import AdminServices from "views/admin/services/index.jsx";
+
 // Staff Views
 import StaffDashboard from "views/staff/dashboard";
-
-import ManageServices from "views/admin/services/component/ManageServices";
-
 import StaffService from "views/staff/services";
 
 // Auth Views
@@ -21,64 +19,64 @@ import SignIn from "views/auth/SignIn";
 
 // Icons
 import {
-  MdHome,
-  MdLock,
-  MdPerson,
   MdDashboard,
-  MdTableView,
+  MdHomeRepairService,
+  MdPerson,
   MdAdminPanelSettings,
-  MdChatBubble,
+  MdMiscellaneousServices,
+  MdLock,
+  MdReportProblem,
+  MdContactSupport
 } from "react-icons/md";
 
 const routes = [
-  // Citizen Routes
+  // ------------------ Citizen Routes ------------------
   {
-    name: " Dashboard",
+    name: "Dashboard",
     layout: "/citizen",
     path: "dashboard",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <CitizenDashboard />,
   },
-
   {
     name: "Grievance Management",
     layout: "/citizen",
     path: "grievance-management",
-    icon: <MdHome className="h-6 w-6" />,
+    icon: <MdReportProblem className="h-6 w-6" />,
     component: <Grievance_Management />,
   },
   {
     name: "Services",
     layout: "/citizen",
-    path: "Services",
-    icon: <MdHome className="h-6 w-6" />,
+    path: "services",
+    icon: <MdMiscellaneousServices className="h-6 w-6" />,
     component: <Service />,
   },
-  // Admin Routes
+
+  // ------------------ Admin Routes ------------------
   {
-    name: " Dashboard",
+    name: "Dashboard",
     layout: "/admin",
     path: "default",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <AdminDashboard />,
   },
-
   {
     name: "Services",
     layout: "/admin",
     path: "services",
-    icon: <MdDashboard className="h-6 w-6" />,
+    icon: <MdHomeRepairService className="h-6 w-6" />,
     component: <AdminServices />,
   },
-   {
+  {
     name: "Profile",
     layout: "/admin",
     path: "profile",
-    icon: <MdDashboard className="h-6 w-6" />,
+    icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
   },
 
-  // Staff Routes
+  // ------------------ Staff Routes ------------------
   {
     name: "Staff Dashboard",
     layout: "/staff",
@@ -86,16 +84,15 @@ const routes = [
     icon: <MdAdminPanelSettings className="h-6 w-6" />,
     component: <StaffDashboard />,
   },
-
   {
     name: "Service Requests",
     layout: "/staff",
     path: "services",
-    icon: <MdTableView className="h-6 w-6" />,
+    icon: <MdContactSupport className="h-6 w-6" />,
     component: <StaffService />,
   },
 
-  // Auth Routes
+  // ------------------ Auth Routes ------------------
   {
     name: "Sign In",
     layout: "/auth",
