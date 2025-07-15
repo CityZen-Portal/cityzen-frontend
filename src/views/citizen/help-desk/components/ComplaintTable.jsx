@@ -112,7 +112,7 @@ const ComplaintTable = ({ complaints }) => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
             >
               <option value="">All</option>
               <option value="pending">Pending</option>
@@ -137,7 +137,7 @@ const ComplaintTable = ({ complaints }) => {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
             >
               {[5, 10, 25, 50].map(num => (
                 <option key={num} value={num}>{num}</option>
@@ -154,13 +154,13 @@ const ComplaintTable = ({ complaints }) => {
           <input
             type="text"
             id="searchTerm"
-            placeholder="Search by ID, issue, or department..."
+            placeholder="Search..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400 dark:placeholder-gray-500"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
           />
         </div>
       </div>
@@ -169,7 +169,7 @@ const ComplaintTable = ({ complaints }) => {
       <div className="overflow-x-auto -mx-3 sm:mx-0 sm:rounded-lg">
         <table className="w-full min-w-full">
           {/* Desktop Table Header - Hidden on mobile */}
-          <thead className="bg-gray-100 dark:bg-gray-700 hidden md:table-header-group">
+          <thead className="bg-gray-100 dark:bg-navy-700 hidden md:table-header-group">
             <tr>
               {[
                 { label: 'ID', key: 'id' },
@@ -184,7 +184,7 @@ const ComplaintTable = ({ complaints }) => {
                   key={idx}
                   onClick={() => key && handleSort(key)}
                   className={`px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-700 dark:text-white border-r last:border-r-0 ${
-                    key ? 'cursor-pointer select-none hover:bg-gray-200 dark:hover:bg-gray-600' : ''
+                    key ? 'cursor-pointer select-none hover:bg-gray-200 dark:hover:bg-navy-800' : ''
                   }`}
                 >
                   <span className="flex items-center gap-1">
@@ -207,7 +207,7 @@ const ComplaintTable = ({ complaints }) => {
           {/* Mobile Table Header - Only shown on mobile */}
           <thead className="md:hidden">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-700">
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-navy-800">
                 <div className="flex items-center justify-between">
                   <span>Complaints</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">

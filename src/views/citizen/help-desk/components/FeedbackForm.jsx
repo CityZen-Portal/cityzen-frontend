@@ -29,7 +29,7 @@ const FeedbackForm = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-navy-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <form
         onSubmit={handleSubmit}
-        className="bg-white dark:bg-navy-700 rounded-lg sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 lg:p-8 w-full max-w-xs sm:max-w-md lg:max-w-2xl"
+        className="bg-white dark:bg-navy-700 rounded-lg sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 lg:p-8 w-[95vw] max-w-md sm:max-w-lg lg:max-w-2xl"
       >
         <h2 className="text-center font-semibold text-base sm:text-lg lg:text-xl mb-4 sm:mb-6 text-black dark:text-white">
           Feedback Form
@@ -124,7 +124,7 @@ const FeedbackForm = () => {
           value={formData.comments}
           onChange={handleChange}
           rows="4"
-          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+          className="w-full border border-gray-300 dark:border-gray-700 dark:bg-navy-800 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         
         <div className="flex justify-center items-center">

@@ -112,7 +112,7 @@ const ComplaintTable = ({ complaints }) => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
             >
               <option value="">All</option>
               <option value="pending">Pending</option>
@@ -137,7 +137,7 @@ const ComplaintTable = ({ complaints }) => {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
             >
               {[5, 10, 25, 50].map(num => (
                 <option key={num} value={num}>{num}</option>
@@ -160,17 +160,17 @@ const ComplaintTable = ({ complaints }) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-300"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
           />
         </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto -mx-3 sm:-mx-4 lg:-mx-6">
-        <div className="inline-block min-w-full align-middle">
-          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <div className="inline-block min-w-full align-middle p-2">
+          <div className="overflow-hidden md:rounded-lg">
             <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-gray-100 dark:bg-navy-700 hidden md:table-header-group">
                 <tr>
                   {[
                     { label: 'ID', key: 'id' },
@@ -185,7 +185,7 @@ const ComplaintTable = ({ complaints }) => {
                       key={idx}
                       onClick={() => key && handleSort(key)}
                       className={`px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-left text-xs sm:text-sm font-medium text-gray-700 dark:text-white ${
-                        key ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600' : ''
+                        key ? 'cursor-pointer select-none hover:bg-gray-200 dark:hover:bg-navy-800' : ''
                       } ${idx < 6 ? 'border-r border-gray-200 dark:border-gray-600' : ''}`}
                     >
                       <span className="flex items-center gap-1">

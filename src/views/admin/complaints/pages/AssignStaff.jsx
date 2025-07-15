@@ -171,7 +171,7 @@ const AssignStaff = () => {
                       <select
                         value={assignedDept}
                         onChange={handleAssignDept}
-                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
                         required
                       >
                         <option value="" disabled>-- Select department --</option>
@@ -187,7 +187,7 @@ const AssignStaff = () => {
                         <select
                           value={assignedStaff}
                           onChange={handleAssign}
-                          className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 text-sm sm:text-base"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
                           required
                         >
                           <option value="" disabled>-- Select staff --</option>

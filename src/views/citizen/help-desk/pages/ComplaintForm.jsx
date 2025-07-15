@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ComplaintForm() {
+  const navigate = useNavigate();
   const [location, setLocation] = useState('');
   const [address, setAddress] = useState('');
   const [wardNumber, setWardNumber] = useState('');
@@ -27,7 +29,6 @@ function ComplaintForm() {
       return alert('Please describe the issue under "Other"');
     }
     if (!description.trim()) return alert('Please enter a description');
-    if (!imageFile) return alert('Please upload the PDF');
     if (imageFile && imageFile.type !== 'application/pdf') {
       return alert('Only PDF files are allowed.');
     }
@@ -54,6 +55,7 @@ function ComplaintForm() {
     setImageFile(null);
 
     alert('Complaint submitted successfully!');
+    navigate('/citizen/help-desk/')
   };
 
   return (
@@ -70,7 +72,7 @@ function ComplaintForm() {
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base"
+                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
 
@@ -80,7 +82,7 @@ function ComplaintForm() {
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base"
+                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
           </div>
@@ -92,7 +94,7 @@ function ComplaintForm() {
                 type="text"
                 value={wardNumber}
                 onChange={(e) => setWardNumber(e.target.value)}
-                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base"
+                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
 
@@ -102,7 +104,7 @@ function ComplaintForm() {
                 type="text"
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value)}
-                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base"
+                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
           </div>
@@ -114,9 +116,9 @@ function ComplaintForm() {
             <select
               value={complaintType}
               onChange={(e) => setComplaintType(e.target.value)}
-              className="w-full border px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base"
+              className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
             >
-              <option value="">-- Select Complaint Type --</option>
+              <option value="" disabled>-- Select Complaint Type --</option>
               <option value="Water Leakage">Water Leakage</option>
               <option value="No Water Supply">No Water Supply</option>
               <option value="Contaminated Water">Contaminated Water</option>
@@ -142,7 +144,7 @@ function ComplaintForm() {
                 value={others}
                 onChange={(e) => setOthers(e.target.value)}
                 placeholder="Describe your complaint"
-                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base resize-none"
+                className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
               ></textarea>
             </div>
           )}
@@ -153,7 +155,7 @@ function ComplaintForm() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base"
+              className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
 
@@ -163,7 +165,7 @@ function ComplaintForm() {
               rows="4"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm sm:text-base resize-none"
+              className="w-full border px-3 sm:px-4 py-2 sm:py-3 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
             ></textarea>
           </div>
 
@@ -173,7 +175,7 @@ function ComplaintForm() {
               type="file"
               accept="application/pdf"
               onChange={(e) => setImageFile(e.target.files[0])}
-              className="w-full text-xs sm:text-sm text-gray-500 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:px-4 file:rounded-md file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+              className="w-full text-xs sm:text-sm text-gray-500 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:px-4 file:rounded-md file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-navy-500"
             />
             {imageFile && (
               <p className="text-xs sm:text-sm text-green-600 mt-1">Selected: {imageFile.name}</p>
@@ -183,7 +185,7 @@ function ComplaintForm() {
           <div className="text-center pt-2 sm:pt-4">
             <button
               type="submit"
-              className="bg-blue-600 text-white font-bold px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-md hover:bg-blue-700 text-sm sm:text-base lg:text-lg transition-colors duration-200 w-full sm:w-auto"
+              className="bg-blue-600 text-white font-bold px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-md hover:bg-blue-700 text-sm sm:text-base lg:text-lg transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
             >
               Submit Complaint
             </button>
