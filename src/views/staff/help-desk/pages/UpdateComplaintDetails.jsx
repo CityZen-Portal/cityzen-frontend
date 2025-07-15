@@ -10,7 +10,7 @@ const UpdateComplaintDetails = () => {
   // Fallback complaint object
   const defaultComplaint = {
     id: '0001',
-    issue: 'Water Leakage',
+    issue: 'Water Leakagage',
     department: 'Water Resource',
     dateLogged: '19/04/2025',
     status: 'pending',
@@ -22,6 +22,7 @@ const UpdateComplaintDetails = () => {
     complaintType: 'Infrastructure',
     Issue: 'Water Pipeline Burst',
     description: 'The main water pipeline has burst near the junction of Anna Nagar main road. Water is flowing continuously causing inconvenience to residents and potential damage to nearby properties.',
+    assignedStaff: "Kane Schnider",
     imageUrl: null,
     statusHistory: [
       { status: 'Submitted', date: '19/04/2025 10:00 AM', note: 'Complaint received' },
@@ -92,115 +93,164 @@ const UpdateComplaintDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-4 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <FaExclamationCircle className="text-3xl text-blue-600" />
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <FaExclamationCircle className="text-2xl sm:text-3xl text-blue-600 flex-shrink-0" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 Complaint #{id || complaint.id}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-sm">Update your complaint details</p>
             </div>
           </div>
-          <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(formData.status)}`}>
+          <span className={`px-3 sm:px-4 py-1 rounded-full text-sm font-medium self-start sm:self-auto ${getStatusColor(formData.status)}`}>
             {getStatusText(formData.status)}
           </span>
         </div>
 
-        <div className="lg:grid-cols-3 gap-8">
-          <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
-            <div className="grid grid-cols-3 gap-6">
-              <div className="lg:col-span-1 space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                  <FaMapMarkerAlt className="mr-2 text-blue-600" /> Location Details
-                </h2>
+        {/* Main Content */}
+        <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            {/* Location Details Section */}
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <FaMapMarkerAlt className="mr-2 text-blue-600 flex-shrink-0" /> 
+                <span className="text-base sm:text-lg">Location Details</span>
+              </h2>
+              <div className="space-y-3 sm:space-y-4">
                 {['complaintant', 'location', 'address', 'wardNumber', 'pincode', 'dateLogged'].map((field) => (
                   <div key={field}>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize mb-1">
                       {field.replace(/([A-Z])/g, ' $1').trim()}
                     </label>
-                    <p className="mt-1 text-gray-900 dark:text-white">{complaint[field] || ''}</p>
+                    <p className="text-sm sm:text-base text-gray-900 dark:text-white break-words">
+                      {complaint[field] || ''}
+                    </p>
                   </div>
                 ))}
               </div>
+            </div>
 
-              <div className="lg:col-span-1 space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                  <FaExclamationCircle className="mr-2 text-blue-600" /> Complaint Title & Details
-                </h2>
+            {/* Complaint Details Section */}
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <FaExclamationCircle className="mr-2 text-blue-600 flex-shrink-0" /> 
+                <span className="text-base sm:text-lg">Complaint Title & Details</span>
+              </h2>
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Complaint Type</label>
-                  <p className="mt-1 text-gray-900 dark:text-white">{complaint.issue || complaint.complaintType}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Complaint Type
+                  </label>
+                  <p className="text-sm sm:text-base text-gray-900 dark:text-white break-words">
+                    {complaint.complaintType || complaint.issue}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
-                  <p className="mt-1 text-gray-900 dark:text-white">{complaint.issue || complaint.Issue}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Issue
+                  </label>
+                  <p className="text-sm sm:text-base text-gray-900 dark:text-white break-words">
+                    {complaint.issue}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                  <p className="mt-1 text-gray-900 dark:text-white">{complaint.notes || complaint.description || 'No description available'}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Description
+                  </label>
+                  <p className="text-sm sm:text-base text-gray-900 dark:text-white break-words">
+                    {complaint.description || 'No description available'}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image</label>
-                  <p className="mt-1 text-gray-500 dark:text-gray-400 italic">No image uploaded</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Assigned Staff
+                  </label>
+                  <p className="text-sm sm:text-base text-gray-900 dark:text-white break-words">
+                    {complaint.assignedStaff || 'No Staff assigned yet'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Image
+                  </label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                    No image uploaded
+                  </p>
                 </div>
               </div>
+            </div>
 
-              <div className="lg:col-span-1">
-                <form className="flex flex-col h-full" onSubmit={handleSubmit}>
-                  <div className="space-y-6">
-                    <h2 className="text-lg font-semibold mb-4 border-b pb-1 text-gray-800 dark:text-gray-100">Update Complaint</h2>
-                    <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Status</label>
-                      <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-gray-700 dark:text-white"
-                      >
-                        <option value="">-- Select status --</option>
-                        {statusOptions.map((status) => (
-                          <option key={status} value={status}>
-                            {getStatusText(status)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Resolution</label>
-                      <textarea
-                        name="resolution"
-                        value={formData.resolution}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        rows="4"
-                        placeholder="Enter resolution details..."
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Notes</label>
-                      <textarea
-                        name="notes"
-                        value={formData.notes}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        rows="4"
-                        placeholder="Enter additional notes..."
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-auto pt-4 text-center">
-                    <button
-                      type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 transition text-white font-semibold px-6 py-2 rounded-lg"
+            {/* Update Form Section */}
+            <div className="lg:col-span-1">
+              <form className="flex flex-col h-full" onSubmit={handleSubmit}>
+                <div className="space-y-4 sm:space-y-6">
+                  <h2 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-800 dark:text-gray-100">
+                    Update Complaint
+                  </h2>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      Status
+                    </label>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-navy-500"
                     >
-                      Save Changes
-                    </button>
+                      <option value="" disabled>-- Select status --</option>
+                      {statusOptions.map((status) => (
+                        <option key={status} value={status}>
+                          {getStatusText(status)}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </form>
-              </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      Resolution
+                    </label>
+                    <textarea
+                      name="resolution"
+                      value={formData.resolution}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 dark:border-gray-700 dark:bg-navy-700 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      rows="4"
+                      placeholder="Enter resolution details..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      Notes
+                    </label>
+                    <textarea
+                      name="notes"
+                      value={formData.notes}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 dark:border-gray-700 dark:bg-navy-700 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      rows="4"
+                      placeholder="Enter additional notes..."
+                    />
+                  </div>
+                </div>
+                
+                {/* Submit Button */}
+                <div className="mt-6 lg:mt-auto pt-4">
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors duration-200 text-white font-semibold px-6 py-3 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
