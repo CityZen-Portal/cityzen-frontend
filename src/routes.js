@@ -10,7 +10,7 @@ import ComplaintFeedback from "views/citizen/help-desk/pages/ComplaintFeedback";
 import ComplaintDetails from "views/citizen/help-desk/pages/ComplaintDetails";
 
 // Admin Views
-import AdminDashboard from "views/admin/default";
+import AdminDashboard from "views/admin/dashboard/index";
 import AdminTables from "views/admin/tables";
 import AdminProfile from "views/admin/profile/Profile";
 import AdminServices from "views/admin/services/index.jsx";
