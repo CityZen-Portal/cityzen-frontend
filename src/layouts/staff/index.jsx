@@ -19,6 +19,18 @@ export default function Staff(props) {
     handleResize(); // Set initial value
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  
+  React.useEffect(() => {
+    if (window.innerWidth >= 1200 || !open) return;
+
+    const handleScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [open]);
+  
 
   React.useEffect(() => {
     getActiveRoute(routes);
