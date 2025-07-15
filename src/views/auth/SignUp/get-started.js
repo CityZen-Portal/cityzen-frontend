@@ -1,84 +1,144 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import SignUpClient from "./SignUpClient";
-import SignUpStaff from "./SignUpStaff";
+import { useNavigate, Outlet } from "react-router-dom";
+
+const RoleCard = ({
+  role,
+  title,
+  description,
+  features,
+  icon,
+  buttonColor,
+  buttonHoverColor,
+  featureColor,
+  accentColor,
+  onClick
+}) => {
+  return (
+    <div className="group relative bg-white dark:bg-gray-800 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.01] p-4 sm:p-6 md:p-8 flex flex-col h-full border-2 border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-400 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-transparent to-blue-100/10 dark:from-blue-900/10 dark:via-transparent dark:to-blue-800/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute -top-4 -right-4 w-20 h-20 bg-blue-200 dark:bg-blue-600 rounded-full opacity-20 group-hover:opacity-30 transition-all duration-500 group-hover:scale-110" />
+      <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-blue-300 dark:bg-blue-500 rounded-full opacity-15 group-hover:opacity-25 transition-all duration-500 group-hover:scale-110" />
+      <div className="relative z-10 flex-1 flex flex-col">
+        <div className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl ${buttonColor} flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg group-hover:shadow-xl`}>
+          {icon}
+        </div>
+        <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">{title}</h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">{description}</p>
+        <div className="flex-1 mb-4 sm:mb-6">
+          <ul className="space-y-2 sm:space-y-3">
+            {features.map((feature, index) => (
+              <li key={index} className="flex items-center gap-2 sm:gap-3 group/item">
+                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-2 h-2 sm:w-3 sm:h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 text-xs sm:text-sm">{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <button onClick={onClick} className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl md:rounded-2xl font-bold text-white text-sm sm:text-base ${buttonColor} ${buttonHoverColor} transition-all duration-300 transform group-hover:scale-105 shadow-xl hover:shadow-2xl relative overflow-hidden mt-auto`}>
+          <span className="relative z-10">Get Started as {role} →</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function GetStarted() {
-  const [role, setRole] = useState("");
   const navigate = useNavigate();
 
-  if (role === "client") return <SignUpClient onBack={() => setRole("")} />;
-  if (role === "staff") return <SignUpStaff onBack={() => setRole("")} />;
-
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white dark:bg-navy-900 relative overflow-hidden px-4 py-8 transition-colors duration-300">
-      {/* Back Button */}
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white dark:bg-gray-900 relative overflow-hidden transition-colors duration-300 py-6">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-10 left-10 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-blue-200 dark:bg-blue-600 rounded-full opacity-40 animate-pulse z-0" />
+      <div className="absolute top-1/2 left-0 w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-blue-200 dark:bg-blue-600 rounded-full opacity-30 animate-pulse delay-300 z-0" />
+      <div className="absolute bottom-10 left-20 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-blue-200 dark:bg-blue-600 rounded-full opacity-30 animate-pulse delay-700 z-0" />
+      <div className="absolute top-10 right-10 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-blue-200 dark:bg-blue-600 rounded-full opacity-40 animate-pulse delay-500 z-0" />
+      <div className="absolute top-1/2 right-0 w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-blue-200 dark:bg-blue-600 rounded-full opacity-30 animate-pulse delay-200 z-0" />
+      <div className="absolute bottom-10 right-20 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-blue-200 dark:bg-blue-600 rounded-full opacity-30 animate-pulse delay-600 z-0" />
+
+      {/* Header with Back Button */}
       <button
-  onClick={() => navigate(-1)}
-  className="absolute top-6 left-6 flex items-center text-blue-600 dark:text-blue-300 hover:underline z-20 bg-white/80 dark:bg-navy-900/80 rounded-full px-3 py-1 shadow"
-  style={{ backdropFilter: 'blur(4px)' }}
->
-  <svg width="20" height="20" fill="none" viewBox="0 0 20 20" className="mr-2">
-    <path d="M7.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L4.414 9H16a1 1 0 110 2H4.414l3.293 3.293a1 1 0 010 1.414z" fill="currentColor"/>
-  </svg>
-  Back
-</button>
+        onClick={() => navigate(-1)}
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center text-blue-600 dark:text-blue-300 hover:underline z-20 bg-white/80 dark:bg-gray-900/80 rounded-full px-3 py-1 shadow backdrop-blur-sm"
+      >
+        <svg width="20" height="20" fill="none" viewBox="0 0 20 20" className="mr-2">
+          <path d="M7.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L4.414 9H16a1 1 0 110 2H4.414l3.293 3.293a1 1 0 010 1.414z" fill="currentColor" />
+        </svg>
+        Back
+      </button>
 
-      {/* Decorative Circles */}
-      <div className="absolute top-10 left-10 w-16 h-16 bg-blue-200 rounded-full opacity-40 z-0"></div>
-      <div className="absolute top-1/2 left-0 w-20 h-20 bg-blue-200 rounded-full opacity-30 z-0"></div>
-      <div className="absolute bottom-10 left-20 w-16 h-16 bg-blue-200 rounded-full opacity-30 z-0"></div>
-      <div className="absolute top-10 right-10 w-16 h-16 bg-blue-200 rounded-full opacity-40 z-0"></div>
-      <div className="absolute top-1/2 right-0 w-20 h-20 bg-blue-200 rounded-full opacity-30 z-0"></div>
-      <div className="absolute bottom-10 right-20 w-16 h-16 bg-blue-200 rounded-full opacity-30 z-0"></div>
+      {/* Hero Section */}
+      <div className="w-full max-w-6xl z-10 text-center mt-16 sm:mt-12 px-4 sm:px-6 md:px-8 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight text-gray-900 dark:text-white">
+          Welcome to <span className="text-blue-600 dark:text-blue-400">CityZen</span>
+        </h1>
+        <p className="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400 mb-4 sm:mb-6 max-w-3xl mx-auto">
+          Your digital gateway to seamless city services. Choose your path to get started.
+        </p>
+      </div>
 
-      {/* Title and Subtitle */}
-      <h1 className="text-4xl md:text-5xl font-extrabold text-center mt-8 mb-2 z-10">
-        Welcome to <span className="text-blue-600">CityZen</span>
-      </h1>
-      <p className="text-lg text-gray-500 text-center mb-10 z-10 max-w-2xl">
-        Your digital gateway to seamless city services. Choose your path to get started.
-      </p>
+      {/* Cards Section */}
+      <div className="w-full z-10 px-4 sm:px-6 md:px-8 lg:px-12 flex-1 flex items-center">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
+            {/* Citizen Card */}
+            <div className="h-auto min-h-[480px] sm:min-h-[520px]">
+              <RoleCard
+                role="Citizen"
+                title="I'm a Citizen"
+                description="Access city services, pay bills, submit requests, track applications, and stay connected with your local government."
+                features={[
+                  "Pay utilities & taxes",
+                  "Submit service requests",
+                  "Track application status",
+                  "Access city announcements"
+                ]}
+                icon={
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                }
+                buttonColor="bg-blue-600"
+                buttonHoverColor="hover:bg-blue-700"
+                featureColor="text-blue-600"
+                accentColor="blue"
+                onClick={() => navigate("/auth/signup/get-started/citizen")}
+              />
+            </div>
 
-      {/* Cards */}
-      <div className="relative z-10 w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-        {/* Citizen Card */}
-        <div className="flex flex-col items-center justify-center py-12 px-8">
-          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-blue-600 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" fill="#2563eb"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16a4 4 0 100-8 4 4 0 000 8z" fill="#fff"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14c-2.21 0-4 1.79-4 4" stroke="#fff"/></svg>
+            {/* Employee Card */}
+            <div className="h-auto min-h-[480px] sm:min-h-[520px]">
+              <RoleCard
+                role="Employee"
+                title="I'm an Employee"
+                description="Manage city operations, process citizen requests, update service statuses, and collaborate with your team effectively."
+                features={[
+                  "Manage service requests",
+                  "Update case statuses",
+                  "Team collaboration tools",
+                  "Administrative dashboard"
+                ]}
+                icon={
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                }
+                buttonColor="bg-blue-600"
+                buttonHoverColor="hover:bg-blue-700"
+                featureColor="text-blue-600"
+                accentColor="blue"
+                onClick={() => navigate("/auth/signup/get-started/staff")}
+              />
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">I'm a Citizen</h3>
-          <p className="text-center text-gray-500 mb-5 max-w-xs">Access city services, pay bills, submit requests, track applications, and stay connected with your local government.</p>
-          <ul className="text-left text-[#4f46e5] font-medium mb-8 space-y-2">
-            <li className="flex items-center gap-2"><svg className="w-5 h-5 text-[#4f46e5]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clipRule="evenodd" /></svg>Pay utilities & taxes</li>
-            <li className="flex items-center gap-2"><svg className="w-5 h-5 text-[#4f46e5]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clipRule="evenodd" /></svg>Submit service requests</li>
-          </ul>
-          <button
-            onClick={() => setRole("client")}
-            className="w-full rounded-lg bg-[#2563eb] py-3 text-white font-semibold shadow-md hover:bg-blue-700 transition-colors duration-200 text-lg mt-auto focus:outline-none"
-          >
-            Get Started as Citizen →
-          </button>
         </div>
-        {/* Employee Side */}
-        <div className="flex flex-col items-center justify-center py-12 px-8">
-          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-[#1e293b] mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" fill="#1e293b"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z" fill="#fff"/></svg>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">I'm an Employee</h3>
-          <p className="text-center text-gray-500 mb-5 max-w-xs">Manage city operations, process citizen requests, update service statuses, and collaborate with your team effectively.</p>
-          <ul className="text-left text-[#6366f1] font-medium mb-8 space-y-2">
-            <li className="flex items-center gap-2"><svg className="w-5 h-5 text-[#6366f1]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clipRule="evenodd" /></svg>Manage service requests</li>
-            <li className="flex items-center gap-2"><svg className="w-5 h-5 text-[#6366f1]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clipRule="evenodd" /></svg>Update case statuses</li>
-            <li className="flex items-center gap-2"><svg className="w-5 h-5 text-[#6366f1]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clipRule="evenodd" /></svg>Access admin tools</li>
-          </ul>
-          <button
-            onClick={() => setRole("staff")}
-            className="w-full rounded-lg bg-[#1e293b] py-3 text-white font-semibold shadow-md hover:bg-[#334155] transition-colors duration-200 text-lg mt-auto focus:outline-none"
-          >
-            Get Started as Employee →
-          </button>
-        </div>
+      </div>
+
+      <div className="w-full max-w-6xl mt-12 z-20">
+        <Outlet />
       </div>
     </div>
   );

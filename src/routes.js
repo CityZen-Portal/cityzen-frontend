@@ -43,6 +43,9 @@ import NewsUpdate from "views/citizen/news/components/NewsUpdate"
 // Auth Views
 import SignIn from "views/auth/SignIn";
 import GetStarted from "views/auth/SignUp/get-started";
+import SignupCitizen from "views/auth/SignUp/SignUpClient";
+import SignupStaff from "views/auth/SignUp/SignUpStaff";
+import ServiceForm from "views/citizen/services/components/ServiceForm";
 // Icons
 
 import {
@@ -58,13 +61,41 @@ import {
   MdBallot,
 } from "react-icons/md";
 
-import SignupCitizen from "views/auth/SignUp/SignUpClient";
-import SignupStaff from "views/auth/SignUp/SignUpStaff";
-
-import ServiceForm from "views/citizen/services/components/ServiceForm";
-
-
 const routes = [
+  // Auth Routes
+  {
+    name: "Sign In",
+    layout: "/auth",
+    path: "sign-in",
+    icon: <MdLock className="h-6 w-6" />,
+    component: <SignIn />,
+  },
+  {
+  name: "Sign Up",
+  layout: "/auth",
+  path: "signup",
+  icon: <MdLock className="h-6 w-6" />,
+  children: [
+    {
+      name: "Get Started",
+      layout: "/auth",
+      path: "get-started",
+      component: <GetStarted />
+    },
+    {
+      name: "Citizen SignUp",
+      layout: "/auth",
+      path: "get-started/citizen",
+      component: <SignupCitizen />
+    },
+    {
+      name: "Staff SignUp",
+      layout: "/auth",
+      path: "get-started/staff",
+      component: <SignupStaff />
+    }
+  ]
+},
   // Citizen Routes
   {
     name: " Dashboard",
@@ -258,36 +289,6 @@ const routes = [
     path: "newsupdate",
     icon: <MdLock className="h-6 w-6" />,
     component: <NewsUpdate/>,
-  },
-  
-
-  // Auth Routes
-  {
-    name: "Sign In",
-    layout: "/auth",
-    path: "sign-in",
-    icon: <MdLock className="h-6 w-6" />,
-    component: <SignIn />,
-  },
-  // {
-  //   path: "signup",
-  //   layout: "/auth",
-  //   component: <GetStarted />,
-  // },
-  {
-    path: "signup/get-started",
-    layout: "/auth",
-    component: <GetStarted />,
-  },
-  {
-    path: "signup/get-started/citizen",
-    layout: "/auth",
-    component: <SignupCitizen />,
-  },
-  {
-    path: "signup/get-started/staff",
-    layout: "/auth",  
-    component: <SignupStaff />,
   }
 ];
 
