@@ -1,10 +1,14 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const FeedbackForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
-    complaintId: "",
-    complaint: "",
+    name: "Hariharan",
+    complaintId: "7689",
+    complaint: "Water Supply Issue",
     comments: "",
     rating: 0,
     resolved: "",
@@ -21,8 +25,42 @@ const FeedbackForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!formData.name.trim() || !formData.complaintId.trim() || !formData.complaint.trim()) {
+      toast.error("Missing complaint data", {
+        position: "top-right",
+        autoClose: 1000,
+        theme: "colored",
+      });
+      return;
+    }
+
+    if (!formData.resolved) {
+      toast.error("Please select if the issue was resolved", {
+        position: "top-right",
+        autoClose: 1000,
+        theme: "colored",
+      });
+      return;
+    }
+
+    if (!formData.rating) {
+      toast.error("Please provide a rating", {
+        position: "top-right",
+        autoClose: 1000,
+        theme: "colored",
+      });
+      return;
+    }
+
     console.log(formData);
-    alert("Feedback Submitted Successfully!");
+
+    toast.success("Feedback Submitted Successfully!", {
+      position: "top-right",
+      autoClose: 1000,
+      theme: "colored",
+      onClose: () => navigate("/citizen/help-desk/complaint/log"),
+    });
   };
 
   return (
@@ -43,11 +81,9 @@ const FeedbackForm = () => {
             <input
               type="text"
               name="complaintId"
-              placeholder="Enter Complaint ID"
               value={formData.complaintId}
-              onChange={handleChange}
               disabled
-              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-sm sm:text-base"
             />
           </div>
 
@@ -58,11 +94,9 @@ const FeedbackForm = () => {
             <input
               type="text"
               name="name"
-              placeholder="Enter Name"
               value={formData.name}
-              onChange={handleChange}
               disabled
-              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-sm sm:text-base"
             />
           </div>
         </div>
@@ -73,11 +107,9 @@ const FeedbackForm = () => {
         <input
           type="text"
           name="complaint"
-          placeholder="Enter Complaint"
           value={formData.complaint}
-          onChange={handleChange}
           disabled
-          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500"
+          className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base"
         />
 
         <label className="block mb-2 sm:mb-3 font-medium text-sm sm:text-base text-black dark:text-white">
@@ -116,7 +148,7 @@ const FeedbackForm = () => {
         </div>
 
         <label className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base text-black dark:text-white">
-          Comments
+          Comments (Optional)
         </label>
         <textarea
           name="comments"
@@ -124,18 +156,21 @@ const FeedbackForm = () => {
           value={formData.comments}
           onChange={handleChange}
           rows="4"
-          className="w-full border border-gray-300 dark:border-gray-700 dark:bg-navy-800 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full border border-gray-300 dark:border-gray-700 dark:bg-navy-800 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
-        
+
         <div className="flex justify-center items-center">
           <button
             type="submit"
-            className="w-full sm:w-2/3 lg:w-2/6 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-full font-bold text-sm sm:text-base lg:text-lg shadow-md transition-all duration-200 dark:text-white bg-blue-700 hover:bg-blue-800"
+            className="w-full sm:w-2/3 lg:w-2/6 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-full font-bold text-sm sm:text-base lg:text-lg shadow-md transition-all duration-200 bg-blue-700 hover:bg-blue-800"
           >
             Submit <span className="animate-pulse"></span>
           </button>
         </div>
       </form>
+
+      {/* Toastify container */}
+      <ToastContainer />
     </div>
   );
 };
