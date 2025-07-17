@@ -6,16 +6,15 @@ import FixedPlugin from "components/fixedPlugin/FixedPlugin";
 export default function Auth() {
   const location = useLocation();
 
-  // Full-screen routes that don't need the constrained layout
   const fullScreenRoutes = [
     "/auth/sign-up",
     "/auth/get-started",
     "/auth/citizen-signup",
     "/auth/staff-signup"
   ];
+
   const isFullScreen = fullScreenRoutes.includes(location.pathname);
 
-  // getRoutes function
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
       if (prop.layout === "/auth") {
@@ -38,9 +37,7 @@ export default function Auth() {
           );
         }
 
-        return (
-          <Route path={prop.path} element={prop.component} key={key} />
-        );
+        return <Route path={prop.path} element={prop.component} key={key} />;
       }
       return null;
     });
@@ -48,43 +45,43 @@ export default function Auth() {
 
   document.documentElement.dir = "ltr";
 
-  // Full-screen layout for get-started and similar pages
+  // --- Full screen layout for specific pages ---
   if (isFullScreen) {
     return (
-      <div className="min-h-screen w-full bg-white">
+      <div className="min-h-screen w-full bg-white dark:bg-gray-900 transition-colors">
         <Routes>
           {getRoutes(routes)}
-          <Route
-            path="/"
-            element={<Navigate to="/auth/sign-in" replace />}
-          />
+          <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
         </Routes>
       </div>
     );
   }
 
-  // Constrained layout for traditional auth forms - made smaller
+  // --- Gradient + decorative layout for sign-in/auth pages ---
   return (
-    <div>
-      <div className="relative float-right h-full min-h-screen w-full !bg-white dark:!bg-navy-900">
+    <div
+      className="relative min-h-screen w-full flex items-center justify-center px-4 py-12
+                 bg-gradient-to-br from-blue-200 via-blue-100 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900
+                 transition-all duration-300 overflow-hidden"
+    >
+      {/* Decorative Gradient Blobs (non-blinking) */}
+      <div className="absolute -top-24 -left-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl opacity-30"></div>
+      <div className="absolute top-10 right-10 w-64 h-64 bg-blue-400 rounded-full blur-2xl opacity-25"></div>
+      <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-blue-200 rounded-full blur-2xl opacity-20"></div>
+
+      {/* Main Layout */}
+      <div className="relative z-10 w-full max-w-full">
         <FixedPlugin />
-        <main className={`mx-auto min-h-screen`}>
-          <div className="relative flex">
-            <div className="mx-auto flex min-h-full w-full flex-col justify-start pt-12 md:max-w-[75%]  lg:max-w-[1013px] lg:px-8 lg:pt-0 xl:min-h-[100vh] xl:max-w-[1383px] xl:px-0 xl:pl-[70px]">
-              <div className="mb-auto flex flex-col pl-5 pr-5 md:pr-0 md:pl-12 lg:max-w-[48%] lg:pl-0 xl:max-w-full">
-                <div className="mx-auto flex min-h-full w-full flex-col justify-start pt-8 md:max-w-[65%] lg:max-w-[800px] lg:px-6 lg:pt-0 xl:min-h-[100vh] xl:max-w-[1000px] xl:px-0 xl:pl-[50px]">
-                  <div className="mb-auto flex flex-col pl-4 pr-4 md:pr-0 md:pl-8 lg:max-w-[60%] lg:pl-0 xl:max-w-full">
-                    <Routes>
-                      {getRoutes(routes)}
-                      <Route
-                        path="/"
-                        element={<Navigate to="/auth/sign-in" replace />}
-                      />
-                    </Routes>
-                  </div>
-                  <Footer />
-                </div>
+        <main className="mx-auto min-h-screen flex flex-col items-center justify-center">
+          <div className="w-full max-w-screen-lg px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col justify-center">
+              <div className="w-full">
+                <Routes>
+                  {getRoutes(routes)}
+                  <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
+                </Routes>
               </div>
+              <Footer />
             </div>
           </div>
         </main>
