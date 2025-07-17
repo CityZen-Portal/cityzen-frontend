@@ -7,10 +7,8 @@ export default function Auth() {
   const location = useLocation();
 
   const fullScreenRoutes = [
-    "/auth/sign-up",
-    "/auth/get-started",
-    "/auth/citizen-signup",
-    "/auth/staff-signup"
+    "/auth/citizen/signup",
+    "/auth/citizen/signin"
   ];
 
   const isFullScreen = fullScreenRoutes.includes(location.pathname);
@@ -48,43 +46,51 @@ export default function Auth() {
   // --- Full screen layout for specific pages ---
   if (isFullScreen) {
     return (
-      <div className="min-h-screen w-full bg-white dark:bg-gray-900 transition-colors">
-        <Routes>
-          {getRoutes(routes)}
-          <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
-        </Routes>
+      <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
+                    dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
+                    transition-all duration-300 overflow-hidden">
+        {/* Decorative Gradient Blobs */}
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400 rounded-full filter blur-3xl opacity-40"></div>
+        <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500 rounded-full filter blur-2xl opacity-30"></div>
+        <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-blue-300 rounded-full filter blur-2xl opacity-25"></div>
+
+        <div className="flex-1 flex items-center justify-center p-4 relative z-10">
+          <Routes>
+            {getRoutes(routes)}
+            <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
+          </Routes>
+        </div>
+        
+        {/* Footer - Aligned to bottom */}
+        <div className="w-full py-4">
+          <Footer />
+        </div>
       </div>
     );
   }
 
   // --- Gradient + decorative layout for sign-in/auth pages ---
   return (
-    <div
-      className="relative min-h-screen w-full flex items-center justify-center px-4 py-12
-                 bg-gradient-to-br from-blue-200 via-blue-100 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900
-                 transition-all duration-300 overflow-hidden"
-    >
-      {/* Decorative Gradient Blobs (non-blinking) */}
-      <div className="absolute -top-24 -left-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl opacity-30"></div>
-      <div className="absolute top-10 right-10 w-64 h-64 bg-blue-400 rounded-full blur-2xl opacity-25"></div>
-      <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-blue-200 rounded-full blur-2xl opacity-20"></div>
+    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
+                    dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
+                    transition-all duration-300 overflow-hidden">
+      {/* Decorative Gradient Blobs */}
+      <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400 rounded-full filter blur-3xl opacity-40"></div>
+      <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500 rounded-full filter blur-2xl opacity-30"></div>
+      <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-blue-300 rounded-full filter blur-2xl opacity-25"></div>
 
-      {/* Main Layout */}
-      <div className="relative z-10 w-full max-w-full">
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center p-4 relative z-10">
         <FixedPlugin />
-        <main className="mx-auto min-h-screen flex flex-col items-center justify-center">
-          <div className="w-full max-w-screen-lg px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col justify-center">
-              <div className="w-full">
-                <Routes>
-                  {getRoutes(routes)}
-                  <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
-                </Routes>
-              </div>
-              <Footer />
-            </div>
-          </div>
-        </main>
+        <Routes>
+          {getRoutes(routes)}
+          <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
+        </Routes>
+      </div>
+      
+      {/* Footer - Aligned to bottom */}
+      <div className="w-full py-4">
+        <Footer />
       </div>
     </div>
   );
