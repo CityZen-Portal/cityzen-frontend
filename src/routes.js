@@ -1,5 +1,8 @@
 import React from "react";
 
+// Home View
+import HomePage from "views/HomePage";
+
 // Citizen Views
 import CitizenDashboard from "./views/citizen/dashboard/index";
 import Service from "views/citizen/services";
@@ -17,37 +20,31 @@ import AdminServices from "views/admin/services/index.jsx";
 import ManageStaffs from "views/admin/services/component/ManageStaffs";
 import ViewTasks from "views/admin/services/component/ViewTasks";
 import ViewSchedule from "views/admin/services/component/ViewSchedule";
-
 import FeedbackManage from "views/admin/services/component/FeedbackManage";
-
 import ComplaintManagement from "views/admin/complaints";
 import AssignStaff from "views/admin/complaints/pages/AssignStaff";
 import ViewComplaint from "views/admin/complaints/pages/ViewComplaint";
 
 // Staff Views
 import StaffDashboard from "views/staff/dashboard";
-
 import ManageServices from "views/admin/services/component/ManageServices";
 import CityNews from "views/staff/news";
 import StaffService from "views/staff/services";
-
 import ComplaintTracker from "views/staff/help-desk";
 import UpdateComplaintDetails from "views/staff/help-desk/pages/UpdateComplaintDetails";
 import ComplaintInfo from "views/staff/help-desk/pages/ComplaintInfo";
-
 import AddNews from "views/staff/news/components/AddNews";
 import ViewNews from "views/staff/news/components/ViewNews";
-
-import NewsUpdate from "views/citizen/news/components/NewsUpdate"
+import NewsUpdate from "views/citizen/news/components/NewsUpdate";
 
 // Auth Views
 import SignIn from "views/auth/SignIn";
-import GetStarted from "views/auth/SignUp/get-started";
-import SignupCitizen from "views/auth/SignUp/SignUpClient";
-import SignupStaff from "views/auth/SignUp/SignUpStaff";
+// import GetStarted from "views/auth/SignUp/get-started";
+import SignupCitizen from "views/auth/SignupCitizen";
+// import SignupStaff from "views/auth/SignUp/SignUpStaff";
 import ServiceForm from "views/citizen/services/components/ServiceForm";
-// Icons
 
+// Icons
 import {
   MdHome,
   MdLock,
@@ -62,40 +59,29 @@ import {
 } from "react-icons/md";
 
 const routes = [
+  //home page
+  {
+    name: "Home",
+    layout: "/",
+    path: "",
+    component: <HomePage />,
+  },
+
   // Auth Routes
   {
     name: "Sign In",
     layout: "/auth",
-    path: "sign-in",
+    path: "signin",
     icon: <MdLock className="h-6 w-6" />,
     component: <SignIn />,
   },
   {
-  name: "Sign Up",
-  layout: "/auth",
-  path: "signup",
-  icon: <MdLock className="h-6 w-6" />,
-  children: [
-    {
-      name: "Get Started",
-      layout: "/auth",
-      path: "get-started",
-      component: <GetStarted />
-    },
-    {
-      name: "Citizen SignUp",
-      layout: "/auth",
-      path: "get-started/citizen",
-      component: <SignupCitizen />
-    },
-    {
-      name: "Staff SignUp",
-      layout: "/auth",
-      path: "get-started/staff",
-      component: <SignupStaff />
-    }
-  ]
-},
+    name: "Sign Up",
+    layout: "/auth",  // Changed from /auth/signup
+    path: "signup",
+    icon: <MdLock className="h-6 w-6" />,
+    component: <SignupCitizen />, // Directly use SignupCitizen component
+  },
   // Citizen Routes
   {
     name: " Dashboard",
@@ -115,11 +101,10 @@ const routes = [
         name: "Service List",
         layout: "/citizen",
         path: "Services/form/:serviceName",
-        component: <ServiceForm/>
-      }
-    ]
+        component: <ServiceForm />,
+      },
+    ],
   },
-  // Help Desk
   {
     name: "Help Desk",
     layout: "/citizen",
@@ -131,28 +116,29 @@ const routes = [
         name: "Complaint Form",
         layout: "/citizen",
         path: "help-desk/complaint/form",
-        component: <ComplaintForm />
+        component: <ComplaintForm />,
       },
       {
         name: "Complaint Log",
         layout: "/citizen",
         path: "help-desk/complaint/log",
-        component: <ComplaintLog />
+        component: <ComplaintLog />,
       },
       {
         name: "Feedback",
         layout: "/citizen",
         path: "help-desk/complaint/feedback/:id",
-        component: <ComplaintFeedback />
+        component: <ComplaintFeedback />,
       },
       {
         name: "View Complaint",
         layout: "/citizen",
         path: "help-desk/complaint/view/:id",
-        component: <ComplaintDetails />
-      }
-    ]
+        component: <ComplaintDetails />,
+      },
+    ],
   },
+
   // Admin Routes
   {
     name: "Admin Dashboard",
@@ -161,46 +147,44 @@ const routes = [
     icon: <MdDashboard className="h-6 w-6" />,
     component: <AdminDashboard />,
   },
-
   {
     name: "Admin Services",
     layout: "/admin",
     path: "services",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <AdminServices />,
-    // Define nested routes for Admin Services
     children: [
       {
         name: "Manage Services",
         layout: "/admin",
         path: "services/manage",
-        component: <ManageServices />
+        component: <ManageServices />,
       },
       {
         name: "Manage Staff",
         layout: "/admin",
         path: "services/staff",
-        component: <ManageStaffs />
+        component: <ManageStaffs />,
       },
       {
         name: "View Tasks",
         layout: "/admin",
         path: "services/tasks",
-        component: <ViewTasks />
+        component: <ViewTasks />,
       },
       {
         name: "View Schedule",
         layout: "/admin",
         path: "services/schedule",
-        component: <ViewSchedule />
+        component: <ViewSchedule />,
       },
       {
         name: "Feedback Management",
         layout: "/admin",
         path: "services/feedback",
-        component: <FeedbackManage />
-      }
-    ]
+        component: <FeedbackManage />,
+      },
+    ],
   },
   {
     name: "Complaint Management",
@@ -213,24 +197,23 @@ const routes = [
         name: "View Complaint",
         layout: "/admin",
         path: "complaints/view/:id",
-        component: <ViewComplaint />
+        component: <ViewComplaint />,
       },
       {
         name: "Edit Staff Assignment",
         layout: "/admin",
         path: "complaints/update/:id",
-        component: <AssignStaff />
+        component: <AssignStaff />,
       },
-    ]
+    ],
   },
-     {
+  {
     name: "Profile",
     layout: "/admin",
     path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
   },
-    
 
   // Staff Routes
   {
@@ -240,7 +223,6 @@ const routes = [
     icon: <MdAdminPanelSettings className="h-6 w-6" />,
     component: <StaffDashboard />,
   },
-
   {
     name: "Service Requests",
     layout: "/staff",
@@ -259,13 +241,13 @@ const routes = [
         name: "Update Complaint Details",
         layout: "/staff",
         path: "complaints/update-details/:id",
-        component: <UpdateComplaintDetails />
+        component: <UpdateComplaintDetails />,
       },
       {
         name: "View Complaint Details",
         layout: "/staff",
         path: "complaints/view-details/:id",
-        component: <ComplaintInfo />
+        component: <ComplaintInfo />,
       },
     ],
   },
@@ -274,30 +256,29 @@ const routes = [
     layout: "/staff",
     path: "news",
     icon: <MdChatBubble className="h-6 w-6" />,
-    component: <CityNews/>,
+    component: <CityNews />,
     children: [
       {
         name: "Manage News",
         layout: "/staff",
         path: "news/add",
-        component: <AddNews/>
+        component: <AddNews />,
       },
       {
         name: "Edit News ",
         layout: "/staff",
         path: "news/add/:id",
-        component: <AddNews/>
-      }
-    ]
-  }
-  ,
- {
+        component: <AddNews />,
+      },
+    ],
+  },
+  {
     name: "News Update",
     layout: "/citizen",
     path: "newsupdate",
     icon: <MdLock className="h-6 w-6" />,
-    component: <NewsUpdate/>,
-  }
+    component: <NewsUpdate />,
+  },
 ];
 
 export default routes;

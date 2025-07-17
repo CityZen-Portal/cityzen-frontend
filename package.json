@@ -24,6 +24,7 @@
     "fortawesome": "^0.0.1-security",
     "framer-motion": "^12.23.0",
     "heroicons": "^2.2.0",
+    "lucide-react": "^0.525.0",
     "react": "19.0.0",
     "react-apexcharts": "1.4.0",
     "react-big-calendar": "^1.19.4",
