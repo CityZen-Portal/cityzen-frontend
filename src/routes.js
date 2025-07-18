@@ -39,9 +39,13 @@ import NewsUpdate from "views/citizen/news/components/NewsUpdate";
 
 // Auth Views
 import SignIn from "views/auth/SignIn";
-// import GetStarted from "views/auth/SignUp/get-started";
 import SignupCitizen from "views/auth/SignupCitizen";
-// import SignupStaff from "views/auth/SignUp/SignUpStaff";
+import ResetPassword from "views/auth/ResetPassword";
+
+// News Details
+import NewsDetails from "views/citizen/news/components/NewsDetails";
+
+// Service Form
 import ServiceForm from "views/citizen/services/components/ServiceForm";
 
 // Icons
@@ -56,11 +60,11 @@ import {
   MdLiveHelp,
   MdAssignment,
   MdBallot,
+  MdBuild,
 } from "react-icons/md";
-import ResetPassword from "views/auth/ResetPassword";
 
 const routes = [
-  //home page
+  // Home
   {
     name: "Home",
     layout: "/",
@@ -76,23 +80,24 @@ const routes = [
     icon: <MdLock className="h-6 w-6" />,
     component: <SignIn />,
   },
-   {
+  {
     name: "Reset Password",
     layout: "/auth",
     path: "reset-password",
     component: <ResetPassword />,
-    hidden: true, // Add this to hide from navigation menus
+    hidden: true,
   },
   {
     name: "Sign Up",
-    layout: "/auth",  // Changed from /auth/signup
+    layout: "/auth",
     path: "signup",
     icon: <MdLock className="h-6 w-6" />,
-    component: <SignupCitizen />, // Directly use SignupCitizen component
+    component: <SignupCitizen />,
   },
+
   // Citizen Routes
   {
-    name: " Dashboard",
+    name: "Dashboard",
     layout: "/citizen",
     path: "dashboard",
     icon: <MdDashboard className="h-6 w-6" />,
@@ -159,7 +164,7 @@ const routes = [
     name: "Admin Services",
     layout: "/admin",
     path: "services",
-    icon: <MdDashboard className="h-6 w-6" />,
+    icon: <MdBuild className="h-6 w-6" />,
     component: <AdminServices />,
     children: [
       {
@@ -286,6 +291,14 @@ const routes = [
     path: "newsupdate",
     icon: <MdLock className="h-6 w-6" />,
     component: <NewsUpdate />,
+    children: [
+      {
+        name: "News Details",
+        layout: "/citizen",
+        path: "/newsupdate/newsdetails/:title",
+        component: <NewsDetails />,
+      },
+    ],
   },
 ];
 
