@@ -56,6 +56,7 @@ import {
   MdLiveHelp,
   MdAssignment,
   MdBallot,
+  MdBuild,
 } from "react-icons/md";
 
 const routes = [
@@ -151,7 +152,7 @@ const routes = [
     name: "Admin Services",
     layout: "/admin",
     path: "services",
-    icon: <MdDashboard className="h-6 w-6" />,
+    icon: <MdBuild className="h-6 w-6" />,
     component: <AdminServices />,
     children: [
       {
