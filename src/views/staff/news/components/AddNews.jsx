@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Card from 'components/card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { MdAdd, MdSave, MdCancel } from 'react-icons/md';
 import { newsData } from '../variables/data';
 
 const AddNews = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [newsItems, setNewsItems] = useState(newsData);
@@ -20,19 +21,40 @@ const AddNews = () => {
 
   const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
 
   useEffect(() => {
-    setFormData({
-      title: '',
-      content: '',
-      location: '',
-      category: '',
-      priority: '',
-      isBreaking: false,
-      images: []
-    });
-    setIsEditing(false);
-  }, []);
+    if (id) {
+      const item = newsItems.find((n) => n.id === parseInt(id));
+      if (item) {
+        setFormData({
+          title: item.title,
+          content: item.content,
+          location: item.location || '',
+          category: item.category || '',
+          priority: item.priority || '',
+          isBreaking: item.isBreaking,
+          images: item.images || []
+        });
+        setIsEditing(true);
+        setCurrentId(item.id);
+      } else {
+        navigate('../news');
+      }
+    } else {
+      setFormData({
+        title: '',
+        content: '',
+        location: '',
+        category: '',
+        priority: '',
+        isBreaking: false,
+        images: []
+      });
+      setIsEditing(false);
+      setCurrentId(null);
+    }
+  }, [id, newsItems, navigate]);
 
   const validateForm = () => {
     const errors = {};
@@ -74,6 +96,7 @@ const AddNews = () => {
   const handleAddNews = () => {
     if (!validateForm()) return;
     const newItem = {
+      id: newsItems.length > 0 ? Math.max(...newsItems.map(item => item.id)) + 1 : 1,
       title: formData.title,
       content: formData.content,
       createdAt: new Date().toISOString(),
@@ -84,6 +107,17 @@ const AddNews = () => {
       images: formData.images
     };
     setNewsItems([newItem, ...newsItems]);
+    navigate('/staff/news');
+  };
+
+  const handleUpdateNews = () => {
+    if (!validateForm() || currentId === null) return;
+    const updatedItems = newsItems.map(item =>
+      item.id === currentId
+        ? { ...item, ...formData }
+        : item
+    );
+    setNewsItems(updatedItems);
     navigate('/staff/news');
   };
 
@@ -103,7 +137,7 @@ const AddNews = () => {
 
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-navy-700 dark:text-white mb-1">
-            Create News Post
+            {isEditing ? 'Edit News Post' : 'Create News Post'}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Share important updates with the community
@@ -245,20 +279,32 @@ const AddNews = () => {
         </div>
 
         <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={handleAddNews}
-            className="flex items-center gap-2 bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700 transition-all"
-          >
-            <MdAdd />
-            Post News
-          </button>
-          <button
-            onClick={handleCancel}
-            className="flex items-center gap-2 border border-red-500 text-red-500 px-5 py-2 rounded-xl hover:bg-red-100 transition-all"
-          >
-            <MdCancel />
-            Cancel
-          </button>
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleUpdateNews}
+                className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 transition-all"
+              >
+                <MdSave />
+                Update
+              </button>
+              <button
+                onClick={handleCancel}
+                className="flex items-center gap-2 border border-red-500 text-red-500 px-5 py-2 rounded-xl hover:bg-red-100 transition-all"
+              >
+                <MdCancel />
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleAddNews}
+              className="flex items-center gap-2 bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700 transition-all"
+            >
+              <MdAdd />
+              Post News
+            </button>
+          )}
         </div>
       </Card>
     </div>
