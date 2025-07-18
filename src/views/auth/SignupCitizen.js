@@ -21,6 +21,14 @@ export default function SignUp() {
   const [errors, setErrors] = useState({});
   const [agreeTerms, setAgreeTerms] = useState(false);
 
+  // Aadhaar OTP verification states
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpInput, setOtpInput] = useState('');
+  const [aadhaarVerified, setAadhaarVerified] = useState(false);
+  const [mockOtp, setMockOtp] = useState('');
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [aadhaarSending, setAadhaarSending] = useState(false);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -29,6 +37,23 @@ export default function SignUp() {
     }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleEmailBlur = () => {
+    validateEmail(formData.email);
+  };
+
+  const validateEmail = (email) => {
+    if (!email.trim()) {
+      setErrors(prev => ({ ...prev, email: 'Email is required' }));
+      return false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+      return false;
+    } else {
+      setErrors(prev => ({ ...prev, email: '' }));
+      return true;
     }
   };
 
@@ -165,6 +190,77 @@ export default function SignUp() {
     const formatted = formatAadharNumber(e.target.value);
     if (formatted.replace(/\s/g, '').length <= 12) {
       setFormData(prev => ({ ...prev, aadharNumber: formatted }));
+      // Reset OTP states if Aadhaar is changed
+      if (otpSent || aadhaarVerified) {
+        setOtpSent(false);
+        setOtpInput('');
+        setAadhaarVerified(false);
+        setMockOtp('');
+      }
+    }
+  };
+
+  const handleAadhaarVerify = async () => {
+    // Validate Aadhaar number first
+    const cleanAadhaar = formData.aadharNumber.replace(/\s/g, '');
+    if (!/^\d{12}$/.test(cleanAadhaar)) {
+      setErrors(prev => ({ ...prev, aadharNumber: 'Aadhar number must be 12 digits' }));
+      return;
+    }
+
+    setAadhaarSending(true);
+    setErrors(prev => ({ ...prev, aadharNumber: '' }));
+
+    // Mock API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Generate mock 6-digit OTP
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setMockOtp(generatedOtp);
+    setOtpSent(true);
+    setAadhaarSending(false);
+
+    // Show OTP in console for testing
+    console.log('Mock OTP sent:', generatedOtp);
+    
+    // You can also show a toast notification here
+    alert(`OTP sent successfully! Mock OTP: ${generatedOtp}`);
+  };
+
+  const handleOtpValidate = async () => {
+    if (!otpInput.trim()) {
+      setErrors(prev => ({ ...prev, otp: 'Please enter OTP' }));
+      return;
+    }
+
+    if (otpInput.length !== 6) {
+      setErrors(prev => ({ ...prev, otp: 'OTP must be 6 digits' }));
+      return;
+    }
+
+    setOtpVerifying(true);
+    setErrors(prev => ({ ...prev, otp: '' }));
+
+    // Mock API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    if (otpInput === mockOtp) {
+      setAadhaarVerified(true);
+      setOtpVerifying(false);
+      alert('Aadhaar verified successfully!');
+    } else {
+      setErrors(prev => ({ ...prev, otp: 'Invalid OTP. Please try again.' }));
+      setOtpVerifying(false);
+    }
+  };
+
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 6) {
+      setOtpInput(value);
+      if (errors.otp) {
+        setErrors(prev => ({ ...prev, otp: '' }));
+      }
     }
   };
 
@@ -249,14 +345,16 @@ export default function SignUp() {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Email*</label>
             <input
-              type="email"
+              type="text"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
+              onBlur={handleEmailBlur}
               className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
                 errors.email ? 'border-red-500' : 'border-[#a3aed0]'
               }`}
               placeholder="mail@example.com"
+              autoComplete="email"
             />
             {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
@@ -333,27 +431,75 @@ export default function SignUp() {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Aadhar Number*</label>
             <div className="flex space-x-2">
-              <input
-                type="text"
-                name="aadharNumber"
-                value={formData.aadharNumber}
-                onChange={handleAadharChange}
-                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                  errors.aadharNumber ? 'border-red-500' : 'border-[#a3aed0]'
-                }`}
-                placeholder="1234 5678 9012"
-                maxLength="14"
-              />
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  name="aadharNumber"
+                  value={formData.aadharNumber}
+                  onChange={handleAadharChange}
+                  disabled={aadhaarVerified}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                    errors.aadharNumber ? 'border-red-500' : 'border-[#a3aed0]'
+                  } ${aadhaarVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
+                  placeholder="1234 5678 9012"
+                  maxLength="14"
+                />
+                {aadhaarVerified && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <span className="text-green-600 text-sm font-medium">✅ Verified</span>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
-                className="px-4 py-3 bg-[#422afb] text-white rounded-lg bg-gradient-to-r
-                     from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-[#422afb] text-sm font-medium"
+                onClick={handleAadhaarVerify}
+                disabled={aadhaarVerified || aadhaarSending}
+                className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  aadhaarVerified 
+                    ? 'bg-green-500 text-white cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+                } ${aadhaarSending ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Verify
+                {aadhaarSending ? 'Sending...' : aadhaarVerified ? 'Verified' : 'Verify'}
               </button>
             </div>
             {errors.aadharNumber && <p className="mt-1 text-sm text-red-600">{errors.aadharNumber}</p>}
           </div>
+
+          {/* OTP Input - Shows only when OTP is sent */}
+          {otpSent && !aadhaarVerified && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Enter OTP*
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={otpInput}
+                  onChange={handleOtpChange}
+                  className={`flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                    errors.otp ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
+                  placeholder="Enter 6-digit OTP"
+                  maxLength="6"
+                />
+                <button
+                  type="button"
+                  onClick={handleOtpValidate}
+                  disabled={otpVerifying}
+                  className={`px-4 py-3 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
+                    otpVerifying ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {otpVerifying ? 'Validating...' : 'Validate OTP'}
+                </button>
+              </div>
+              {errors.otp && <p className="mt-1 text-sm text-red-600">{errors.otp}</p>}
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                OTP sent to your registered mobile number
+              </p>
+            </div>
+          )}
 
           {/* Terms */}
           <div className="pt-2">
