@@ -209,7 +209,7 @@ const routes = [
   },
   {
     name: "Profile",
-    layout: "/admin",
+    layout: "/citizen",
     path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
