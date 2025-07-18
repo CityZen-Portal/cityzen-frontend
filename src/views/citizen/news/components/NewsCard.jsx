@@ -32,13 +32,12 @@ export default function NewsCard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      
+    <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-800  dark:text-white">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
         {newsData.map((news, index) => (
           <div
             key={index}
-            className="overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-105"
+            className="overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-105 dark:bg-navy-700 dark:text-white"
           >
             <img
               src={news.image}
@@ -46,7 +45,7 @@ export default function NewsCard() {
               className="h-48 w-full object-cover"
             />
             <div className="p-4">
-              <h2 className="mb-2 text-lg font-semibold text-gray-800">
+              <h2 className="mb-2 text-lg font-semibold text-gray-800  dark:text-white">
                 {news.title}
               </h2>
               <p className="mb-4 text-sm text-gray-600">{news.description}</p>
