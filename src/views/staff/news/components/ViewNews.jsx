@@ -3,15 +3,15 @@ import Card from 'components/card';
 import { MdEdit, MdDelete, MdTrendingUp, MdNotifications, MdAdd, MdRemoveRedEye } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import Pagination from 'components/pagination';
-import Image1 from "../../../../assets/img/service/govimg-3.jpg"
+
 const ViewNews = ({ newsItems, setNewsItems }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [previewImage, setPreviewImage] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-  const itemsPerPage = 5;
 
   const handleDeleteNews = (id) => {
     const updatedItems = newsItems.filter(item => item.id !== id);
@@ -20,7 +20,6 @@ const ViewNews = ({ newsItems, setNewsItems }) => {
 
   const filteredNews = (newsItems ?? []).filter(item => {
     if (activeTab === 'breaking') return item.isBreaking;
-   
     return true;
   });
 
@@ -62,6 +61,19 @@ const ViewNews = ({ newsItems, setNewsItems }) => {
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-navy-700 dark:text-white"
             >
               <option value="newest">Newest First</option>
+            </select>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(parseInt(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-navy-700 dark:text-white"
+            >
+              <option value={5}>5 per page</option>
+              <option value={10}>10 per page</option>
+              <option value={15}>15 per page</option>
+              <option value={20}>20 per page</option>
             </select>
           </div>
         </div>
