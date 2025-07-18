@@ -57,6 +57,7 @@ import {
   MdAssignment,
   MdBallot,
 } from "react-icons/md";
+import NewsDetails from "views/citizen/news/components/NewsDetails";
 
 const routes = [
   //home page
@@ -209,7 +210,7 @@ const routes = [
   },
   {
     name: "Profile",
-    layout: "/admin",
+    layout: "/citizen",
     path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
@@ -278,6 +279,14 @@ const routes = [
     path: "newsupdate",
     icon: <MdLock className="h-6 w-6" />,
     component: <NewsUpdate />,
+    children:[
+      {
+      name: "News Details",
+      layout: "/citizen",
+      path: "/newsupdate/newsdetails/:title",
+      component:<NewsDetails />
+      }
+    ]
   },
 ];
 
