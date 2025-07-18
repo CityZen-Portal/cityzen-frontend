@@ -1,8 +1,9 @@
-import { useState } from "react";
+import InputField from "components/fields/InputField";
 import { useNavigate } from "react-router-dom";
+import Checkbox from "components/checkbox";
+import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Checkbox from "components/checkbox";
 import Footer from "components/footer/FooterAuthDefault";
 
 export default function SignUp() {
@@ -64,30 +65,102 @@ export default function SignUp() {
   const validateForm = () => {
     const newErrors = {};
     
+    // First Name validation
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required';
+      toast.error("First name is required", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     }
+
+    // Last Name validation
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Last name is required';
+      toast.error("Last name is required", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     }
-    if (!validateEmail(formData.email)) {
-      newErrors.email = errors.email || 'Email is invalid';
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+      toast.error("Email is required", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
+      newErrors.email = 'Please enter a valid email address';
+      toast.error("Please enter a valid email address", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     }
+
+    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
+      toast.error("Password is required", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
+      toast.error("Password must be at least 8 characters", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}/.test(formData.password)) {
+      newErrors.password = 'Password must contain uppercase, lowercase, number and special character';
+      toast.error("Password must contain uppercase, lowercase, number and special character", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     }
+
+    // Confirm Password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
+      toast.error("Please confirm your password", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
+      toast.error("Passwords do not match", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     }
+
+    // Aadhar validation
     if (!formData.aadharNumber.trim()) {
       newErrors.aadharNumber = 'Aadhar number is required';
+      toast.error("Aadhar number is required", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     } else if (!/^\d{12}$/.test(formData.aadharNumber.replace(/\s/g, ''))) {
       newErrors.aadharNumber = 'Aadhar number must be 12 digits';
+      toast.error("Aadhar number must be 12 digits", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     }
+
+    // Phone validation
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
     } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
@@ -99,8 +172,15 @@ export default function SignUp() {
     if (!aadhaarVerified) {
       newErrors.aadhaarVerified = 'Aadhaar must be verified';
     }
+
+    // Terms validation
     if (!agreeTerms) {
       newErrors.terms = 'You must agree to the terms and policy';
+      toast.error("You must agree to the terms and policy", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
     }
 
     setErrors(newErrors);
@@ -118,7 +198,7 @@ export default function SignUp() {
       });
     } else {
       Object.values(errors).forEach(error => {
-        if (error) {
+        if (error && typeof error === 'string') {
           toast.error(error, {
             position: 'top-right',
             autoClose: 3000,
@@ -240,6 +320,7 @@ export default function SignUp() {
                     dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
                     transition-all duration-300">
       
+      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -355,9 +436,9 @@ export default function SignUp() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.firstName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  } bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                    errors.firstName ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
                   placeholder="Enter first name"
                 />
                 {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
@@ -369,9 +450,9 @@ export default function SignUp() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.lastName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  } bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                    errors.lastName ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
                   placeholder="Enter last name"
                 />
                 {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
@@ -387,15 +468,16 @@ export default function SignUp() {
                 value={formData.email}
                 onChange={handleInputChange}
                 onBlur={handleEmailBlur}
-                className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } bg-white dark:bg-gray-800 dark:text-white`}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                  errors.email ? 'border-red-500' : 'border-[#a3aed0]'
+                }`}
                 placeholder="mail@example.com"
+                autoComplete="email"
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
-            {/* Password */}
+            {/* Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Password*</label>
               <div className="relative">
@@ -404,9 +486,9 @@ export default function SignUp() {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  } bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                    errors.password ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
                   placeholder="Min. 8 characters"
                 />
                 <button 
@@ -429,7 +511,7 @@ export default function SignUp() {
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             </div>
 
-            {/* Confirm Password */}
+            {/* Confirm Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Confirm Password*</label>
               <div className="relative">
@@ -438,9 +520,9 @@ export default function SignUp() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  } bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                    errors.confirmPassword ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
                   placeholder="Confirm your password"
                 />
                 <button 
@@ -474,11 +556,9 @@ export default function SignUp() {
                     value={formData.aadharNumber}
                     onChange={handleAadharChange}
                     disabled={aadhaarVerified}
-                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.aadharNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } bg-white dark:bg-gray-800 dark:text-white ${
-                      aadhaarVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''
-                    }`}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                      errors.aadharNumber ? 'border-red-500' : 'border-[#a3aed0]'
+                    } ${aadhaarVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
                     placeholder="1234 5678 9012"
                     maxLength="14"
                   />
@@ -495,7 +575,7 @@ export default function SignUp() {
                   className={`px-4 py-3 rounded-lg text-sm font-medium ${
                     aadhaarVerified 
                       ? 'bg-green-500 text-white cursor-not-allowed' 
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
                   } ${aadhaarSending ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {aadhaarSending ? 'Verifying...' : aadhaarVerified ? 'Verified' : 'Verify'}
@@ -518,11 +598,9 @@ export default function SignUp() {
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                     disabled={phoneVerified}
-                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phoneNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } bg-white dark:bg-gray-800 dark:text-white ${
-                      phoneVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''
-                    }`}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                      errors.phoneNumber ? 'border-red-500' : 'border-[#a3aed0]'
+                    } ${phoneVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
                     placeholder="9876543210"
                     maxLength="10"
                   />
@@ -540,7 +618,7 @@ export default function SignUp() {
                     phoneVerified 
                       ? 'bg-green-500 text-white cursor-not-allowed' 
                       : aadhaarVerified 
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white' 
                         : 'bg-gray-400 text-white cursor-not-allowed'
                   }`}
                 >
@@ -562,7 +640,7 @@ export default function SignUp() {
                   className={errors.terms ? 'border-red-500' : ''}
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600 dark:text-gray-300">
-                  I agree to the <a href="#" className="text-blue-600 hover:text-blue-800">Terms of Service</a> and <a href="#" className="text-blue-600 hover:text-blue-800">Privacy Policy</a>
+                  I agree to the <a href="#" className="text-[#422afb] hover:text-[#1b254b]">Terms of Service</a> and <a href="#" className="text-[#422afb] hover:text-[#1b254b]">Privacy Policy</a>
                 </label>
               </div>
               {errors.terms && (
@@ -591,7 +669,7 @@ export default function SignUp() {
             Already have an account?{' '}
             <button
               onClick={() => navigate("/auth/signin")}
-              className="text-blue-600 hover:text-blue-800 font-medium"
+              className="text-[#422afb] hover:text-[#1b254b] font-medium"
             >
               Sign in
             </button>

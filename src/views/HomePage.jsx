@@ -1,21 +1,8 @@
 import React, { useState, useEffect } from "react";
+import FixedPlugin from "components/fixedPlugin/FixedPlugin"; // Make sure the path is correct
 
 export default function CityZenHomepage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
 
   const handleStartJourney = () => {
     // Navigate to /auth/signin
@@ -87,13 +74,8 @@ export default function CityZenHomepage() {
         <span className="ml-2 text-xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">CityZen</span>
       </div>
 
-      {/* Theme Toggle (Bottom Right) */}
-      <button
-        onClick={toggleTheme}
-        className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200"
-      >
-        {theme === "light" ? "🌙" : "☀️"}
-      </button>
+      {/* Fixed Plugin (Bottom Right) */}
+      <FixedPlugin />
 
       {/* Hero Section */}
       <section id="home" className="relative py-20 overflow-hidden">
@@ -235,55 +217,9 @@ export default function CityZenHomepage() {
 
       {/* Footer */}
       <footer className="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 text-white py-12">
-        {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-sky-400 rounded-lg flex items-center justify-center shadow-lg">
-                  <span className="text-white text-lg">🏛️</span>
-                </div>
-                <span className="ml-2 text-xl font-bold bg-gradient-to-r from-blue-400 to-sky-400 bg-clip-text text-transparent">CityZen</span>
-              </div>
-              <p className="text-gray-400">
-                Empowering citizens through digital transformation and smart city solutions.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">File Grievances</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Utility Services</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">City Alerts</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Feedback</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Help Center</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Contact Us</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">FAQs</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Privacy Policy</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Connect</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Facebook</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Twitter</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">LinkedIn</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors duration-200">Instagram</a></li>
-              </ul>
-            </div>
-          </div> */}
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 CityZen. All rights reserved. | Government of India Initiative</p>
-          </div>
-        {/* </div> */}
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <p>&copy; 2025 CityZen. All rights reserved. | Government of India Initiative</p>
+        </div>
       </footer>
 
       <style jsx>{`
