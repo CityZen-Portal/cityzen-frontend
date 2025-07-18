@@ -57,6 +57,7 @@ import {
   MdAssignment,
   MdBallot,
 } from "react-icons/md";
+import ResetPassword from "views/auth/ResetPassword";
 
 const routes = [
   //home page
@@ -74,6 +75,13 @@ const routes = [
     path: "signin",
     icon: <MdLock className="h-6 w-6" />,
     component: <SignIn />,
+  },
+   {
+    name: "Reset Password",
+    layout: "/auth",
+    path: "reset-password",
+    component: <ResetPassword />,
+    hidden: true, // Add this to hide from navigation menus
   },
   {
     name: "Sign Up",
