@@ -241,7 +241,7 @@ const AssignStaff = () => {
         <div className="mt-8">
           <button
             onClick={() => {
-              navigate(`/admin/complaint/log`)
+              navigate(`/admin/complaints/`)
               window.scrollTo(0,0)
             }}
             className="bg-blue-600 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
