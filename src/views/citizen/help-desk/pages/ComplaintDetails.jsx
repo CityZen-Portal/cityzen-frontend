@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import { FaMapMarkerAlt, FaExclamationCircle, FaHistory } from 'react-icons/fa';
+import React from 'react';
+import { MdError, MdLocationOn } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
+import TitleCard from '../components/TitleCard';
+import auth from '../../../../assets/img/auth/auth.png' // Dummy File URL
+import DetailsList from '../components/DetailsList';
+import StatusHistory from '../components/StatusHistory';
+import StaffCard from '../components/StaffCard';
+import ResponseCard from '../components/ResponseCard';
 
 const ComplaintDetails = () => {
   const navigate = useNavigate()
-  
-  const [showImageModal, setShowImageModal] = useState(false);
 
   const complaintData = {
     id: '0001',
@@ -21,28 +25,43 @@ const ComplaintDetails = () => {
     complaintType: 'Infrastructure',
     Issue: 'Water Pipeline Burst',
     description: 'The main water pipeline has burst near the junction of Anna Nagar main road. Water is flowing continuously causing inconvenience to residents and potential damage to nearby properties.',
-    imageUrl: null,
+    fileUrl: auth,
+    staff: {staffName: "Davis Wanbros", department: "Water Supply", role: "Maintenance Technicians"},
     statusHistory: [
       { status: 'Submitted', date: '19/04/2025 10:00 AM', note: 'Complaint received' },
       { status: 'Pending', date: '19/04/2025 10:15 AM', note: 'Assigned to Water Resource team' },
-    ]
+      { status: 'Under Review', date: '20/04/2025 10:55 AM', note: 'Reviewing under Water Resource team' },
+    ],
+    responses: [
+      { index:1, description: "Your request is viewed and being reviewed for processing a solution", date: "19/04/2025 10:30 AM" },
+      { index:2, description: "Your request is review and is in progress", date: "20/04/2025 11:30 AM" }
+    ],
+    resolution: "-",
   };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-300 dark:text-yellow-900';
-      case 'inprogress': return 'bg-blue-100 text-blue-800 dark:bg-blue-300 dark:text-blue-900';
-      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-300 dark:text-green-900';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-300 dark:text-gray-900';
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900';
+      case 'under-review': return 'bg-amber-100 text-amber-800 dark:bg-amber-200 dark:text-amber-900';
+      case 'assigned': return 'bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900';
+      case 'in-progress': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-200 dark:text-indigo-900';
+      case 'on-hold': return 'bg-gray-200 text-gray-700 dark:bg-gray-400 dark:text-gray-900';
+      case 'resolved': return 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900';
+      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-200 dark:text-red-900';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-200 dark:text-gray-900';
     }
   };
 
   const getStatusText = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status) {
       case 'pending': return 'Pending';
-      case 'inprogress': return 'In Progress';
-      case 'completed': return 'Completed';
-      default: return status;
+      case 'under-review': return 'Under Review';
+      case 'assigned': return 'Assigned';
+      case 'in-progress': return 'In Progress';
+      case 'on-hold': return 'On Hold';
+      case 'resolved': return 'Resolved';
+      case 'rejected': return 'Rejected';
+      default: return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
 
@@ -50,20 +69,13 @@ const ComplaintDetails = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <FaExclamationCircle className="text-3xl text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Complaint #{complaintData.id}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">Manage your complaint details</p>
-            </div>
-          </div>
-          <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(complaintData.status)}`}>
-            {getStatusText(complaintData.status)}
-          </span>
-        </div>
+        <TitleCard 
+          title={`Complaint #${complaintData.id}`}
+          Icon={MdError}
+          complaintStatus={complaintData.status}
+          getStatusColor={getStatusColor}
+          getStatusText={getStatusText}
+        />
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -72,128 +84,61 @@ const ComplaintDetails = () => {
             <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Location Details */}
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <FaMapMarkerAlt className="mr-2 text-blue-600" /> Location Details
-                  </h2>
-                  {['complaintant', 'location', 'address', 'wardNumber', 'pincode'].map((field) => (
-                    <div key={field}>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
-                        {field.replace(/([A-Z])/g, ' $1').trim()}
-                      </label>
-                      <p className="mt-1 text-gray-900 dark:text-white">{complaintData[field]}</p>
-                    </div>
-                  ))}
-                </div>
+                <DetailsList
+                  key={1}
+                  title={'Location Details'}
+                  Icon={MdLocationOn}
+                  complaintData={complaintData}
+                  fields={['complaintant', 'location', 'address', 'wardNumber', 'pincode', 'department']}
+                />
 
                 {/* Complaint Details */}
-                <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <FaExclamationCircle className="mr-2 text-blue-600" /> Complaint Title & Details
-                  </h2>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Complaint Type</label>
-                    <p className="mt-1 text-gray-900 dark:text-white">{complaintData.complaintType}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Issue</label>
-                    <p className="mt-1 text-gray-900 dark:text-white">{complaintData.Issue}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                    <p className="mt-1 text-gray-900 dark:text-white">{complaintData.description}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image</label>
-                    <div className="mt-1">
-                      {complaintData.imageUrl ? (
-                        <img
-                          src={complaintData.imageUrl}
-                          alt="Complaint"
-                          className="max-w-xs rounded-md cursor-pointer hover:opacity-80"
-                          onClick={() => setShowImageModal(true)}
-                        />
-                      ) : (
-                        <p className="text-gray-500 dark:text-gray-400 italic">No image uploaded</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <DetailsList
+                  key={2}
+                  title={'Complaint Details'}
+                  Icon={MdError}
+                  complaintData={complaintData}
+                  fields={['complaintType','department', 'Issue', 'description', 'attachment']}
+                />
               </div>
             </div>
           </div>
 
           {/* Right Sidebar */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <FaHistory className="mr-2 text-blue-600" /> Status History
-              </h2>
-              <div className="space-y-4">
-                {complaintData.statusHistory.map((entry, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="h-2 w-2 bg-blue-600 rounded-full mt-1.5"></div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{entry.status}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{entry.date}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{entry.note}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Staff */}
+            <StaffCard 
+              complaintData={complaintData}
+              fields={['staffName', 'department', 'role']}
+              />
 
-            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Additional Information</h2>
-              {['department', 'dateLogged'].map((field) => (
-                <div key={field} className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
-                    {field.replace(/([A-Z])/g, ' $1').trim()}
-                  </label>
-                  <p className="mt-1 text-gray-900 dark:text-white">{complaintData[field]}</p>
-                </div>
-              ))}
-            </div>
+            {/* Status History */}
+            <StatusHistory statusHistory={complaintData.statusHistory} />
+          
           </div>
         </div>
 
+        {/* Response & Resolutions */}
+        <ResponseCard 
+          extra={'grid grid-cols-1 lg:grid-cols-3 mt-8'}
+          resolution={complaintData.resolution} 
+          responses={complaintData.responses}
+          />
+
         {/* Back Button */}
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <button
             onClick={() => {
               navigate(`/citizen/help-desk/complaint/log`)
               window.scrollTo(0,0)
             }}
-            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors dark:bg-white dark:text-navy-900 dark:hover:bg-gray-200"
+            className="bg-blue-600 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
           >
             Back to Complaint Log
           </button>
-        </div>
+        </div> */}
       </div>
 
-      {/* Image Modal */}
-      {showImageModal && complaintData.imageUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-navy-800 rounded-xl p-4 max-w-3xl w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Image Preview</h3>
-              <button
-                onClick={() => setShowImageModal(false)}
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-            <img
-              src={complaintData.imageUrl}
-              alt="Complaint"
-              className="w-full rounded-md"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

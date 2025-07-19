@@ -1,19 +1,69 @@
-import InputField from "components/fields/InputField";
+import InputField from "./components/InputField";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "components/checkbox";
 import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function SignIn() {
   const navigate = useNavigate();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("Test@1234"); // for testing
+  const [emailState, setEmailState] = useState("");
+  const [passwordState, setPasswordState] = useState("");
 
-  const handleForgotPassword = () => {
-    // Here you would typically send a password reset email
+
+  const handleForgotPassword = (e) => {
+    e.preventDefault()
     console.log("Password reset requested for:", email);
     setShowForgotPassword(false);
-    // You might want to show a success message here
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form submitted");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    // Email validation
+    if (!emailRegex.test(email)) {
+      toast.error("Enter a valid email", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+      setEmailState("error")
+      return;
+    }
+    else{
+      setEmailState("success")
+    }
+
+    // Paswsord validation
+    if (!passwordRegex.test(password)) {
+      toast.error("Enter a strong password", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+      setPasswordState("error")
+      return;
+    }
+    else{
+      setPasswordState("success")
+    }
+
+  // Login Success
+  toast.success("Login successful", {
+    position: 'top-right',
+    autoClose: 1000,
+    theme: 'colored',
+    onClose: () => navigate("/citizen/dashboard"),
+  });
+};
+
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-12 
@@ -21,7 +71,6 @@ export default function SignIn() {
                     dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
                     transition-all duration-300 overflow-hidden">
       
-      {/* Decorative Gradient Blobs */}
       <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400 rounded-full filter blur-3xl opacity-40"></div>
       <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500 rounded-full filter blur-2xl opacity-30"></div>
       <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-blue-300 rounded-full filter blur-2xl opacity-25"></div>
@@ -31,71 +80,82 @@ export default function SignIn() {
                       border border-blue-100 dark:border-gray-700 
                       bg-white/80 dark:bg-gray-700/90 backdrop-blur-md 
                       transition-all duration-300">
-        
-        {/* Title */}
-        <h2 className="text-4xl font-extrabold mb-2 text-center text-blue-700 dark:text-white">
-          Sign In
-        </h2>
-        <p className="text-center text-sm text-gray-600 dark:text-gray-300 mb-6">
-          Enter your email and password to access your account
-        </p>
+        <form onSubmit={handleSubmit}>
+          {/* Title */}
+          <h2 className="text-4xl font-extrabold mb-2 text-center text-blue-700 dark:text-white">
+            Sign In
+          </h2>
+          <p className="text-center text-sm text-gray-600 dark:text-gray-300 mb-6">
+            Enter your email and password to access your account
+          </p>
 
-        {/* Email */}
-        <InputField
-          variant="auth"
-          extra="mb-4"
-          label="Email*"
-          placeholder="mail@simmmple.com"
-          id="email"
-          type="text"
-        />
+          {/* Email */}
+          <InputField
+            key={1}
+            variant="auth"
+            extra="mb-4"
+            label="Email*"
+            placeholder="mail@simmmple.com"
+            id="email"
+            type="text"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            state={emailState}
+          />
 
-        {/* Password */}
-        <InputField
-          variant="auth"
-          extra="mb-4"
-          label="Password*"
-          placeholder="Min. 8 characters"
-          id="password"
-          type="password"
-        />
+          {/* Password */}
+          <InputField
+            key={2}
+            variant="auth"
+            extra="mb-4"
+            label="Password*"
+            placeholder="Min. 8 characters"
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            state={passwordState}
+          />
 
-        {/* Checkbox + Forgot Password */}
-        <div className="mb-4 flex items-center justify-between text-sm">
-          <div className="flex items-center">
-            <Checkbox />
-            <p className="ml-2 text-gray-700 dark:text-white">Keep me logged In</p>
+          {/* Checkbox + Forgot Password */}
+          <div className="mb-4 flex items-center justify-between text-sm">
+            <div className="flex items-center">
+              <Checkbox />
+              <p className="ml-2 text-gray-700 dark:text-white">Keep me logged In</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-blue-300"
+            >
+              Forgot Password?
+            </button>
           </div>
-          <button
-            onClick={() => setShowForgotPassword(true)}
-            className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-blue-300"
-          >
-            Forgot Password?
-          </button>
-        </div>
 
-        {/* Sign In Button */}
-        <button
-        onClick={() => navigate("/citizen/dashboard")}
-          className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r
-                     from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
-                     transition-transform duration-300 transform hover:scale-105 shadow-lg"
-        >
-          Sign In
-        </button>
-
-        {/* Sign Up */}
-        <div className="text-center mt-6">
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Not registered yet?
-          </span>
+          {/* Sign In Button */}
           <button
-            onClick={() => navigate("/auth/signup")}
-            className="ml-1 text-sm font-semibold text-blue-500 hover:text-blue-600 dark:text-blue-300"
+            type="submit"
+            className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r
+                      from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+                      transition-transform duration-300 transform hover:scale-105 shadow-lg"
           >
-            Create an account
+            Sign In
           </button>
-        </div>
+
+           {/* Sign Up */}
+          <div className="text-center mt-6">
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              Not registered yet?
+            </span>
+            <button
+              onClick={() => navigate("/auth/signup")}
+              className="ml-1 text-sm font-semibold text-blue-500 hover:text-blue-600 dark:text-blue-300"
+            >
+              Create an account
+            </button>
+          </div>
+          
+        </form>
       </div>
 
       {/* Forgot Password Popup */}
@@ -106,6 +166,7 @@ export default function SignIn() {
                           bg-white dark:bg-gray-800
                           transition-all duration-300">
             <button
+              type="button"
               onClick={() => setShowForgotPassword(false)}
               className="absolute top-4 right-4 p-1 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
@@ -122,10 +183,11 @@ export default function SignIn() {
             </p>
 
             <InputField
+              key={3}
               variant="auth"
               extra="mb-6"
               label="Email*"
-              placeholder="mail@simmmple.com"
+              placeholder="mail@simple.com"
               id="reset-email"
               type="email"
               value={email}
@@ -133,6 +195,7 @@ export default function SignIn() {
             />
 
             <button
+              type="button"
               onClick={handleForgotPassword}
               className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r
                          from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
@@ -143,6 +206,7 @@ export default function SignIn() {
 
             <div className="text-center mt-4">
               <button
+                type="button"
                 onClick={() => setShowForgotPassword(false)}
                 className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-blue-300"
               >
@@ -152,6 +216,7 @@ export default function SignIn() {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 }
