@@ -1,5 +1,5 @@
 import React from "react";
-// import Dropdown from "components/dropdown";
+import Dropdown from "components/dropdown";
 import { FiAlignJustify } from "react-icons/fi";
 import { Link } from "react-router-dom";
 // import navbarimage from "assets/img/layout/Navbar.png";
@@ -150,7 +150,7 @@ const Navbar = (props) => {
           )}
         </div>
         {/* Profile & Dropdown */}
-        {/* <Dropdown
+        <Dropdown
           button={
             <img
               className="h-10 w-10 rounded-full"
@@ -170,7 +170,7 @@ const Navbar = (props) => {
               <div className="h-px w-full bg-gray-200 dark:bg-white/20 " />
 
               <div className="flex flex-col p-4">
-                <a
+                {/* <a
                   href=" "
                   className="text-sm text-gray-800 dark:text-white hover:dark:text-white"
                 >
@@ -181,7 +181,7 @@ const Navbar = (props) => {
                   className="mt-3 text-sm text-gray-800 dark:text-white hover:dark:text-white"
                 >
                   Newsletter Settings
-                </a>
+                </a> */}
                 <a
                   href=" "
                   className="mt-3 text-sm font-medium text-red-500 hover:text-red-500 transition duration-150 ease-out hover:ease-in"
@@ -192,7 +192,7 @@ const Navbar = (props) => {
             </div>
           }
           classNames={"py-2 top-8 -left-[180px] w-max"}
-        /> */}
+        />
       </div>
     </nav>
   );
