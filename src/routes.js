@@ -210,7 +210,7 @@ const routes = [
         name: "View Complaint",
         layout: "/admin",
         path: "complaints/view/:id",
-        component: <ViewComplaint />,
+        component: <ComplaintDetails />,
       },
       {
         name: "Edit Staff Assignment",
@@ -260,7 +260,7 @@ const routes = [
         name: "View Complaint Details",
         layout: "/staff",
         path: "complaints/view-details/:id",
-        component: <ComplaintInfo />,
+        component: <ComplaintDetails />,
       },
     ],
   },

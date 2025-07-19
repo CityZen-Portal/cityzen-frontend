@@ -87,7 +87,7 @@ const ComplaintLog = () => {
       </div>
 
       {/* Table */}
-      <ComplaintTable complaints={complaints} />
+      <ComplaintTable extra={"mt-8"} complaints={complaints} />
     </div>
   );
 };
