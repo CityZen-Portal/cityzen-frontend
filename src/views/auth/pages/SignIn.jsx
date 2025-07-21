@@ -1,119 +1,150 @@
 import InputField from "../components/InputField";
-import PasswordField from "../components/PasswordField"
-import { useNavigate } from "react-router-dom";
+import PasswordField from "../components/PasswordField";
+import { Form, useNavigate } from "react-router-dom";
 import Checkbox from "components/checkbox";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import Footer from "components/footer/FooterAuthDefault";
+import axios from "axios";
 
 export default function SignIn() {
   const navigate = useNavigate();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("Test@1234"); // for testing
+  const [password, setPassword] = useState("Test@1234");
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const [userRole, setUserRole] = useState("");
 
   const handleForgotPassword = () => {
     if (!email.trim()) {
       toast.error("Email is required to reset password", {
-        position: 'top-right',
+        position: "top-right",
         autoClose: 3000,
-        theme: 'colored',
+        theme: "colored",
       });
       return;
     }
-    if(!validateEmail(email.trim())){
+    if (!validateEmail(email.trim())) {
       toast.error("Enter a valid email", {
-        position: 'top-right',
+        position: "top-right",
         autoClose: 3000,
-        theme: 'colored',
+        theme: "colored",
       });
       return;
     }
     console.log("Password reset requested for:", email);
-    
+
     setShowForgotPassword(false);
     toast.success(`Password reset link sent to ${email}`, {
-      position: 'top-right',
+      position: "top-right",
       autoClose: 2000,
-      theme: 'colored'
+      theme: "colored",
     });
   };
 
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email)
-  }
+    return emailRegex.test(email);
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted");
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+   console.log("Form submitted");
 
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+   const passwordRegex = /^.{4,}$/;
 
-    // Email validation
-    if (!validateEmail(email)) {
-      toast.error("Enter a valid email", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
-      setEmailState("error")
-      return;
-    }
-    else{
-      setEmailState("success")
-    }
+   if (!validateEmail(email)) {
+     toast.error("Enter a valid email", {
+       position: "top-right",
+       autoClose: 3000,
+       theme: "colored",
+     });
+     setEmailState("error");
+     return;
+   } else {
+     setEmailState("success");
+   }
 
-    // Paswsord validation
-    if (!passwordRegex.test(password)) {
-      toast.error("Enter a strong password", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
-      setPasswordState("error")
-      return;
-    }
-    else{
-      setPasswordState("success")
-    }
+   if (!passwordRegex.test(password)) {
+     toast.error("Enter a strong password", {
+       position: "top-right",
+       autoClose: 3000,
+       theme: "colored",
+     });
+     setPasswordState("error");
+     return;
+   } else {
+     setPasswordState("success");
+   }
 
-  // Login Success
-  toast.success("Login successful", {
-    position: 'top-right',
-    autoClose: 1000,
-    theme: 'colored',
-    onClose: () => navigate("/citizen/dashboard"),
-  });
-};
+   try {
+     const response = await axios.post("http://localhost:8080/api/auth/login", {
+       email,
+       password,
+     });
+
+     const token = response.data.token;
+     const roles = response.data.roles;
+
+     localStorage.setItem("token", token);
+     localStorage.setItem("username", response.data.username);
+     localStorage.setItem("email", response.data.email);
+     localStorage.setItem("role", JSON.stringify(roles));
+     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+     toast.success("Login successful", {
+       position: "top-right",
+       autoClose: 1000,
+       theme: "colored",
+       onClose: () => {
+         if (roles.includes("ROLE_STAFF")) {
+           navigate("/staff/dashboard");
+         } else if (roles.includes("ROLE_USER")) {
+           navigate("/citizen/dashboard");
+         } else {
+           navigate("/admin/dashboard");
+         }
+       },
+     });
+   } catch (error) {
+     console.error(error);
+     toast.error("Invalid credentials or server error", {
+       position: "top-right",
+       autoClose: 3000,
+       theme: "colored",
+     });
+   }
+ };
 
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
-                    dark:from-navy-900 dark:via-navy-900 dark:to-navy-900 
-                    transition-all duration-300">
-      
-      <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400 dark:bg-navy-600 rounded-full filter blur-3xl opacity-40"></div>
-      <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500 dark:bg-navy-600 rounded-full filter blur-2xl opacity-30"></div>
-      <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-blue-300 dark:bg-navy-600 rounded-full filter blur-2xl opacity-25"></div>
+    <div
+      className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
+                    transition-all duration-300 dark:from-navy-900 
+                    dark:via-navy-900 dark:to-navy-900"
+    >
+      <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-blue-400 opacity-40 blur-3xl filter dark:bg-navy-600"></div>
+      <div className="absolute right-10 top-10 h-64 w-64 rounded-full bg-blue-500 opacity-30 blur-2xl filter dark:bg-navy-600"></div>
+      <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-300 opacity-25 blur-2xl filter dark:bg-navy-600"></div>
 
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex flex-1 items-center justify-center p-4">
         {/* Auth Card */}
-        <div className="relative z-10 w-full max-w-md p-8 rounded-2xl shadow-2xl 
-                        border border-blue-100 dark:border-none 
-                        bg-white/80 dark:bg-navy-700/90 backdrop-blur-md 
-                        transition-all duration-300">
+        <div
+          className="relative z-10 w-full max-w-md rounded-2xl border border-blue-100 
+                        bg-white/80 p-8 shadow-2xl 
+                        backdrop-blur-md transition-all duration-300 
+                        dark:border-none dark:bg-navy-700/90"
+        >
           <form onSubmit={handleSubmit}>
             {/* Title */}
-            <h2 className="text-4xl font-extrabold mb-2 text-center text-brand-500 dark:text-white">
+            <h2 className="mb-2 text-center text-4xl font-extrabold text-brand-500 dark:text-white">
               Sign In
             </h2>
-            <p className="text-center text-sm text-gray-600 dark:text-gray-300 mb-6">
+            <p className="mb-6 text-center text-sm text-gray-600 dark:text-gray-300">
               Enter your email and password to access your account
             </p>
 
@@ -144,18 +175,13 @@ export default function SignIn() {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-
-
-
             {/* Checkbox + Forgot Password */}
             <div className="mb-4 flex items-center justify-between text-sm">
               <div className="flex items-center">
-                
-                <label className="flex items-center text-gray-700 dark:text-white gap-2 cursor-pointer">
-                  <Checkbox color={'blue'} />
+                <label className="flex cursor-pointer items-center gap-2 text-gray-700 dark:text-white">
+                  <Checkbox color={"blue"} />
                   Keep me logged in
                 </label>
-
               </div>
               <button
                 type="button"
@@ -169,15 +195,15 @@ export default function SignIn() {
             {/* Sign In Button */}
             <button
               type="submit"
-              className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r
-                        from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700
-                        transition-transform duration-300 transform hover:scale-105 shadow-lg"
+              className="w-full transform rounded-xl bg-gradient-to-r from-brand-500 to-brand-600
+                        py-3 font-semibold text-white shadow-lg
+                        transition-transform duration-300 hover:scale-105 hover:from-brand-600 hover:to-brand-700"
             >
               Sign In
             </button>
 
             {/* Sign Up */}
-            <div className="text-center mt-6">
+            <div className="mt-6 text-center">
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Not registered yet?
               </span>
@@ -188,7 +214,6 @@ export default function SignIn() {
                 Create an account
               </button>
             </div>
-            
           </form>
         </div>
       </div>
@@ -200,25 +225,38 @@ export default function SignIn() {
 
       {/* Forgot Password Popup */}
       {showForgotPassword && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="relative w-full max-w-md p-6 mx-4 rounded-2xl shadow-2xl 
-                          border border-blue-100 dark:border-gray-700 
-                          bg-white dark:bg-gray-800
-                          transition-all duration-300">
+        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 backdrop-blur-sm">
+          <div
+            className="relative mx-4 w-full max-w-md rounded-2xl border border-blue-100 
+                          bg-white p-6 shadow-2xl 
+                          transition-all duration-300
+                          dark:border-gray-700 dark:bg-gray-800"
+          >
             <button
               type="button"
               onClick={() => setShowForgotPassword(false)}
-              className="absolute top-4 right-4 p-1 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="absolute right-4 top-4 rounded-full p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
 
-            <h3 className="text-2xl font-bold mb-2 text-center text-brand-500 dark:text-white">
+            <h3 className="mb-2 text-center text-2xl font-bold text-brand-500 dark:text-white">
               Reset Password
             </h3>
-            <p className="text-center text-sm text-gray-600 dark:text-gray-300 mb-6">
+            <p className="mb-6 text-center text-sm text-gray-600 dark:text-gray-300">
               Enter your email to receive a password reset link
             </p>
 
@@ -237,14 +275,14 @@ export default function SignIn() {
             <button
               type="button"
               onClick={handleForgotPassword}
-              className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r
-                         from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700
-                         transition-transform duration-300 transform hover:scale-105 shadow-lg"
+              className="w-full transform rounded-xl bg-gradient-to-r from-brand-500 to-brand-600
+                         py-3 font-semibold text-white shadow-lg
+                         transition-transform duration-300 hover:scale-105 hover:from-brand-600 hover:to-brand-700"
             >
               Send Reset Link
             </button>
 
-            <div className="text-center mt-4">
+            <div className="mt-4 text-center">
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(false)}

@@ -156,7 +156,7 @@ const routes = [
   {
     name: "Admin Dashboard",
     layout: "/admin",
-    path: "default",
+    path: "dashboard",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <AdminDashboard />,
   },
