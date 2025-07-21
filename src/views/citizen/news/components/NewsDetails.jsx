@@ -1,12 +1,15 @@
-import React  from "react";
-import { useParams, useNavigate, useLocation} from "react-router-dom";
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import newsData from "./newsData";
 
 export default function NewsDetails() {
   const { title } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
- console.log(title);
-  const newsItem = location.state;
+
+  // Match title from URL with newsData
+  const newsItem = newsData.find(
+    (item) => item.title.toLowerCase() === decodeURIComponent(title).toLowerCase()
+  );
 
   if (!newsItem) {
     return (
@@ -23,26 +26,21 @@ export default function NewsDetails() {
   }
 
   return (
-    <>
-      <div className="mx-auto bg-white p-8 dark:bg-navy-800 dark:text-white">
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-6 text-blue-600 underline mb-3"
-        >
-          ← Back to News
-        </button>
-        <img
-          src={newsItem.image}
-          alt={newsItem.title}
-          className="mb-6 w-full rounded-xl"
-        />
-        <h1 className="mb-2 text-3xl font-bold">{newsItem.title}</h1>
-        <p className="mb-4 text-gray-700">{newsItem.description}</p>
-        <p className="text-gray-600">{newsItem.content}</p>
-      </div>
-      
-        
-      
-    </>
+    <div className="mx-auto bg-white p-8 dark:bg-navy-800 dark:text-white">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-6 text-blue-600 underline"
+      >
+        ← Back to News
+      </button>
+      <img
+        src={newsItem.image}
+        alt={newsItem.title}
+        className="mb-6 w-full rounded-xl"
+      />
+      <h1 className="mb-2 text-3xl font-bold">{newsItem.title}</h1>
+      <p className="mb-4 text-gray-700 dark:text-gray-300">{newsItem.description}</p>
+      <p className="text-gray-600 dark:text-gray-400">{newsItem.content}</p>
+    </div>
   );
 }
