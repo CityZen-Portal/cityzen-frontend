@@ -300,6 +300,27 @@ const routes = [
       },
     ],
   },
+  {
+    name: "City News & Alerts",
+    layout: "/admin",
+    path: "news",
+    icon: <MdChatBubble className="h-6 w-6" />,
+    component: <CityNews />,
+    children: [
+      {
+        name: "Manage News",
+        layout: "/admin",
+        path: "news/add",
+        component: <AddNews />,
+      },
+      {
+        name: "Edit News ",
+        layout: "/admin",
+        path: "news/add/:id",
+        component: <AddNews />,
+      },
+    ],
+  },
 ];
 
 export default routes;
