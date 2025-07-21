@@ -1,41 +1,32 @@
 import React from "react";
 
-function useOutsideAlerter(ref, setX) {
+function useOutsideAlerter(ref, isOpen, setIsOpen) {
   React.useEffect(() => {
-    /**
-     * Alert if clicked on outside of element
-     */
     function handleClickOutside(event) {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setX(false);
+      if (ref.current && !ref.current.contains(event.target) && isOpen) {
+        setIsOpen(false);
       }
     }
-    // Bind the event listener
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      // Unbind the event listener on clean up
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [ref, setX]);
+  }, [ref, isOpen, setIsOpen]);
 }
 
-const Dropdown = (props) => {
-  const { button, children, classNames, animation } = props;
+const Dropdown = ({ button, children, classNames, animation, isOpen, setIsOpen }) => {
   const wrapperRef = React.useRef(null);
-  const [openWrapper, setOpenWrapper] = React.useState(false);
-  useOutsideAlerter(wrapperRef, setOpenWrapper);
+  useOutsideAlerter(wrapperRef, isOpen, setIsOpen);
 
   return (
     <div ref={wrapperRef} className="relative flex">
-      <div className="flex" onMouseDown={() => setOpenWrapper(!openWrapper)}>
+      <div className="flex" onClick={() => setIsOpen(!isOpen)}>
         {button}
       </div>
       <div
         className={`${classNames} absolute z-10 ${
-          animation
-            ? animation
-            : "origin-top-right transition-all duration-300 ease-in-out"
-        } ${openWrapper ? "scale-100" : "scale-0"}`}
+          animation ? animation : "origin-top-right transition-all duration-300 ease-in-out"
+        } ${isOpen ? "scale-100" : "scale-0"}`}
       >
         {children}
       </div>
