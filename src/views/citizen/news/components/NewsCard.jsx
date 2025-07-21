@@ -1,36 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
+import newsData from "./newsData";
 export default function NewsCard() {
   const navigate = useNavigate();
-
-  const newsData = [
-    {
-      title: "AI Breakthrough in Healthcare",
-      description:
-        "AI models are helping diagnose diseases faster and more accurately than ever before.",
-      image: "https://source.unsplash.com/400x250/?healthcare,technology",
-      content:
-        "AI is transforming the medical field by enabling rapid diagnostics, improving treatment outcomes, and offering personalized healthcare solutions.",
-    },
-    {
-      title: "Climate Change Impacts",
-      description:
-        "Record temperatures and sea-level rise are putting pressure on global leaders to act.",
-      image: "https://source.unsplash.com/400x250/?climate,earth",
-      content:
-        "The planet is experiencing severe climate events due to global warming. Governments are urged to act swiftly to mitigate carbon emissions and invest in sustainability.",
-    },
-    {
-      title: "SpaceX Launches New Satellite",
-      description:
-        "Elon Musk's SpaceX successfully launched a new satellite to boost global internet.",
-      image: "https://source.unsplash.com/400x250/?spacex,rocket",
-      content:
-        "SpaceX’s Starlink satellite network continues expanding, aiming to provide high-speed internet access to underserved regions across the globe.",
-    },
-  ];
-
+    
+  console.log(newsData);
   return (
     <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-800  dark:text-white">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
@@ -48,7 +22,7 @@ export default function NewsCard() {
               <h2 className="mb-2 text-lg font-semibold text-gray-800  dark:text-white">
                 {news.title}
               </h2>
-              <p className="mb-4 text-sm text-gray-600">{news.description}</p>
+              {/* <p className="mb-4 text-sm text-gray-600">{news.description}</p> */}
               <button
                 onClick={() => {
                   navigate(
