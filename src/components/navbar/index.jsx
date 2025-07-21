@@ -6,6 +6,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import avatar from "assets/img/avatars/avatar4.png";
 import { motion } from "framer-motion";
+import ProfileDropdown from "../dropdown/ProfileDropdown";
 
 const Navbar = (props) => {
   const { onOpenSidenav, brandText } = props;
@@ -151,24 +152,39 @@ const Navbar = (props) => {
           )}
         </div>
 
-        <Dropdown
-          button={<img className="h-10 w-10 rounded-full" src={avatar} alt="Profile" />}
+       <ProfileDropdown
+          button={
+            <img
+              className="h-10 w-10 rounded-full"
+              src={avatar}
+              alt="Elon Musk"
+            />
+          }
           children={
             <div className="flex w-56 flex-col justify-start rounded-[20px] bg-white bg-cover bg-no-repeat shadow-xl shadow-shadow-500 dark:!bg-navy-700 dark:text-white dark:shadow-none">
               <div className="p-4">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-bold text-navy-700 dark:text-white">👋 Hey, Adela</p>
+                  <p className="text-sm font-bold text-navy-700 dark:text-white">
+                    👋 Hey, Adela
+                  </p>{" "}
                 </div>
               </div>
-              <div className="h-px w-full bg-gray-200 dark:bg-white/20" />
+              <div className="h-px w-full bg-gray-200 dark:bg-white/20 " />
+
               <div className="flex flex-col p-4">
-                <Link
-                  to="/logout"
-                  onClick={() => setIsNotifOpen(false)}
+                <a
+                  href=" "
+                  className="text-sm text-gray-800 dark:text-white hover:dark:text-white"
+                >
+                  Profile
+                </a>
+                
+                <a
+                  href=" "
                   className="mt-3 text-sm font-medium text-red-500 hover:text-red-500 transition duration-150 ease-out hover:ease-in"
                 >
                   Log Out
-                </Link>
+                </a>
               </div>
             </div>
           }
