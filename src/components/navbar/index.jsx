@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 // import { BsArrowBarUp } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
-import brandIcon from "../../assets/img/navbar/brand-logo.png"
+// import brandIcon from "../../assets/img/navbar/brand-logo.png"
 // import {
 //   IoMdNotificationsOutline,
 //   IoMdInformationCircleOutline,
@@ -68,7 +68,7 @@ const Navbar = (props) => {
           <input
             type="text"
             placeholder="Search..."
-            class="block h-full w-full rounded-full bg-lightPrimary text-sm font-medium text-navy-700 outline-none placeholder:!text-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder:!text-white sm:w-fit"
+            className="block h-full w-full rounded-full bg-lightPrimary text-sm font-medium text-navy-700 outline-none placeholder:!text-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder:!text-white sm:w-fit"
           />
         </div>
         <span
