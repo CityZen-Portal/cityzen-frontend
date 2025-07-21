@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const FeedbackForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "Hariharan",
+    name: "Jeghan",
     complaintId: "7689",
     complaint: "Water Supply Issue",
     comments: "",

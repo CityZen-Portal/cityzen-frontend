@@ -5,33 +5,124 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function ComplaintForm() {
   const navigate = useNavigate();
-  const [location, setLocation] = useState('');
-  const [address, setAddress] = useState('');
-  const [wardNumber, setWardNumber] = useState('');
-  const [pincode, setPincode] = useState('');
+  
   const [complaintType, setComplaintType] = useState('');
   const [others, setOthers] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState(null);
+  const [file, setFile] = useState(null);
+
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [taluk, setTaluk] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [address, setAddress] = useState('');
+  const [wardNumber, setWardNumber] = useState('');
+
+  const setLocationDetails = (address) => {
+    const details = address.split(",");
+
+    if(details.length <= 5){
+      toast.error("Received unexpected response", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+      return;
+    }
+
+    const response_country = details[details.length - 1].trim();
+    const response_pincode = details[details.length - 2].trim();
+    const response_state = details[details.length - 3].trim();
+    const response_district = details[details.length - 4].trim();
+    const response_taluk = details[details.length - 5].trim();
+
+    const response_localAddress = details.slice(0, details.length - 5).join(",").trim();
+
+    setAddress(response_localAddress)
+    setTaluk(response_taluk)
+    setDistrict(response_district)
+    setState(response_state)
+    setPincode(Number(response_pincode))
+  };
+
+  const options = {method: 'GET', headers: {accept: 'application/json'}};
+  const BASE_URL = 'https://us1.locationiq.com/v1/reverse'
+
+  const getLocation = async () => {
+    const LOCATIONIQ_API_KEY = "pk.fa68c2e9928bf498051000f918028096";
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          
+          const response = await fetch(`${BASE_URL}?key=${LOCATIONIQ_API_KEY}&lat=${latitude}&lon=${longitude}&format=json`, options); // https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=8eb4c196fb814a5eb2a97f5ba78b9b21&format=json
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+          const data = await response.json();
+          console.log(data); // Entire response
+          const fullAddress = data.display_name;
+          setLocationDetails(fullAddress); // Setting the Location details
+        } catch (error) {
+          console.error("Error fetching location:", error);
+          toast.error("Unable to fetch Location", {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored',
+          });
+        }
+      }, (err) => {
+        toast.error("Failed to get geolocation:" + err.message, {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored',
+        });
+      });
+    } else {
+      
+      toast.error("Geolocation is not supported by this browser", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!location.trim()) {
-      toast.error('Please enter a location');
-      return;
-    }
     if (!address.trim()) {
       toast.error('Please enter an address');
       return;
     }
-    if (wardNumber && !/^[0-9]+$/.test(wardNumber)) {
-      toast.error('Ward number must be numeric');
+    if (!taluk.trim()) {
+      toast.error('Please enter taluk');
+      return;
+    }
+    if (!district.trim()) {
+      toast.error('Please enter district');
+      return;
+    }
+    if (!state.trim()) {
+      toast.error('Please enter state');
+      return;
+    }
+    if(!pincode){
+      toast.error('Please enter pincode');
       return;
     }
     if (!/^[0-9]{6}$/.test(pincode)) {
       toast.error('Please enter a valid 6-digit pincode');
+      return;
+    }
+    if(!wardNumber){
+      toast.error('Please enter Ward Number');
+      return;
+    }
+    if (!/^[0-9]+$/.test(wardNumber)) {
+      toast.error('Ward number must be numeric');
       return;
     }
     if (!complaintType.trim()) {
@@ -46,33 +137,23 @@ function ComplaintForm() {
       toast.error('Please enter a description');
       return;
     }
-    if (imageFile && imageFile.type !== 'application/pdf') {
+    if (file && file.type !== 'application/pdf') {
       toast.error('Only PDF files are allowed.');
       return;
     }
 
-    console.log('Submitting complaint:', {
-      location,
-      address,
-      wardNumber,
-      pincode,
-      complaintType,
-      others,
-      title,
-      description,
-      imageFile,
-    });
-
     // Clear form
-    setLocation('');
-    setAddress('');
-    setWardNumber('');
-    setPincode('');
-    setComplaintType('');
-    setOthers('');
-    setTitle('');
-    setDescription('');
-    setImageFile(null);
+    // setAddress('');
+    // setTaluk('');
+    // setDistrict('');
+    // setState('');
+    // setPincode('');
+    // setWardNumber('');
+    // setComplaintType('');
+    // setOthers('');
+    // setTitle('');
+    // setDescription('');
+    // setFile(null);
 
     toast.success('Complaint submitted successfully!', {
       position: 'top-right',
@@ -83,23 +164,13 @@ function ComplaintForm() {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-10 px-4 sm:px-6 lg:px-8">
-      <div className="bg-gray-50 dark:bg-gray-900 max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
+    <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
+      <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
         <h1 className="font-bold text-center text-lg sm:text-xl lg:text-2xl mb-4 sm:mb-6">Complaint Form</h1>
         <form className="space-y-3 sm:space-y-4 lg:space-y-6" onSubmit={handleSubmit}>
           <h2 className="font-bold text-center text-base sm:text-lg lg:text-xl">Location & Address</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-            <div>
-              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Location</label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-              />
-            </div>
-
             <div>
               <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Address</label>
               <input
@@ -109,19 +180,37 @@ function ComplaintForm() {
                 className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
             <div>
-              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Ward Number</label>
+              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Taluk</label>
               <input
                 type="text"
-                value={wardNumber}
-                onChange={(e) => setWardNumber(e.target.value)}
+                value={taluk}
+                onChange={(e) => setTaluk(e.target.value)}
                 className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               />
             </div>
 
+            <div>
+              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">District</label>
+              <input
+                type="text"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">State</label>
+              <input
+                type="text"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+              />
+            </div>
+            
             <div>
               <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Pincode</label>
               <input
@@ -131,6 +220,25 @@ function ComplaintForm() {
                 className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               />
             </div>
+            <div>
+              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Ward Number</label>
+              <input
+                type="text"
+                value={wardNumber}
+                onChange={(e) => setWardNumber(e.target.value)}
+                className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className=' w-full flex align-middle justify-center items-center col-span-2'>
+            <button 
+              type="button" 
+              className="bg-blue-600 text-white font-bold px-9 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
+              onClick={() => getLocation()}
+            >
+              Get Location
+            </button>
           </div>
 
           <h2 className="font-bold text-center pt-2 sm:pt-4 text-base sm:text-lg lg:text-xl">Complaint Details</h2>
@@ -198,11 +306,11 @@ function ComplaintForm() {
             <input
               type="file"
               accept="application/pdf"
-              onChange={(e) => setImageFile(e.target.files[0])}
+              onChange={(e) => setFile(e.target.files[0])}
               className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-navy-500"
             />
-            {imageFile && (
-              <p className="text-xs text-green-600 mt-1">Selected: {imageFile.name}</p>
+            {file && (
+              <p className="text-xs text-green-600 mt-1">Selected: {file.name}</p>
             )}
           </div>
 
