@@ -22,14 +22,14 @@ function InputField(props) {
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border bg-white/0 p-3 text-sm outline-none ${
+        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border bg-white/0 p-3 text-sm outline-none focus:ring-2 dark:bg-navy-900 ${
           disabled === true
             ? "!border-none !bg-gray-100 dark:!bg-white/5 dark:placeholder:!text-[rgba(255,255,255,0.15)]"
             : state === "error"
-            ? "border-red-500 text-black placeholder:text-red-500 dark:!border-red-500 dark:!text-white dark:placeholder:!text-red-500"
+            ? "border-red-500 text-black dark:!border-red-500 dark:!text-white focus:ring-red-300"
             : state === "success"
-            ? "border-green-500 text-black placeholder:text-green-500 dark:!border-green-400 dark:!text-white dark:placeholder:!text-green-400"
-            : "border-gray-200 dark:!border-white/10 dark:text-white"
+            ? "border-green-500 text-black dark:!border-green-400 dark:!text-white focus:ring-green-300"
+            : "border-gray-200 dark:!border-white/10 dark:text-white focus:ring-blue-300"
         }`}
       />
     </div>

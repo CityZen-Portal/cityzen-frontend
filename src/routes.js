@@ -38,7 +38,7 @@ import ViewNews from "views/staff/news/components/ViewNews";
 import NewsUpdate from "views/citizen/news/components/NewsUpdate";
 
 // Auth Views
-import SignIn from "views/auth/SignIn";
+import SignIn from "views/auth/pages/SignIn";
 import SignupCitizen from "views/auth/SignupCitizen";
 import ResetPassword from "views/auth/ResetPassword";
 
@@ -156,7 +156,7 @@ const routes = [
   {
     name: "Admin Dashboard",
     layout: "/admin",
-    path: "default",
+    path: "dashboard",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <AdminDashboard />,
   },
