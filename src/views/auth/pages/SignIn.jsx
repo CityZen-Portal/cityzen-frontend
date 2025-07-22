@@ -89,16 +89,16 @@ export default function SignIn() {
         email,
         password,
       });
-
-      const token = response.data.token;
-      const roles = response.data.roles;
+      
+      const token = response.data.data.token;
+      const roles = response.data.data.roles[0];
 
       localStorage.setItem("token", token);
-      localStorage.setItem("username", response.data.username);
-      localStorage.setItem("email", response.data.email);
+      localStorage.setItem("username", response.data.data.username);
+      localStorage.setItem("email", response.data.data.email);
       localStorage.setItem("role", JSON.stringify(roles));
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
+      
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 1000,
