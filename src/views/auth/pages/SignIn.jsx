@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import Footer from "components/footer/FooterAuthDefault";
 import axios from "axios";
+import { ProgressCircleCircle } from "@chakra-ui/react";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -15,6 +16,9 @@ export default function SignIn() {
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const apiurl = process.env.REACT_APP_API_UMS_URL;
+  console.log(apiurl);
 
   const [userRole, setUserRole] = useState("");
 
@@ -45,81 +49,79 @@ export default function SignIn() {
     });
   };
 
-
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
-   console.log("Form submitted");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Form submitted");
 
-   const passwordRegex = /^.{4,}$/;
+    const passwordRegex = /^.{4,}$/;
 
-   if (!validateEmail(email)) {
-     toast.error("Enter a valid email", {
-       position: "top-right",
-       autoClose: 3000,
-       theme: "colored",
-     });
-     setEmailState("error");
-     return;
-   } else {
-     setEmailState("success");
-   }
+    if (!validateEmail(email)) {
+      toast.error("Enter a valid email", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+      setEmailState("error");
+      return;
+    } else {
+      setEmailState("success");
+    }
 
-   if (!passwordRegex.test(password)) {
-     toast.error("Enter a strong password", {
-       position: "top-right",
-       autoClose: 3000,
-       theme: "colored",
-     });
-     setPasswordState("error");
-     return;
-   } else {
-     setPasswordState("success");
-   }
+    if (!passwordRegex.test(password)) {
+      toast.error("Enter a strong password", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+      setPasswordState("error");
+      return;
+    } else {
+      setPasswordState("success");
+    }
 
-   try {
-     const response = await axios.post("http://localhost:8080/api/auth/login", {
-       email,
-       password,
-     });
+    try {
+      const response = await axios.post(`${apiurl}/api/auth/login`, {
+        email,
+        password,
+      });
 
-     const token = response.data.token;
-     const roles = response.data.roles;
+      const token = response.data.token;
+      const roles = response.data.roles;
 
-     localStorage.setItem("token", token);
-     localStorage.setItem("username", response.data.username);
-     localStorage.setItem("email", response.data.email);
-     localStorage.setItem("role", JSON.stringify(roles));
-     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", response.data.username);
+      localStorage.setItem("email", response.data.email);
+      localStorage.setItem("role", JSON.stringify(roles));
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-     toast.success("Login successful", {
-       position: "top-right",
-       autoClose: 1000,
-       theme: "colored",
-       onClose: () => {
-         if (roles.includes("ROLE_STAFF")) {
-           navigate("/staff/dashboard");
-         } else if (roles.includes("ROLE_USER")) {
-           navigate("/citizen/dashboard");
-         } else {
-           navigate("/admin/dashboard");
-         }
-       },
-     });
-   } catch (error) {
-     console.error(error);
-     toast.error("Invalid credentials or server error", {
-       position: "top-right",
-       autoClose: 3000,
-       theme: "colored",
-     });
-   }
- };
-
+      toast.success("Login successful", {
+        position: "top-right",
+        autoClose: 1000,
+        theme: "colored",
+        onClose: () => {
+          if (roles.includes("ROLE_STAFF")) {
+            navigate("/staff/dashboard");
+          } else if (roles.includes("ROLE_USER")) {
+            navigate("/citizen/dashboard");
+          } else {
+            navigate("/admin/dashboard");
+          }
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Invalid credentials or server error", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+    }
+  };
 
   return (
     <div
