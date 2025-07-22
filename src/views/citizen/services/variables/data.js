@@ -1,6 +1,6 @@
 
 
-import fire from "../../../../assets/img/service/fire.jpeg";
+import fire from "../../../../assets/img/service/fire1.jpg";
 import electrical from "../../../../assets/img/service/electrical.jpeg";
 import water from "../../../../assets/img/service/water.jpeg";
 import waste from "../../../../assets/img/service/waste.jpg";
