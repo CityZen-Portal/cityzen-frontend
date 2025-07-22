@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PencilSquareIcon, EyeIcon, TrashIcon } from '@heroicons/react/24/solid';
-import Water from "../../../../assets/img/service/water.jpeg"
-import Electricity from "../../../../assets/img/service/electrical.jpeg"
+import Water from "../../../../assets/img/service/water.jpeg";
+import Electricity from "../../../../assets/img/service/electrical.jpeg";
+
 const ManageServices = () => {
   const navigate = useNavigate();
 
@@ -28,20 +29,8 @@ const ManageServices = () => {
 
   useEffect(() => {
     const storedServices = [
-      {
-        id: 1,
-        category: 'Utilities',
-        serviceName: 'Water Supply',
-        description: 'Monthly water service',
-        image: Water
-      },
-      {
-        id: 2,
-        category: 'Utilities',
-        serviceName: 'Electricity',
-        description: '24x7 power supply',
-        image: Electricity
-      }
+      { id: 1, category: 'Utilities', serviceName: 'Water Supply', description: 'Monthly water service', image: Water },
+      { id: 2, category: 'Utilities', serviceName: 'Electricity', description: '24x7 power supply', image: Electricity }
     ];
     setServices(storedServices);
   }, []);
@@ -60,18 +49,17 @@ const ManageServices = () => {
     );
   };
 
+  const resetForm = () => {
+    setFormData({ category: 'Utilities', serviceName: 'Water Supply', description: '', image: '' });
+    setEditServiceId(null);
+    setAddServices(false);
+    setError('');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!formData.description || !formData.image) {
-      setError('All fields including image are required.');
-      return;
-    }
-
-    if (isDuplicate()) {
-      setError('This service already exists.');
-      return;
-    }
+    if (!formData.description || !formData.image) return setError('All fields including image are required.');
+    if (isDuplicate()) return setError('This service already exists.');
 
     if (editServiceId !== null) {
       setServices(prev =>
@@ -80,87 +68,72 @@ const ManageServices = () => {
         )
       );
     } else {
-      const newService = {
-        id: Date.now(),
-        ...formData
-      };
-      setServices(prev => [...prev, newService]);
+      setServices(prev => [...prev, { id: Date.now(), ...formData }]);
     }
 
-    setFormData({ category: 'Utilities', serviceName: 'Water Supply', description: '', image: '' });
-    setAddServices(false);
-    setEditServiceId(null);
-    setError('');
+    resetForm();
   };
 
-  const handleDelete = (id) => {
-    setServices(prev => prev.filter(service => service.id !== id));
-  };
+  const handleDelete = (id) => setServices(prev => prev.filter(service => service.id !== id));
 
   const handleEdit = (service) => {
-    setFormData({
-      category: Object.keys(serviceCategories).find(category =>
-        serviceCategories[category].includes(service.serviceName)
-      ),
-      serviceName: service.serviceName,
-      description: service.description,
-      image: service.image
-    });
+    const category = Object.keys(serviceCategories).find(cat => serviceCategories[cat].includes(service.serviceName));
+    setFormData({ category, serviceName: service.serviceName, description: service.description, image: service.image });
     setEditServiceId(service.id);
     setAddServices(true);
     setError('');
   };
 
   return (
-    <div className="space-y-6 dark:bg-navy-700">
-      <div className="bg-white p-6 rounded-xl border border-gray-300 shadow-sm">
+    <div className="space-y-6 mt-8">
+      {/* Header */}
+      <div className="bg-white dark:bg-navy-800 p-6 rounded-xl border border-gray-300 dark:border-navy-600 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div>
             <button
               onClick={() => navigate('/admin/services')}
-              className="text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1 mb-2"
+              className="text-blue-500 hover:text-blue-600 dark:text-blue-300 transition-colors flex items-center gap-1 mb-2"
             >
               <span>←</span> Back
             </button>
-            <h2 className="text-2xl font-bold text-gray-800">Manage Services</h2>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manage Services</h2>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                setAddServices(!addServices);
-                setFormData({ category: 'Utilities', serviceName: 'Water Supply', description: '', image: '' });
-                setEditServiceId(null);
-                setError('');
-              }}
-              className={`px-6 py-2 rounded-lg shadow-sm transition-colors ${addServices ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white hover:bg-purple-600'}`}
-            >
-              {editServiceId !== null ? 'Edit Service' : 'Add Service'}
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              setAddServices(!addServices);
+              resetForm();
+            }}
+            className={`px-6 py-2 rounded-lg transition-colors shadow-sm ${
+              addServices ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white hover:bg-purple-600'
+            }`}
+          >
+            {editServiceId !== null ? 'Edit Service' : 'Add Service'}
+          </button>
         </div>
       </div>
 
+      {/* Form */}
       {addServices && (
-        <div className="bg-white p-6 rounded-xl border border-gray-300 shadow-sm">
+        <div className="bg-white dark:bg-navy-800 p-6 rounded-xl border border-gray-300 dark:border-navy-600 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && <p className="text-red-500 font-medium">{error}</p>}
 
+            {/* Category */}
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Service Category</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Service Category</label>
               <select
-                id="category"
                 name="category"
                 required
                 value={formData.category}
                 onChange={(e) => {
-                  const selectedCategory = e.target.value;
+                  const category = e.target.value;
                   setFormData(prev => ({
                     ...prev,
-                    category: selectedCategory,
-                    serviceName: serviceCategories[selectedCategory][0]
+                    category,
+                    serviceName: serviceCategories[category][0]
                   }));
                 }}
-                className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full border border-gray-300 dark:border-navy-600 dark:bg-navy-700 dark:text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
                 {Object.keys(serviceCategories).map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -168,15 +141,15 @@ const ManageServices = () => {
               </select>
             </div>
 
+            {/* Service Name */}
             <div>
-              <label htmlFor="serviceName" className="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Service Name</label>
               <select
-                id="serviceName"
                 name="serviceName"
                 required
                 value={formData.serviceName}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full border border-gray-300 dark:border-navy-600 dark:bg-navy-700 dark:text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
                 {serviceCategories[formData.category]?.map(service => (
                   <option key={service} value={service}>{service}</option>
@@ -184,24 +157,23 @@ const ManageServices = () => {
               </select>
             </div>
 
+            {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description</label>
               <textarea
-                id="description"
                 name="description"
                 required
                 value={formData.description}
                 onChange={handleInputChange}
                 rows="3"
-                className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full border border-gray-300 dark:border-navy-600 dark:bg-navy-700 dark:text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
               />
             </div>
 
+            {/* Image Upload */}
             <div>
-              <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">Service Image</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Service Image</label>
               <input
-                id="image"
-                name="image"
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
@@ -214,26 +186,23 @@ const ManageServices = () => {
                     reader.readAsDataURL(file);
                   }
                 }}
-                className="w-full border border-gray-300 p-2 rounded-lg"
+                className="w-full border border-gray-300 dark:border-navy-600 dark:bg-navy-700 dark:text-white p-2 rounded-lg"
               />
             </div>
 
+            {/* Image Preview */}
             {formData.image && (
               <div className="mt-2">
                 <img src={formData.image} alt="Preview" className="h-20 rounded-md object-cover" />
               </div>
             )}
 
+            {/* Buttons */}
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setAddServices(false);
-                  setFormData({ category: 'Utilities', serviceName: 'Water Supply', description: '', image: '' });
-                  setEditServiceId(null);
-                  setError('');
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                onClick={resetForm}
+                className="px-4 py-2 border border-gray-300 dark:border-navy-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-navy-700"
               >
                 Cancel
               </button>
@@ -248,60 +217,51 @@ const ManageServices = () => {
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-xl border border-gray-300 shadow-sm">
-        <h3 className="text-xl font-semibold mb-6 text-purple-700">Existing Services</h3>
+      {/* Service List */}
+      <div className="bg-white dark:bg-navy-800 p-6 rounded-xl border border-gray-300 dark:border-navy-600 shadow-sm">
+        <h3 className="text-xl font-semibold mb-6 text-purple-700 dark:text-purple-400">Existing Services</h3>
         {services.length === 0 ? (
-          <p className="text-gray-500 text-center">No services added yet.</p>
+          <p className="text-gray-500 dark:text-gray-300 text-center">No services added yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map(service => (
-              <div key={service.id} className="bg-gradient-to-br from-white to-purple-50 border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-5">
+              <div key={service.id} className="bg-gradient-to-br from-white to-purple-50 dark:from-navy-700 dark:to-navy-800 border border-gray-200 dark:border-navy-600 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-800">{service.serviceName}</h4>
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white">{service.serviceName}</h4>
                     <p className="text-sm text-purple-600 font-medium mt-1">{service.category}</p>
                   </div>
                   <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-purple-100 text-purple-600 text-sm font-bold">
                     {service.serviceName.charAt(0)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-3 line-clamp-3">{service.description}</p>
-
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-3 line-clamp-3">{service.description}</p>
                 <div className="flex justify-end items-center gap-2 mt-4">
                   {service.image && (
-                    <button
-                      onClick={() => setPreviewImage(service.image)}
-                      className="text-purple-600 hover:text-purple-800"
-                    >
+                    <button onClick={() => setPreviewImage(service.image)} className="text-purple-600 hover:text-purple-800 dark:hover:text-purple-400">
                       <EyeIcon className="w-5 h-5" />
                     </button>
                   )}
-                  <button
-                    onClick={() => handleEdit(service)}
-                    className="text-yellow-500 hover:text-yellow-600"
-                  >
+                  <button onClick={() => handleEdit(service)} className="text-yellow-500 hover:text-yellow-600">
                     <PencilSquareIcon className="w-4 h-4" />
                   </button>
-                  <button
-                    onClick={() => handleDelete(service.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
+                  <button onClick={() => handleDelete(service.id)} className="text-red-600 hover:text-red-800">
                     <TrashIcon className="w-4 h-4" />
                   </button>
                 </div>
-
               </div>
             ))}
           </div>
         )}
       </div>
 
+      {/* Image Modal */}
       {previewImage && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-4 shadow-lg max-w-2xl w-full relative">
+          <div className="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg max-w-2xl w-full relative">
             <button
               onClick={() => setPreviewImage(null)}
-              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-lg"
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-lg"
             >
               ✕
             </button>
