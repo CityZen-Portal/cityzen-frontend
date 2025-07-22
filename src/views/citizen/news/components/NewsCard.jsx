@@ -6,12 +6,12 @@ export default function NewsCard() {
     
   console.log(newsData);
   return (
-    <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-800  dark:text-white">
+    <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-700  dark:text-white">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
         {newsData.map((news, index) => (
           <div
             key={index}
-            className="overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-105 dark:bg-navy-700 dark:text-white"
+            className="overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-105 dark:bg-navy-900 dark:text-white"
           >
             <img
               src={news.image}

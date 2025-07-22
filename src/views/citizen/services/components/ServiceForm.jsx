@@ -8,7 +8,7 @@ function ServiceForm() {
     <>
       <form>
         <div class="flex items-center justify-center pt-12 md:p-12">
-          <div class="mx-auto w-full max-w-[700px] bg-white dark:border-navy-800 dark:bg-navy-700">
+          <div class="mx-auto w-full max-w-[700px] bg-white dark:border-navy-700 dark:bg-navy-700">
             <div>
               <div className="flex items-center justify-between px-4 pt-4">
                 <button
