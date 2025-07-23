@@ -318,7 +318,7 @@ export default function SignUp() {
   return (
     <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
                     dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
-                    transition-all duration-300">
+                    transition-all duration-300 overflow-y-auto">
       
       {/* Toast Container */}
       <ToastContainer
@@ -413,11 +413,11 @@ export default function SignUp() {
       <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-blue-300 rounded-full filter blur-2xl opacity-25"></div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4 w-full">
         <div className="relative z-10 w-full max-w-2xl p-10 rounded-2xl shadow-2xl 
                         border border-blue-100 dark:border-gray-700 
                         bg-white/80 dark:bg-gray-700/90 backdrop-blur-md 
-                        transition-all duration-300 overflow-y-auto max-h-[90vh]">
+                        transition-all duration-300 my-8">
 
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">
             Create Citizen Account
