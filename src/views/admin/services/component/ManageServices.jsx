@@ -15,6 +15,17 @@ const ManageServices = () => {
     'Community Services': ['Public Parks & Recreation', 'Fire and Emergency Services', 'Community Welfare Services']
   };
 
+  const getDefaultImage = (serviceName) => {
+    switch (serviceName) {
+      case 'Water Supply':
+        return Water;
+      case 'Electricity':
+        return Electricity;
+      default:
+        return '';
+    }
+  };
+
   const [services, setServices] = useState([]);
   const [addServices, setAddServices] = useState(false);
   const [editServiceId, setEditServiceId] = useState(null);
@@ -23,7 +34,7 @@ const ManageServices = () => {
     category: 'Utilities',
     serviceName: 'Water Supply',
     description: '',
-    image: ''
+    image: getDefaultImage('Water Supply')
   });
   const [error, setError] = useState('');
 
@@ -50,15 +61,28 @@ const ManageServices = () => {
   };
 
   const resetForm = () => {
-    setFormData({ category: 'Utilities', serviceName: 'Water Supply', description: '', image: '' });
+    setFormData({ category: 'Utilities', serviceName: 'Water Supply', description: '', image: getDefaultImage('Water Supply') });
     setEditServiceId(null);
     setAddServices(false);
     setError('');
   };
 
+  const openAddForm = () => {
+    setAddServices(true);
+    setEditServiceId(null);
+    setFormData({
+      category: 'Utilities',
+      serviceName: 'Water Supply',
+      description: '',
+      image: getDefaultImage('Water Supply')
+    });
+    setError('');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.description || !formData.image) return setError('All fields including image are required.');
+    if (!formData.description) return setError('Description is required.');
+    if (!formData.image) formData.image = getDefaultImage(formData.serviceName);
     if (isDuplicate()) return setError('This service already exists.');
 
     if (editServiceId !== null) {
@@ -86,7 +110,6 @@ const ManageServices = () => {
 
   return (
     <div className="space-y-6 mt-8">
-      {/* Header */}
       <div className="bg-white dark:bg-navy-800 p-6 rounded-xl border border-gray-300 dark:border-navy-600 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -99,10 +122,7 @@ const ManageServices = () => {
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manage Services</h2>
           </div>
           <button
-            onClick={() => {
-              setAddServices(!addServices);
-              resetForm();
-            }}
+            onClick={() => addServices ? resetForm() : openAddForm()}
             className={`px-6 py-2 rounded-lg transition-colors shadow-sm ${
               addServices ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white hover:bg-purple-600'
             }`}
@@ -112,13 +132,11 @@ const ManageServices = () => {
         </div>
       </div>
 
-      {/* Form */}
       {addServices && (
         <div className="bg-white dark:bg-navy-800 p-6 rounded-xl border border-gray-300 dark:border-navy-600 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && <p className="text-red-500 font-medium">{error}</p>}
 
-            {/* Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Service Category</label>
               <select
@@ -130,7 +148,8 @@ const ManageServices = () => {
                   setFormData(prev => ({
                     ...prev,
                     category,
-                    serviceName: serviceCategories[category][0]
+                    serviceName: serviceCategories[category][0],
+                    image: getDefaultImage(serviceCategories[category][0])
                   }));
                 }}
                 className="w-full border border-gray-300 dark:border-navy-600 dark:bg-navy-700 dark:text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -141,14 +160,20 @@ const ManageServices = () => {
               </select>
             </div>
 
-            {/* Service Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Service Name</label>
               <select
                 name="serviceName"
                 required
                 value={formData.serviceName}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const name = e.target.value;
+                  setFormData(prev => ({
+                    ...prev,
+                    serviceName: name,
+                    image: getDefaultImage(name)
+                  }));
+                }}
                 className="w-full border border-gray-300 dark:border-navy-600 dark:bg-navy-700 dark:text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
                 {serviceCategories[formData.category]?.map(service => (
@@ -157,7 +182,6 @@ const ManageServices = () => {
               </select>
             </div>
 
-            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description</label>
               <textarea
@@ -170,7 +194,6 @@ const ManageServices = () => {
               />
             </div>
 
-            {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Service Image</label>
               <input
@@ -190,14 +213,12 @@ const ManageServices = () => {
               />
             </div>
 
-            {/* Image Preview */}
             {formData.image && (
               <div className="mt-2">
                 <img src={formData.image} alt="Preview" className="h-20 rounded-md object-cover" />
               </div>
             )}
 
-            {/* Buttons */}
             <div className="flex justify-end gap-3">
               <button
                 type="button"
@@ -217,7 +238,6 @@ const ManageServices = () => {
         </div>
       )}
 
-      {/* Service List */}
       <div className="bg-white dark:bg-navy-800 p-6 rounded-xl border border-gray-300 dark:border-navy-600 shadow-sm">
         <h3 className="text-xl font-semibold mb-6 text-purple-700 dark:text-purple-400">Existing Services</h3>
         {services.length === 0 ? (
@@ -255,7 +275,6 @@ const ManageServices = () => {
         )}
       </div>
 
-      {/* Image Modal */}
       {previewImage && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg max-w-2xl w-full relative">
