@@ -5,9 +5,7 @@ const Service = () => {
   return (
     <>
    <Servicelist/>
-   <div className='bg-white'>
    <CitizenServiceRequests currentCitizenName="John Doe" />
-</div>
     </>
   )
 }
