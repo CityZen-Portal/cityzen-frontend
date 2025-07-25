@@ -6,7 +6,6 @@ const Service = () => {
     <>
    <Servicelist/>
    <CitizenServiceRequests currentCitizenName="John Doe" />
-
     </>
   )
 }
