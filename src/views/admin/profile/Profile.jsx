@@ -10,9 +10,9 @@ import {
   FaVenus,
   FaMars,
   FaUser,
+  FaTrashAlt, FaTint, FaLightbulb
 } from "react-icons/fa";
-import { MdDateRange } from "react-icons/md";
-
+import { MdDateRange,MdOutlinePendingActions } from "react-icons/md";
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(avatar);
@@ -296,6 +296,7 @@ const Profile = () => {
                   <span>{`XXXX-XXXX-${aadhaar.slice(-4)}`}</span>
                 </div>
               </div>
+
             </div>
 
             {isEditing && (
@@ -309,7 +310,43 @@ const Profile = () => {
           </div>
         </div>
       </div>
+    <div className="p-4 pt-0 space-y-6">
+  {/* Bookings Card */}
+  <div className="bg-white dark:bg-navy-800 rounded-xl shadow-md p-6 space-y-4">
+    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">Previous Bookings</h3>
+    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Your booking history is shown here.</p>
+    <ul className="space-y-3">
+      <li className="w-full p-4 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center gap-3 text-sm shadow-md">
+        <FaTrashAlt className="text-gray-700" />
+        <span>Garbage Pickup – 15 June 2025 – <span className="font-medium text-yellow-600">Scheduled</span></span>
+      </li>
+      <li className="w-full p-4 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center gap-3 text-sm shadow-md">
+        <FaTint className="text-gray-700" />
+        <span>Water Tanker – 3 May 2025 – <span className="font-medium text-green-600">Completed</span></span>
+      </li>
+    </ul>
+  </div>
+
+  {/* Complaints Card */}
+  <div className="bg-white dark:bg-navy-800 rounded-xl shadow-md p-6 space-y-4">
+    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">Previous Complaints</h3>
+    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">All your submitted complaints appear here.</p>
+    <ul className="space-y-3">
+      <li className="w-full p-4 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center gap-3 text-sm shadow-md">
+        <FaLightbulb className="text-gray-700" />
+        <span>Street light not working – 12 April 2025 – <span className="font-medium text-green-600">Resolved</span></span>
+      </li>
+      <li className="w-full p-4 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center gap-3 text-sm shadow-md">
+        <FaTrashAlt className="text-gray-700" />
+        <span>Garbage not collected – 5 March 2025 – <span className="font-medium text-yellow-600">Pending</span></span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
     </div>
+  
   );
 };
 
