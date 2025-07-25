@@ -22,6 +22,10 @@ function ViewSchedule() {
             onClick={() => navigate("/admin/services")}
             className="text-white hover:text-gray-200 transition-colors flex items-center gap-1 mb-2"
           >
+            <span>←</span> Back
+          </button>
+          <h2 className="text-white text-lg font-semibold">Staff Schedule</h2>
+        </div>
 
       <div className="bg-white dark:bg-navy-800 shadow rounded-lg">
         <div className="bg-blue-600 dark:bg-navy-700 p-4 rounded-t-lg">
@@ -72,6 +76,7 @@ function ViewSchedule() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
