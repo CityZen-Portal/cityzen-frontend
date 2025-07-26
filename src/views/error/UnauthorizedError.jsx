@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 export default function Unauthorized() {
   const navigate = useNavigate();
-  const redirectPreviousPage = () => {
-    navigate(-1);
-  };
   return (
     <div className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-900">
       <div className="text-center">
@@ -17,7 +14,7 @@ export default function Unauthorized() {
           You do not have permission to view this page.
         </p>
         <button
-          onClick={redirectPreviousPage}
+          onClick={() => navigate(-1)}
           className="mt-6 inline-block rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Go Previous
