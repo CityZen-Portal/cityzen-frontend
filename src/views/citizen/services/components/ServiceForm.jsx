@@ -8,7 +8,7 @@ function ServiceForm() {
     <>
       <form>
         <div class="flex items-center justify-center pt-12 md:p-12">
-          <div class="mx-auto w-full max-w-[700px] bg-white dark:border-navy-800 dark:bg-navy-700">
+          <div class="mx-auto w-full max-w-[700px] bg-white dark:border-navy-700 dark:bg-navy-700">
             <div>
               <div className="flex items-center justify-between px-4 pt-4">
                 <button
@@ -108,7 +108,7 @@ function ServiceForm() {
                 <textarea
                   id="message"
                   rows="4"
-                  class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:border-navy-800 dark:bg-gray-700 dark:bg-navy-900 dark:text-white dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                  class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600  dark:bg-gray-700  dark:text-white  dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                   placeholder="Address"
                 ></textarea>
                 <div class="-mx-3 flex flex-wrap">

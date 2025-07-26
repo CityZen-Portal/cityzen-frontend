@@ -1,5 +1,5 @@
 import React  from "react";
-import img1 from "../../../../assets/img/service/govimg-2.jpeg";
+import img1 from "../../../../assets/img/service/govimg-4.jpg";
 import data from "../variables/data"; 
 import ServiceForm from "./ServiceForm";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ function Servicelist() {
   return (
     <>
       <div
-        className="border-r-lg border bg-cover bg-center md:h-60 dark:border-navy-900"
+        className="border-r-lg border bg-cover bg-center md:h-72 dark:border-navy-900"
         style={{ backgroundImage: `url(${img1})` }}
       >
         <h1 className="flex items-center justify-center pt-6 text-4xl font-bold text-white">
@@ -27,7 +27,7 @@ function Servicelist() {
         {data.map((item, index) => (
           <div
             key={index}
-            className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-900 dark:text-white dark:border-navy-900"
+            className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-700 dark:text-white dark:border-navy-900"
           >
             <img
               src={item.img}

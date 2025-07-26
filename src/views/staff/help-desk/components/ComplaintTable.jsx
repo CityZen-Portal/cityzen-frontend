@@ -3,7 +3,7 @@ import PageNavigator from './PageNavigator';
 import Rows from './Rows';
 import { MdArrowUpward, MdArrowDownward, MdUnfoldMore } from 'react-icons/md';
 
-const ComplaintTable = ({ complaints }) => {
+const ComplaintTable = ({ extra, complaints }) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -96,7 +96,7 @@ const ComplaintTable = ({ complaints }) => {
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 lg:p-6 ${extra}`}>
       {/* Filter & Search */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className='flex gap-4'>

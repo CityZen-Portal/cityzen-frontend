@@ -12,13 +12,14 @@ const AddNews = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    author: '',
     location: '',
     category: '',
-    image: '',
+    othercategory:"",
+    priority: '',
     isBreaking: false,
-    isTrending: false
+    images: []
   });
+
   const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
@@ -30,11 +31,11 @@ const AddNews = () => {
         setFormData({
           title: item.title,
           content: item.content,
-          author: item.author,
           location: item.location || '',
           category: item.category || '',
+          priority: item.priority || '',
           isBreaking: item.isBreaking,
-          isTrending: item.isTrending
+          images: item.images || []
         });
         setIsEditing(true);
         setCurrentId(item.id);
@@ -45,11 +46,11 @@ const AddNews = () => {
       setFormData({
         title: '',
         content: '',
-        author: '',
         location: '',
         category: '',
+        priority: '',
         isBreaking: false,
-        isTrending: false
+        images: []
       });
       setIsEditing(false);
       setCurrentId(null);
@@ -58,9 +59,11 @@ const AddNews = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = "Title is required";
-    if (!formData.content.trim()) errors.content = "Content is required";
-    if (!formData.author.trim()) errors.author = "Author is required";
+    if (!formData.title.trim()) errors.title = 'Title is required';
+    if (!formData.content.trim()) errors.content = 'Content is required';
+    if (!formData.location.trim()) errors.location = 'Location is required';
+    if (!formData.category) errors.category = 'Category is required';
+    if (!formData.priority) errors.priority = 'Priority is required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -76,20 +79,33 @@ const AddNews = () => {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files]
+    }));
+  };
+
+  const removeImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleAddNews = () => {
     if (!validateForm()) return;
     const newItem = {
       id: newsItems.length > 0 ? Math.max(...newsItems.map(item => item.id)) + 1 : 1,
       title: formData.title,
       content: formData.content,
-      author: formData.author,
+      createdAt: new Date().toISOString(),
       location: formData.location,
       category: formData.category,
+      priority: formData.priority,
       isBreaking: formData.isBreaking,
-      isTrending: formData.isTrending,
-      date: new Date().toISOString().split('T')[0],
-      votes: 0,
-      comments: []
+      images: formData.images
     };
     setNewsItems([newItem, ...newsItems]);
     navigate('/staff/news');
@@ -111,18 +127,18 @@ const AddNews = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 sm:p-6 lg:p-10 w-full">
+    <div className="flex w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-10">
       <Card extra="w-full max-w-3xl p-6 sm:p-8 shadow-xl rounded-2xl bg-white dark:bg-navy-700">
         <button
-          onClick={() => navigate('/staff/news')}
-          className="text-blue-500 hover:text-blue-600 text-sm flex items-center gap-1 mb-4"
+          onClick={() => navigate("/staff/news")}
+          className="mb-4 flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600"
         >
           ← Back
         </button>
 
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-navy-700 dark:text-white mb-1">
-            {isEditing ? 'Edit News Post' : 'Create News Post'}
+          <h2 className="mb-1 text-2xl font-bold text-navy-700 dark:text-white">
+            {isEditing ? "Edit News Post" : "Create News Post"}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Share important updates with the community
@@ -130,7 +146,13 @@ const AddNews = () => {
         </div>
 
         <div className="mb-4">
-          <label className={`block text-sm font-medium mb-1 ${formErrors.title ? 'text-red-500' : 'text-navy-700 dark:text-white'}`}>
+          <label
+            className={`mb-1 block text-sm font-medium ${
+              formErrors.title
+                ? "text-red-500"
+                : "text-navy-700 dark:text-white"
+            }`}
+          >
             Title
           </label>
           <input
@@ -139,13 +161,25 @@ const AddNews = () => {
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Enter a catchy title"
-            className={`w-full px-4 py-2 border dark:bg-navy-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+            className={`w-full rounded-xl border px-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:bg-navy-700 dark:text-white ${
+              formErrors.title
+                ? "border-red-500"
+                : "border-gray-300 dark:border-gray-600"
+            }`}
           />
-          {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
+          {formErrors.title && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.title}</p>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className={`block text-sm font-medium mb-1 ${formErrors.content ? 'text-red-500' : 'text-navy-700 dark:text-white'}`}>
+          <label
+            className={`mb-1 block text-sm font-medium ${
+              formErrors.content
+                ? "text-red-500"
+                : "text-navy-700 dark:text-white"
+            }`}
+          >
             Content
           </label>
           <textarea
@@ -153,62 +187,159 @@ const AddNews = () => {
             value={formData.content}
             onChange={handleInputChange}
             placeholder="Share the details of your news..."
-            className={`w-full px-4 py-2 border rounded-xl text-sm h-28 resize-none focus:ring-2 dark:bg-navy-700 focus:ring-brand-500 dark:bg-transparent dark:text-white ${formErrors.content ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+            className={`h-28 w-full resize-none rounded-xl border px-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:bg-navy-700 dark:text-white ${
+              formErrors.content
+                ? "border-red-500"
+                : "border-gray-300 dark:border-gray-600"
+            }`}
           />
-          {formErrors.content && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
+          {formErrors.content && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.content}</p>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className={`block text-sm font-medium mb-1 ${formErrors.author ? 'text-red-500' : 'text-navy-700 dark:text-white'}`}>
-            Author / Department
+          <label
+            className={`mb-1 block text-sm font-medium ${
+              formErrors.location
+                ? "text-red-500"
+                : "text-navy-700 dark:text-white"
+            }`}
+          >
+            Location
           </label>
           <input
             type="text"
-            name="author"
-            value={formData.author}
-            onChange={handleInputChange}
-            placeholder="Your name or department"
-            className={`w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white dark:bg-navy-700 ${formErrors.author ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
-          />
-          {formErrors.author && <p className="text-red-500 text-xs mt-1">{formErrors.author}</p>}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1 text-navy-700 dark:text-white">
-            Location
-          </label>
-          <select
             name="location"
             value={formData.location}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border dark:bg-navy-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white border-gray-300 dark:border-gray-600"
-          >
-            <option value="">Select Location</option>
-            <option value="Townhall">Townhall</option>
-            <option value="Sai Baba Colony">Sai Baba Colony</option>
-            <option value="Ukkadam">Ukkadam</option>
-          </select>
+            placeholder="Enter location (e.g., Gandhi Nagar, Ward 12)"
+            className={`w-full rounded-xl border px-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:bg-navy-700 dark:text-white ${
+              formErrors.location
+                ? "border-red-500"
+                : "border-gray-300 dark:border-gray-600"
+            }`}
+          />
+          {formErrors.location && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.location}</p>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1 text-navy-700 dark:text-white">
+          <label
+            className={`mb-1 block text-sm font-medium ${
+              formErrors.category
+                ? "text-red-500"
+                : "text-navy-700 dark:text-white"
+            }`}
+          >
             Category
           </label>
           <select
             name="category"
             value={formData.category}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 dark:bg-navy-700 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 dark:bg-transparent dark:text-white border-gray-300 dark:border-gray-600"
+            className={`w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white ${
+              formErrors.category
+                ? "border-red-500"
+                : "border-gray-300 dark:border-gray-600"
+            }`}
           >
             <option value="">Select Category</option>
-            <option value="Sports">Sports</option>
-            <option value="Business">Business</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Tech">Tech</option>
+            <option value="GOVERNMENT_ANNOUNCEMENT">
+              Government Announcement
+            </option>
+            <option value="INFRASTRUCTURE">Infrastructure & Maintenance</option>
+            <option value="HEALTH">Health & Safety</option>
+            <option value="ELECTION">Election & Participation</option>
+            <option value="ENVIRONMENT">Environment & Cleanliness</option>
+            <option value="CULTURE">Cultural & Community Events</option>
+            <option value="PUBLIC_SERVICE">Public Service Info</option>
+            <option value="EMERGENCY">Emergency Alert</option>
+            <option value="JOBS">Jobs & Appointments</option>
+            <option value="PUBLIC_NOTICE">Public Notice / Lost & Found</option>
+            <option value="OTHERS">Others</option>
           </select>
+          {formData.category === "OTHERS" && (
+            <input
+              type="text"
+              name="otherCategory"
+              value={formData.othercategory}
+              onChange={handleInputChange}
+              placeholder="Enter custom category"
+              className="mt-3 w-full rounded-xl border px-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:bg-navy-700 dark:text-white"
+            />
+          )}
+          {formErrors.category && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.category}</p>
+          )}
         </div>
 
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
+        <div className="mb-4">
+          <label
+            className={`mb-1 block text-sm font-medium ${
+              formErrors.priority
+                ? "text-red-500"
+                : "text-navy-700 dark:text-white"
+            }`}
+          >
+            Priority
+          </label>
+          <select
+            name="priority"
+            value={formData.priority}
+            onChange={handleInputChange}
+            className={`w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white ${
+              formErrors.priority
+                ? "border-red-500"
+                : "border-gray-300 dark:border-gray-600"
+            }`}
+          >
+            <option value="">Select Priority</option>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
+          {formErrors.priority && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.priority}</p>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-1 block text-sm font-medium text-navy-700 dark:text-white">
+            Upload Images
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+            className="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm dark:border-gray-600 dark:bg-navy-700 dark:text-white"
+          />
+          {formData.images.length > 0 && (
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {formData.images.map((img, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={URL.createObjectURL(img)}
+                    alt={`Preview ${index}`}
+                    className="h-32 w-full rounded-xl object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute right-1 top-1 rounded-full bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mb-6">
           <label className="flex items-center space-x-2 text-sm text-navy-700 dark:text-white">
             <input
               type="checkbox"
@@ -219,31 +350,21 @@ const AddNews = () => {
             />
             <span>Breaking News</span>
           </label>
-          <label className="flex items-center space-x-2 text-sm text-navy-700 dark:text-white">
-            <input
-              type="checkbox"
-              name="isTrending"
-              checked={formData.isTrending}
-              onChange={handleCheckboxChange}
-              className="h-4 w-4"
-            />
-            <span>Trending News</span>
-          </label>
         </div>
 
-        <div className="flex justify-end gap-3 mt-4">
+        <div className="mt-4 flex justify-end gap-3">
           {isEditing ? (
             <>
               <button
                 onClick={handleUpdateNews}
-                className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 transition-all"
+                className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-white transition-all hover:bg-blue-700"
               >
                 <MdSave />
                 Update
               </button>
               <button
                 onClick={handleCancel}
-                className="flex items-center gap-2 border border-red-500 text-red-500 px-5 py-2 rounded-xl hover:bg-red-100 transition-all"
+                className="flex items-center gap-2 rounded-xl border border-red-500 px-5 py-2 text-red-500 transition-all hover:bg-red-100"
               >
                 <MdCancel />
                 Cancel
@@ -252,7 +373,7 @@ const AddNews = () => {
           ) : (
             <button
               onClick={handleAddNews}
-              className="flex items-center gap-2 bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700 transition-all"
+              className="flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2 text-white transition-all hover:bg-green-700"
             >
               <MdAdd />
               Post News

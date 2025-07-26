@@ -1,36 +1,17 @@
-import React from 'react'
-
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import newsData from "./newsData";
 export default function NewsCard() {
-    const newsData = [
-      {
-        title: "AI Breakthrough in Healthcare",
-        description:
-          "AI models are helping diagnose diseases faster and more accurately than ever before.",
-        image: "https://source.unsplash.com/400x250/?healthcare,technology",
-        link: "#",
-      },
-      {
-        title: "Climate Change Impacts",
-        description:
-          "Record temperatures and sea-level rise are putting pressure on global leaders to act.",
-        image: "https://source.unsplash.com/400x250/?climate,earth",
-        link: "#",
-      },
-      {
-        title: "SpaceX Launches New Satellite",
-        description:
-          "Elon Musk's SpaceX successfully launched a new satellite to boost global internet.",
-        image: "https://source.unsplash.com/400x250/?spacex,rocket",
-        link: "#",
-      },
-    ];
+  const navigate = useNavigate();
+    
+  console.log(newsData);
   return (
-    <>
-      <div className="grid grid-cols-1 gap-6  sm:grid-cols-2 md:grid-cols-3">
+    <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-700  dark:text-white">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
         {newsData.map((news, index) => (
           <div
             key={index}
-            className="overflow-hidden rounded-2xl bg-white dark:bg-navy-700 shadow-lg transition-transform hover:scale-105"
+            className="overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-105 dark:bg-navy-900 dark:text-white"
           >
             <img
               src={news.image}
@@ -38,18 +19,29 @@ export default function NewsCard() {
               className="h-48 w-full object-cover"
             />
             <div className="p-4">
-              <h2 className="mb-2 text-lg font-semibold dark:text-white">{news.title}</h2>
-              <p className="mb-4 text-sm text-gray-900 dark:text-white">{news.description}</p>
-              <a
-                href={news.link}
+              <h2 className="mb-2 text-lg font-semibold text-gray-800  dark:text-white">
+                {news.title}
+              </h2>
+              {/* <p className="mb-4 text-sm text-gray-600">{news.description}</p> */}
+              <button
+                onClick={() => {
+                  navigate(
+                    `/citizen/newsupdate/newsdetails/${encodeURIComponent(
+                      news.title
+                    )}`,
+                    {
+                      state: news,
+                    }
+                  );
+                }}
                 className="font-medium text-blue-600 hover:underline"
               >
                 Read more →
-              </a>
+              </button>
             </div>
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }
