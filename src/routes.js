@@ -20,6 +20,12 @@ import AdminServices from "views/admin/services/index.jsx";
 import ManageStaffs from "views/admin/services/component/ManageStaffs";
 import ViewTasks from "views/admin/services/component/ViewTasks";
 import ViewSchedule from "views/admin/services/component/ViewSchedule";
+import AdminAnalytics from "views/admin/services/component/analytics";
+import { MdMiscellaneousServices} from "react-icons/md";
+import { MdBarChart } from "react-icons/md";
+import AdminPro from "views/admin/services/component/AdminPro";
+
+
 import FeedbackManage from "views/admin/services/component/FeedbackManage";
 import ComplaintManagement from "views/admin/complaints";
 import AssignStaff from "views/admin/complaints/pages/AssignStaff";
@@ -241,6 +247,22 @@ const routes = [
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
   },
+ {
+  name: "Views and Analytics",
+  layout: "/admin",
+  path: "analytics",
+ icon: <MdBarChart className="h-6 w-6" />,
+  component: <AdminAnalytics />,
+},
+ {
+    name: "Profile",
+    layout: "/admin",
+    path: "AdminPro",
+    icon: <MdPerson className="h-6 w-6" />,
+    component: <AdminPro />,
+  },
+
+    
 
   // Staff Routes
   {
