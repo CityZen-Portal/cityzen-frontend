@@ -47,7 +47,7 @@ import NewsDetails from "views/citizen/news/components/NewsDetails";
 
 // Service Form
 import ServiceForm from "views/citizen/services/components/ServiceForm";
-
+import FeedBack from "views/citizen/services/components/FeedBack";
 // Icons
 import {
   MdHome,
@@ -62,6 +62,8 @@ import {
   MdBallot,
   MdBuild,
 } from "react-icons/md";
+import ReportForm from "views/citizen/services/components/ReportForm";
+
 
 const routes = [
   // Home
@@ -115,6 +117,18 @@ const routes = [
         layout: "/citizen",
         path: "Services/form/:serviceName",
         component: <ServiceForm />,
+      },
+      {
+        name: "Report form",
+        layout: "/citizen",
+        path: "Services/reportform",
+        component: <ReportForm />,
+      },
+      {
+        name: "FeedBack form",
+        layout: "/citizen",
+        path: "Services/feedform",
+        component: <FeedBack/>,
       },
     ],
   },
