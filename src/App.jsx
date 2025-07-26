@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
 import CitizenLayout from "layouts/citizen";
@@ -8,13 +8,14 @@ import HomePage from "views/HomePage";
 import StaffLayout from "layouts/staff";
 import ScrollToTop from "views/citizen/news/components/ScrollToTop";
 import ProtectedRoute from "utils/ProtectedRoutes";
+import Unauthorized from "views/error/UnauthorizedError";
 
 const App = () => {
-  const role = localStorage.getItem("role");
+  const role = JSON.stringify(localStorage.getItem("role"));
   const navigate = useNavigate();
-  if (role == null || role == undefined) {
-    navigate("/auth/signin");
-  }
+  useEffect(() => {
+    if (!role) navigate("/auth/signin");
+  }, [role, navigate]);
   return (
     <>
       <ScrollToTop />
@@ -23,7 +24,7 @@ const App = () => {
         <Route
           path="citizen/*"
           element={
-            <ProtectedRoute requiredRole="user" Role={role}>
+            <ProtectedRoute requiredRole="user" role={role}>
               <CitizenLayout />
             </ProtectedRoute>
           }
@@ -32,7 +33,7 @@ const App = () => {
         <Route
           path="admin/*"
           element={
-            <ProtectedRoute requiredRole="admin" Role={role}>
+            <ProtectedRoute requiredRole="admin" role={role}>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -46,6 +47,7 @@ const App = () => {
           }
         />
         <Route path="/*" element={<CitizenLayout />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
     </>
   );
