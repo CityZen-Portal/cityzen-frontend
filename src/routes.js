@@ -62,6 +62,7 @@ import {
   MdBallot,
   MdBuild,
 } from "react-icons/md";
+import JobApplicationPage from "views/citizen/job-application";
 
 const routes = [
   // Home
@@ -150,6 +151,13 @@ const routes = [
         component: <ComplaintDetails />,
       },
     ],
+  },
+  {
+    name: "Job Application",
+    layout: "/citizen",
+    path: "job-application",
+    icon: <MdDashboard className="h-6 w-6" />,
+    component: <JobApplicationPage />,
   },
 
   // Admin Routes
