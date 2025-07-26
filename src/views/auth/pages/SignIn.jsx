@@ -89,7 +89,7 @@ export default function SignIn() {
         email,
         password,
       });
-      
+
       const token = response.data.data.token;
       const roles = response.data.data.roles[0];
 
@@ -98,7 +98,7 @@ export default function SignIn() {
       localStorage.setItem("email", response.data.data.email);
       localStorage.setItem("role", JSON.stringify(roles));
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
+
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 1000,
@@ -108,7 +108,7 @@ export default function SignIn() {
             navigate("/staff/dashboard");
           } else if (roles.includes("ROLE_USER")) {
             navigate("/citizen/dashboard");
-          } else {
+          } else if (roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
           }
         },
