@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ role, requiredRole, children }) => {
-  if (role !== requiredRole) {
+  if (!role || !role.includes(requiredRole)) {
     return <Navigate to="/unauthorized" />;
   }
   return children;

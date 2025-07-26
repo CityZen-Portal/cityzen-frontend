@@ -21,19 +21,12 @@ const App = () => {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route
-          path="citizen/*"
-          element={
-            <ProtectedRoute requiredRole="user" role={role}>
-              <CitizenLayout />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="citizen/*" element={<CitizenLayout />} />
         <Route path="auth/*" element={<AuthLayout />} />
         <Route
           path="admin/*"
           element={
-            <ProtectedRoute requiredRole="admin" role={role}>
+            <ProtectedRoute requiredRole="ROLE_ADMIN" role={role}>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -41,7 +34,7 @@ const App = () => {
         <Route
           path="staff/*"
           element={
-            <ProtectedRoute requiredRole="staff" Role={role}>
+            <ProtectedRoute requiredRole="ROLE_STAFF" role={role}>
               <StaffLayout />
             </ProtectedRoute>
           }
