@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
 
 import CitizenLayout from "layouts/citizen";
 import AdminLayout from "layouts/admin";
@@ -9,6 +8,7 @@ import StaffLayout from "layouts/staff";
 import ScrollToTop from "views/citizen/news/components/ScrollToTop";
 import ProtectedRoute from "utils/ProtectedRoutes";
 import Unauthorized from "views/error/UnauthorizedError";
+import { Route, Routes, useNavigate } from "react-router-dom";
 
 const App = () => {
   const role = JSON.stringify(localStorage.getItem("role"));

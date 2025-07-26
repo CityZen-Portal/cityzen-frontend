@@ -1,8 +1,20 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 
 export default function Unauthorized() {
   const navigate = useNavigate();
+  const redirectHome = () => {
+    const role = JSON.stringify(localStorage.getItem("role"));
+    if(role.includes("ROLE_ADMIN")){
+      navigate("/citizen")
+    }
+    else if(role.includes("ROLE_STAFF")){
+      navigate("/staff")
+    }
+    else{
+      navigate("/admin")
+    }
+  }
   return (
     <div className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-900">
       <div className="text-center">
@@ -14,7 +26,7 @@ export default function Unauthorized() {
           You do not have permission to view this page.
         </p>
         <button
-          onClick={() => navigate(-1)}
+          onClick={redirectHome}
           className="mt-6 inline-block rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Go Previous
