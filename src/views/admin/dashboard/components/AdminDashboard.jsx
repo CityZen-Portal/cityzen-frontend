@@ -1,33 +1,19 @@
 import React, { useState, useEffect } from "react";
-import Calendar from "react-calendar";
+import { FaEllipsisV } from "react-icons/fa";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import "react-calendar/dist/Calendar.css";
+  CheckCircleIcon,
+  EyeSlashIcon,
+  EyeIcon,
+  TrashIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/solid";
+
+import dayjs from "dayjs";
 
 const cardStyle =
-  "bg-white dark:bg-gray-800 rounded-2xl shadow-md p-4 flex flex-col items-start gap-1 transition-colors duration-300";
-
-const dataLine = [
-  { name: "JAN", uv: 450, pv: 600 },
-  { name: "FEB", uv: 750, pv: 500 },
-  { name: "MAR", uv: 620, pv: 530 },
-  { name: "APR", uv: 680, pv: 490 },
-  { name: "MAY", uv: 700, pv: 550 },
-  { name: "JUN", uv: 730, pv: 570 },
-  { name: "JUL", uv: 690, pv: 520 },
-  { name: "AUG", uv: 710, pv: 540 },
-  { name: "SEP", uv: 640, pv: 510 },
-  { name: "OCT", uv: 600, pv: 480 },
-  { name: "NOV", uv: 590, pv: 460 },
-  { name: "DEC", uv: 660, pv: 500 },
-];
+  "rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg flex flex-col items-start gap-2 transition-colors duration-300";
 
 export default function AdminDashboard() {
   const [theme, setTheme] = useState("light");
@@ -44,97 +30,9 @@ export default function AdminDashboard() {
     }
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
-
   return (
     <div className="flex min-h-screen font-sans bg-slate-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
-      <style>{`
-  .react-calendar {
-    background-color: white;
-    color: #111827;
-    border-radius: 1rem;
-    padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    width: 100%;
-    max-width: 400px;
-  }
-
-  .dark .react-calendar {
-    background-color: #1f2937;
-    color: #f9fafb;
-  }
-
-  .react-calendar__navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-  }
-
-  .react-calendar__navigation button {
-    background: none;
-    color: #4f46e5;
-    font-weight: 600;
-    font-size: 1rem;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-  }
-
-  .dark .react-calendar__navigation button {
-    color: #a5b4fc;
-  }
-
-  .react-calendar__tile {
-    border-radius: 0.5rem;
-    padding: 0.75rem 0.5rem;
-    font-weight: 500;
-    transition: background 0.2s;
-  }
-
-  .react-calendar__tile--active {
-    background-color: #6366f1;
-    color: white;
-  }
-
-  .dark .react-calendar__tile--active {
-    background-color: #818cf8;
-    color: white;
-  }
-
-  .react-calendar__tile--now {
-    background-color: #e0e7ff;
-    color: #3730a3;
-  }
-
-  .dark .react-calendar__tile--now {
-    background-color: #4f46e5;
-    color: white;
-  }
-
-  .react-calendar__tile:hover {
-    background-color: #e5e7eb;
-  }
-
-  .dark .react-calendar__tile:hover {
-    background-color: #374151;
-  }
-
-  .react-calendar__month-view__days__day--weekend {
-    color: #6b7280;
-  }
-
-  .dark .react-calendar__month-view__days__day--weekend {
-    color: #9ca3af;
-  }
-`}</style>
-
-
-      {/* Theme toggle */}
-      
-
       <div className="flex-1 p-6">
-        {/* Conditional UI: Complaints / Requests / Feedback */}
         {showComplaints ? (
           <ComplaintsTable onBack={() => setShowComplaints(false)} />
         ) : showRequests ? (
@@ -143,73 +41,135 @@ export default function AdminDashboard() {
           <FeedbackTable onBack={() => setShowFeedback(false)} />
         ) : (
           <>
-            {/* Dashboard Stats */}
+            {/* Stats */}
             <div className="mb-6 grid grid-cols-1 gap-10 md:grid-cols-3">
-              {[
-                "Grievences Raised",
-                "Resolved Complaints",
-                "Service Requests",
-                "Feedback Received",
-                "Staff Tasks",
-                "Citizen Registered",
-              ].map((title, i) => (
+              {["Grievences Raised", "Resolved Complaints", "Service Requests", "Feedback Received", "Staff Tasks", "Citizen Registered"].map((title, i) => (
                 <div key={i} className={cardStyle}>
-                  <div className="text-sm text-gray-500 dark:text-gray-300">
-                    {title}
-                  </div>
-                  <div className="text-xl font-semibold">0</div>
+                  <div className="text-sm font-semibold text-black-700 dark:text-gray-300">{title}</div>
+                  <div className="text-xl font-bold text-black dark:text-white">0</div>
                 </div>
               ))}
             </div>
 
-            {/* Action Buttons */}
+            {/* Actions */}
             <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
               <ActionCard
                 title="View Complaints"
-                description="Monitor all citizen grievances raised across departments. Track pending, resolved, and escalated issues."
+                description="Monitor all citizen grievances raised across departments."
                 onClick={() => setShowComplaints(true)}
               />
               <ActionCard
                 title="View Requests"
-                description="Access all public service requests including electricity, water, sanitation, and more. Assign tasks to staff."
+                description="Access service requests like electricity, water, sanitation."
                 onClick={() => setShowRequests(true)}
               />
               <ActionCard
-                title="View Feedback"
-                description="Review citizen feedback on services and staff. Use insights to improve quality and public satisfaction."
+                title="View Messages"
+                description="Review citizen feedback to improve service quality."
                 onClick={() => setShowFeedback(true)}
               />
             </div>
 
-            {/* Graph & Calendar */}
-            <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-                <div className="mb-4 text-xl font-semibold">
-                  📈 Monthly Citizen Activity
+            {/* Summary Section */}
+            <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
+              {/* Civic Issue Summary */}
+              <div className="col-span-2 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg transition-colors">
+                <div className="mb-4 text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                  📋 <span>Civic Issue Summary</span>
                 </div>
-                <ResponsiveContainer width="100%" height={350}>
-                  <LineChart data={dataLine}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" /> → <XAxis dataKey="name" interval={0} />
-
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="uv" stroke="#6C5DD3" strokeWidth={3} />
-                    <Line type="monotone" dataKey="pv" stroke="#00C9FF" strokeWidth={3} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-black dark:text-gray-300">
+                      <th className="pb-2">Name</th>
+                      <th className="pb-2">Status</th>
+                      <th className="pb-2">Date</th>
+                      <th className="pb-2">Progress</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      {
+                        name: "Road Maintenance",
+                        status: "Approved",
+                        icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
+                        date: "24Jan'25",
+                        color: "bg-green-500",
+                        progress: "80%",
+                      },
+                      {
+                        name: "Garbage Collection",
+                        status: "Disable",
+                        icon: <XCircleIcon className="h-5 w-5 text-gray-500" />,
+                        date: "15Feb'25",
+                        color: "bg-red-500",
+                        progress: "30%",
+                      },
+                      {
+                        name: "Street Light Repair",
+                        status: "Error",
+                        icon: <ExclamationTriangleIcon className="h-5 w-5 text-gray-500" />,
+                        date: "20Mar'25",
+                        color: "bg-orange-500",
+                        progress: "50%",
+                      },
+                      {
+                        name: "Water Leakage",
+                        status: "Approved",
+                        icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
+                        date: "12Apr'25",
+                        color: "bg-green-500",
+                        progress: "70%",
+                      },
+                    ].map((item, i) => (
+                      <tr key={i} className="border-t border-gray-200 dark:border-gray-700">
+                        <td className="py-3 font-medium text-black dark:text-white">{item.name}</td>
+                        <td className="py-3 flex items-center gap-2 text-black dark:text-white">
+                          {item.icon} {item.status}
+                        </td>
+                        <td className="py-3 text-black dark:text-white">{item.date}</td>
+                        <td className="py-3">
+                          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded">
+                            <div className={`h-2 rounded ${item.color}`} style={{ width: item.progress }}></div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
-              <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-  <style>{/* Paste style block here */}</style>
-  <div className="mb-4 text-xl font-bold flex items-center gap-2">
-    📅 <span>City Events Calendar</span>
-  </div>
-  <div className="flex justify-center">
-    <Calendar className="w-full max-w-[400px]" />
-  </div>
-</div>
+              {/* Tasks */}
+              <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="flex items-center text-xl font-bold text-gray-800 dark:text-white">
+                    <ClipboardDocumentListIcon className="h-5 w-5 mr-2" />
+                    Tasks
+                  </h2>
+                </div>
+                <ul className="space-y-4">
+                  {["Sanitation", "Fire and Emergency", "Electricity and Street Lights", "Water Supply Management", "Waste Management"].map((task, index) => (
+                    <li key={index} className="flex items-center justify-between">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 text-violet-500 rounded focus:ring-violet-400"
+                        />
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {task}
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
+              {/* Calendar */}
+              <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
+                <div className="mb-4 text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-white">
+                  📅 <span>Events Calendar</span>
+                </div>
+                <CustomCalendar />
+              </div>
             </div>
           </>
         )}
@@ -222,7 +182,7 @@ function ActionCard({ title, description, onClick }) {
   return (
     <div className="h-48 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md flex flex-col justify-between transition-colors">
       <div>
-        <h2 className="mb-2 text-xl font-semibold text-indigo-600">{title}</h2>
+        <h2 className="mb-2 text-xl font-semibold text-indigo-600 dark:text-white">{title}</h2>
         <p className="text-gray-700 dark:text-gray-300">{description}</p>
       </div>
       <button
@@ -235,10 +195,58 @@ function ActionCard({ title, description, onClick }) {
   );
 }
 
+// Complaints Table
 function ComplaintsTable({ onBack }) {
+  const complaints = [
+    {
+      id: 1,
+      name: "Priya Sharma",
+      department: "Water",
+      complaint: "No supply in Sector 12",
+      status: "Pending",
+    },
+    {
+      id: 2,
+      name: "Amit Verma",
+      department: "Sanitation",
+      complaint: "Garbage not collected for 3 days",
+      status: "In Progress",
+    },
+    {
+      id: 3,
+      name: "Neha Joshi",
+      department: "Electricity",
+      complaint: "Streetlights not working on 5th Avenue",
+      status: "Resolved",
+    },
+    {
+      id: 4,
+      name: "Rahul Mehta",
+      department: "Roads",
+      complaint: "Potholes in front of Block C",
+      status: "Pending",
+    },
+  ];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "text-red-600";
+      case "In Progress":
+        return "text-yellow-600";
+      case "Resolved":
+        return "text-green-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
   return (
     <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-      <button className="text-lg font-bold text-indigo-600 underline mb-4" onClick={onBack}>
+      <button
+        className="text-lg font-bold text-indigo-600 underline mb-4"
+        onClick={onBack}
+      >
         ← Back
       </button>
       <h2 className="text-xl font-semibold mb-4">Manage Complaints</h2>
@@ -246,46 +254,360 @@ function ComplaintsTable({ onBack }) {
         <thead className="text-xs uppercase bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200">
           <tr>
             <th className="px-4 py-2">#</th>
-            <th className="px-4 py-2">Citizen Name</th>
+            <th className="px-4 py-2">Name</th>
             <th className="px-4 py-2">Department</th>
             <th className="px-4 py-2">Complaint</th>
             <th className="px-4 py-2">Status</th>
           </tr>
         </thead>
         <tbody>
-          <tr className="border-b">
-            <td className="px-4 py-2">1</td>
-            <td className="px-4 py-2">Priya Sharma</td>
-            <td className="px-4 py-2">Water</td>
-            <td className="px-4 py-2">No supply in Sector 12</td>
-            <td className="px-4 py-2 text-red-600">Pending</td>
-          </tr>
+          {complaints.map((c) => (
+            <tr key={c.id} className="border-b">
+              <td className="px-4 py-2">{c.id}</td>
+              <td className="px-4 py-2">{c.name}</td>
+              <td className="px-4 py-2">{c.department}</td>
+              <td className="px-4 py-2">{c.complaint}</td>
+              <td className={`px-4 py-2 font-semibold ${getStatusColor(c.status)}`}>
+                {c.status}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
   );
 }
 
+
+// Requests Table with Hide and Remove
 function RequestsTable({ onBack }) {
+  const [requests, setRequests] = useState([
+    {
+      id: 1,
+      name: "Ravi Sharma",
+      department: "Water",
+      request: "New water connection for house in Sector 18",
+      hidden: false,
+      accepted: false,
+    },
+    {
+      id: 2,
+      name: "Anjali Patel",
+      department: "Sanitation",
+      request: "Request for additional dustbins in park area",
+      hidden: false,
+      accepted: false,
+    },
+    {
+      id: 3,
+      name: "Mohit Verma",
+      department: "Electricity",
+      request: "Apply for a new streetlight near bus stop",
+      hidden: false,
+      accepted: false,
+    },
+    {
+      id: 4,
+      name: "Sneha Rao",
+      department: "Roads",
+      request: "Request to construct a pedestrian crossing",
+      hidden: false,
+      accepted: false,
+    },
+  ]);
+
+  const [menuOpen, setMenuOpen] = useState(null);
+  const [showHidden, setShowHidden] = useState(false);
+
+  const toggleMenu = (id) => {
+    setMenuOpen((prev) => (prev === id ? null : id));
+  };
+
+  const acceptRequest = (id) => {
+    setRequests((prev) =>
+      prev.map((req) => (req.id === id ? { ...req, accepted: true } : req))
+    );
+    setMenuOpen(null);
+  };
+
+  const toggleHide = (id) => {
+    setRequests((prev) =>
+      prev.map((req) => (req.id === id ? { ...req, hidden: !req.hidden } : req))
+    );
+    setMenuOpen(null);
+  };
+
+  const removeRequest = (id) => {
+    setRequests((prev) => prev.filter((req) => req.id !== id));
+    setMenuOpen(null);
+  };
+
+  const visibleRequests = requests.filter((r) => !r.hidden && !r.accepted);
+  const hiddenRequests = requests.filter((r) => r.hidden);
+  const acceptedRequests = requests.filter((r) => r.accepted);
+
   return (
     <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-      <button className="text-lg font-bold text-indigo-600 underline mb-4" onClick={onBack}>
+      <button
+        className="text-lg font-bold text-indigo-600 underline mb-4"
+        onClick={onBack}
+      >
         ← Back
       </button>
-      <h2 className="text-xl font-semibold mb-4">Manage Requests</h2>
-      <p>No requests yet.</p>
+
+      <h2 className="text-xl font-semibold mb-2">Manage Requests</h2>
+
+      <div className="flex justify-between items-center mb-4 text-sm text-gray-600 dark:text-gray-300">
+        <span>Visible: {visibleRequests.length}</span>
+        <span>Hidden: {hiddenRequests.length}</span>
+        <span>Accepted: {acceptedRequests.length}</span>
+      </div>
+
+      {visibleRequests.length === 0 ? (
+        <p className="text-gray-600 dark:text-gray-300">No visible requests.</p>
+      ) : (
+        <table className="w-full text-sm text-left border mb-6 relative">
+          <thead className="text-xs uppercase bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200">
+            <tr>
+              <th className="px-4 py-2">#</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Department</th>
+              <th className="px-4 py-2">Request</th>
+              <th className="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleRequests.map((req, index) => (
+              <tr className="border-b relative" key={req.id}>
+                <td className="px-4 py-2">{index + 1}</td>
+                <td className="px-4 py-2">{req.name}</td>
+                <td className="px-4 py-2">{req.department}</td>
+                <td className="px-4 py-2">{req.request}</td>
+                <td className="px-4 py-2">
+                  <div className="relative">
+                    <button
+                      onClick={() => toggleMenu(req.id)}
+                      className="text-gray-700 dark:text-gray-200 hover:text-indigo-600"
+                    >
+                      <FaEllipsisV />
+                    </button>
+                    {menuOpen === req.id && (
+                      <div className="absolute right-0 mt-2 bg-white dark:bg-gray-700 border rounded shadow z-10">
+                        <button
+                          onClick={() => acceptRequest(req.id)}
+                          className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 w-full text-sm text-left"
+                        >
+                          <CheckCircleIcon className="w-4 h-4 mr-2 text-green-600" /> Accept
+                        </button>
+                        <button
+                          onClick={() => toggleHide(req.id)}
+                          className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 w-full text-sm text-left"
+                        >
+                          <EyeSlashIcon className="w-4 h-4 mr-2 text-yellow-600" /> Hide
+                        </button>
+                        <button
+                          onClick={() => removeRequest(req.id)}
+                          className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 w-full text-sm text-left"
+                        >
+                          <TrashIcon className="w-4 h-4 mr-2 text-red-600" /> Remove
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {acceptedRequests.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-md font-semibold mb-2 text-green-700 dark:text-green-300">
+            Accepted Requests
+          </h3>
+          <ul className="space-y-2">
+            {acceptedRequests.map((req) => (
+              <li
+                key={req.id}
+                className="flex justify-between items-center bg-green-100 dark:bg-green-700 px-4 py-2 rounded"
+              >
+                <div>
+                  <span className="font-medium">{req.name}</span> —{" "}
+                  <span className="text-sm">{req.request}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {hiddenRequests.length > 0 && (
+        <div className="mt-4">
+          <button
+            onClick={() => setShowHidden((prev) => !prev)}
+            className="text-indigo-600 underline mb-2 text-sm"
+          >
+            {showHidden ? "Hide Hidden Requests" : "Show Hidden Requests"}
+          </button>
+
+          {showHidden && (
+            <div>
+              <h3 className="text-md font-semibold mb-2 text-gray-700 dark:text-gray-200">
+                Hidden Requests
+              </h3>
+              <ul className="space-y-2">
+                {hiddenRequests.map((req) => (
+                  <li
+                    key={req.id}
+                    className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded"
+                  >
+                    <div>
+                      <span className="font-medium">{req.name}</span> —{" "}
+                      <span className="text-sm">{req.request}</span>
+                    </div>
+                    <button
+                      onClick={() => toggleHide(req.id)}
+                      className="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600"
+                      title="Unhide"
+                    >
+                      <EyeIcon className="h-4 w-4 inline mr-1" /> Unhide
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
+// Feedback Table
 function FeedbackTable({ onBack }) {
+  
+const [messages, setMessages] = useState([
+    {
+      id: 1,
+      name: "Amit Kumar",
+      department: "Electricity",
+      message: "Has my electricity complaint been resolved yet?",
+    },
+    {
+      id: 2,
+      name: "Sunita Mehta",
+      department: "Water",
+      message: "I want to know how to apply for a new water connection.",
+    },
+  ]);
+
   return (
     <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-      <button className="text-lg font-bold text-indigo-600 underline mb-4" onClick={onBack}>
+      <button
+        className="text-lg font-bold text-indigo-600 underline mb-4"
+        onClick={onBack}
+      >
         ← Back
       </button>
-      <h2 className="text-xl font-semibold mb-4">Citizen Feedback</h2>
-      <p>No feedback yet.</p>
+
+      {/* User Messages Section */}
+      <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
+        User Messages
+      </h2>
+
+      {messages.length === 0 ? (
+        <p className="text-gray-600 dark:text-gray-300">No messages yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left border border-gray-200 dark:border-gray-600">
+            <thead className="text-xs uppercase bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-200">
+              <tr>
+                <th className="px-4 py-2">#</th>
+                <th className="px-4 py-2">Citizen</th>
+                <th className="px-4 py-2">Department</th>
+                <th className="px-4 py-2">Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {messages.map((msg, index) => (
+                <tr key={msg.id} className="border-b dark:border-gray-700">
+                  <td className="px-4 py-2">{index + 1}</td>
+                  <td className="px-4 py-2">{msg.name}</td>
+                  <td className="px-4 py-2">{msg.department}</td>
+                  <td className="px-4 py-2">{msg.message}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// Calendar component
+function CustomCalendar() {
+  const [currentDate, setCurrentDate] = useState(dayjs());
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+
+  const startOfMonth = currentDate.startOf("month");
+  const startDay = startOfMonth.day() === 0 ? 6 : startOfMonth.day() - 1;
+  const daysInMonth = currentDate.daysInMonth();
+
+  const days = [];
+  for (let i = 0; i < startDay; i++) days.push(null);
+  for (let i = 1; i <= daysInMonth; i++) days.push(dayjs(currentDate).date(i));
+
+  const weekdays = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+  return (
+    <div className="w-full max-w-sm mx-auto">
+      <div className="flex justify-between items-center mb-3">
+        <button
+          onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
+          className="bg-indigo-600 text-white px-2 py-1 rounded-full text-lg"
+        >
+          &lt;
+        </button>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+          {currentDate.format("MMMM YYYY")}
+        </h2>
+        <button
+          onClick={() => setCurrentDate(currentDate.add(1, "month"))}
+          className="bg-indigo-600 text-white px-2 py-1 rounded-full text-lg"
+        >
+          &gt;
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-sm font-semibold text-gray-600 dark:text-gray-300">
+        {weekdays.map((day) => (
+          <div key={day}>{day}</div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mt-2">
+        {days.map((date, idx) => (
+          <div key={idx} className="h-10 w-10 flex items-center justify-center">
+            {date ? (
+              <button
+                onClick={() => setSelectedDate(date)}
+                className={`w-10 h-10 rounded-full transition-all duration-200 ${
+                  date.isSame(selectedDate, "day")
+                    ? "bg-indigo-600 text-white"
+                    : "text-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+                }`}
+              >
+                {date.date()}
+              </button>
+            ) : (
+              <div />
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

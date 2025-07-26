@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import avatar from "assets/img/avatars/avatar1.png";
 import {
   FaPen,
@@ -21,21 +21,54 @@ const Profile = () => {
   const userType = "Citizen User"; // constant, not editable
   const [email, setEmail] = useState("smartcitizen.portal@gmail.com");
   const [phone, setPhone] = useState("+91 98765 43210");
-
   const [addressLine, setAddressLine] = useState("123, Gandhi Street");
   const [city, setCity] = useState("Coimbatore");
   const [state, setState] = useState("Tamil Nadu");
   const [pincode, setPincode] = useState("641001");
-
   const citizenId = "CITZ1024"; // constant, not editable
   const [dob, setDob] = useState("1990-05-22");
   const [gender, setGender] = useState("Female");
   const aadhaar = "123456789012";
 
+  const [originalData, setOriginalData] = useState({});
+
+  useEffect(() => {
+    if (isEditing) {
+      setOriginalData({
+        fullName,
+        lastName,
+        email,
+        phone,
+        addressLine,
+        city,
+        state,
+        pincode,
+        dob,
+        gender,
+        profilePhoto,
+      });
+    }
+  }, [isEditing]);
+
+  const hasChanges = () => {
+    return (
+      fullName !== originalData.fullName ||
+      lastName !== originalData.lastName ||
+      email !== originalData.email ||
+      phone !== originalData.phone ||
+      addressLine !== originalData.addressLine ||
+      city !== originalData.city ||
+      state !== originalData.state ||
+      pincode !== originalData.pincode ||
+      dob !== originalData.dob ||
+      gender !== originalData.gender ||
+      profilePhoto !== originalData.profilePhoto
+    );
+  };
+
   const inputStyle =
     "px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400 focus:outline-none bg-white text-black dark:bg-navy-700 dark:text-white";
 
-  // Handle profile photo change
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -61,7 +94,6 @@ const Profile = () => {
     });
   };
 
-  // Render gender icon dynamically based on gender state
   const renderGenderIcon = () => {
     switch (gender.toLowerCase()) {
       case "female":
@@ -152,18 +184,40 @@ const Profile = () => {
               {/* User Type */}
               <div className="flex flex-col sm:flex-row sm:items-start sm:gap-2">
                 <FaUser className="text-gray-400 text-xl mt-1 sm:mr-2" />
-                <div className="flex flex-col">
-                  <p className="text-black text-xs font-medium mb-1">User Type:</p>
-                  <span>{userType}</span>
+                <div className="flex flex-col w-full sm:w-auto">
+                  {isEditing ? (
+                    <div className="mb-1">
+                      <label className="block text-white-600 text-sm font-medium mb-1">User Type:</label>
+                      <input
+                        type="text"
+                        value={userType}
+                        readOnly
+                        className={`${inputStyle} w-full sm:w-[250px] bg-gray-100 cursor-not-allowed`}
+                      />
+                    </div>
+                  ) : (
+                    <span>{userType}</span>
+                  )}
                 </div>
               </div>
 
               {/* Citizen ID */}
               <div className="flex flex-col sm:flex-row sm:items-start sm:gap-2">
                 <FaIdCard className="text-gray-400 text-xl mt-1 sm:mr-2" />
-                <div className="flex flex-col">
-                  <p className="text-black text-xs font-medium mb-1">Citizen ID:</p>
-                  <span>{citizenId}</span>
+                <div className="flex flex-col w-full sm:w-auto">
+                  {isEditing ? (
+                    <div className="mb-1">
+                      <label className="block text-white-600 text-sm font-medium mb-1">Citizen ID:</label>
+                      <input
+                        type="text"
+                        value={citizenId}
+                        readOnly
+                        className={`${inputStyle} w-full sm:w-[250px] bg-gray-100 cursor-not-allowed`}
+                      />
+                    </div>
+                  ) : (
+                    <span>{citizenId}</span>
+                  )}
                 </div>
               </div>
 
@@ -171,13 +225,15 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row sm:items-start sm:gap-2">
                 <FaEnvelope className="text-gray-400 text-xl mt-1 sm:mr-2" />
                 <div className="flex flex-col w-full sm:w-auto">
-                  <p className="text-black text-xs font-medium mb-1">Email:</p>
                   {isEditing ? (
-                    <input
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={`${inputStyle} w-full sm:w-[250px]`}
-                    />
+                    <div className="mb-1">
+                      <label className="block text-white-600 text-sm font-medium mb-1">Email:</label>
+                      <input
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={`${inputStyle} w-full sm:w-[250px]`}
+                      />
+                    </div>
                   ) : (
                     <span>{email}</span>
                   )}
@@ -188,13 +244,15 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row sm:items-start sm:gap-2">
                 <FaPhone className="text-gray-400 text-xl mt-1 sm:mr-2" />
                 <div className="flex flex-col w-full sm:w-auto">
-                  <p className="text-black text-xs font-medium mb-1">Phone:</p>
                   {isEditing ? (
-                    <input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className={`${inputStyle} w-full sm:w-[180px]`}
-                    />
+                    <div className="mb-1">
+                      <label className="block text-white-600 text-sm font-medium mb-1">Phone:</label>
+                      <input
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className={`${inputStyle} w-full sm:w-[180px]`}
+                      />
+                    </div>
                   ) : (
                     <span>{phone}</span>
                   )}
@@ -242,7 +300,6 @@ const Profile = () => {
                     </div>
                   ) : (
                     <div className="flex flex-col">
-                      <p className="text-black text-xs font-medium mb-1">Address:</p>
                       <span>{`${addressLine}, ${city}, ${state} - ${pincode}`}</span>
                     </div>
                   )}
@@ -253,14 +310,16 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row sm:items-start sm:gap-2">
                 <MdDateRange className="text-gray-400 text-xl mt-1 sm:mr-2" />
                 <div className="flex flex-col w-full sm:w-auto">
-                  <p className="text-black text-xs font-medium mb-1">Date of Birth:</p>
                   {isEditing ? (
-                    <input
-                      type="date"
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                      className={inputStyle}
-                    />
+                    <div className="mb-1">
+                      <label className="block text-white-600 text-sm font-medium mb-1">Date of Birth:</label>
+                      <input
+                        type="date"
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
+                        className={inputStyle}
+                      />
+                    </div>
                   ) : (
                     <span>{dob}</span>
                   )}
@@ -271,17 +330,19 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row sm:items-start sm:gap-2">
                 <div className="mt-1 sm:mr-2">{renderGenderIcon()}</div>
                 <div className="flex flex-col w-full sm:w-auto">
-                  <p className="text-black text-xs font-medium mb-1">Gender:</p>
                   {isEditing ? (
-                    <select
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
-                      className={inputStyle}
-                    >
-                      <option>Female</option>
-                      <option>Male</option>
-                      <option>Other</option>
-                    </select>
+                    <div className="mb-1">
+                      <label className="block text-white-600 text-sm font-medium mb-1">Gender:</label>
+                      <select
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        className={inputStyle}
+                      >
+                        <option>Female</option>
+                        <option>Male</option>
+                        <option>Other</option>
+                      </select>
+                    </div>
                   ) : (
                     <span>{gender}</span>
                   )}
@@ -292,13 +353,13 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row sm:items-start sm:gap-2">
                 <FaIdCard className="text-gray-400 text-xl mt-1 sm:mr-2" />
                 <div className="flex flex-col">
-                  <p className="text-black text-xs font-medium mb-1">Aadhaar:</p>
                   <span>{`XXXX-XXXX-${aadhaar.slice(-4)}`}</span>
                 </div>
               </div>
             </div>
 
-            {isEditing && (
+            {/* Conditionally render Save button only if data is changed */}
+            {isEditing && hasChanges() && (
               <button
                 onClick={handleSave}
                 className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto"
