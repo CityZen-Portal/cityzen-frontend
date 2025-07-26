@@ -111,6 +111,9 @@ export default function SignIn() {
           } else if (roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
           }
+          else{
+            navigate("/");
+          }
         },
       });
     } catch (error) {
