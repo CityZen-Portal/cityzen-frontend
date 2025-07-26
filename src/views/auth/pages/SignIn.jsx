@@ -12,7 +12,7 @@ export default function SignIn() {
   const navigate = useNavigate();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("Test@1234");
+  const [password, setPassword] = useState("");
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
   const [showPassword, setShowPassword] = useState(false);

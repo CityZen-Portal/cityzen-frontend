@@ -9,7 +9,7 @@ export default function SignIn() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Add this line
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: "",
     password: ""
