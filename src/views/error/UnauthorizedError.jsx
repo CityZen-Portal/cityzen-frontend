@@ -6,13 +6,13 @@ export default function Unauthorized() {
   const redirectHome = () => {
     const role = JSON.stringify(localStorage.getItem("role"));
     if(role.includes("ROLE_ADMIN")){
-      navigate("/citizen")
+      navigate("/admin")
     }
     else if(role.includes("ROLE_STAFF")){
       navigate("/staff")
     }
     else{
-      navigate("/admin")
+      navigate("/citizen")
     }
   }
   return (
