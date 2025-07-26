@@ -9,8 +9,7 @@ import Footer from "components/footer/FooterAuthDefault";
 export default function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -64,21 +63,11 @@ export default function SignUp() {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    // First Name validation
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-      toast.error("First name is required", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
-    }
 
-    // Last Name validation
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-      toast.error("Last name is required", {
+    // Name validation (replaces firstName/lastName validation)
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+      toast.error("Name is required", {
         position: 'top-right',
         autoClose: 3000,
         theme: 'colored',
@@ -319,7 +308,7 @@ export default function SignUp() {
     <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
                     dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
                     transition-all duration-300 overflow-y-auto">
-      
+
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -342,7 +331,7 @@ export default function SignUp() {
             <p className="text-gray-600 dark:text-gray-300 mb-4">
               Enter the OTP sent to {formData.phoneNumber}
             </p>
-            
+
             {otpSent && mockOtp && (
               <div className="mb-4">
                 <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
@@ -359,7 +348,7 @@ export default function SignUp() {
                 </p>
               </div>
             )}
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Enter OTP
@@ -374,15 +363,14 @@ export default function SignUp() {
                     if (errors.otp) setErrors(prev => ({ ...prev, otp: '' }));
                   }
                 }}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.otp ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } bg-white dark:bg-gray-700 dark:text-white`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.otp ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  } bg-white dark:bg-gray-700 dark:text-white`}
                 placeholder="6-digit OTP"
                 maxLength={6}
               />
               {errors.otp && <p className="mt-1 text-sm text-red-600">{errors.otp}</p>}
             </div>
-            
+
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => {
@@ -396,9 +384,8 @@ export default function SignUp() {
               <button
                 onClick={handleVerifyOtp}
                 disabled={otpVerifying}
-                className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg ${
-                  otpVerifying ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg ${otpVerifying ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
               >
                 {otpVerifying ? 'Verifying...' : 'Verify OTP'}
               </button>
@@ -427,36 +414,19 @@ export default function SignUp() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* First Name and Last Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">First Name*</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                    errors.firstName ? 'border-red-500' : 'border-[#a3aed0]'
+            {/* Name Field (replaces First Name/Last Name fields) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Full Name*</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.name ? 'border-red-500' : 'border-[#a3aed0]'
                   }`}
-                  placeholder="Enter first name"
-                />
-                {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Last Name*</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                    errors.lastName ? 'border-red-500' : 'border-[#a3aed0]'
-                  }`}
-                  placeholder="Enter last name"
-                />
-                {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
-              </div>
+                placeholder="Enter your full name"
+              />
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
             </div>
 
             {/* Email */}
@@ -468,9 +438,8 @@ export default function SignUp() {
                 value={formData.email}
                 onChange={handleInputChange}
                 onBlur={handleEmailBlur}
-                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                  errors.email ? 'border-red-500' : 'border-[#a3aed0]'
-                }`}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.email ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
                 placeholder="mail@example.com"
                 autoComplete="email"
               />
@@ -486,14 +455,13 @@ export default function SignUp() {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                    errors.password ? 'border-red-500' : 'border-[#a3aed0]'
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.password ? 'border-red-500' : 'border-[#a3aed0]'
+                    }`}
                   placeholder="Min. 8 characters"
                 />
-                <button 
-                  type="button" 
-                  onClick={() => setShowPassword(!showPassword)} 
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showPassword ? (
@@ -520,14 +488,13 @@ export default function SignUp() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-[#a3aed0]'
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.confirmPassword ? 'border-red-500' : 'border-[#a3aed0]'
+                    }`}
                   placeholder="Confirm your password"
                 />
-                <button 
-                  type="button" 
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showConfirmPassword ? (
@@ -556,9 +523,8 @@ export default function SignUp() {
                     value={formData.aadharNumber}
                     onChange={handleAadharChange}
                     disabled={aadhaarVerified}
-                    className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                      errors.aadharNumber ? 'border-red-500' : 'border-[#a3aed0]'
-                    } ${aadhaarVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.aadharNumber ? 'border-red-500' : 'border-[#a3aed0]'
+                      } ${aadhaarVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
                     placeholder="1234 5678 9012"
                     maxLength="14"
                   />
@@ -572,11 +538,10 @@ export default function SignUp() {
                   type="button"
                   onClick={handleAadhaarVerify}
                   disabled={aadhaarVerified || aadhaarSending}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium ${
-                    aadhaarVerified 
-                      ? 'bg-green-500 text-white cursor-not-allowed' 
+                  className={`px-4 py-3 rounded-lg text-sm font-medium ${aadhaarVerified
+                      ? 'bg-green-500 text-white cursor-not-allowed'
                       : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
-                  } ${aadhaarSending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${aadhaarSending ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {aadhaarSending ? 'Verifying...' : aadhaarVerified ? 'Verified' : 'Verify'}
                 </button>
@@ -598,9 +563,8 @@ export default function SignUp() {
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                     disabled={phoneVerified}
-                    className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-                      errors.phoneNumber ? 'border-red-500' : 'border-[#a3aed0]'
-                    } ${phoneVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
+                    className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.phoneNumber ? 'border-red-500' : 'border-[#a3aed0]'
+                      } ${phoneVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
                     placeholder="9876543210"
                     maxLength="10"
                   />
@@ -614,13 +578,12 @@ export default function SignUp() {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={!aadhaarVerified || phoneVerified}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium ${
-                    phoneVerified 
-                      ? 'bg-green-500 text-white cursor-not-allowed' 
-                      : aadhaarVerified 
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white' 
+                  className={`px-4 py-3 rounded-lg text-sm font-medium ${phoneVerified
+                      ? 'bg-green-500 text-white cursor-not-allowed'
+                      : aadhaarVerified
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
                         : 'bg-gray-400 text-white cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {phoneVerified ? 'Verified' : 'Send OTP'}
                 </button>
@@ -634,7 +597,7 @@ export default function SignUp() {
             {/* Terms */}
             <div className="pt-2">
               <div className="flex items-start space-x-2">
-                <Checkbox 
+                <Checkbox
                   checked={agreeTerms}
                   onChange={(e) => setAgreeTerms(e.target.checked)}
                   className={errors.terms ? 'border-red-500' : ''}
@@ -656,9 +619,8 @@ export default function SignUp() {
               disabled={!aadhaarVerified || !phoneVerified || !agreeTerms}
               className={`w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r
                        from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
-                       transition-all duration-300 shadow-lg mt-6 ${
-                         (!aadhaarVerified || !phoneVerified || !agreeTerms) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'
-                       }`}
+                       transition-all duration-300 shadow-lg mt-6 ${(!aadhaarVerified || !phoneVerified || !agreeTerms) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'
+                }`}
             >
               Create Account
             </button>
