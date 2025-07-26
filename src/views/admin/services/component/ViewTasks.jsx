@@ -31,7 +31,6 @@ function ViewTasks() {
   const [newTask, setNewTask] = useState(initialNewTaskState);
   const [selectedBooking, setSelectedBooking] = useState("");
 
-  // ✅ fetch booking requests (replace with backend later)
   useEffect(() => {
     setBookingRequests([
       {
@@ -159,8 +158,6 @@ function ViewTasks() {
           )}
         </div>
       </div>
-
-      {/* Modal */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl p-8 m-4">
