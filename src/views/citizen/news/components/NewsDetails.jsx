@@ -62,7 +62,7 @@ export default function NewsDetails() {
           ← Back to News
         </button>
         <img
-          src={`https://media-api-service-hzx2.onrender.com/${newsItem.imagePath}`}
+          src={`${newsItem.imagePath}`}
           alt={newsItem.title}
           className="w-full max-h-96 object-cover rounded-xl shadow"
         />

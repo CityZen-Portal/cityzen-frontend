@@ -24,8 +24,8 @@ import AdminAnalytics from "views/admin/services/component/analytics";
 import { MdMiscellaneousServices} from "react-icons/md";
 import { MdBarChart } from "react-icons/md";
 import AdminPro from "views/admin/services/component/AdminPro";
-
-
+import AdminCityNews from "views/admin/news";
+import AdminAddNews from "views/admin/news/components/AdminAddNews";
 import FeedbackManage from "views/admin/services/component/FeedbackManage";
 import ComplaintManagement from "views/admin/complaints";
 import AssignStaff from "views/admin/complaints/pages/AssignStaff";
@@ -351,19 +351,19 @@ const routes = [
     layout: "/admin",
     path: "news",
     icon: <MdChatBubble className="h-6 w-6" />,
-    component: <CityNews />,
+    component: <AdminCityNews/>,
     children: [
       {
         name: "Manage News",
         layout: "/admin",
         path: "news/add",
-        component: <AddNews />,
+        component: <AdminAddNews/>,
       },
       {
         name: "Edit News ",
         layout: "/admin",
         path: "news/add/:id",
-        component: <AddNews />,
+        component: <AdminAddNews />,
       },
     ],
   },

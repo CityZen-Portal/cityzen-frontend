@@ -41,7 +41,7 @@ export default function NewsCard() {
               className="overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-105 dark:bg-navy-900 dark:text-white"
             >
               <img
-                src={`https://media-api-service-hzx2.onrender.com/${news.imagePath}`}
+                src={`${news.imagePath}`}
                 alt={news.title}
                 className="h-48 w-full object-cover"
               />
