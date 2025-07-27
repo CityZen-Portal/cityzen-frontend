@@ -341,7 +341,7 @@ const routes = [
       {
         name: "News Details",
         layout: "/citizen",
-        path: "/newsupdate/newsdetails/:title",
+        path: "/newsupdate/newsdetails/:id",
         component: <NewsDetails />,
       },
     ],
