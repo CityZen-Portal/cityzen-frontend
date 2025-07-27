@@ -40,7 +40,7 @@ function Servicelist() {
               </div>
             </div>
             <div className="flex justify-center pb-4">
-              <button  onClick={()=>navigate(`/citizen/Services/form/${item.nameOfService}`)} className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+              <button  onClick={()=>navigate(`/citizen/Services/form/${item.nameOfService}`,{state:{nameOfService: item.nameOfService}})} className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
                 Get service
               </button>
             </div>
