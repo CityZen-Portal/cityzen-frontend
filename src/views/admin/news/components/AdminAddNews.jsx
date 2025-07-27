@@ -26,7 +26,7 @@ const AddNews = () => {
 
   useEffect(() => {
     if (id) {
-      axios.get(`https://city-news-alert-backend.onrender.com/api/news/${id}`)
+      axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
         .then(res => {
           const item = res.data.data;
           setFormData({
@@ -115,10 +115,10 @@ const AddNews = () => {
       };
 
       if (isEditing) {
-        await axios.put(`https://city-news-alert-backend.onrender.com/api/news/update/${id}`, payload);
+        await axios.put(`https://city-news-alert-backend-new.onrender.com/api/news/update/${id}`, payload);
         toast.success('News updated successfully!');
       } else {
-        await axios.post('https://city-news-alert-backend.onrender.com/api/news/add', payload);
+        await axios.post('https://city-news-alert-backend-new.onrender.com/api/news/add', payload);
         toast.success('News posted successfully!');
       }
 

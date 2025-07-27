@@ -12,7 +12,7 @@ export default function NewsDetails() {
     const fetchNewsData = async () => {
       try {
         const response = await axios.get(
-          `https://city-news-alert-backend.onrender.com/api/news/${id}`
+          `https://city-news-alert-backend-new.onrender.com/api/news/${id}`
         );
         setNewsItem(response.data.data);
       } catch (err) {
@@ -23,6 +23,19 @@ export default function NewsDetails() {
     };
     fetchNewsData();
   }, [id]);
+
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return date.toLocaleString("en-IN", options);
+  }
 
   if (loading) {
     return (
@@ -53,27 +66,54 @@ export default function NewsDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-navy-900 text-gray-800 dark:text-white px-4 py-10">
-      <div className="max-w-3xl mx-auto shadow-lg bg-white dark:bg-navy-800 rounded-2xl p-6 sm:p-10 space-y-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-blue-600 hover:underline hover:text-blue-800 transition text-sm"
-        >
-          ← Back to News
-        </button>
-        <img
-          src={`${newsItem.imagePath}`}
-          alt={newsItem.title}
-          className="w-full max-h-96 object-cover rounded-xl shadow"
-        />
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-navy-900 dark:text-white">
-          {newsItem.title}
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">
-          {newsItem.description}
-        </p>
-        <div className="text-base leading-relaxed text-gray-700 dark:text-gray-200">
-          {newsItem.content}
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900 px-4 py-10 text-gray-800 dark:text-white">
+      <div className="max-w-4xl mx-auto bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
+        <div className="p-6 sm:p-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-4 text-blue-600 hover:underline hover:text-blue-800 text-sm transition"
+          >
+            ← Back to News
+          </button>
+
+          {newsItem.imagePath && (
+            <div className="mb-6">
+              <img
+                src={newsItem.imagePath}
+                alt={newsItem.title}
+                className="w-full h-64 sm:h-96 object-cover rounded-xl shadow-md"
+              />
+            </div>
+          )}
+
+          <div className="flex flex-wrap justify-between items-center mb-3">
+            <span className="text-sm text-gray-500 dark:text-gray-300">
+              Published: {formatDate(newsItem.created_date)}
+            </span>
+            {newsItem.breaking && (
+              <span className="inline-block bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full dark:bg-red-900/30 dark:text-red-400">
+                🔥 Breaking News
+              </span>
+            )}
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl font-bold text-navy-900 dark:text-white mb-4 leading-tight">
+            {newsItem.title}
+          </h1>
+
+          <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-6">
+            {newsItem.description}
+          </p>
+
+          <div className="prose prose-gray dark:prose-invert max-w-none text-base leading-relaxed">
+            <p>{newsItem.content}</p>
+          </div>
+
+          {newsItem.location && (
+            <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+              📍 Location: {newsItem.location}
+            </div>
+          )}
         </div>
       </div>
     </div>
