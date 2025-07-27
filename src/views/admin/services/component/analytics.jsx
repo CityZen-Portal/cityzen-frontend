@@ -65,12 +65,13 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 dark:bg-navy-700">
       {/* Metric Cards */}
+      
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {metricCards.map((card, idx) => (
-          <div key={idx} className="p-4 bg-white shadow rounded-xl flex items-center gap-4">
-            <div className="text-xl text-purple-600">{card.icon}</div>
+          <div key={idx} className="p-4 bg-white dark:bg-navy-900 shadow rounded-xl flex items-center gap-4">
+            <div className="text-xl text-purple-600 ">{card.icon}</div>
             <div>
               <p className="text-sm text-gray-500">{card.title}</p>
               <h2 className="text-2xl font-bold">{card.value}</h2>
@@ -81,8 +82,8 @@ const Dashboard = () => {
 
       {/* Chart Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="mb-2 font-semibold text-lg">Service vs Complaint Trend</h3>
+        <div className="bg-white dark:bg-navy-900 dark:text-white p-4 rounded-xl shadow">
+          <h3 className="mb-2 font-semibold text-lg ">Service vs Complaint Trend</h3>
           <ResponsiveContainer width="100%" height={250}>
             <ComposedChart data={monthlyData}>
               <XAxis dataKey="month" />
@@ -94,7 +95,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="bg-white p-4 dark:bg-navy-900 dark:text-white rounded-xl shadow">
           <h3 className="mb-2 font-semibold text-lg">Requests by Category</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
@@ -117,7 +118,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="bg-white dark:bg-navy-900 dark:text-white  p-4 rounded-xl shadow">
           <h3 className="mb-2 font-semibold text-lg">Gender Distribution</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
@@ -143,7 +144,7 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="bg-white dark:bg-navy-900 dark:text-white  p-4 rounded-xl shadow">
           <h3 className="mb-2 font-semibold text-lg">Daily Request Traffic</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={dailyRequestData}>
@@ -158,7 +159,7 @@ const Dashboard = () => {
 
       {/* Division & Monthly Highlight */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="bg-white dark:bg-navy-900 dark:text-white  p-4 rounded-xl shadow">
           <h3 className="mb-2 font-semibold text-lg">Requests by Division</h3>
           {divisionStats.map((item, idx) => (
             <div key={idx} className="flex justify-between border-b py-2">
