@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusIcon, TrashIcon, PencilSquareIcon, EnvelopeIcon, PhoneIcon, UserIcon, MapPinIcon, CalendarIcon, BuildingOfficeIcon } from '@heroicons/react/24/solid';
+import {
+  PlusIcon,
+  TrashIcon,
+  PencilSquareIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  UserIcon,
+  MapPinIcon,
+  CalendarIcon
+} from '@heroicons/react/24/solid';
+import axios from 'axios';
 
-// Initial state for the new staff form
 const initialNewStaffState = {
   name: '',
-  department: '', // Changed from 'role'
+  department: '',
   contact: '',
   age: '',
   email: '',
@@ -16,10 +25,7 @@ const initialNewStaffState = {
 
 function ManageStaffs() {
   const navigate = useNavigate();
-  
-  // In a real application, this list would likely be fetched from a database
-  // or managed via a global state (Context API, Redux) so it can be updated from a "Manage Services" page.
-  const [departments, setDepartments] = useState([
+  const [departments] = useState([
     'Electricity',
     'Water Supply',
     'Cleaning',
@@ -28,32 +34,27 @@ function ManageStaffs() {
     'Maintenance'
   ]);
 
-  const [staffs, setStaffs] = useState([
-    {
-      id: 1,
-      name: 'Poovarasan',
-      department: 'Cleaning', // Changed from 'role'
-      contact: '+1234567890',
-      age: '30',
-      email: 'poovarasan05@gmail.com',
-      address: '106/d, East Colony',
-      dateOfJoining: '2025-01-01',
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      department: 'Gardening', // Changed from 'role'
-      contact: '+0987654321',
-      age: '28',
-      email: 'jane.smith@example.com',
-      address: '456 Garden Ave',
-      dateOfJoining: '2023-05-10',
-    }
-  ]);
-
+  const [staffs, setStaffs] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [newStaff, setNewStaff] = useState(initialNewStaffState);
+
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const response = await axios.get("https://utility-booking-backend.onrender.com/api/staff/all");
+        const staffData = response.data?.data.data;
+        setStaffs(Array.isArray(staffData) ? staffData : []);
+      } catch (err) {
+        console.error("Failed to fetch staff data:", err);
+        setStaffs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStaff();
+  }, []);
 
   const handleOpen = (staff = null) => {
     if (staff) {
@@ -83,11 +84,14 @@ function ManageStaffs() {
     }
 
     if (editId) {
-      setStaffs((prev) => prev.map((s) => (s.id === editId ? { ...newStaff, id: editId } : s)));
+      setStaffs((prev) =>
+        prev.map((s) => (s.id === editId ? { ...newStaff, id: editId } : s))
+      );
     } else {
-      const newId = staffs.length ? Math.max(...staffs.map(s => s.id)) + 1 : 1;
+      const newId = staffs.length ? Math.max(...staffs.map(s => s.id || 0)) + 1 : 1;
       setStaffs((prev) => [...prev, { ...newStaff, id: newId }]);
     }
+
     handleClose();
   };
 
@@ -96,6 +100,23 @@ function ManageStaffs() {
       setStaffs((prev) => prev.filter((s) => s.id !== id));
     }
   };
+  const calculateAge = (dob) => {
+  const birthDate = new Date(dob);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const hasBirthdayPassed =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+     today.getDate() >= birthDate.getDate());
+
+  if (!hasBirthdayPassed) {
+    age--;
+  }
+
+  return age;
+};
+
 
   return (
     <div className='mt-12 mb-8 flex flex-col gap-12 px-4 md:px-6'>
@@ -117,41 +138,60 @@ function ManageStaffs() {
         </div>
 
         <div className='p-6 grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
-          {staffs.map((staff) => (
-            <div key={staff.id} className="bg-gray-50 dark:bg-navy-900/50 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-navy-700 flex flex-col justify-between">
-              <div>
-                <div className='flex justify-between items-start mb-4'>
-                  <div className='flex items-center gap-4'>
-                    <div className='w-14 h-14 bg-blue-100 dark:bg-navy-700 rounded-full flex items-center justify-center'>
-                      <UserIcon className='w-8 h-8 text-blue-500 dark:text-blue-400' />
-                    </div>
-                    <div>
-                      <h3 className='font-bold text-lg text-gray-800 dark:text-white'>{staff.name}</h3>
-                      <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{staff.department}</p>
-                    </div>
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-gray-100 dark:bg-navy-900/50 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-navy-700 animate-pulse space-y-4">
+                <div className="flex gap-4 items-center">
+                  <div className="w-14 h-14 rounded-full bg-gray-300 dark:bg-navy-700"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-300 dark:bg-navy-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-300 dark:bg-navy-700 rounded w-1/2"></div>
                   </div>
                 </div>
-                <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2.5">
-                  <div className="flex items-center gap-3"><EnvelopeIcon className="h-5 w-5 text-gray-400" /><span>{staff.email}</span></div>
-                  <div className="flex items-center gap-3"><PhoneIcon className="h-5 w-5 text-gray-400" /><span>{staff.contact}</span></div>
-                  <div className="flex items-center gap-3"><MapPinIcon className="h-5 w-5 text-gray-400" /><span>{staff.address}</span></div>
-                  <div className="flex items-center gap-3"><CalendarIcon className="h-5 w-5 text-gray-400" /><span>Joined: {staff.dateOfJoining} (Age: {staff.age})</span></div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-300 dark:bg-navy-700 rounded"></div>
+                  <div className="h-3 bg-gray-300 dark:bg-navy-700 rounded w-5/6"></div>
+                  <div className="h-3 bg-gray-300 dark:bg-navy-700 rounded w-2/3"></div>
                 </div>
               </div>
-              <div className="mt-5 pt-4 border-t border-gray-200 dark:border-navy-700 flex justify-end gap-3">
-                <button onClick={() => handleOpen(staff)} className='text-yellow-500 hover:text-yellow-600 transition-colors' aria-label="Edit Staff">
-                  <PencilSquareIcon className='w-5 h-5' />
-                </button>
-                <button onClick={() => handleDeleteStaff(staff.id)} className='text-red-500 hover:text-red-600 transition-colors' aria-label="Delete Staff">
-                  <TrashIcon className='w-5 h-5' />
-                </button>
+            ))
+          ) : (
+            Array.isArray(staffs) &&
+            staffs.map((staff) => (
+              <div key={staff.id} className="bg-gray-50 dark:bg-navy-900/50 p-5 rounded-lg shadow-lg border border-gray-200 dark:border-navy-700 flex flex-col justify-between">
+                <div>
+                  <div className='flex justify-between items-start mb-4'>
+                    <div className='flex items-center gap-4'>
+                      <div className='w-14 h-14 bg-blue-100 dark:bg-navy-700 rounded-full flex items-center justify-center'>
+                        <UserIcon className='w-8 h-8 text-blue-500 dark:text-blue-400' />
+                      </div>
+                      <div>
+                        <h3 className='font-bold text-lg text-gray-800 dark:text-white'>{staff.fullName}</h3>
+                        <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{staff.department}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2.5">
+                    <div className="flex items-center gap-3"><EnvelopeIcon className="h-5 w-5 text-gray-400" /><span>{staff.emailAddress}</span></div>
+                    <div className="flex items-center gap-3"><PhoneIcon className="h-5 w-5 text-gray-400" /><span>{staff.contactNumber}</span></div>
+                    <div className="flex items-center gap-3"><MapPinIcon className="h-5 w-5 text-gray-400" /><span>{staff.fullAddress}</span></div>
+                    <div className="flex items-center gap-3"><CalendarIcon className="h-5 w-5 text-gray-400" /><span>Age: {calculateAge(staff.dob)}</span></div>
+                  </div>
+                </div>
+                <div className="mt-5 pt-4 border-t border-gray-200 dark:border-navy-700 flex justify-end gap-3">
+                  <button onClick={() => handleOpen(staff)} className='text-yellow-500 hover:text-yellow-600 transition-colors' aria-label="Edit Staff">
+                    <PencilSquareIcon className='w-5 h-5' />
+                  </button>
+                  <button onClick={() => handleDeleteStaff(staff.id)} className='text-red-500 hover:text-red-600 transition-colors' aria-label="Delete Staff">
+                    <TrashIcon className='w-5 h-5' />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
-      {/* Modal with Backdrop Blur */}
       {open && (
         <div className='fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50'>
           <div className='bg-white dark:bg-navy-800 w-full max-w-xl p-8 rounded-xl shadow-2xl m-4 border dark:border-navy-700'>
@@ -160,26 +200,16 @@ function ManageStaffs() {
             </h2>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-5'>
               <input name='name' placeholder='Full Name' value={newStaff.name} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
-              
-              {/* Department Dropdown */}
-              <select 
-                name='department' 
-                value={newStaff.department} 
-                onChange={handleInputChange} 
-                className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none'
-              >
+              <select name='department' value={newStaff.department} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none'>
                 <option value="" disabled>Select Department</option>
-                {departments.map(dep => (
-                  <option key={dep} value={dep}>{dep}</option>
-                ))}
+                {departments.map(dep => <option key={dep} value={dep}>{dep}</option>)}
               </select>
-
               <input name='contact' placeholder='Contact Number' value={newStaff.contact} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
               <input name='age' placeholder='Age' value={newStaff.age} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
               <input name='email' placeholder='Email Address' value={newStaff.email} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
               <input name='password' type='password' placeholder='Password' value={newStaff.password} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
-              <input name='address' placeholder='Full Address' value={newStaff.address} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none col-span-2' />
-              <input type='date' name='dateOfJoining' value={newStaff.dateOfJoining} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none col-span-2' />
+              <input name='address' placeholder='Full Address' value={newStaff.address} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full col-span-2 bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
+              <input type='date' name='dateOfJoining' value={newStaff.dateOfJoining} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full col-span-2 bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
             </div>
             <div className='flex justify-end gap-4 mt-8'>
               <button onClick={handleClose} className='px-5 py-2.5 rounded-lg border text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700 transition-colors'>Cancel</button>
