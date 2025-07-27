@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { useLocation } from "react-router-dom";
 function ServiceForm() {
   const { serviceName } = useParams();
   const navigate = useNavigate();
-
+  const location=useLocation();
+  const services=location.state?.nameOfService;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,6 +17,8 @@ function ServiceForm() {
     area: "",
     city: "",
     postcode: "",
+    description:"",
+    services
   });
 
   const handleChange = (e) => {
@@ -37,7 +40,7 @@ function ServiceForm() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/staff/add",
+        "http://localhost:8080/api/services/request/add",
         payload
       );
       alert("Form submitted successfully!");
@@ -157,6 +160,19 @@ function ServiceForm() {
                   />
                 </div>
               </div>
+            </div>
+            <div className="m-8">
+              <label className="mb-2 block text-lg font-semibold dark:text-white">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="4"
+                placeholder="Enter your description"
+                className="w-full rounded-md border px-4 py-2 text-sm"
+              />
             </div>
 
             {/* Address */}
