@@ -17,6 +17,7 @@ function ServiceForm() {
     area: "",
     city: "",
     postcode: "",
+    description:"",
     services
   });
 
@@ -159,6 +160,19 @@ function ServiceForm() {
                   />
                 </div>
               </div>
+            </div>
+            <div className="m-8">
+              <label className="mb-2 block text-lg font-semibold dark:text-white">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="4"
+                placeholder="Enter your description"
+                className="w-full rounded-md border px-4 py-2 text-sm"
+              />
             </div>
 
             {/* Address */}
