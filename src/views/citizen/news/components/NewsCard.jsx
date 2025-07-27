@@ -10,7 +10,7 @@ export default function NewsCard() {
     const fetchNews=async ()=>{
       try{
         const response=await axios.get('https://city-news-alert-backend.onrender.com/api/news/get-all');
-        console.log(response.data.data.records);
+        // console.log(response.data.data.records);
         setData(response.data.data.records);
         setCount(response.data.data.totalCount);
       }
@@ -53,7 +53,7 @@ export default function NewsCard() {
                   onClick={() => {
                     navigate(
                       `/citizen/newsupdate/newsdetails/${encodeURIComponent(
-                        news.title
+                        news.id
                       )}`,
                       {
                         state: news,

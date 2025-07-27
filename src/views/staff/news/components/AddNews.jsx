@@ -63,7 +63,7 @@ const AddNews = () => {
     if (!formData.content.trim()) errors.content = 'Content is required';
     if (!formData.location.trim()) errors.location = 'Location is required';
     if (!formData.category) errors.category = 'Category is required';
-    if (!formData.priority) errors.priority = 'Priority is required';
+    // if (!formData.priority) errors.priority = 'Priority is required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -275,7 +275,7 @@ const AddNews = () => {
           )}
         </div>
 
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label
             className={`mb-1 block text-sm font-medium ${
               formErrors.priority
@@ -304,7 +304,7 @@ const AddNews = () => {
           {formErrors.priority && (
             <p className="mt-1 text-xs text-red-500">{formErrors.priority}</p>
           )}
-        </div>
+        </div> */}
 
         <div className="mb-4">
           <label className="mb-1 block text-sm font-medium text-navy-700 dark:text-white">
