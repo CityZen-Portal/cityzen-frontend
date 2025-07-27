@@ -26,7 +26,7 @@ export const newsData = [
     id: 3,
     title: "Free Polio Vaccination Drive – July 22 to 24 at All Urban PHCs",
     content: "Children under 5 can receive free polio vaccines at all urban health centers between July 22 and 24.",
-    location: "Urban PHC Centers",
+    location: "Village Health Care Center",
     category: "Health and Safety Alerts",
     priority: "High",
     isBreaking: true,
