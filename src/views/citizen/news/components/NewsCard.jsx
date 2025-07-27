@@ -9,8 +9,8 @@ export default function NewsCard() {
    useEffect(()=>{
     const fetchNews=async ()=>{
       try{
-        const response=await axios.get('https://city-news-alert-backend.onrender.com/api/news/get-all');
-        // console.log(response.data.data.records);
+        const response=await axios.get('https://city-news-alert-backend-new.onrender.com/api/news/get-all');
+        console.log(response.data.data.records);
         setData(response.data.data.records);
         setCount(response.data.data.totalCount);
       }

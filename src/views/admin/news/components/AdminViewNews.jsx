@@ -22,7 +22,7 @@ const ViewNews = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`https://city-news-alert-backend.onrender.com/api/news/delete/${id}`);
+      await axios.delete(`https://city-news-alert-backend-new.onrender.com/api/news/delete/${id}`);
       const updatedItems = newsData.filter(item => item.id !== id);
       setNewsData(updatedItems);
       toast.success('News Deleted successfully!');
@@ -53,7 +53,7 @@ const ViewNews = () => {
   useEffect(() => {
     const fetchNewsData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/news/author/4');
+        const response = await axios.get('https://city-news-alert-backend-new.onrender.com/api/news/author/4');
         setNewsData(response.data.data);
       } catch (err) {
         console.error(err);
