@@ -81,11 +81,9 @@ export default function SignIn() {
       setIsLoading(true);
       console.log("Form is valid, attempting to navigate...");
       
-      // Simulate API call
       setTimeout(() => {
         console.log("Navigation timeout completed");
         setIsLoading(false);
-        // In a real app, you would verify credentials with your backend
         try {
           navigate("/citizen/dashboard");
           console.log("Navigation called successfully");
