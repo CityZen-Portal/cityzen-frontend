@@ -16,67 +16,125 @@ const USER_API = "https://auth-backend-cpcr.onrender.com";
 
 export default function DocumentInfo() {
   const [docs, setDocs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
   const [openUpload, setOpenUpload] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedName, setSelectedName] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+
   const [openUpdate, setOpenUpdate] = useState(false);
   const [editingDoc, setEditingDoc] = useState(null);
   const [editName, setEditName] = useState("");
   const [editFile, setEditFile] = useState(null);
 
   const [userInfo, setUserInfo] = useState({
-    email: localStorage.getItem("email"),
+    email: localStorage.getItem("email") || "",
+    username: localStorage.getItem("username") || "",
     aadharNumber: 0,
-    username: localStorage.getItem("username"),
   });
-
-  const fetchUserInfo = async () => {
-    try {
-      const response = await axios.get(
-        `${USER_API}/api/auth/getUser/${userInfo.email}`
-      );
-      const aadharNumber = response.data.data.aadharNumber;
-
-      setUserInfo((prev) => ({
-        ...prev,
-        aadharNumber: aadharNumber,
-      }));
-    } catch (err) {
-      console.error("Error fetching user info:", err);
-    }
-  };
-
-  console.log(userInfo);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchUserInfo();
-    };
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchAll = async () => {
-      const response = await axios.get(
-        `${LOCKER_API}/api/lock/listDocument/${userInfo.aadharNumber}`
-      );
-      console.log(
-        `${LOCKER_API}/api/lock/listDocument/${userInfo.aadharNumber}`
-      );
-      setDocs(response.data.data || []);
-    };
-    fetchAll();
-  }, [userInfo]);
+      try {
+        setLoading(true);
+        const userRes = await axios.get(
+          `${USER_API}/api/auth/getUser/${userInfo.email}`
+        );
+        const aadharNumber = userRes.data.data.aadharNumber;
 
-  const refreshDataDocuments = async () => {
+        const newUser = { ...userInfo, aadharNumber };
+        setUserInfo(newUser);
+
+        const docsRes = await axios.get(
+          `${LOCKER_API}/api/lock/listDocument/${aadharNumber}`
+        );
+        setDocs(docsRes.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setErrorMsg("Failed to fetch user or documents");
+        setLoading(false);
+      }
+    };
+
+    if (userInfo.email) {
+      fetchAll();
+    }
+  }, []);
+
+  const refreshDocuments = async () => {
     try {
-      const response = await axios.get(
+      const res = await axios.get(
         `${LOCKER_API}/api/lock/listDocument/${userInfo.aadharNumber}`
       );
-      setDocs(response.data.data);
-    } catch (error) {
-      console.log(error);
+      setDocs(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to refresh documents");
+    }
+  };
+
+  const uploadFiles = async () => {
+    if (!selectedFile) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("name", selectedName);
+      formData.append("imageFile", selectedFile);
+
+      const mediaRes = await axios.post(
+        `${MEDIA_API}/api/images/upload`,
+        formData
+      );
+      const { name: fileName, path: filePath } = mediaRes.data.data;
+
+      await axios.post(`${LOCKER_API}/api/lock/add`, {
+        aadharNumber: userInfo.aadharNumber,
+        fileName,
+        filePath,
+      });
+
+      setSuccessMsg("Document uploaded successfully");
+      setTimeout(() => setSuccessMsg(""), 3000);
+      closeUploadModal();
+      refreshDocuments();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Upload failed");
+    }
+  };
+
+  const downloadDoc = async (doc) => {
+    try {
+      const response = await fetch(doc.filePath);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.fileName || "document";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+      
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  };
+
+  const deleteDoc = async (fileId) => {
+    try {
+      await axios.delete(
+        `${LOCKER_API}/api/lock/delete/${userInfo.aadharNumber}/${fileId}`
+      );
+      refreshDocuments();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to delete document");
     }
   };
 
@@ -92,56 +150,14 @@ export default function DocumentInfo() {
     setSelectedName("");
   };
 
-  const onFileChange = (e) => {
-    const f = e.target.files?.[0] || null;
-    setSelectedFile(f);
-    setSelectedName(f?.name || "");
-  };
-
-  const uploadFiles = async () => {
-    if (!selectedFile) return;
-
-    const fileData = new FormData();
-    fileData.append("name", selectedName);
-    fileData.append("imageFile", selectedFile);
-
-    const uploadDocumentResponse = await axios.post(
-      `${MEDIA_API}/api/images/upload`,
-      fileData
-    );
-    const fileName = uploadDocumentResponse.data.data.name;
-    const filePath = uploadDocumentResponse.data.data.path;
-
-    const addDocument = await axios.post(`${LOCKER_API}/api/lock/add`, {
-      aadharNumber: userInfo.aadharNumber,
-      fileName: fileName,
-      filePath: filePath,
-    });
-
-    refreshDataDocuments();
-    closeUploadModal();
-    setSuccessMsg("Successfully uploaded");
-    setTimeout(() => setSuccessMsg(""), 3000);
-  };
-
-  const downloadDoc = (doc) => {
-    window.alert(`Downloading ${doc.fileName}`);
-  };
-
-  const deleteDoc = async (id) => {
-    const res = await axios.delete(
-      `${LOCKER_API}/api/lock/delete/${userInfo.aadharNumber}/${id}`
-    );
-    refreshDataDocuments();
-  };
-
   const openUpdateModal = (id) => {
-    const doc = docs.find((x) => x.fileId === id);
-    if (!doc) return;
-    setEditingDoc(doc);
-    setEditName(doc.fileName);
-    setEditFile(null);
-    setOpenUpdate(true);
+    const doc = docs.find((d) => d.fileId === id);
+    if (doc) {
+      setEditingDoc(doc);
+      setEditName(doc.fileName);
+      setEditFile(null);
+      setOpenUpdate(true);
+    }
   };
 
   const closeUpdateModal = () => {
@@ -154,34 +170,44 @@ export default function DocumentInfo() {
   const saveUpdate = async () => {
     if (!editingDoc) return;
 
-    let fileName = editName;
-    let filePath = editingDoc.filePath;
+    try {
+      let fileName = editName;
+      let filePath = editingDoc.filePath;
 
-    if (editFile) {
-      const updateForm = new FormData();
-      updateForm.append("name", editFile.name);
-      updateForm.append("imageFile", editFile);
+      if (editFile) {
+        const updateForm = new FormData();
+        updateForm.append("name", editFile.name);
+        updateForm.append("imageFile", editFile);
 
-      const mediaUpload = await axios.post(
-        `${MEDIA_API}/api/images/upload`,
-        updateForm
-      );
+        const uploadRes = await axios.post(
+          `${MEDIA_API}/api/images/upload`,
+          updateForm
+        );
+        fileName = uploadRes.data.data.name;
+        filePath = uploadRes.data.data.path;
+      }
 
-      fileName = mediaUpload.data.data.name;
-      filePath = mediaUpload.data.data.path;
+      await axios.put(`${LOCKER_API}/api/lock/update`, {
+        aadharNumber: userInfo.aadharNumber,
+        fileId: editingDoc.fileId,
+        fileName,
+        filePath,
+      });
+
+      setSuccessMsg("Document updated");
+      setTimeout(() => setSuccessMsg(""), 3000);
+      closeUpdateModal();
+      refreshDocuments();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Update failed");
     }
+  };
 
-    await axios.put(`${LOCKER_API}/api/lock/update`, {
-      aadharNumber: userInfo.aadharNumber,
-      fileId: editingDoc.fileId,
-      fileName: fileName,
-      filePath: filePath,
-    });
-
-    refreshDataDocuments();
-    closeUpdateModal();
-    setSuccessMsg("Document updated");
-    setTimeout(() => setSuccessMsg(""), 3000);
+  const onFileChange = (e) => {
+    const f = e.target.files?.[0] || null;
+    setSelectedFile(f);
+    setSelectedName(f?.name || "");
   };
 
   return (
@@ -193,7 +219,7 @@ export default function DocumentInfo() {
           </h1>
           <button
             onClick={openUploadModal}
-            className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
+            className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600"
           >
             Upload Document
           </button>
@@ -202,6 +228,11 @@ export default function DocumentInfo() {
         {successMsg && (
           <div className="mb-4 rounded-xl bg-green-500/10 p-3 text-sm text-green-600 dark:text-green-400">
             {successMsg}
+          </div>
+        )}
+        {errorMsg && (
+          <div className="mb-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
+            {errorMsg}
           </div>
         )}
 
@@ -215,7 +246,16 @@ export default function DocumentInfo() {
               </tr>
             </thead>
             <tbody className="text-sm text-navy-700 dark:text-white">
-              {docs.length === 0 && (
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="px-6 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              ) : docs.length === 0 ? (
                 <tr>
                   <td
                     colSpan={3}
@@ -224,40 +264,39 @@ export default function DocumentInfo() {
                     No documents found
                   </td>
                 </tr>
-              )}
-              {docs.map((doc) => (
-                <tr
-                  key={doc.fileId}
-                  className="border-b border-white/5 last:border-none"
-                >
-                  <td className="break-all px-6 py-4">{doc.fileName}</td>
-                  <td className="px-6 py-4">
-                    {new Date(doc.creationDate).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
+              ) : (
+                docs.map((doc) => (
+                  <tr
+                    key={doc.fileId}
+                    className="border-b border-white/5 last:border-none"
+                  >
+                    <td className="break-all px-6 py-4">{doc.fileName}</td>
+                    <td className="px-6 py-4">
+                      {new Date(doc.creationDate).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => downloadDoc(doc)}
-                        className="rounded-lg px-3 py-1 text-xs font-medium text-brand-500 hover:underline"
+                        className="mr-2 text-xs text-brand-500 hover:underline"
                       >
                         Download
                       </button>
                       <button
                         onClick={() => openUpdateModal(doc.fileId)}
-                        className="rounded-lg px-3 py-1 text-xs font-medium text-yellow-500 hover:underline"
+                        className="mr-2 text-xs text-yellow-500 hover:underline"
                       >
                         Update
                       </button>
                       <button
                         onClick={() => deleteDoc(doc.fileId)}
-                        className="rounded-lg px-3 py-1 text-xs font-medium text-red-500 hover:underline"
+                        className="text-xs text-red-500 hover:underline"
                       >
                         Delete
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -265,7 +304,7 @@ export default function DocumentInfo() {
 
       {openUpload && (
         <div className="bg-black/40 fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800">
+          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl dark:bg-navy-800">
             <h2 className="text-xl font-semibold text-navy-700 dark:text-white">
               Upload Document
             </h2>
@@ -276,30 +315,26 @@ export default function DocumentInfo() {
                 className="w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
               />
               {selectedFile && (
-                <div className="rounded-xl border border-white/10 p-3 text-sm text-gray-700 dark:text-gray-200">
-                  <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                    Document Name
-                  </label>
-                  <input
-                    type="text"
-                    value={selectedName}
-                    onChange={(e) => setSelectedName(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={selectedName}
+                  onChange={(e) => setSelectedName(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
+                  placeholder="Document Name"
+                />
               )}
             </div>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={closeUploadModal}
-                className="rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
+                className="text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
               >
                 Cancel
               </button>
               <button
                 onClick={uploadFiles}
-                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:opacity-60"
                 disabled={!selectedFile}
+                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60"
               >
                 Upload
               </button>
@@ -310,45 +345,33 @@ export default function DocumentInfo() {
 
       {openUpdate && editingDoc && (
         <div className="bg-black/40 fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800">
+          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl dark:bg-navy-800">
             <h2 className="text-xl font-semibold text-navy-700 dark:text-white">
               Update Document
             </h2>
-            <div className="mt-4">
-              <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                Name
-              </label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
-              />
-            </div>
-            <div className="mt-4">
-              <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                Replace File (optional)
-              </label>
-              <input
-                type="file"
-                onChange={(e) => setEditFile(e.target.files?.[0] || null)}
-                className="w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
-              />
-              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Old size: {editingDoc.size ? formatBytes(editingDoc.size) : "-"}
-                {editFile && <> → New size: {formatBytes(editFile.size)}</>}
-              </div>
-            </div>
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
+              placeholder="Document Name"
+            />
+            <input
+              type="file"
+              onChange={(e) => setEditFile(e.target.files?.[0] || null)}
+              className="mt-4 w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
+            />
+
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={closeUpdateModal}
-                className="rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
+                className="text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
               >
                 Cancel
               </button>
               <button
                 onClick={saveUpdate}
-                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
+                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600"
               >
                 Save
               </button>
