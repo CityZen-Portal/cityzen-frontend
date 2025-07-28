@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { MdAddCircleOutline, MdDelete, MdLocationOn } from 'react-icons/md';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
-
 
 // const JobApplicationForm = ({ onFormSubmit, initialData }) => {
 //   const [formData, setFormData] = useState(initialData?.formData || {
@@ -18,8 +16,9 @@ import { useNavigate } from 'react-router-dom';
 //     street: '', taluk: '', district: '', state: '', pincode: '', wardNumber: '',
 //   });
 
-const JobApplicationForm = ({ onFormSubmit, initialData }) => {
-    const navigate = useNavigate();
+const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
+    const [applicantId, setApplicantId] = useState(initialData?.applicantId || '');
+
     const [formData, setFormData] = useState(initialData?.formData || {
     fullName: '',
     email: '',
@@ -211,11 +210,10 @@ const JobApplicationForm = ({ onFormSubmit, initialData }) => {
 
 
   // Success
-  toast.success('Application submitted successfully!', {
+  toast.success('Job application submitted successfully!', {
     position: 'top-right',
     autoClose: 2000,
     theme: 'colored',
-    onClose: () => navigate('/citizen/job-application/JobApplicationResponseView')
   });
 
   if (onFormSubmit) {
@@ -227,35 +225,82 @@ const JobApplicationForm = ({ onFormSubmit, initialData }) => {
     // <div className="min-h-screen bg-navy-900 py-10">
         <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
             <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
-                <h2 className="text-2xl font-bold mb-6 text-center">Job Application Form</h2>
+                <h2 className="text-2xl font-bold mb-6 text-center">Edit Job Application</h2>
 
                 {/* Personal Info */}
                 <h3 className="text-xl font-semibold mb-6 mt-14 text-center">Personal Info</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Full Name
-                    <input type="text" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal" />
-                </label>
-                <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Email
-                    <input type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal" /> 
-                </label>
-                <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Phone Number
-                    <input type="number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" /> 
-                </label >
-                <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Age
-                    <input type="number" value={formData.age} onChange={(e) => handleInputChange('age', e.target.value)} className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" /> 
-                </label>
-                <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Gender
-                    <select value={formData.gender} onChange={(e) => handleInputChange('gender', e.target.value)} className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal">
-                    <option value="">Select Gender</option>
-                    <option>Male</option>
-                    <option>Female</option>
-                    <option>Other</option>
-                    </select>
-                </label>
-                <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Highest Qualification
-                    <input type="text" value={formData.education} onChange={(e) => handleInputChange('education', e.target.value)} className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal" />
-                </label>
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    {/* Applicant ID - full width */}
+    <div className="md:col-span-1">
+        <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Applicant ID</label>
+        <input
+            type="text"
+            name="applicantId"
+            className="w-full border mt-2 mb-4 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"      />
+        </div>
                 </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    
+
+    {/* Full Name */}
+    <div>
+      <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Full Name</label>
+      <input
+        type="text"
+        name="fullName"
+        className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"      />
+    </div>
+
+    {/* Email */}
+    <div>
+      <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Email</label>
+      <input
+        type="email"
+        name="email"
+        className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"      />
+    </div>
+
+    {/* Phone Number */}
+    <div>
+      <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Phone Number</label>
+      <input
+        type="number"
+        name="phone"
+        className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"      />
+    </div>
+
+    {/* Age */}
+    <div>
+      <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Age</label>
+      <input
+        type="number"
+        name="age"
+        className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"      />
+    </div>
+
+    {/* Gender */}
+    <div>
+      <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Gender</label>
+      <select
+        name="gender"
+        className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"      >
+        <option>Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    {/* Highest Qualification */}
+    <div>
+      <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Highest Qualification</label>
+      <input
+        type="text"
+        name="qualification"
+        className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"
+      />
+    </div>
+  </div>
 
                 {/* Location Section */}
                 <div className="mb-8">
@@ -335,4 +380,4 @@ const JobApplicationForm = ({ onFormSubmit, initialData }) => {
   );
 };
 
-export default JobApplicationForm;
+export default JobApplicationEdit;

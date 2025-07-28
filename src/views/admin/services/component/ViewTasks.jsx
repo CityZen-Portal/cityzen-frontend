@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  PlusIcon,
-  MapPinIcon,
-  ClockIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
 
 const initialNewTaskState = {
   title: "",
@@ -20,42 +16,32 @@ function ViewTasks() {
   const navigate = useNavigate();
 
   const [bookingRequests, setBookingRequests] = useState([]);
-  const [staffList, setStaffList] = useState([
-    "John Doe",
-    "Jane Smith",
-    "Mike Johnson",
-    "Sarah Williams",
-  ]);
+  const [staffList, setStaffList] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [newTask, setNewTask] = useState(initialNewTaskState);
-  const [selectedBooking, setSelectedBooking] = useState("");
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedBookingData, setSelectedBookingData] = useState(null); // 🔹 Save full booking data
 
   useEffect(() => {
-    setBookingRequests([
-      {
-        id: "BR-101",
-        userName: "Alice Johnson",
-        serviceName: "Garden Maintenance",
-        date: "2024-01-25",
-        time: "11:00",
-        address: "88 Park Lane, City",
-        note: "Need special care for roses.",
-      },
-      {
-        id: "BR-102",
-        userName: "Bob Martin",
-        serviceName: "Lawn Mowing",
-        date: "2024-01-26",
-        time: "15:00",
-        address: "12 Palm Street, Town",
-        note: "Please mow the backyard too.",
-      },
-    ]);
+    const fetchRequest = async () => {
+      try {
+        const response = await axios.get(
+          "https://utility-booking-backend.onrender.com/api/services/request/all"
+        );
+        const visibleRequests = response.data.data.filter((request) => request.show === false);
+
+      setBookingRequests(visibleRequests);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchRequest();
   }, []);
 
   const handleOpen = (task = null) => {
     setSelectedBooking("");
+    setStaffList([]);
     if (task) {
       setCurrentTask(task);
       setNewTask(task);
@@ -71,20 +57,39 @@ function ViewTasks() {
     setCurrentTask(null);
     setNewTask(initialNewTaskState);
     setSelectedBooking("");
+    setStaffList([]);
+    setSelectedBookingData(null);
   };
 
-  const handleBookingSelect = (bookingId) => {
+  const handleBookingSelect = async (bookingId) => {
     setSelectedBooking(bookingId);
+
     const selected = bookingRequests.find((b) => b.id === bookingId);
-    if (selected) {
-      setNewTask((prev) => ({
-        ...prev,
-        title: selected.serviceName,
-        date: selected.date,
-        time: selected.time,
-        address: selected.address,
-        description: `Booking by ${selected.userName}: ${selected.note}`,
-      }));
+    if (!selected) return;
+
+    setSelectedBookingData(selected); 
+
+    setNewTask((prev) => ({
+      ...prev,
+      title: selected.serviceName || selected.services,
+      date: selected.date,
+      time: selected.time,
+      address: selected.address,
+      description: `Booking by ${selected.name}: ${selected.note}`,
+    }));
+
+    try {
+      const res = await axios.get(
+        `https://utility-booking-backend.onrender.com/api/staff/department/${encodeURIComponent(selected.services)}`
+      );
+      const fetchedStaff = res.data?.data?.data || [];
+      setStaffList(fetchedStaff.map((staff) => ({
+        name: staff.fullName,
+        id: staff._id
+      })));
+    } catch (error) {
+      console.error("Error fetching staff list:", error);
+      setStaffList([]);
     }
   };
 
@@ -94,12 +99,53 @@ function ViewTasks() {
   };
 
   const handleSaveTask = async () => {
-    if (!newTask.title || !newTask.staff || !newTask.date || !newTask.time || !newTask.address) {
+    if (
+      !newTask.title ||
+      !newTask.staff ||
+      !newTask.date ||
+      !newTask.time ||
+      !newTask.address
+    ) {
       alert("Please fill in all required fields.");
       return;
     }
 
     console.log("Saving task: ", newTask);
+
+    try {
+      // 🔹 Get selected staff ID from list
+      const selectedStaff = staffList.find((s) => s.name === newTask.staff);
+      if (!selectedStaff || !selectedBookingData) {
+        alert("Invalid staff or booking request selection.");
+        return;
+      }
+
+      // 🔹 POST to /api/task/add
+      const taskPayload = {
+        serviceId: selectedBookingData.id,
+        citizenId: selectedBookingData.citizenId || "1", // fallback to 1
+        staffId: selectedStaff.id,
+        status: "PENDING",
+      };
+
+      await axios.post(
+        "https://utility-booking-backend.onrender.com/api/task/add",
+        taskPayload
+      );
+
+      // 🔹 PUT to update service (set show: true)
+      await axios.put(
+        `https://utility-booking-backend.onrender.com/api/services/request/${selectedBookingData.id}`,
+        { ...selectedBookingData, show: true }
+      );
+
+      console.log("Task added and booking updated successfully.");
+      alert("Task assigned successfully!");
+    } catch (error) {
+      console.error("Error saving task:", error);
+      alert("Failed to assign task.");
+    }
+
 
     handleClose();
   };
@@ -139,9 +185,9 @@ function ViewTasks() {
                   key={req.id}
                   className="border rounded-lg p-4 bg-gray-50 shadow-sm"
                 >
-                  <h4 className="font-bold text-blue-700">{req.serviceName}</h4>
+                  <h4 className="font-bold text-blue-700">{req.services}</h4>
                   <p className="text-sm text-gray-600">
-                    Requested by: {req.userName}
+                    Requested by: {req.name}
                   </p>
                   <p className="text-sm">
                     📅 {req.date} ⏰ {req.time}
@@ -156,6 +202,7 @@ function ViewTasks() {
           )}
         </div>
       </div>
+
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl p-8 m-4">
@@ -176,7 +223,7 @@ function ViewTasks() {
                   <option value="">-- Select --</option>
                   {bookingRequests.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.serviceName} (by {b.userName})
+                      {b.services} (by {b.name})
                     </option>
                   ))}
                 </select>
@@ -200,8 +247,8 @@ function ViewTasks() {
               >
                 <option value="">Select Staff Member</option>
                 {staffList.map((staff) => (
-                  <option key={staff} value={staff}>
-                    {staff}
+                  <option key={staff.id} value={staff.name}>
+                    {staff.name}
                   </option>
                 ))}
               </select>
