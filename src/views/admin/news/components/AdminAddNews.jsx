@@ -16,7 +16,7 @@ const AddNews = () => {
     location: '',
     category: '',
     othercategory: '',
-    author_id: '4',
+    authorId: '4',
     isBreaking: false,
     image: null,
   });
@@ -100,7 +100,7 @@ const AddNews = () => {
         content: formData.content,
         location: formData.location,
         breaking: formData.isBreaking,
-        author_id: '4',
+        authorId: '4',
         ...(formData.category === 'OTHERS'
           ? {
               category_name: formData.othercategory,
