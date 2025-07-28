@@ -3,6 +3,9 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 
 
@@ -25,13 +28,13 @@ function ReportForm() {
       "https://utility-booking-backend.onrender.com/api/report/add",
       data
     );
-    alert("Report submitted!");
+    toast.success("Report submitted!");
     navigate("/citizen/Services");
     }
     catch(error)
     {
       console.error("Error submitting feedback:", error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -93,6 +96,7 @@ function ReportForm() {
           </div>
         </form>
       </div>
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 }
