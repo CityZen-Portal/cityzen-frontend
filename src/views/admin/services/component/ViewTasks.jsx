@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  PlusIcon,
-  MapPinIcon,
-  ClockIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
+import { PlusIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 
 const initialNewTaskState = {
@@ -26,6 +21,7 @@ function ViewTasks() {
   const [currentTask, setCurrentTask] = useState(null);
   const [newTask, setNewTask] = useState(initialNewTaskState);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedBookingData, setSelectedBookingData] = useState(null); // 🔹 Save full booking data
 
   useEffect(() => {
     const fetchRequest = async () => {
@@ -33,8 +29,9 @@ function ViewTasks() {
         const response = await axios.get(
           "https://utility-booking-backend.onrender.com/api/services/request/all"
         );
-        console.log(response.data.data);
-        setBookingRequests(response.data.data);
+        const visibleRequests = response.data.data.filter((request) => request.show === false);
+
+      setBookingRequests(visibleRequests);
       } catch (err) {
         console.log(err);
       }
@@ -61,37 +58,40 @@ function ViewTasks() {
     setNewTask(initialNewTaskState);
     setSelectedBooking("");
     setStaffList([]);
+    setSelectedBookingData(null);
   };
-const handleBookingSelect = async (bookingId) => {
-  setSelectedBooking(bookingId);
 
-  const selected = bookingRequests.find((b) => b.id === bookingId);
-  if (!selected) return;
+  const handleBookingSelect = async (bookingId) => {
+    setSelectedBooking(bookingId);
 
-  // Pre-fill task form with booking request details
-  setNewTask((prev) => ({
-    ...prev,
-    title: selected.serviceName || selected.services, // Fallback if inconsistent naming
-    date: selected.date,
-    time: selected.time,
-    address: selected.address,
-    description: `Booking by ${selected.name}: ${selected.note}`,
-  }));
+    const selected = bookingRequests.find((b) => b.id === bookingId);
+    if (!selected) return;
 
-  try {
-    const res = await axios.get(
-      `http://localhost:8080/api/staff/department/${encodeURIComponent(selected.services)}`
-    );
+    setSelectedBookingData(selected); 
 
-    const fetchedStaff = res.data?.data?.data || [];
-    setStaffList(fetchedStaff.map((staff) => staff.fullName));
-  } catch (error) {
-    console.error("Error fetching staff list:", error);
-    setStaffList([]);
-  }
-};
+    setNewTask((prev) => ({
+      ...prev,
+      title: selected.serviceName || selected.services,
+      date: selected.date,
+      time: selected.time,
+      address: selected.address,
+      description: `Booking by ${selected.name}: ${selected.note}`,
+    }));
 
-
+    try {
+      const res = await axios.get(
+        `https://utility-booking-backend.onrender.com/api/staff/department/${encodeURIComponent(selected.services)}`
+      );
+      const fetchedStaff = res.data?.data?.data || [];
+      setStaffList(fetchedStaff.map((staff) => ({
+        name: staff.fullName,
+        id: staff._id
+      })));
+    } catch (error) {
+      console.error("Error fetching staff list:", error);
+      setStaffList([]);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -110,8 +110,39 @@ const handleBookingSelect = async (bookingId) => {
       return;
     }
 
-    // 🔗 Integrate with backend later
-    console.log("Saving task: ", newTask);
+    try {
+      // 🔹 Get selected staff ID from list
+      const selectedStaff = staffList.find((s) => s.name === newTask.staff);
+      if (!selectedStaff || !selectedBookingData) {
+        alert("Invalid staff or booking request selection.");
+        return;
+      }
+
+      // 🔹 POST to /api/task/add
+      const taskPayload = {
+        serviceId: selectedBookingData.id,
+        citizenId: selectedBookingData.citizenId || "1", // fallback to 1
+        staffId: selectedStaff.id,
+        status: "PENDING",
+      };
+
+      await axios.post(
+        "https://utility-booking-backend.onrender.com/api/task/add",
+        taskPayload
+      );
+
+      // 🔹 PUT to update service (set show: true)
+      await axios.put(
+        `https://utility-booking-backend.onrender.com/api/services/request/${selectedBookingData.id}`,
+        { ...selectedBookingData, show: true }
+      );
+
+      console.log("Task added and booking updated successfully.");
+      alert("Task assigned successfully!");
+    } catch (error) {
+      console.error("Error saving task:", error);
+      alert("Failed to assign task.");
+    }
 
     handleClose();
   };
@@ -214,8 +245,8 @@ const handleBookingSelect = async (bookingId) => {
               >
                 <option value="">Select Staff Member</option>
                 {staffList.map((staff) => (
-                  <option key={staff} value={staff}>
-                    {staff}
+                  <option key={staff.id} value={staff.name}>
+                    {staff.name}
                   </option>
                 ))}
               </select>
