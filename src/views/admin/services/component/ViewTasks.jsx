@@ -85,7 +85,7 @@ function ViewTasks() {
       const fetchedStaff = res.data?.data?.data || [];
       setStaffList(fetchedStaff.map((staff) => ({
         name: staff.fullName,
-        id: staff._id
+        id: staff.id
       })));
     } catch (error) {
       console.error("Error fetching staff list:", error);
@@ -128,6 +128,7 @@ function ViewTasks() {
         status: "PENDING",
       };
 
+      // console.log(taskPayload);
       await axios.post(
         "https://utility-booking-backend.onrender.com/api/task/add",
         taskPayload
