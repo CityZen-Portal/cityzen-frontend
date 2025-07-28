@@ -110,6 +110,8 @@ function ViewTasks() {
       return;
     }
 
+    console.log("Saving task: ", newTask);
+
     try {
       // 🔹 Get selected staff ID from list
       const selectedStaff = staffList.find((s) => s.name === newTask.staff);
@@ -144,6 +146,7 @@ function ViewTasks() {
       alert("Failed to assign task.");
     }
 
+
     handleClose();
   };
 
@@ -169,7 +172,6 @@ function ViewTasks() {
           </button>
         </div>
 
-        {/* ✅ Only show User Booking Requests */}
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4 text-gray-700">
             User Booking Requests
