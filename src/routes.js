@@ -275,6 +275,7 @@ const routes = [
     path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
+    sidebar:false
   },
   {
     name: "Views and Analytics",
