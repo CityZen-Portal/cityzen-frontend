@@ -1,13 +1,24 @@
 import axios from "axios";
+import { Axis3D } from "lucide-react";
 import React, { useEffect, useState } from "react";
+
+function formatBytes(bytes) {
+  if (!bytes && bytes !== 0) return "-";
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+const MEDIA_API = "https://media-api-service-hzx2.onrender.com";
+const LOCKER_API = "http://localhost:8080";
 
 export default function DocumentInfo() {
   const [docs, setDocs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
   const [openUpload, setOpenUpload] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedName, setSelectedName] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
   const [openUpdate, setOpenUpdate] = useState(false);
@@ -15,64 +26,77 @@ export default function DocumentInfo() {
   const [editName, setEditName] = useState("");
   const [editFile, setEditFile] = useState(null);
 
-  const aadharNumber = "1234564447421241778";
-  const API_BASE = "http://localhost:8080";
-
   useEffect(() => {
-    let cancelled = false;
-    const fetchData = async () => {
-      setLoading(true);
-      setErrorMsg("");
+    const fetchAllDocuments = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE}/api/lock/listDocument/${aadharNumber}`
+          `${LOCKER_API}/api/lock/listDocument/1234564447421241778`
         );
-        if (!cancelled) {
-          setDocs(response.data?.data || []);
-        }
+        setDocs(response.data.data || []);
       } catch (error) {
-        if (!cancelled) {
-          console.error(error);
-          setErrorMsg(
-            error?.response?.data?.message || "Failed to fetch documents"
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+        console.log(error);
       }
     };
-    fetchData();
-    return () => {
-      cancelled = true;
-    };
-  }, [API_BASE, aadharNumber]);
+    fetchAllDocuments();
+  }, []);
+
+  const refreshDataDocuments = async () => {
+    try {
+      const response = await axios.get(
+        `${LOCKER_API}/api/lock/listDocument/1234564447421241778`
+      );
+      setDocs(response.data.data);
+      console.log("refreshDataDocuments called");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const openUploadModal = () => {
-    setSelectedFiles([]);
+    setSelectedFile(null);
+    setSelectedName("");
     setOpenUpload(true);
   };
 
   const closeUploadModal = () => {
     setOpenUpload(false);
-    setSelectedFiles([]);
+    setSelectedFile(null);
+    setSelectedName("");
   };
 
   const onFileChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    setSelectedFiles(files.map((f) => ({ file: f, name: f.name })));
+    const f = e.target.files?.[0] || null;
+    setSelectedFile(f);
+    setSelectedName(f?.name || "");
   };
 
   const uploadFiles = async () => {
-    if (!selectedFiles.length) return;
+    if (!selectedFile) return;
 
-    const newDocs = selectedFiles.map((f, idx) => ({
-      fileId: Date.now() + idx,
-      fileName: f.name || f.file.name,
-      creationDate: new Date().toISOString(),
-      url: "#",
-    }));
+    const fileData = new FormData();
 
-    setDocs((d) => [...newDocs, ...d]);
+    fileData.append("name", selectedName);
+    fileData.append("imageFile", selectedFile);
+
+    const uploadDocumentResponse = await axios.post(
+      `${MEDIA_API}/api/images/upload`,
+      fileData
+    );
+    const fileName = uploadDocumentResponse.data.data.name;
+    const filePath = uploadDocumentResponse.data.data.path;
+
+    const addDocument =  await axios.post(
+      "http://localhost:8080/api/lock/add",
+      {
+        aadharNumber: "1234564447421241778",
+        fileName: fileName,
+        filePath: filePath,
+      }
+    );
+
+    console.log(addDocument);
+
+    refreshDataDocuments();
     closeUploadModal();
     setSuccessMsg("Successfully uploaded");
     setTimeout(() => setSuccessMsg(""), 3000);
@@ -82,10 +106,12 @@ export default function DocumentInfo() {
     window.alert(`Downloading ${doc.fileName}`);
   };
 
-  const deleteDoc = (id) => {
-    setDocs((d) => d.filter((x) => x.fileId !== id));
-    setSuccessMsg("Document deleted");
-    setTimeout(() => setSuccessMsg(""), 3000);
+  const deleteDoc = async (id) => {
+    const res = await axios.delete(
+      `http://localhost:8080/api/lock/delete/1234564447421241778/${id}`
+    );
+    refreshDataDocuments();
+    console.log(res.data);
   };
 
   const openUpdateModal = (id) => {
@@ -107,12 +133,25 @@ export default function DocumentInfo() {
   const saveUpdate = async () => {
     if (!editingDoc) return;
 
+
+    const updateResponse = await axios.put(
+      "http://localhost:8080/api/lock/update",
+      {
+        aadharNumber: "1234564447421241778",
+        
+      }
+    );
+
+
+
+
     setDocs((prev) =>
       prev.map((d) =>
         d.fileId === editingDoc.fileId
           ? {
               ...d,
               fileName: editName || d.fileName,
+              size: editFile ? editFile.size : d.size,
               creationDate: editFile
                 ? new Date().toISOString()
                 : d.creationDate,
@@ -125,26 +164,19 @@ export default function DocumentInfo() {
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
-  const changeSelectedName = (index, value) => {
-    setSelectedFiles((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], name: value };
-      return copy;
-    });
-  };
-
   return (
-    <div className="min-h-screen w-full bg-lightPrimary p-4 dark:bg-navy-900 sm:p-6">
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-          <h1 className="text-xl font-bold text-navy-700 dark:text-white sm:text-2xl">
+    <div className="min-h-screen w-full bg-lightPrimary p-6 dark:bg-navy-900">
+      <div className="mx-auto w-full">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-navy-700 dark:text-white">
             Documents
           </h1>
+
           <button
             onClick={openUploadModal}
-            className="rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
+            className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
           >
-            Upload Documents
+            Upload Document
           </button>
         </div>
 
@@ -153,156 +185,94 @@ export default function DocumentInfo() {
             {successMsg}
           </div>
         )}
-        {errorMsg && (
-          <div className="mb-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
-            {errorMsg}
-          </div>
-        )}
-        {loading && (
-          <div className="rounded-2xl border border-white/10 p-6 text-center text-sm text-gray-500 dark:text-gray-400">
-            Loading documents...
-          </div>
-        )}
 
-        {!loading && (
-          <>
-            {/* Desktop / Tablet table */}
-            <div className="hidden overflow-x-auto rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl dark:bg-navy-800 sm:block">
-              <table className="min-w-full table-auto text-left">
-                <thead className="text-xs uppercase text-gray-500 dark:text-gray-400">
-                  <tr className="border-b border-white/10">
-                    <th className="px-6 py-4">Name</th>
-                    <th className="px-6 py-4">Uploaded</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm text-navy-700 dark:text-white">
-                  {docs.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        className="px-6 py-10 text-center text-gray-500 dark:text-gray-400"
-                      >
-                        No documents found
-                      </td>
-                    </tr>
-                  )}
-                  {docs.map((doc) => (
-                    <tr
-                      key={doc.fileId}
-                      className="border-b border-white/5 last:border-none"
-                    >
-                      <td className="break-all px-6 py-4">{doc.fileName}</td>
-                      <td className="px-6 py-4">
-                        {new Date(doc.creationDate).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => downloadDoc(doc)}
-                            className="rounded-lg px-3 py-1 text-xs font-medium text-brand-500 hover:underline"
-                          >
-                            Download
-                          </button>
-                          <button
-                            onClick={() => openUpdateModal(doc.fileId)}
-                            className="rounded-lg px-3 py-1 text-xs font-medium text-yellow-500 hover:underline"
-                          >
-                            Update
-                          </button>
-                          <button
-                            onClick={() => deleteDoc(doc.fileId)}
-                            className="rounded-lg px-3 py-1 text-xs font-medium text-red-500 hover:underline"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="space-y-3 sm:hidden">
+        <div className="overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl dark:bg-navy-800">
+          <table className="min-w-full table-auto text-left">
+            <thead className="text-xs uppercase text-gray-500 dark:text-gray-400">
+              <tr className="border-b border-white/10">
+                <th className="px-6 py-4">Name</th>
+                <th className="px-6 py-4">Uploaded</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm text-navy-700 dark:text-white">
               {docs.length === 0 && (
-                <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-gray-500 dark:text-gray-400">
-                  No documents found
-                </div>
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="px-6 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No documents found
+                  </td>
+                </tr>
               )}
-              {docs.map((doc) => (
-                <div
-                  key={doc.fileId}
-                  className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl dark:bg-navy-800"
-                >
-                  <p className="break-all text-sm font-semibold text-navy-700 dark:text-white">
-                    {doc.fileName}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(doc.creationDate).toLocaleString()}
-                  </p>
 
-                  <div className="mt-3 flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => downloadDoc(doc)}
-                      className="rounded-lg px-3 py-1 text-xs font-medium text-brand-500 hover:underline"
-                    >
-                      Download
-                    </button>
-                    <button
-                      onClick={() => openUpdateModal(doc.fileId)}
-                      className="rounded-lg px-3 py-1 text-xs font-medium text-yellow-500 hover:underline"
-                    >
-                      Update
-                    </button>
-                    <button
-                      onClick={() => deleteDoc(doc.fileId)}
-                      className="rounded-lg px-3 py-1 text-xs font-medium text-red-500 hover:underline"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+              {docs.map((doc) => (
+                <tr
+                  key={doc.fileId}
+                  className="border-b border-white/5 last:border-none"
+                >
+                  <td className="break-all px-6 py-4">{doc.fileName}</td>
+                  <td className="px-6 py-4">
+                    {new Date(doc.creationDate).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => downloadDoc(doc)}
+                        className="rounded-lg px-3 py-1 text-xs font-medium text-brand-500 hover:underline"
+                      >
+                        Download
+                      </button>
+                      <button
+                        onClick={() => openUpdateModal(doc.fileId)}
+                        className="rounded-lg px-3 py-1 text-xs font-medium text-yellow-500 hover:underline"
+                      >
+                        Update
+                      </button>
+                      <button
+                        onClick={() => deleteDoc(doc.fileId)}
+                        className="rounded-lg px-3 py-1 text-xs font-medium text-red-500 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
               ))}
-            </div>
-          </>
-        )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {openUpload && (
         <div className="bg-black/40 fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800 md:max-w-lg">
+          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800">
             <h2 className="text-xl font-semibold text-navy-700 dark:text-white">
-              Upload Documents
+              Upload Document
             </h2>
 
-            <div className="mt-4">
+            <div className="mt-4 space-y-3">
               <input
                 type="file"
-                multiple
                 onChange={onFileChange}
                 className="w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
               />
-            </div>
 
-            {selectedFiles.length > 0 && (
-              <div className="mt-4 max-h-52 space-y-3 overflow-auto rounded-xl border border-white/10 p-3 text-sm text-gray-700 dark:text-gray-200">
-                {selectedFiles.map((sf, i) => (
-                  <div key={i} className="flex flex-col">
-                    <label className="mb-1 text-xs text-gray-500 dark:text-gray-400">
-                      {`Document ${i + 1}`}
-                    </label>
-                    <input
-                      type="text"
-                      value={sf.name}
-                      onChange={(e) => changeSelectedName(i, e.target.value)}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+              {selectedFile && (
+                <div className="rounded-xl border border-white/10 p-3 text-sm text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
+                    Document Name
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedName}
+                    onChange={(e) => setSelectedName(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
+                  />
+                </div>
+              )}
+            </div>
 
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -314,7 +284,7 @@ export default function DocumentInfo() {
               <button
                 onClick={uploadFiles}
                 className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:opacity-60"
-                disabled={!selectedFiles.length}
+                disabled={!selectedFile}
               >
                 Upload
               </button>
@@ -325,14 +295,14 @@ export default function DocumentInfo() {
 
       {openUpdate && editingDoc && (
         <div className="bg-black/40 fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800 md:max-w-lg">
+          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800">
             <h2 className="text-xl font-semibold text-navy-700 dark:text-white">
               Update Document
             </h2>
 
             <div className="mt-4">
               <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                Current Name
+                Name
               </label>
               <input
                 type="text"
@@ -351,6 +321,10 @@ export default function DocumentInfo() {
                 onChange={(e) => setEditFile(e.target.files?.[0] || null)}
                 className="w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
               />
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Old size: {editingDoc.size ? formatBytes(editingDoc.size) : "-"}
+                {editFile && <> → New size: {formatBytes(editFile.size)}</>}
+              </div>
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
