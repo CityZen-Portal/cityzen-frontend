@@ -10,9 +10,9 @@ function formatBytes(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-const MEDIA_API = "https://media-api-service-hzx2.onrender.com";
-const LOCKER_API = "https://locker-management-service.onrender.com";
-const USER_API = "https://auth-backend-cpcr.onrender.com";
+const MEDIA_API = process.env.REACT_APP_API_MEDIA_URL;
+const LOCKER_API = process.env.REACT_APP_API_LOCKER_URL;
+const USER_API = process.env.REACT_APP_API_UMS_URL;
 
 export default function DocumentInfo() {
   const [docs, setDocs] = useState([]);
