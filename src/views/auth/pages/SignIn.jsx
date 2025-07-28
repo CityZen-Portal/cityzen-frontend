@@ -97,6 +97,7 @@ export default function SignIn() {
       localStorage.setItem("username", response.data.data.username);
       localStorage.setItem("email", response.data.data.email);
       localStorage.setItem("role", JSON.stringify(roles));
+      localStorage.setItem("id", response.data.data.id);
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       toast.success("Login successful", {

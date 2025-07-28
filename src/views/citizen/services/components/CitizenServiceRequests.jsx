@@ -11,7 +11,8 @@ import {
   MdSort,
 } from "react-icons/md";
 
-const CitizenServiceRequests = ({ id }) => {
+const CitizenServiceRequests = () => {
+  const id=localStorage.getItem("id");
   const [viewingDetails, setViewingDetails] = useState(null);
   const [viewMode, setViewMode] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,7 +26,7 @@ const CitizenServiceRequests = ({ id }) => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/task/citizen/1234"
+          `https://utility-booking-backend.onrender.com/api/task/citizen/${id}`
         );
         console.log(response.data.data.data);
         setData(response.data.data.data );

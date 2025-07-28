@@ -99,7 +99,6 @@ function ViewTasks() {
       return;
     }
 
-    // 🔗 Integrate with backend later
     console.log("Saving task: ", newTask);
 
     handleClose();
@@ -127,7 +126,6 @@ function ViewTasks() {
           </button>
         </div>
 
-        {/* ✅ Only show User Booking Requests */}
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4 text-gray-700">
             User Booking Requests
