@@ -25,14 +25,6 @@ export default function SignUp() {
   const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [aadhaarSending, setAadhaarSending] = useState(false);
 
-  // Phone OTP verification states
-  const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpInput, setOtpInput] = useState('');
-  const [mockOtp, setMockOtp] = useState('');
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [otpVerifying, setOtpVerifying] = useState(false);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -64,7 +56,7 @@ export default function SignUp() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Name validation (replaces firstName/lastName validation)
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
       toast.error("Name is required", {
@@ -132,6 +124,23 @@ export default function SignUp() {
       });
     }
 
+    // Phone validation
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+      toast.error("Phone number is required", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Phone number must be 10 digits';
+      toast.error("Phone number must be 10 digits", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    }
+
     // Aadhar validation
     if (!formData.aadharNumber.trim()) {
       newErrors.aadharNumber = 'Aadhar number is required';
@@ -147,19 +156,6 @@ export default function SignUp() {
         autoClose: 3000,
         theme: 'colored',
       });
-    }
-
-    // Phone validation
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'Phone number must be 10 digits';
-    }
-    if (!phoneVerified) {
-      newErrors.phoneVerified = 'Phone number must be verified';
-    }
-    if (!aadhaarVerified) {
-      newErrors.aadhaarVerified = 'Aadhaar must be verified';
     }
 
     // Terms validation
@@ -236,74 +232,6 @@ export default function SignUp() {
     });
   };
 
-  const handleSendOtp = () => {
-    if (!aadhaarVerified) {
-      toast.error("Please verify Aadhaar first", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
-      return;
-    }
-
-    if (!/^\d{10}$/.test(formData.phoneNumber)) {
-      setErrors(prev => ({ ...prev, phoneNumber: 'Phone number must be 10 digits' }));
-      return;
-    }
-
-    // Generate random 6-digit OTP
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setMockOtp(generatedOtp);
-    setOtpSent(true);
-    setShowOtpModal(true);
-    setOtpInput('');
-
-    toast.info(`OTP sent to ${formData.phoneNumber}`, {
-      position: 'top-right',
-      autoClose: 3000,
-      theme: 'colored',
-    });
-  };
-
-  const handleVerifyOtp = () => {
-    if (!otpInput) {
-      setErrors(prev => ({ ...prev, otp: 'Please enter OTP' }));
-      return;
-    }
-
-    if (otpInput.length !== 6) {
-      setErrors(prev => ({ ...prev, otp: 'OTP must be 6 digits' }));
-      return;
-    }
-
-    setOtpVerifying(true);
-
-    // Mock verification delay
-    setTimeout(() => {
-      if (otpInput === mockOtp) {
-        setPhoneVerified(true);
-        setShowOtpModal(false);
-        toast.success("Phone number verified successfully!", {
-          position: 'top-right',
-          autoClose: 3000,
-          theme: 'colored',
-        });
-      } else {
-        setErrors(prev => ({ ...prev, otp: 'Invalid OTP. Please try again.' }));
-      }
-      setOtpVerifying(false);
-    }, 1000);
-  };
-
-  const copyOtpToClipboard = () => {
-    navigator.clipboard.writeText(mockOtp);
-    toast.info("OTP copied to clipboard", {
-      position: 'top-right',
-      autoClose: 2000,
-      theme: 'colored',
-    });
-  };
-
   return (
     <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
                     dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
@@ -322,77 +250,6 @@ export default function SignUp() {
         pauseOnHover
         theme="colored"
       />
-
-      {/* OTP Verification Modal */}
-      {showOtpModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Verify Phone Number</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Enter the OTP sent to {formData.phoneNumber}
-            </p>
-
-            {otpSent && mockOtp && (
-              <div className="mb-4">
-                <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                  <span className="font-mono text-lg">{mockOtp}</span>
-                  <button
-                    onClick={copyOtpToClipboard}
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium"
-                  >
-                    Copy OTP
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  This is a mock OTP for demonstration purposes
-                </p>
-              </div>
-            )}
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Enter OTP
-              </label>
-              <input
-                type="text"
-                value={otpInput}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  if (value.length <= 6) {
-                    setOtpInput(value);
-                    if (errors.otp) setErrors(prev => ({ ...prev, otp: '' }));
-                  }
-                }}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.otp ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  } bg-white dark:bg-gray-700 dark:text-white`}
-                placeholder="6-digit OTP"
-                maxLength={6}
-              />
-              {errors.otp && <p className="mt-1 text-sm text-red-600">{errors.otp}</p>}
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowOtpModal(false);
-                  setErrors(prev => ({ ...prev, otp: '' }));
-                }}
-                className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleVerifyOtp}
-                disabled={otpVerifying}
-                className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg ${otpVerifying ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-              >
-                {otpVerifying ? 'Verifying...' : 'Verify OTP'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Decorative Gradient Blobs */}
       <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400 rounded-full filter blur-3xl opacity-40"></div>
@@ -414,7 +271,7 @@ export default function SignUp() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Field (replaces First Name/Last Name fields) */}
+            {/* Name Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Full Name*</label>
               <input
@@ -512,6 +369,22 @@ export default function SignUp() {
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             </div>
 
+            {/* Phone Number Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Phone Number*</label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.phoneNumber ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
+                placeholder="9876543210"
+                maxLength="10"
+              />
+              {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
+            </div>
+
             {/* Aadhar Number */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Aadhar Number*</label>
@@ -547,51 +420,6 @@ export default function SignUp() {
                 </button>
               </div>
               {errors.aadharNumber && <p className="mt-1 text-sm text-red-600">{errors.aadharNumber}</p>}
-              {errors.aadhaarVerified && !aadhaarVerified && (
-                <p className="mt-1 text-sm text-red-600">{errors.aadhaarVerified}</p>
-              )}
-            </div>
-
-            {/* Phone Number with OTP */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Phone Number*</label>
-              <div className="flex space-x-2">
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    disabled={phoneVerified}
-                    className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.phoneNumber ? 'border-red-500' : 'border-[#a3aed0]'
-                      } ${phoneVerified ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
-                    placeholder="9876543210"
-                    maxLength="10"
-                  />
-                  {phoneVerified && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <span className="text-green-600 text-sm font-medium">✅ Verified</span>
-                    </div>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSendOtp}
-                  disabled={!aadhaarVerified || phoneVerified}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium ${phoneVerified
-                      ? 'bg-green-500 text-white cursor-not-allowed'
-                      : aadhaarVerified
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
-                        : 'bg-gray-400 text-white cursor-not-allowed'
-                    }`}
-                >
-                  {phoneVerified ? 'Verified' : 'Send OTP'}
-                </button>
-              </div>
-              {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
-              {errors.phoneVerified && !phoneVerified && (
-                <p className="mt-1 text-sm text-red-600">{errors.phoneVerified}</p>
-              )}
             </div>
 
             {/* Terms */}
@@ -616,10 +444,10 @@ export default function SignUp() {
             {/* Submit */}
             <button
               type="submit"
-              disabled={!aadhaarVerified || !phoneVerified || !agreeTerms}
+              disabled={!aadhaarVerified || !agreeTerms}
               className={`w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r
                        from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
-                       transition-all duration-300 shadow-lg mt-6 ${(!aadhaarVerified || !phoneVerified || !agreeTerms) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'
+                       transition-all duration-300 shadow-lg mt-6 ${(!aadhaarVerified || !agreeTerms) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'
                 }`}
             >
               Create Account
