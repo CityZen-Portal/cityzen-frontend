@@ -11,6 +11,8 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/solid';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const initialNewStaffState = {
   fullName: '',
@@ -47,6 +49,7 @@ function ManageStaffs() {
         setStaffs(Array.isArray(staffData) ? staffData : []);
       } catch (err) {
         console.error("Failed to fetch staff data:", err);
+        toast.error('Failed to fetch staff data. Please try again.');
         setStaffs([]);
       } finally {
         setLoading(false);
@@ -70,6 +73,8 @@ function ManageStaffs() {
     } else {
       setEditId(null);
       setNewStaff(initialNewStaffState);
+
+      
     }
     setOpen(true);
   };
@@ -88,7 +93,7 @@ function ManageStaffs() {
     const requiredFields = ['fullName', 'department', 'contactNumber', 'emailAddress', 'password', 'fullAddress', 'dob'];
     const missing = requiredFields.filter(field => !newStaff[field]);
     if (missing.length) {
-      alert("Please fill all fields.");
+      toast.error(`Please fill all fields: ${missing.join(', ')}`);
       return;
     }
 
@@ -99,16 +104,18 @@ function ManageStaffs() {
         setStaffs((prev) =>
           prev.map((s) => (s.id === editId ? { ...s, ...newStaff, id: editId } : s))
         );
+        toast.success('Staff updated successfully!');
       } else {
         // Add new staff
         const response = await axios.post("https://utility-booking-backend.onrender.com/api/staff/add", newStaff);
         const createdStaff = response.data?.data;
         setStaffs((prev) => [...prev, createdStaff]);
+        toast.success('Staff added successfully!');
       }
       handleClose();
     } catch (error) {
       console.error("Error saving staff:", error);
-      alert("Something went wrong while saving staff.");
+      toast.error('Failed to save staff. Please try again.');
     }
   };
 
@@ -117,10 +124,10 @@ function ManageStaffs() {
     try {
       await axios.delete(`https://utility-booking-backend.onrender.com/api/staff/${id}`);
       setStaffs((prev) => prev.filter((s) => s.id !== id));
-      alert("Staff member deleted successfully.");
+      toast.success('Staff deleted successfully!');
     } catch (error) {
       console.error("Failed to delete staff:", error);
-      alert("Error deleting staff. Please try again.");
+      toast.error('Failed to delete staff. Please try again.');
     }
   }
 };
@@ -240,6 +247,7 @@ function ManageStaffs() {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const categories = {
   Utilities: ["Water Supply", "Electricity", "Gas", "Internet"],
@@ -81,12 +83,13 @@ function ManageServices() {
           `https://utility-booking-backend.onrender.com/api/service/update/${editServiceId}`,
           servicePayload
         );
+        toast.success('Service updated successfully!');
       } else {
         await axios.post(
           "https://utility-booking-backend.onrender.com/api/service/add",
           servicePayload
         );
-        console.log(servicePayload);
+        toast.success('Service added successfully!');
       }
 
       loadServices();
@@ -94,6 +97,7 @@ function ManageServices() {
     } catch (err) {
       console.error("Error saving service:", err);
       setError("An error occurred while saving the service.");
+      toast.error('Failed to save service. Please try again.');
     }
   };
 
@@ -119,8 +123,10 @@ function ManageServices() {
     try {
       await axios.delete(`https://utility-booking-backend.onrender.com/api/service/delete/${id}`);
       loadServices();
+      toast.success('Service deleted successfully!');
     } catch (err) {
       console.error("Error deleting service:", err);
+      toast.error('Failed to delete service. Please try again.');
     }
   };
 
@@ -222,6 +228,7 @@ function ManageServices() {
           </div>
         ))}
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
