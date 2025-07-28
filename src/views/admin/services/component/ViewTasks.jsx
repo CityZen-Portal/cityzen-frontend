@@ -6,6 +6,7 @@ import {
   ClockIcon,
   UserIcon,
 } from "@heroicons/react/24/solid";
+import axios from "axios";
 
 const initialNewTaskState = {
   title: "",
@@ -20,42 +21,30 @@ function ViewTasks() {
   const navigate = useNavigate();
 
   const [bookingRequests, setBookingRequests] = useState([]);
-  const [staffList, setStaffList] = useState([
-    "John Doe",
-    "Jane Smith",
-    "Mike Johnson",
-    "Sarah Williams",
-  ]);
+  const [staffList, setStaffList] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [newTask, setNewTask] = useState(initialNewTaskState);
-  const [selectedBooking, setSelectedBooking] = useState("");
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
-    setBookingRequests([
-      {
-        id: "BR-101",
-        userName: "Alice Johnson",
-        serviceName: "Garden Maintenance",
-        date: "2024-01-25",
-        time: "11:00",
-        address: "88 Park Lane, City",
-        note: "Need special care for roses.",
-      },
-      {
-        id: "BR-102",
-        userName: "Bob Martin",
-        serviceName: "Lawn Mowing",
-        date: "2024-01-26",
-        time: "15:00",
-        address: "12 Palm Street, Town",
-        note: "Please mow the backyard too.",
-      },
-    ]);
+    const fetchRequest = async () => {
+      try {
+        const response = await axios.get(
+          "https://utility-booking-backend.onrender.com/api/services/request/all"
+        );
+        console.log(response.data.data);
+        setBookingRequests(response.data.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchRequest();
   }, []);
 
   const handleOpen = (task = null) => {
     setSelectedBooking("");
+    setStaffList([]);
     if (task) {
       setCurrentTask(task);
       setNewTask(task);
@@ -71,22 +60,38 @@ function ViewTasks() {
     setCurrentTask(null);
     setNewTask(initialNewTaskState);
     setSelectedBooking("");
+    setStaffList([]);
   };
+const handleBookingSelect = async (bookingId) => {
+  setSelectedBooking(bookingId);
 
-  const handleBookingSelect = (bookingId) => {
-    setSelectedBooking(bookingId);
-    const selected = bookingRequests.find((b) => b.id === bookingId);
-    if (selected) {
-      setNewTask((prev) => ({
-        ...prev,
-        title: selected.serviceName,
-        date: selected.date,
-        time: selected.time,
-        address: selected.address,
-        description: `Booking by ${selected.userName}: ${selected.note}`,
-      }));
-    }
-  };
+  const selected = bookingRequests.find((b) => b.id === bookingId);
+  if (!selected) return;
+
+  // Pre-fill task form with booking request details
+  setNewTask((prev) => ({
+    ...prev,
+    title: selected.serviceName || selected.services, // Fallback if inconsistent naming
+    date: selected.date,
+    time: selected.time,
+    address: selected.address,
+    description: `Booking by ${selected.name}: ${selected.note}`,
+  }));
+
+  try {
+    const res = await axios.get(
+      `http://localhost:8080/api/staff/department/${encodeURIComponent(selected.services)}`
+    );
+
+    const fetchedStaff = res.data?.data?.data || [];
+    setStaffList(fetchedStaff.map((staff) => staff.fullName));
+  } catch (error) {
+    console.error("Error fetching staff list:", error);
+    setStaffList([]);
+  }
+};
+
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -94,7 +99,13 @@ function ViewTasks() {
   };
 
   const handleSaveTask = async () => {
-    if (!newTask.title || !newTask.staff || !newTask.date || !newTask.time || !newTask.address) {
+    if (
+      !newTask.title ||
+      !newTask.staff ||
+      !newTask.date ||
+      !newTask.time ||
+      !newTask.address
+    ) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -141,9 +152,9 @@ function ViewTasks() {
                   key={req.id}
                   className="border rounded-lg p-4 bg-gray-50 shadow-sm"
                 >
-                  <h4 className="font-bold text-blue-700">{req.serviceName}</h4>
+                  <h4 className="font-bold text-blue-700">{req.services}</h4>
                   <p className="text-sm text-gray-600">
-                    Requested by: {req.userName}
+                    Requested by: {req.name}
                   </p>
                   <p className="text-sm">
                     📅 {req.date} ⏰ {req.time}
@@ -158,6 +169,7 @@ function ViewTasks() {
           )}
         </div>
       </div>
+
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl p-8 m-4">
@@ -178,7 +190,7 @@ function ViewTasks() {
                   <option value="">-- Select --</option>
                   {bookingRequests.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.serviceName} (by {b.userName})
+                      {b.services} (by {b.name})
                     </option>
                   ))}
                 </select>
