@@ -1,24 +1,28 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function FeedBack() {
-    const navigate = useNavigate();
-   const [fullName, setFullName] = useState("");
-   const [feedback, setFeedback] = useState("");
-    
-  useEffect(() => {
-    
-      setFullName(fullName || "");
-      setFeedback(feedback || "");
-    
-  }, []);
+  const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [feedback, setFeedback] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Submit feedback to your backend here
-    alert("Feedback submitted!");
-    navigate("/citizen/Services");
+
+    const data = {
+      name: fullName,
+      description: feedback,
+    };
+
+    try {
+      await axios.post("http://localhost:8080/api/feedback/add", data);
+      alert("Feedback submitted!");
+      navigate("/citizen/Services");
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -81,7 +85,6 @@ function FeedBack() {
       </div>
     </div>
   );
-
 }
 
-export default FeedBack
+export default FeedBack;
