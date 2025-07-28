@@ -24,14 +24,26 @@ const initialNewStaffState = {
 
 function ManageStaffs() {
   const navigate = useNavigate();
-  const [departments] = useState([
-    'Electricity',
-    'Water Supply',
-    'Cleaning',
-    'Gardening',
-    'Security',
-    'Maintenance'
-  ]);
+  const [departments,setDepartments] = useState([ ]);
+
+  useEffect(()=>{
+    const fetchDepartment= async ()=>{
+      try{
+        const response= await axios.get('https://utility-booking-backend.onrender.com/api/service/all');
+        const serviceList = response.data.data;
+        // setList(serviceList);
+
+        // Extract unique service names into departments
+        const extractedDepartments = serviceList.map((item) => item.serviceName);
+        setDepartments(extractedDepartments);
+      }
+      catch(err)
+      {
+        console.log(err);
+      }
+    }
+    fetchDepartment();
+  },[])
 
   const [staffs, setStaffs] = useState(null);
   const [loading, setLoading] = useState(true);
