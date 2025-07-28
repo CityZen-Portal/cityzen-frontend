@@ -43,7 +43,7 @@ import ComplaintInfo from "views/staff/help-desk/pages/ComplaintInfo";
 import AddNews from "views/staff/news/components/AddNews";
 import ViewNews from "views/staff/news/components/ViewNews";
 import NewsUpdate from "views/citizen/news/components/NewsUpdate";
-
+import StaffProfile from "views/staff/profile/profile";
 // Auth Views
 import SignIn from "views/auth/pages/SignIn";
 import SignupCitizen from "views/auth/SignupCitizen";
@@ -307,6 +307,7 @@ const routes = [
     icon: <MdTableView className="h-6 w-6" />,
     component: <StaffService />,
   },
+   
   {
     name: "Complaint Management",
     layout: "/staff",
@@ -384,6 +385,13 @@ const routes = [
         component: <AdminAddNews />,
       },
     ],
+  },
+  {
+    name: "Profile",
+    layout: "/staff",
+    path: " profile",
+    icon: <MdPerson className="h-6 w-6" />,
+    component: <StaffProfile />,
   },
 ];
 
