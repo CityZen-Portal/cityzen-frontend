@@ -13,7 +13,8 @@ export default function SignUp() {
     email: '',
     password: '',
     confirmPassword: '',
-    aadharNumber: ''
+    aadharNumber: '',
+    phoneNumber: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -55,7 +56,7 @@ export default function SignUp() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Name validation (replaces firstName/lastName validation)
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
       toast.error("Name is required", {
@@ -117,6 +118,23 @@ export default function SignUp() {
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
       toast.error("Passwords do not match", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    }
+
+    // Phone validation
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+      toast.error("Phone number is required", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Phone number must be 10 digits';
+      toast.error("Phone number must be 10 digits", {
         position: 'top-right',
         autoClose: 3000,
         theme: 'colored',
@@ -253,7 +271,7 @@ export default function SignUp() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Field (replaces First Name/Last Name fields) */}
+            {/* Name Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Full Name*</label>
               <input
@@ -351,6 +369,22 @@ export default function SignUp() {
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             </div>
 
+            {/* Phone Number Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Phone Number*</label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all duration-200 ${errors.phoneNumber ? 'border-red-500' : 'border-[#a3aed0]'
+                  }`}
+                placeholder="9876543210"
+                maxLength="10"
+              />
+              {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
+            </div>
+
             {/* Aadhar Number */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Aadhar Number*</label>
@@ -386,9 +420,6 @@ export default function SignUp() {
                 </button>
               </div>
               {errors.aadharNumber && <p className="mt-1 text-sm text-red-600">{errors.aadharNumber}</p>}
-              {errors.aadhaarVerified && !aadhaarVerified && (
-                <p className="mt-1 text-sm text-red-600">{errors.aadhaarVerified}</p>
-              )}
             </div>
 
             {/* Terms */}
