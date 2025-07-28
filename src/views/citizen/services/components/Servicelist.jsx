@@ -1,11 +1,29 @@
-import React  from "react";
+import React, { useEffect, useState } from "react";
 import img1 from "../../../../assets/img/service/govimg-4.jpg";
-import data from "../variables/data"; 
-import ServiceForm from "./ServiceForm";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 function Servicelist() {
   const navigate = useNavigate();
-  console.log(data);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "https://utility-booking-backend.onrender.com/api/service/all"
+        );
+        setList(response.data.data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
       <div
@@ -24,31 +42,55 @@ function Servicelist() {
       </div>
 
       <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2 md:p-10 ">
-        {data.map((item, index) => (
-          <div
-            key={index}
-            className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-700 dark:text-white dark:border-navy-900"
-          >
-            <img
-              src={item.img}
-              alt={item.nameOfService}
-              className="h-60 w-full transform object-cover transition-transform duration-500 hover:scale-110"
-            />
-            <div className="px-6 py-4">
-              <div className=" flex justify-center text-xl font-bold">
-                {item.nameOfService}
+        {loading ? (
+          <>
+            {[...Array(4)].map((_, idx) => (
+              <div
+                key={idx}
+                className="border-r-lg mt-6 animate-pulse overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-700 dark:text-white dark:border-navy-900"
+              >
+                <div className="h-60 w-full bg-gray-300 dark:bg-gray-600"></div>
+                <div className="px-6 py-4">
+                  <div className="h-6 w-2/3 bg-gray-300 dark:bg-gray-600 mx-auto mb-2"></div>
+                </div>
+                <div className="flex justify-center pb-4">
+                  <div className="h-10 w-32 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                </div>
+              </div>
+            ))}
+          </>
+        ) : (
+          list.map((item, index) => (
+            <div
+              key={index}
+              className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-700 dark:text-white dark:border-navy-900"
+            >
+              <img
+                src={item.imagePath}
+                alt={item.imageName}
+                className="h-60 w-full transform object-cover transition-transform duration-500 hover:scale-110"
+              />
+              <div className="px-6 py-4">
+                <div className="flex justify-center text-xl font-bold">
+                  {item.serviceName}
+                </div>
+              </div>
+              <div className="flex justify-center pb-4">
+                <button
+                  onClick={() =>
+                    navigate(`/citizen/Services/form/${item.serviceName}`, {
+                      state: { nameOfService: item.nameOfService },
+                    })
+                  }
+                  className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                >
+                  Get service
+                </button>
               </div>
             </div>
-            <div className="flex justify-center pb-4">
-              <button  onClick={()=>navigate(`/citizen/Services/form/${item.nameOfService}`,{state:{nameOfService: item.nameOfService}})} className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
-                Get service
-              </button>
-            </div>
-          </div>
-        ))}
-
+          ))
+        )}
       </div>
-      {/* <ServiceForm/> */}
     </>
   );
 }
