@@ -63,8 +63,8 @@ function ManageServices() {
         );
 
         uploadedImage = {
-          imageName: imgRes.data.name,
-          imagePath: imgRes.data.path,
+          imageName: imgRes.data.data.name,
+          imagePath: imgRes.data.data.path,
         };
       }
 
@@ -86,6 +86,7 @@ function ManageServices() {
           "https://utility-booking-backend.onrender.com/api/service/add",
           servicePayload
         );
+        console.log(servicePayload);
       }
 
       loadServices();
@@ -133,7 +134,6 @@ function ManageServices() {
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4 bg-gray-100 p-6 rounded-lg shadow">
-        {/* Category Dropdown */}
         <select
           value={formData.category}
           onChange={(e) => setFormData({ ...formData, category: e.target.value, serviceName: "" })}
@@ -155,8 +155,6 @@ function ManageServices() {
           className="w-full border p-2 rounded"
           required
         />
-
-        {/* Description */}
         <textarea
           placeholder="Description"
           value={formData.description}
@@ -164,8 +162,6 @@ function ManageServices() {
           className="w-full border p-2 rounded"
           required
         />
-
-        {/* Image Upload */}
         <input
           type="file"
           accept="image/*"
@@ -189,8 +185,6 @@ function ManageServices() {
           {editServiceId ? "Update" : "Add"} Service
         </button>
       </form>
-
-      {/* Display Services */}
       <h3 className="text-xl font-semibold mt-10">All Services</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {services.map((service) => (
