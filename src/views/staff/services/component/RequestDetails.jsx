@@ -7,6 +7,7 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
   
   return (
     <Card extra="mt-7">
+      
       <div className="p-5">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -24,13 +25,13 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
             Close
           </button>
         </div>
-
+           {viewingDetails.staffName!==null && 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="rounded-xl bg-gray-50 p-4 dark:bg-navy-900">
             <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-2 dark:border-navy-700">
               <MdPerson className="h-5 w-5 text-brand-500" />
               <p className="font-bold text-navy-700 dark:text-white">
-                Citizen Information
+                Staff Information
               </p>
             </div>
             <div className="space-y-3">
@@ -38,25 +39,25 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
                 <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                   Name:
                 </span>
-                {viewingDetails.citizenName}
+                {viewingDetails.staffName}
               </p>
               <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                   Service Type:
                 </span>
-                {viewingDetails.service}
+                {viewingDetails.serviceName}
               </p>
               <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                   Request Date:
                 </span>
-                {viewingDetails.date}
+                {viewingDetails.completedDate===null? "Not Completed Yet":viewingDetails.completedDate}
               </p>
               <p className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                 <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                   Description:
                 </span>
-                {viewingDetails.description}
+                {viewingDetails.description===null ? "No Description":viewingDetails.description}
               </p>
             </div>
 
@@ -139,7 +140,10 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
               </div>
             </div>
           ) : null}
-        </div>
+        </div>}
+        { viewingDetails.staffName===null && 
+        
+        <div>No staff is assigned yet</div>}
       </div>
     </Card>
   );
