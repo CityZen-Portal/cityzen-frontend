@@ -21,7 +21,10 @@ function ReportForm() {
       description:reportDetails
     }
     try{
-    await axios.post("http://localhost:8080/api/report/add",data);
+    await axios.post(
+      "https://utility-booking-backend.onrender.com/api/report/add",
+      data
+    );
     alert("Report submitted!");
     navigate("/citizen/Services");
     }
