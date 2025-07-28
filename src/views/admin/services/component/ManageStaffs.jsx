@@ -13,14 +13,13 @@ import {
 import axios from 'axios';
 
 const initialNewStaffState = {
-  name: '',
+  fullName: '',
   department: '',
-  contact: '',
-  age: '',
-  email: '',
-  address: '',
-  dateOfJoining: '',
-  password: ''
+  contactNumber: '',
+  emailAddress: '',
+  password: '',
+  fullAddress: '',
+  dob: ''
 };
 
 function ManageStaffs() {
@@ -59,7 +58,15 @@ function ManageStaffs() {
   const handleOpen = (staff = null) => {
     if (staff) {
       setEditId(staff.id);
-      setNewStaff(staff);
+      setNewStaff({
+        fullName: staff.fullName || '',
+        department: staff.department || '',
+        contactNumber: staff.contactNumber || '',
+        emailAddress: staff.emailAddress || '',
+        password: staff.password || '',
+        fullAddress: staff.fullAddress || '',
+        dob: staff.dob || ''
+      });
     } else {
       setEditId(null);
       setNewStaff(initialNewStaffState);
@@ -77,46 +84,60 @@ function ManageStaffs() {
     setNewStaff((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddOrUpdateStaff = () => {
-    if (!newStaff.name || !newStaff.department || !newStaff.contact) {
-      alert("Please fill in Name, Department, and Contact.");
+  const handleAddOrUpdateStaff = async () => {
+    const requiredFields = ['fullName', 'department', 'contactNumber', 'emailAddress', 'password', 'fullAddress', 'dob'];
+    const missing = requiredFields.filter(field => !newStaff[field]);
+    if (missing.length) {
+      alert("Please fill all fields.");
       return;
     }
 
-    if (editId) {
-      setStaffs((prev) =>
-        prev.map((s) => (s.id === editId ? { ...newStaff, id: editId } : s))
-      );
-    } else {
-      const newId = staffs.length ? Math.max(...staffs.map(s => s.id || 0)) + 1 : 1;
-      setStaffs((prev) => [...prev, { ...newStaff, id: newId }]);
+    try {
+      if (editId) {
+        // Update staff
+        await axios.put(`https://utility-booking-backend.onrender.com/api/staff/${editId}`, newStaff);
+        setStaffs((prev) =>
+          prev.map((s) => (s.id === editId ? { ...s, ...newStaff, id: editId } : s))
+        );
+      } else {
+        // Add new staff
+        const response = await axios.post("https://utility-booking-backend.onrender.com/api/staff/add", newStaff);
+        const createdStaff = response.data?.data;
+        setStaffs((prev) => [...prev, createdStaff]);
+      }
+      handleClose();
+    } catch (error) {
+      console.error("Error saving staff:", error);
+      alert("Something went wrong while saving staff.");
     }
-
-    handleClose();
   };
 
-  const handleDeleteStaff = (id) => {
-    if (window.confirm("Are you sure you want to delete this staff member?")) {
+  const handleDeleteStaff = async (id) => {
+  if (window.confirm("Are you sure you want to delete this staff member?")) {
+    try {
+      await axios.delete(`https://utility-booking-backend.onrender.com/api/staff/${id}`);
       setStaffs((prev) => prev.filter((s) => s.id !== id));
+      alert("Staff member deleted successfully.");
+    } catch (error) {
+      console.error("Failed to delete staff:", error);
+      alert("Error deleting staff. Please try again.");
     }
-  };
-  const calculateAge = (dob) => {
-  const birthDate = new Date(dob);
-  const today = new Date();
-
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const hasBirthdayPassed =
-    today.getMonth() > birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() &&
-     today.getDate() >= birthDate.getDate());
-
-  if (!hasBirthdayPassed) {
-    age--;
   }
-
-  return age;
 };
 
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const hasBirthdayPassed =
+      today.getMonth() > birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() >= birthDate.getDate());
+    if (!hasBirthdayPassed) {
+      age--;
+    }
+    return age;
+  };
 
   return (
     <div className='mt-12 mb-8 flex flex-col gap-12 px-4 md:px-6'>
@@ -199,17 +220,16 @@ function ManageStaffs() {
               {editId ? 'Edit Staff Member' : 'Add New Staff Member'}
             </h2>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-5'>
-              <input name='name' placeholder='Full Name' value={newStaff.name} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
+              <input name='fullName' placeholder='Full Name' value={newStaff.fullName} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
               <select name='department' value={newStaff.department} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none'>
                 <option value="" disabled>Select Department</option>
                 {departments.map(dep => <option key={dep} value={dep}>{dep}</option>)}
               </select>
-              <input name='contact' placeholder='Contact Number' value={newStaff.contact} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
-              <input name='age' placeholder='Age' value={newStaff.age} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
-              <input name='email' placeholder='Email Address' value={newStaff.email} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
+              <input name='contactNumber' placeholder='Contact Number' value={newStaff.contactNumber} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
+              <input name='dob' type='date' value={newStaff.dob} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
+              <input name='emailAddress' placeholder='Email Address' value={newStaff.emailAddress} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
               <input name='password' type='password' placeholder='Password' value={newStaff.password} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
-              <input name='address' placeholder='Full Address' value={newStaff.address} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full col-span-2 bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
-              <input type='date' name='dateOfJoining' value={newStaff.dateOfJoining} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full col-span-2 bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
+              <input name='fullAddress' placeholder='Full Address' value={newStaff.fullAddress} onChange={handleInputChange} className='border px-4 py-2.5 rounded-lg w-full col-span-2 bg-gray-50 dark:bg-navy-700 dark:border-navy-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none' />
             </div>
             <div className='flex justify-end gap-4 mt-8'>
               <button onClick={handleClose} className='px-5 py-2.5 rounded-lg border text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700 transition-colors'>Cancel</button>

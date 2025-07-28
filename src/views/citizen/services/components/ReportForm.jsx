@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+
+import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 
@@ -10,18 +12,27 @@ function ReportForm() {
   const [reporterName, setReporterName] = useState("");
   const [reportDetails, setReportDetails] = useState("");
 
-  useEffect(() => {
-    
-      setReporterName(reporterName || "");
-      setReportDetails(reportDetails || "");
-    
-  }, []);
+ 
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
-    
+    const data={
+      name:reporterName,
+      description:reportDetails
+    }
+    try{
+    await axios.post(
+      "https://utility-booking-backend.onrender.com/api/report/add",
+      data
+    );
     alert("Report submitted!");
     navigate("/citizen/Services");
+    }
+    catch(error)
+    {
+      console.error("Error submitting feedback:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
