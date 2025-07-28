@@ -72,6 +72,7 @@ import {
 import JobApplicationPage from "views/citizen/job-application";
 
 import ReportForm from "views/citizen/services/components/ReportForm";
+import AppliedJobs from "views/citizen/job-application/pages/AppliedJobs";
 
 
 const routes = [
@@ -180,6 +181,14 @@ const routes = [
     path: "job-application",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <JobApplicationPage />,
+    children: [
+      {
+        name: "Job Application List",
+        layout: "/citizen",
+        path: "job-application/applications",
+        component: <AppliedJobs />,
+      },
+    ]
   },
 
   // Admin Routes
