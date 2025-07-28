@@ -10,11 +10,11 @@ function formatBytes(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-const MEDIA_API = process.env.REACT_APP_API_MEDIA_URL;
-const LOCKER_API = process.env.REACT_APP_API_LOCKER_URL;
-const USER_API = process.env.REACT_APP_API_UMS_URL;
-
 export default function DocumentInfo() {
+  const MEDIA_API = process.env.REACT_APP_API_MEDIA_URL;
+  const LOCKER_API = process.env.REACT_APP_API_LOCKER_URL;
+  const USER_API = process.env.REACT_APP_API_UMS_URL;
+
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -120,7 +120,6 @@ export default function DocumentInfo() {
       a.remove();
 
       window.URL.revokeObjectURL(url);
-      
     } catch (err) {
       console.error("Download failed:", err);
     }
