@@ -19,7 +19,6 @@ function ReportForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     alert("Report submitted!");
     navigate("/citizen/Services");
   };

@@ -72,7 +72,9 @@ import {
 import JobApplicationPage from "views/citizen/job-application";
 
 import ReportForm from "views/citizen/services/components/ReportForm";
-import AppliedJobs from "views/citizen/job-application/pages/AppliedJobs";
+import { layout } from "@chakra-ui/system";
+import Locker from "views/citizen/locker";
+import DocumentInfo from "views/citizen/locker/components/DocumentInfo";import AppliedJobs from "views/citizen/job-application/pages/AppliedJobs";
 
 
 const routes = [
@@ -138,10 +140,26 @@ const routes = [
         name: "FeedBack form",
         layout: "/citizen",
         path: "Services/feedform",
-        component: <FeedBack/>,
+        component: <FeedBack />,
       },
     ],
   },
+  {
+    name: "Locker",
+    layout: "/citizen",
+    path: "Locker",
+    icon: <MdLock className="h-6 w-6" />,
+    component: <Locker />,
+    children: [
+      {
+        name: "My Locker",
+        layout: "/citizen",
+        path: "Locker/my-locker",
+        component: <DocumentInfo />,
+      },
+    ],
+  },
+
   {
     name: "Help Desk",
     layout: "/citizen",
@@ -265,15 +283,16 @@ const routes = [
     path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
+    sidebar:false
   },
- {
-  name: "Views and Analytics",
-  layout: "/admin",
-  path: "analytics",
- icon: <MdBarChart className="h-6 w-6" />,
-  component: <AdminAnalytics />,
-},
- {
+  {
+    name: "Views and Analytics",
+    layout: "/admin",
+    path: "analytics",
+    icon: <MdBarChart className="h-6 w-6" />,
+    component: <AdminAnalytics />,
+  },
+  {
     name: "Profile",
     layout: "/admin",
     path: "AdminPro",
@@ -350,7 +369,7 @@ const routes = [
       {
         name: "News Details",
         layout: "/citizen",
-        path: "/newsupdate/newsdetails/:title",
+        path: "/newsupdate/newsdetails/:id",
         component: <NewsDetails />,
       },
     ],
@@ -360,19 +379,19 @@ const routes = [
     layout: "/admin",
     path: "news",
     icon: <MdChatBubble className="h-6 w-6" />,
-    component: <CityNews />,
+    component: <AdminCityNews/>,
     children: [
       {
         name: "Manage News",
         layout: "/admin",
         path: "news/add",
-        component: <AddNews />,
+        component: <AdminAddNews/>,
       },
       {
         name: "Edit News ",
         layout: "/admin",
         path: "news/add/:id",
-        component: <AddNews />,
+        component: <AdminAddNews />,
       },
     ],
   },

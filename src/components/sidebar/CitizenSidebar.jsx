@@ -6,7 +6,7 @@ import brandLight from "../../assets/img/dashboards/brand-logo.png";
 import brandDark from "../../assets/img/dashboards/dark-logo.png";
 
 const CitizenSidebar = ({ open, onClose }) => {
-  const citizenRoutes = routes.filter(route => route.layout === "/citizen");
+  const citizenRoutes = routes.filter(route => route.layout === "/citizen" && route.sidebar!==false) ;
   const sidebarRef = useRef();
   const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem("theme") === "dark");
 
