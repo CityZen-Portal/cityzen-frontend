@@ -10,6 +10,8 @@ function ServiceForm() {
   const navigate = useNavigate();
   const location=useLocation();
   const services=location.state?.nameOfService;
+  console.log(services);
+  const id=localStorage.getItem("id");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,6 +23,7 @@ function ServiceForm() {
     city: "",
     postcode: "",
     description:"",
+    citizenId:id,
     services
   });
 
@@ -35,10 +38,10 @@ function ServiceForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare request object
+    
     const payload = {
       ...formData,
-      serviceName: serviceName || "",
+      services: serviceName || "",
     };
 
     try {
@@ -46,8 +49,11 @@ function ServiceForm() {
         "https://utility-booking-backend.onrender.com/api/services/request/add",
         payload
       );
+      console.log(payload);
       toast.success("Form submitted successfully!");
-      navigate("/citizen/Services");
+      setTimeout(() => {
+        navigate("/citizen/Services");
+      }, 2000);
     } catch (error) {
       console.error(
         "Error submitting form:",

@@ -24,29 +24,7 @@ function Servicelist() {
     };
     fetchData();
   }, []);
-   const [userData, setUserData] = useState(null);
-
-   useEffect(() => {
-     const id = localStorage.getItem("id");
-
-     const fetchData = async () => {
-       try {
-         const response = await axios.get(
-           `https://utility-booking-backend.onrender.com/api/services/request/citizen/${id}`
-         );
-         console.log("API Response:", response.data);
-         if (response.data?.data) {
-           setUserData(response.data.data[0]);
-         }
-       } catch (err) {
-         console.error(err);
-       }
-     };
-
-     if (id) {
-       fetchData();
-     }
-   }, []);
+   
 
   return (
     <>
@@ -115,7 +93,7 @@ function Servicelist() {
           ))
         )}
       </div>
-      {userData && userData.show === false && <ViewRequest />}
+     <ViewRequest />
     </>
   );
 }
