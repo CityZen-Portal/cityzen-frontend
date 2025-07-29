@@ -1,191 +1,136 @@
-import React, { useState } from 'react';
-import { ChatBubbleLeftEllipsisIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 function FeedbackManage() {
-  const [activeTab, setActiveTab] = useState('feedback');
+  const [userData, setData] = useState([]); // Always keep this as an array
   const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [feedbacks] = useState([
-    {
-      id: 1,
-      type: 'feedback',
-      citizen: 'Poovarasan',
-      date: '2024-01-15',
-      content: 'The new park maintenance service is excellent! Very satisfied with the cleanliness.',
-      status: 'New',
-    },
-    {
-      id: 2,
-      type: 'complaint',
-      citizen: 'Mary Johnson',
-      date: '2024-01-14',
-      service: 'Garbage Collection',
-      content: 'Garbage was not collected on the scheduled day.',
-      status: 'In Progress',
-    },
-  ]);
-
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'new': return 'bg-blue-100 text-blue-800';
-      case 'in progress': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+  useEffect(() => {
+    async function fetchFeedback() {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await axios.get(
+          "https://utility-booking-backend.onrender.com/api/feedback/all"
+        );
+        // Check if result.data is actually an array or inside a property
+        let responseData = result.data;
+        if (Array.isArray(responseData)) {
+          setData(responseData);
+        } else if (
+          responseData &&
+          (Array.isArray(responseData.feedback) ||
+            Array.isArray(responseData.data))
+        ) {
+          setData(responseData.feedback || responseData.data);
+        } else {
+          setData([]); // fallback if not an array
+        }
+      } catch (err) {
+        setError("Could not fetch feedback data.");
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    fetchFeedback();
+  }, []);
 
   return (
-    <div className="p-6">
-      <div className="bg-white shadow-md rounded-md">
-        <div className="bg-blue-600 text-white px-6 py-4 rounded-t-md">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="mx-auto max-w-4xl overflow-hidden rounded-md bg-white shadow-md">
+        <div className="rounded-t-md bg-blue-600 px-6 py-4 text-white">
           <h2 className="text-lg font-bold">Feedback Management</h2>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 px-6 pt-4 space-x-4">
-          <button
-            className={`flex items-center px-3 py-2 rounded-t-md font-medium ${activeTab === 'feedback' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('feedback')}
-          >
-            <ChatBubbleLeftEllipsisIcon className="h-4 w-4 mr-2" />
-            General Feedback
-          </button>
-          <button
-            className={`flex items-center px-3 py-2 rounded-t-md font-medium ${activeTab === 'complaints' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('complaints')}
-          >
-            <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
-            Service Complaints
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className="p-4 overflow-x-auto">
-          <table className="w-full table-auto text-sm text-left text-gray-700">
-            <thead className="text-xs text-gray-500 uppercase">
-              <tr>
-                {activeTab === 'feedback' ? (
-                  <>
-                    <th className="px-4 py-2">Citizen</th>
-                    <th className="px-4 py-2">Date</th>
-                    <th className="px-4 py-2">Feedback</th>
-                    <th className="px-4 py-2">Status</th>
-                    <th className="px-4 py-2">Action</th>
-                  </>
+        <div className="overflow-x-auto p-4">
+          {loading && (
+            <div className="py-8 text-center text-gray-500">Loading...</div>
+          )}
+          {error && (
+            <div className="py-8 text-center text-red-500">{error}</div>
+          )}
+          {!loading && !error && (
+            <table className="w-full table-auto text-left text-sm text-gray-700">
+              <thead className="bg-gray-100 text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="px-4 py-2">Name</th>
+                  <th className="px-4 py-2">Date</th>
+                  <th className="px-4 py-2">Description</th>
+                  <th className="px-4 py-2">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.isArray(userData) && userData.length > 0 ? (
+                  userData.map((item) => (
+                    <tr key={item.id || item._id} className="border-b">
+                      <td className="px-4 py-2">{item.name || "N/A"}</td>
+                      <td className="px-4 py-2">{item.date || "N/A"}</td>
+                      <td className="px-4 py-2">
+                        {(item.description || "").length > 70
+                          ? item.description.slice(0, 70) + "..."
+                          : item.description}
+                      </td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={() => setSelectedFeedback(item)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
-                  <>
-                    <th className="px-4 py-2">Citizen</th>
-                    <th className="px-4 py-2">Date</th>
-                    <th className="px-4 py-2">Service</th>
-                    <th className="px-4 py-2">Complaint</th>
-                    <th className="px-4 py-2">Status</th>
-                    <th className="px-4 py-2">Action</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {feedbacks
-                .filter(f => f.type === activeTab)
-                .map(item => (
-                  <tr key={item.id} className="border-b">
-                    <td className="px-4 py-2">{item.citizen}</td>
-                    <td className="px-4 py-2">{item.date}</td>
-                    {activeTab === 'feedback' ? (
-                      <>
-                        <td className="px-4 py-2">{item.content.slice(0, 50)}...</td>
-                        <td className="px-4 py-2">
-                          <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(item.status)}`}>
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">
-                          <button
-                            onClick={() => setSelectedFeedback(item)}
-                            className="text-blue-600 hover:underline"
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-4 py-2">{item.service}</td>
-                        <td className="px-4 py-2">{item.content.slice(0, 40)}...</td>
-                        <td className="px-4 py-2">
-                          <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(item.status)}`}>
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">
-                          <button
-                            onClick={() => setSelectedFeedback(item)}
-                            className="text-blue-600 hover:underline"
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </>
-                    )}
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center">
+                      No feedback found.
+                    </td>
                   </tr>
-                ))}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
       {/* Modal */}
       {selectedFeedback && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
-            <div className="flex justify-between items-center border-b pb-3 mb-4">
-              <h3 className="text-lg font-bold">
-                {selectedFeedback.type === 'complaint' ? 'Complaint Details' : 'Feedback Details'}
-              </h3>
-              <button onClick={() => setSelectedFeedback(null)} className="text-gray-500 hover:text-black">✕</button>
+        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between border-b pb-3">
+              <h3 className="text-lg font-bold">Feedback Details</h3>
+              <button
+                onClick={() => setSelectedFeedback(null)}
+                className="hover:text-black text-2xl leading-none text-gray-500"
+              >
+                &times;
+              </button>
             </div>
-
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-semibold text-gray-600">Citizen:</p>
-                <p>{selectedFeedback.citizen}</p>
+                <p className="text-sm font-semibold text-gray-600">Name:</p>
+                <p>{selectedFeedback.name}</p>
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-600">Date:</p>
                 <p>{selectedFeedback.date}</p>
               </div>
-              {selectedFeedback.type === 'complaint' && (
-                <div>
-                  <p className="text-sm font-semibold text-gray-600">Service:</p>
-                  <p>{selectedFeedback.service}</p>
-                </div>
-              )}
               <div>
-                <p className="text-sm font-semibold text-gray-600">{selectedFeedback.type === 'complaint' ? 'Complaint:' : 'Feedback:'}</p>
-                <p>{selectedFeedback.content}</p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-600">Status:</p>
-                <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(selectedFeedback.status)}`}>
-                  {selectedFeedback.status}
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-600 mb-1">Response:</p>
-                <textarea
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                  rows="3"
-                  placeholder="Add your response here..."
-                ></textarea>
+                <p className="text-sm font-semibold text-gray-600">
+                  Description:
+                </p>
+                <p>{selectedFeedback.description}</p>
               </div>
             </div>
-
-            <div className="mt-6 flex justify-end gap-2">
-              <button onClick={() => setSelectedFeedback(null)} className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setSelectedFeedback(null)}
+                className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-100"
+              >
                 Close
-              </button>
-              <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                Update Status
               </button>
             </div>
           </div>
