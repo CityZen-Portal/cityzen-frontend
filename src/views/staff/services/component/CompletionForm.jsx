@@ -1,19 +1,96 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from "components/card";
 import InputField from "components/fields/InputField";
 import { MdCheckCircleOutline, MdPhotoCamera, MdPerson, MdCalendarToday, MdComment } from "react-icons/md";
+import axios from 'axios';
+
+const IMAGE_UPLOAD_API = "https://media-api-service-hzx2.onrender.com/api/images/upload";
 
 const CompletionForm = ({
   selectedRequest,
   setSelectedRequest,
   formData,
   handleInputChange,
-  handlePhotoChange,
-  photoPreview,
-  handleSubmitCompletion,
-  errors
+  errors,
+  setErrors,
 }) => {
+  const [task, setTask] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [photo, setPhoto] = useState(null); // File object
+  const [photoPreview, setPhotoPreview] = useState(null);
+
+  useEffect(() => {
+    if (!selectedRequest) return;
+    const fetchTask = async () => {
+      try {
+        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/${selectedRequest.taskId}`);
+        setTask(response.data.data);
+        // console.log(response.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTask();
+  }, [selectedRequest?.taskId]);
+
   if (!selectedRequest) return null;
+
+  // Handle photo input change (store file + preview for UI)
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhoto(file); // Store the actual file object for upload
+      const reader = new FileReader();
+      reader.onloadend = () => setPhotoPreview(reader.result);
+      reader.readAsDataURL(file);
+      if (setErrors) setErrors((prev={}) => ({ ...prev, photo: undefined })); // Clear photo error
+    }
+  };
+
+  // Function for uploading file
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("name", selectedRequest.taskId);
+    formData.append("imageFile", file); // Use the File object directly!
+    const response = await axios.post(IMAGE_UPLOAD_API, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  };
+
+  // Submission handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    let imageName, imagePath;
+
+    try {
+
+        const uploadRes = await uploadImage(photo);
+        // console.log(uploadRes.data)
+        imageName = uploadRes.data.name;
+        imagePath = uploadRes.data.path;
+      
+      //  console.log(task);
+      const payload = {
+        serviceId: task.serviceId,
+        citizenId: task.citizenId,
+        staffId: task.staffId,
+        status: "COMPLETED",
+        completion_date: `${formData.completionDate}T00:00:00.000+00:00`,
+        image_name: imageName,
+        image_path: imagePath,
+        suggestion: formData.suggestion || ""
+      };
+      console.log(payload);
+      await axios.put(`https://utility-booking-backend.onrender.com/api/task/${selectedRequest.taskId}`, payload);
+      setSelectedRequest(null);
+      alert("Task marked as completed!");
+    } catch (err) {
+      alert("There was an error completing the request.");
+    }
+    setLoading(false);
+  };
 
   return (
     <Card extra=" mt-7">
@@ -24,7 +101,6 @@ const CompletionForm = ({
           </div>
           <h5 className="text-xl font-bold text-navy-700 dark:text-white">Complete Service Request</h5>
         </div>
-
         <div className="bg-gray-50 dark:bg-navy-900 p-4 rounded-xl mb-6">
           <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200 dark:border-navy-700">
             <MdPerson className="h-5 w-5 text-brand-500" />
@@ -37,41 +113,21 @@ const CompletionForm = ({
             </p>
             <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <span className="font-medium text-navy-700 dark:text-white">Service:</span>
-              {selectedRequest.service}
+              {selectedRequest.serviceName}
             </p>
             <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <span className="font-medium text-navy-700 dark:text-white">Date:</span>
-              {selectedRequest.date}
+              {selectedRequest.requested_Date}
             </p>
           </div>
-          <p className="mt-2 flex items-start gap-2 text-gray-700 dark:text-gray-300">
-            <span className="font-medium text-navy-700 dark:text-white">Description:</span>
-            {selectedRequest.description}
-          </p>
         </div>
-
-        <form onSubmit={handleSubmitCompletion}>
+        <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-navy-800 p-4 rounded-xl shadow-md">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200 dark:border-navy-700">
                 <MdPerson className="h-5 w-5 text-brand-500" />
                 <p className="font-bold text-navy-700 dark:text-white">Staff Information</p>
               </div>
-
-              <InputField
-                label="Staff Name *"
-                placeholder="Enter your name"
-                id="staffName"
-                type="text"
-                value={formData.staffName}
-                onChange={handleInputChange}
-                extra="mb-1"
-                error={errors?.staffName}
-              />
-              {errors?.staffName && (
-                <p className="text-red-500 text-xs mt-1 ml-1">{errors.staffName}</p>
-              )}
-
               <div className="mb-4">
                 <label className="block text-sm font-bold text-navy-700 dark:text-white mb-2">
                   <div className="flex items-center gap-2">
@@ -92,7 +148,6 @@ const CompletionForm = ({
                   <p className="text-red-500 text-xs mt-1 ml-1">{errors.completionDate}</p>
                 )}
               </div>
-
               <div className="mb-4">
                 <label className="block text-sm font-bold text-navy-700 dark:text-white mb-2">
                   <div className="flex items-center gap-2">
@@ -109,13 +164,11 @@ const CompletionForm = ({
                 />
               </div>
             </div>
-
             <div className="bg-white dark:bg-navy-800 p-4 rounded-xl shadow-md">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200 dark:border-navy-700">
                 <MdPhotoCamera className="h-5 w-5 text-brand-500" />
                 <p className="font-bold text-navy-700 dark:text-white">Completion Photo *</p>
               </div>
-
               <div className="mb-4 flex flex-col items-center justify-center">
                 <div className="w-full mb-4">
                   <label
@@ -136,11 +189,9 @@ const CompletionForm = ({
                     />
                   </label>
                 </div>
-
                 {errors?.photo && (
                   <p className="text-red-500 text-xs mt-1 text-center">{errors.photo}</p>
                 )}
-
                 {photoPreview ? (
                   <div className="mt-2 w-full">
                     <div className="overflow-hidden rounded-xl shadow-lg">
@@ -159,9 +210,9 @@ const CompletionForm = ({
               </div>
             </div>
           </div>
-
           <div className="flex justify-end mt-6">
             <button
+              disabled={loading}
               type="button"
               onClick={() => setSelectedRequest(null)}
               className="px-5 py-3 mr-3 rounded-xl bg-white text-navy-700 dark:bg-navy-700 dark:text-white hover:bg-gray-100 dark:hover:bg-navy-600 shadow-md transition-all duration-200 flex items-center gap-2"
@@ -169,11 +220,16 @@ const CompletionForm = ({
               Cancel
             </button>
             <button
+              disabled={loading}
               type="submit"
               className="px-5 py-3 rounded-xl bg-brand-500 text-white hover:bg-brand-600 shadow-md transition-all duration-200 flex items-center gap-2"
             >
-              <MdCheckCircleOutline className="h-5 w-5" />
-              <span>Mark as Completed</span>
+              {loading ? "Saving..." : (
+                <>
+                  <MdCheckCircleOutline className="h-5 w-5" />
+                  <span>Mark as Completed</span>
+                </>
+              )}
             </button>
           </div>
         </form>
