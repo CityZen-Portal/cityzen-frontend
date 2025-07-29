@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import img1 from "../../../../assets/img/service/govimg-4.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import ViewRequest from "./ViewRequest";
 
 function Servicelist() {
   const navigate = useNavigate();
@@ -23,11 +24,12 @@ function Servicelist() {
     };
     fetchData();
   }, []);
+   
 
   return (
     <>
       <div
-        className="border-r-lg border bg-cover bg-center md:h-72 dark:border-navy-900"
+        className="border-r-lg border bg-cover bg-center dark:border-navy-900 md:h-72"
         style={{ backgroundImage: `url(${img1})` }}
       >
         <h1 className="flex items-center justify-center pt-6 text-4xl font-bold text-white">
@@ -47,14 +49,14 @@ function Servicelist() {
             {[...Array(4)].map((_, idx) => (
               <div
                 key={idx}
-                className="border-r-lg mt-6 animate-pulse overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-700 dark:text-white dark:border-navy-900"
+                className="border-r-lg mt-6 animate-pulse overflow-hidden rounded border bg-white shadow-lg dark:border-navy-900 dark:bg-navy-700 dark:text-white md:max-w-lg"
               >
                 <div className="h-60 w-full bg-gray-300 dark:bg-gray-600"></div>
                 <div className="px-6 py-4">
-                  <div className="h-6 w-2/3 bg-gray-300 dark:bg-gray-600 mx-auto mb-2"></div>
+                  <div className="mx-auto mb-2 h-6 w-2/3 bg-gray-300 dark:bg-gray-600"></div>
                 </div>
                 <div className="flex justify-center pb-4">
-                  <div className="h-10 w-32 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                  <div className="h-10 w-32 rounded-full bg-gray-300 dark:bg-gray-600"></div>
                 </div>
               </div>
             ))}
@@ -63,7 +65,7 @@ function Servicelist() {
           list.map((item, index) => (
             <div
               key={index}
-              className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg md:max-w-lg dark:bg-navy-700 dark:text-white dark:border-navy-900"
+              className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg dark:border-navy-900 dark:bg-navy-700 dark:text-white md:max-w-lg"
             >
               <img
                 src={item.imagePath}
@@ -91,6 +93,7 @@ function Servicelist() {
           ))
         )}
       </div>
+     <ViewRequest />
     </>
   );
 }

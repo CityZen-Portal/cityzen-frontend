@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { MdAddCircleOutline, MdDelete, MdLocationOn } from 'react-icons/md';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
+
 
 // const JobApplicationForm = ({ onFormSubmit, initialData }) => {
 //   const [formData, setFormData] = useState(initialData?.formData || {
@@ -17,6 +19,7 @@ import 'react-toastify/dist/ReactToastify.css';
 //   });
 
 const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
+    const navigate = useNavigate();
     const [applicantId, setApplicantId] = useState(initialData?.applicantId || '');
 
     const [formData, setFormData] = useState(initialData?.formData || {
@@ -210,20 +213,22 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
 
 
   // Success
-  toast.success('Job application submitted successfully!', {
+  toast.success('Application submitted successfully!', {
     position: 'top-right',
     autoClose: 2000,
     theme: 'colored',
   });
-
-  if (onFormSubmit) {
+  
+  // Delay calling onFormSubmit to give the toast time to show
+  setTimeout(() => {
     onFormSubmit(formData, location, experiences);
-  }
+  }, 2500);
 };
 
   return (
     // <div className="min-h-screen bg-navy-900 py-10">
         <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
+          <form onSubmit={handleSubmit}>
             <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
                 <h2 className="text-2xl font-bold mb-6 text-center">Edit Job Application</h2>
 
@@ -248,6 +253,7 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
       <input
         type="text"
         name="fullName"
+        value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)}
         className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"      />
     </div>
 
@@ -257,6 +263,7 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
       <input
         type="email"
         name="email"
+        value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)}
         className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"      />
     </div>
 
@@ -266,6 +273,7 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
       <input
         type="number"
         name="phone"
+        value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)}
         className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"      />
     </div>
 
@@ -275,6 +283,7 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
       <input
         type="number"
         name="age"
+        value={formData.age} onChange={(e) => handleInputChange('age', e.target.value)}
         className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"      />
     </div>
 
@@ -283,6 +292,7 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
       <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Gender</label>
       <select
         name="gender"
+        value={formData.gender} onChange={(e) => handleInputChange('gender', e.target.value)}
         className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"      >
         <option>Select Gender</option>
         <option>Male</option>
@@ -297,6 +307,7 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
       <input
         type="text"
         name="qualification"
+        value={formData.education} onChange={(e) => handleInputChange('education', e.target.value)}
         className="w-full border mt-2 px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm font-normal"
       />
     </div>
@@ -375,7 +386,9 @@ const JobApplicationEdit = ({ onFormSubmit, initialData }) => {
                 </div>
             </div>
             <ToastContainer />
+            </form>
         </div>
+        
     // </div>
   );
 };

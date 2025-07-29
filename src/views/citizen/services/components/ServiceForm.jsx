@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function ServiceForm() {
   const { serviceName } = useParams();
   const navigate = useNavigate();
   const location=useLocation();
   const services=location.state?.nameOfService;
+  console.log(services);
+  const id=localStorage.getItem("id");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,6 +23,7 @@ function ServiceForm() {
     city: "",
     postcode: "",
     description:"",
+    citizenId:id,
     services
   });
 
@@ -32,10 +38,10 @@ function ServiceForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare request object
+    
     const payload = {
       ...formData,
-      serviceName: serviceName || "",
+      services: serviceName || "",
     };
 
     try {
@@ -43,14 +49,17 @@ function ServiceForm() {
         "https://utility-booking-backend.onrender.com/api/services/request/add",
         payload
       );
-      alert("Form submitted successfully!");
-      navigate("/citizen/Services");
+      console.log(payload);
+      toast.success("Form submitted successfully!");
+      setTimeout(() => {
+        navigate("/citizen/Services");
+      }, 2000);
     } catch (error) {
       console.error(
         "Error submitting form:",
         error.response?.data || error.message
       );
-      alert("Failed to submit form.");
+      toast.error("Failed to submit form.");
     }
   };
 
@@ -252,6 +261,7 @@ function ServiceForm() {
           </div>
         </div>
       </form>
+      <ToastContainer position="top-right" autoClose={2000} />
     </>
   );
 }

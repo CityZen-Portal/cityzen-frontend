@@ -1,18 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { ToastContainer, toast } from "react-toastify";
 function FeedBack() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [feedback, setFeedback] = useState("");
-
+  const [date,setDate]=useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const data = {
       name: fullName,
       description: feedback,
+      date
     };
 
     try {
@@ -20,11 +21,11 @@ function FeedBack() {
         "https://utility-booking-backend.onrender.com/api/feedback/add",
         data
       );
-      alert("Feedback submitted!");
+      toast.success("Feedback submitted!");
       navigate("/citizen/Services");
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -60,6 +61,22 @@ function FeedBack() {
             className="bg-whiten w-full rounded-md border border-[#e0e0e0] px-6 py-3 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md dark:border-navy-800 dark:bg-navy-900 dark:text-white"
             required
           />
+          <label
+            htmlFor="feedbackName"
+            className="m-3 block text-base font-semibold text-[#07074D] dark:text-white sm:text-xl"
+          >
+            Your Full Name
+          </label>
+          <input
+            type="date"
+            name="date"
+            id="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            placeholder="Full Name"
+            className="bg-whiten w-full rounded-md border border-[#e0e0e0] px-6 py-3 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md dark:border-navy-800 dark:bg-navy-900 dark:text-white"
+            required
+          />
 
           <label
             htmlFor="feedbackText"
@@ -85,6 +102,7 @@ function FeedBack() {
             </button>
           </div>
         </form>
+        <ToastContainer position="top-right" autoClose={2000} />
       </div>
     </div>
   );
