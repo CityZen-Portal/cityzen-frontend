@@ -16,7 +16,10 @@ function FeedBack() {
     };
 
     try {
-      await axios.post("http://localhost:8080/api/feedback/add", data);
+      await axios.post(
+        "https://utility-booking-backend.onrender.com/api/feedback/add",
+        data
+      );
       alert("Feedback submitted!");
       navigate("/citizen/Services");
     } catch (error) {
