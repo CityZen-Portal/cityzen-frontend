@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
-
+import { ToastContainer, toast } from 'react-toastify';
 const initialNewTaskState = {
   title: "",
   staff: "",
@@ -31,7 +31,7 @@ function ViewTasks() {
         );
         const visibleRequests = response.data.data.filter((request) => request.show === false);
 
-      setBookingRequests(visibleRequests);
+        setBookingRequests(visibleRequests);
       } catch (err) {
         console.log(err);
       }
@@ -67,7 +67,7 @@ function ViewTasks() {
     const selected = bookingRequests.find((b) => b.id === bookingId);
     if (!selected) return;
 
-    setSelectedBookingData(selected); 
+    setSelectedBookingData(selected);
 
     setNewTask((prev) => ({
       ...prev,
@@ -87,6 +87,7 @@ function ViewTasks() {
         name: staff.fullName,
         id: staff.id
       })));
+
     } catch (error) {
       console.error("Error fetching staff list:", error);
       setStaffList([]);
@@ -141,7 +142,7 @@ function ViewTasks() {
       );
 
       console.log("Task added and booking updated successfully.");
-      alert("Task assigned successfully!");
+
     } catch (error) {
       console.error("Error saving task:", error);
       alert("Failed to assign task.");
@@ -180,26 +181,45 @@ function ViewTasks() {
           {bookingRequests.length === 0 ? (
             <p className="text-gray-500">No booking requests found.</p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-8">
+            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-10 px-4">
               {bookingRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="border rounded-lg p-4 bg-gray-50 shadow-sm"
+                  className="bg-gradient-to-br from-blue-50 via-white to-pink-50 shadow-2xl rounded-3xl
+             p-6 md:p-8 border-2 border-blue-200 hover:shadow-2xl hover:border-pink-300
+             transition duration-300 min-h-[260px] w-full md:max-w-[420px]
+             flex flex-col justify-between"
                 >
-                  <h4 className="font-bold text-blue-700">{req.services}</h4>
-                  <p className="text-sm text-gray-600">
-                    Requested by: {req.name}
-                  </p>
-                  <p className="text-sm">
-                    📅 {req.date} ⏰ {req.time}
-                  </p>
-                  <p className="text-sm">📍 {req.address}</p>
-                  <p className="text-xs italic text-gray-500 mt-1">
-                    {req.note}
-                  </p>
+                  <h4 className="text-base md:text-lg font-bold text-blue-700 mb-3">
+                    Requested by: <span className="font-semibold">{req.name}</span>
+                  </h4>
+
+                  <div className="flex items-center text-sm md:text-base text-gray-800 mb-2">
+                    <span className="mr-2 text-blue-400 text-lg md:text-xl">📅</span>
+                    <span>{req.date}</span>
+                    <span className="mx-2 text-pink-400 text-lg md:text-xl">⏰</span>
+                    <span>{req.time}</span>
+                  </div>
+
+                  <div className="flex items-start text-sm md:text-base text-gray-700 mb-2">
+                    <span className="mr-2 pt-1 text-red-400 text-lg md:text-xl">📍</span>
+                    <div className="whitespace-pre-line break-words font-medium text-gray-700
+                    max-h-[96px] overflow-auto custom-scrollbar">
+                      {req.address}
+                    </div>
+                  </div>
+
+                  {req.note && (
+                    <p className="mt-2 text-xs md:text-sm italic text-gray-400">
+                      {req.note}
+                    </p>
+                  )}
                 </div>
+
               ))}
             </div>
+
+
           )}
         </div>
       </div>
@@ -304,6 +324,7 @@ function ViewTasks() {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 }
