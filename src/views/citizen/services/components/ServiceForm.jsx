@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function ServiceForm() {
   const { serviceName } = useParams();
   const navigate = useNavigate();
@@ -43,14 +46,14 @@ function ServiceForm() {
         "https://utility-booking-backend.onrender.com/api/services/request/add",
         payload
       );
-      alert("Form submitted successfully!");
+      toast.success("Form submitted successfully!");
       navigate("/citizen/Services");
     } catch (error) {
       console.error(
         "Error submitting form:",
         error.response?.data || error.message
       );
-      alert("Failed to submit form.");
+      toast.error("Failed to submit form.");
     }
   };
 
@@ -252,6 +255,7 @@ function ServiceForm() {
           </div>
         </div>
       </form>
+      <ToastContainer position="top-right" autoClose={2000} />
     </>
   );
 }

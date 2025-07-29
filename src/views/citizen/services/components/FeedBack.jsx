@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { ToastContainer, toast } from "react-toastify";
 function FeedBack() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
@@ -20,11 +20,11 @@ function FeedBack() {
         "https://utility-booking-backend.onrender.com/api/feedback/add",
         data
       );
-      alert("Feedback submitted!");
+      toast.success("Feedback submitted!");
       navigate("/citizen/Services");
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -85,6 +85,7 @@ function FeedBack() {
             </button>
           </div>
         </form>
+        <ToastContainer position="top-right" autoClose={2000} />
       </div>
     </div>
   );
