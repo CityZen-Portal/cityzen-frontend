@@ -7,7 +7,7 @@ export default function NewsDetails() {
   const navigate = useNavigate();
   const [newsItem, setNewsItem] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     const fetchNewsData = async () => {
       try {

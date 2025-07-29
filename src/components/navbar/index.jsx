@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Dropdown from "components/dropdown";
 import { FiAlignJustify, FiSearch } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
@@ -7,13 +7,41 @@ import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import avatar from "assets/img/avatars/avatar4.png";
 import { motion } from "framer-motion";
 import ProfileDropdown from "../dropdown/ProfileDropdown";
+import axios from "axios";
 
 const Navbar = (props) => {
-  const { onOpenSidenav, brandText } = props;
+  const { onOpenSidenav, brandText ,newsState} = props;
   const [darkmode, setDarkmode] = React.useState(() => {
     const saved = localStorage.getItem("theme");
     return saved === "dark";
   });
+
+  const [news, setNews] = useState(null);
+  const [breakingNews, setBreakingNews] = useState([]);
+  useEffect(() => {
+    const fetcheNews = async () => {
+      try {
+        const response = await axios.get('https://city-news-alert-backend-new.onrender.com/api/news/get-all');
+        const records = response.data.data.records;
+        const now = new Date();
+        const eightHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+
+        const filteredBreakingNews = records.filter((item) => {
+          const createdDate = new Date(item.created_date);
+          return item.breaking && createdDate >= eightHoursAgo;
+          setBreakingNews(filteredBreakingNews);
+          // console.log(filteredBreakingNews)
+          setNews(records);
+        });
+        setBreakingNews(filteredBreakingNews);
+        // console.log(response.data);
+      }
+      catch (err) {
+        console.log(err);
+      }
+    }
+    fetcheNews();
+  }, []);
 
   const [notifKey, setNotifKey] = React.useState(0);
   const [highlightNotif, setHighlightNotif] = React.useState(true);
@@ -34,7 +62,6 @@ const Navbar = (props) => {
       navigate(path);
     }, 0);
   };
-
   return (
     <nav className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-blur-xl dark:bg-[#0b14374d]">
       <div className="ml-[6px]">
@@ -69,7 +96,7 @@ const Navbar = (props) => {
         <span className="flex cursor-pointer text-xl text-gray-600 dark:text-white xl:hidden" onClick={onOpenSidenav}>
           <FiAlignJustify className="h-5 w-5" />
         </span>
-
+        {newsState &&
         <Dropdown
           isOpen={isNotifOpen}
           setIsOpen={setIsNotifOpen}
@@ -104,8 +131,31 @@ const Navbar = (props) => {
                 <p className="text-sm font-bold text-navy-700 dark:text-white cursor-pointer">Mark all read</p>
               </div>
 
-              <div className="space-y-4">
-                <button
+
+              {breakingNews.length === 0 ?
+                (
+                  <p>No breaking News {breakingNews.length}</p>
+                )
+                : (
+                  <div className="space-y-4">
+                    {breakingNews.map((news, idx) => (
+                      <button key={idx}
+                        className="flex w-full items-center rounded-lg border border-gray-300 dark:border-gray-600 p-4 hover:shadow-md transition"
+                        onClick={() => handleNotificationClick(`/citizen/newsupdate/newsdetails/${news.id}`)}
+                      >
+                        <div className="ml-2 flex h-full w-full flex-col justify-center text-sm">
+                          <p className="mb-1 text-left text-base font-bold text-gray-900 dark:text-white">
+                            {news.title}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                )
+              }
+
+              {/* <button
                   className="flex w-full items-center rounded-lg border border-gray-300 dark:border-gray-600 p-4 hover:shadow-md transition"
                   onClick={() => handleNotificationClick("/citizen/newsupdate/newsdetails/Swachhata Abhiyan on August 15")}
                 >
@@ -114,9 +164,9 @@ const Navbar = (props) => {
                       Swachhata Abhiyan on August 15
                     </p>
                   </div>
-                </button>
+                </button> */}
 
-                <button
+              {/* <button
                   className="flex w-full items-center rounded-lg border border-gray-300 dark:border-gray-600 p-4 hover:shadow-md transition"
                   onClick={() => handleNotificationClick("/citizen/newsupdate/newsdetails/Free Polio Vaccination Drive")}
                 >
@@ -125,12 +175,12 @@ const Navbar = (props) => {
                       Free Polio Vaccination Drive
                     </p>
                   </div>
-                </button>
-              </div>
+                </button> */}
+
             </motion.div>
           }
         />
-
+        }
         <div
           className="cursor-pointer text-gray-600"
           onClick={() => {
@@ -152,7 +202,7 @@ const Navbar = (props) => {
           )}
         </div>
 
-       <ProfileDropdown
+        <ProfileDropdown
           button={
             <img
               className="h-10 w-10 rounded-full"
@@ -178,7 +228,7 @@ const Navbar = (props) => {
                 >
                   Profile
                 </Link>
-                
+
                 <Link
                   to="/auth/signin"
                   className="mt-3 text-sm font-medium text-red-500 hover:text-red-500 transition duration-150 ease-out hover:ease-in"

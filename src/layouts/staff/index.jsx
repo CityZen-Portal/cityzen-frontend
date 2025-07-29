@@ -104,6 +104,7 @@ export default function Staff(props) {
               brandText={currentRoute}
               secondary={getActiveNavbar(routes)}
               {...rest}
+               newsState={false}
             />
             <div className="pt-5s mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
               <Routes>
