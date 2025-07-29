@@ -2,7 +2,7 @@ import Image from "../../../../assets/img/nfts/Nft5.png"
 export const newsData = [
   {
     id: 1,
-    title: "Property Tax Due Date Extended to 31st August",
+    title: " Tax Due Date Extended to 31st August",
     content: "The property tax deadline has been extended for all zones until August 31 to facilitate timely payments.",
     location: "Municipal HQ, Central Ward",
     category: "Government Announcements",

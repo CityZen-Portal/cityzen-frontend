@@ -9,7 +9,7 @@ export default function SignIn() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Add this line
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: "",
     password: ""
@@ -81,11 +81,9 @@ export default function SignIn() {
       setIsLoading(true);
       console.log("Form is valid, attempting to navigate...");
       
-      // Simulate API call
       setTimeout(() => {
         console.log("Navigation timeout completed");
         setIsLoading(false);
-        // In a real app, you would verify credentials with your backend
         try {
           navigate("/citizen/dashboard");
           console.log("Navigation called successfully");

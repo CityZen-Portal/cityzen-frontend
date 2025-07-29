@@ -12,7 +12,7 @@ export default function SignIn() {
   const navigate = useNavigate();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("Test@1234");
+  const [password, setPassword] = useState("");
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -89,7 +89,7 @@ export default function SignIn() {
         email,
         password,
       });
-      
+
       const token = response.data.data.token;
       const roles = response.data.data.roles[0];
 
@@ -97,8 +97,9 @@ export default function SignIn() {
       localStorage.setItem("username", response.data.data.username);
       localStorage.setItem("email", response.data.data.email);
       localStorage.setItem("role", JSON.stringify(roles));
+      localStorage.setItem("id", response.data.data.id);
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
+
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 1000,
@@ -108,8 +109,11 @@ export default function SignIn() {
             navigate("/staff/dashboard");
           } else if (roles.includes("ROLE_USER")) {
             navigate("/citizen/dashboard");
-          } else {
+          } else if (roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
+          }
+          else{
+            navigate("/");
           }
         },
       });

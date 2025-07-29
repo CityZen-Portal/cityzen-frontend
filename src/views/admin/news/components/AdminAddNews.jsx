@@ -16,7 +16,7 @@ const AddNews = () => {
     location: '',
     category: '',
     othercategory: '',
-    author_id: '4',
+    authorId: '4',
     isBreaking: false,
     image: null,
   });
@@ -35,12 +35,12 @@ const AddNews = () => {
             location: item.location || '',
             category: item.category || '',
             othercategory: item.category_name || '',
-            breaking: item.breaking || false,
+            isBreaking: item.breaking || false,
             image: null,
           });
           setIsEditing(true);
         })
-        .catch(() => navigate('/staff/news'));
+        .catch(() => navigate('/admin/news'));
     }
   }, [id, navigate]);
 
@@ -99,8 +99,8 @@ const AddNews = () => {
         title: formData.title,
         content: formData.content,
         location: formData.location,
-        breaking: formData.breaking,
-        author_id: '4',
+        breaking: formData.isBreaking,
+        authorId: '4',
         ...(formData.category === 'OTHERS'
           ? {
               category_name: formData.othercategory,
@@ -123,7 +123,7 @@ const AddNews = () => {
       }
 
       setTimeout(() => {
-        navigate('/staff/news');
+        navigate('/admin/news');
       }, 2000);
     } catch (error) {
       toast.error('Something went wrong. Please try again.');
@@ -131,14 +131,14 @@ const AddNews = () => {
   };
 
   const handleCancel = () => {
-    navigate('/staff/news');
+    navigate('/admin/news');
   };
 
   return (
     <div className="flex w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-10">
       <Card extra="w-full max-w-3xl p-6 sm:p-8 shadow-xl rounded-2xl bg-white dark:bg-navy-700">
         <button
-          onClick={() => navigate('/staff/news')}
+          onClick={() => navigate('/admin/news')}
           className="mb-4 flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600"
         >
           ← Back
