@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 const CORRECT_OTP = "123456";
 
+// const url =    "https://otp-service-4nd9.onrender.com;
+const url = "http://localhost:8500";
+
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,6 +15,7 @@ export default function VerifyOTP() {
   const [showModal, setShowModal] = useState(true);
   const navigate = useNavigate();
   const userEmail = localStorage.getItem("email");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -34,14 +38,19 @@ export default function VerifyOTP() {
     }
     setLoading(true);
     const response = await axios.post(
-      "https://cityzen-auth.onrender.com/auth/validate-otp",
+      `${url}/api/otp/validate-otp`,
       {
         email: userEmail,
         otp,
+      },
+      {
+        headers: {
+          token,
+        },
       }
     );
     console.log(response.data);
-    if (otp === response.data) {
+    if (response.data.status === 200) {
       navigate("/Locker/my-locker");
     } else {
       setError("Invalid OTP");
@@ -52,19 +61,46 @@ export default function VerifyOTP() {
   const resend = async () => {
     if (secondsLeft > 0) return;
     setSecondsLeft(60);
+    await axios.post(
+      // "https://otp-service-4nd9.onrender.com/api/auth/generate-otp",
+      `${url}/api/otp/generate-otp`,
+      {
+        email: userEmail,
+      },
+      {
+        headers: {
+          token,
+        },
+      }
+    );
+    console.log("OTP RESEND");
     setOtp("");
     setError("");
   };
 
   const generateOtp = async () => {
     if (!userEmail) {
-      return new Error("INVALID USER EMAIL");
+      throw new Error("INVALID USER EMAIL");
     }
-    await axios.post("https://cityzen-auth.onrender.com/auth/generate-otp", {
-      email: userEmail,
-    });
-    console.log("generated OTP");
-    setShowModal(false);
+
+    try {
+      const response = await axios.post(
+        `${url}/api/otp/generate-otp`,
+        { email: userEmail },
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+      console.log("generated OTP", response.data);
+      setShowModal(false);
+    } catch (error) {
+      console.error(
+        "Error generating OTP:",
+        error.response?.data || error.message
+      );
+    }
   };
 
   return (
