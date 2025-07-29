@@ -11,7 +11,7 @@ function ViewSchedule() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/task/dto/all");
+        const response = await axios.get("https://utility-booking-backend.onrender.com/api/task/dto/all");
         setData(response.data.data.data); // Assuming: data > data > array
         console.log(response.data.data.data);
       } catch (err) {

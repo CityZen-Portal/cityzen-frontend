@@ -44,7 +44,7 @@ import ViewNews from "views/staff/news/components/ViewNews";
 import NewsUpdate from "views/citizen/news/components/NewsUpdate";
 import StaffProfile from "views/staff/profile/profile";
 // Auth Views
-import SignIn from "views/auth/SignIn";
+import SignIn from "views/auth/pages/SignIn";
 import SignupCitizen from "views/auth/SignupCitizen";
 import ResetPassword from "views/auth/ResetPassword";
 
