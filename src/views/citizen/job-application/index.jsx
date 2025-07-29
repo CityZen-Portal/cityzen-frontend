@@ -10,7 +10,7 @@ const JobApplicationPage = () => {
 
   return (
     <div>
-      
+      <JobApplicationList />
     </div>
   );
 };

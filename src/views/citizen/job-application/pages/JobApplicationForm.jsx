@@ -207,6 +207,8 @@ const JobApplicationForm = ({ onFormSubmit, initialData }) => {
     toast.error(`Experience for company ${i + 1} must be numeric`);
     return;
   }
+
+  navigate('/citizen/job-application/applications');
 }
 
 
@@ -326,7 +328,7 @@ setTimeout(() => {
 
                 {/* Submit */}
                 <div className="text-center">
-                  <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+                  <button type="submit" onSubmit={handleSubmit} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
                     Submit Application
                   </button>
                 </div>
