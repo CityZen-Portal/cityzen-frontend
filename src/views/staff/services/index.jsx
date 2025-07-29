@@ -46,8 +46,9 @@ const StaffService = () => {
     }
   };
 
-  const handleComplete = (id) => {
-    const request = requests.find(req => req.id === id);
+  const handleComplete = (request) => {
+    console.log(request);
+   // const request = requests.find(req => req.id === id);
     setSelectedRequest(request);
     setFormData({
       staffName: "",
