@@ -1,51 +1,253 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plus, FilePen, Briefcase, MapPin, Calendar,
-  Building2, ToggleLeft, ToggleRight
+  Building2, ToggleLeft, ToggleRight, AlertCircle
 } from 'lucide-react';
+
+// Job Form Component - moved outside to prevent recreation
+const JobForm = React.memo(({ 
+  isEdit, 
+  formData, 
+  onInputChange, 
+  onSave, 
+  onCancel,
+  errors = {}
+}) => {
+  
+  return (
+    <div className="bg-gray-50 dark:bg-navy-900 p-4 rounded-xl mb-6 min-h-screen">
+      {/* Header */}
+      <div className="bg-white dark:bg-[#334155] border-b border-gray-200 dark:border-[#475569]">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-200">
+                {isEdit ? 'Edit Job' : 'Add New Job'}
+              </h1>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">
+                {isEdit ? 'Update job posting details' : 'Create a new job posting'}
+              </p>
+            </div>
+            <button
+              onClick={onCancel}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg"
+            >
+              Back to List
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Form */}
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="bg-white dark:bg-[#334155] rounded-xl border border-gray-200 dark:border-[#475569] p-8">
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Job Title *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => onInputChange('title', e.target.value)}
+                  className={`w-full px-4 py-3 border ${errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200`}
+                  placeholder="Enter job title"
+                  required
+                />
+                {errors.title && (
+                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
+                )}
+              </div>
+              {errors.title && (
+                <p className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  {errors.title}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description *
+              </label>
+              <div className="relative">
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => onInputChange('description', e.target.value)}
+                  rows={6}
+                  className={`w-full px-4 py-3 border ${errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200 resize-none`}
+                  placeholder="Enter detailed job description"
+                  required
+                />
+                {errors.description && (
+                  <AlertCircle className="absolute right-3 top-3 text-red-400" size={20} />
+                )}
+              </div>
+              {errors.description && (
+                <p className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Department *
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.department}
+                    onChange={(e) => onInputChange('department', e.target.value)}
+                    className={`w-full px-4 py-3 border ${errors.department ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200`}
+                    placeholder="e.g., Engineering, Marketing"
+                    required
+                  />
+                  {errors.department && (
+                    <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
+                  )}
+                </div>
+                {errors.department && (
+                  <p className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                    <AlertCircle size={16} />
+                    {errors.department}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Location *
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => onInputChange('location', e.target.value)}
+                    className={`w-full px-4 py-3 border ${errors.location ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200`}
+                    placeholder="e.g., New York, NY or Remote"
+                    required
+                  />
+                  {errors.location && (
+                    <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
+                  )}
+                </div>
+                {errors.location && (
+                  <p className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                    <AlertCircle size={16} />
+                    {errors.location}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Application Deadline *
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={formData.lastDate}
+                  onChange={(e) => onInputChange('lastDate', e.target.value)}
+                  className={`w-full px-4 py-3 border ${errors.lastDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200`}
+                  required
+                />
+                {errors.lastDate && (
+                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
+                )}
+              </div>
+              {errors.lastDate && (
+                <p className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  {errors.lastDate}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Requirements *
+              </label>
+              <div className="relative">
+                <textarea
+                  value={formData.requirements}
+                  onChange={(e) => onInputChange('requirements', e.target.value)}
+                  rows={4}
+                  className={`w-full px-4 py-3 border ${errors.requirements ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200 resize-none`}
+                  placeholder="Enter job requirements and qualifications"
+                  required
+                />
+                {errors.requirements && (
+                  <AlertCircle className="absolute right-3 top-3 text-red-400" size={20} />
+                )}
+              </div>
+              {errors.requirements && (
+                <p className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  {errors.requirements}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Job Status
+              </label>
+              <button
+                type="button"
+                onClick={() => onInputChange('isActive', !formData.isActive)}
+                className="flex items-center gap-2 bg-gray-100 dark:bg-[#475569] hover:bg-gray-200 dark:hover:bg-[#64748b] rounded-full px-4 py-2 transition-all"
+              >
+                {formData.isActive ? (
+                  <ToggleRight className="text-green-600" size={20} />
+                ) : (
+                  <ToggleLeft className="text-gray-400" size={20} />
+                )}
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {formData.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </button>
+            </div>
+
+            <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-600">
+              <button
+                onClick={onSave}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-all duration-200 font-medium"
+              >
+                {isEdit ? 'Update Job' : 'Create Job'}
+              </button>
+              <button
+                onClick={onCancel}
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg transition-all duration-200 font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 const AdminJobManager = () => {
   const [jobs, setJobs] = useState([]);
   const [currentView, setCurrentView] = useState('list'); // 'list', 'add', 'edit'
   const [editingJobId, setEditingJobId] = useState(null);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     department: '',
     location: '',
     lastDate: '',
+    requirements: '',
     isActive: true
   });
-
-  // Mock navigate function for demonstration
-  const navigate = (path) => {
-    if (path === '/admin/job-applications/add') {
-      setCurrentView('add');
-      setFormData({
-        title: '',
-        description: '',
-        department: '',
-        location: '',
-        lastDate: '',
-        isActive: true
-      });
-    } else if (path.includes('/admin/job-applications/edit/')) {
-      const id = parseInt(path.split('/').pop());
-      const jobToEdit = jobs.find(job => job.id === id);
-      if (jobToEdit) {
-        setCurrentView('edit');
-        setEditingJobId(id);
-        setFormData({
-          title: jobToEdit.title,
-          description: jobToEdit.description,
-          department: jobToEdit.department,
-          location: jobToEdit.location,
-          lastDate: jobToEdit.lastDate,
-          isActive: jobToEdit.isActive
-        });
-      }
-    }
-  };
 
   // Initialize with sample data if no jobs exist
   useEffect(() => {
@@ -53,29 +255,32 @@ const AdminJobManager = () => {
       const sampleJobs = [
         {
           id: 1,
-          title: "Frontend Developer",
-          description: "We are looking for a skilled Frontend Developer to join our dynamic team. You will be responsible for creating user-friendly web applications using modern technologies like React, Vue, or Angular.",
-          department: "Engineering",
-          location: "New York, NY",
+          title: "Junior Engineer - Public Works",
+          description: "The Municipal Corporation invites applications for the position of Junior Engineer in Public Works Department. The candidate will be responsible for planning, designing, and supervising municipal infrastructure projects including roads, drainage systems, and public utilities. This role involves field inspections, project monitoring, and ensuring compliance with municipal standards and regulations.",
+          department: "Public Works",
+          location: "Coimbatore Municipal Corporation",
           lastDate: "2025-08-15",
+          requirements: "Bachelor's degree in Civil Engineering. 2+ years experience in municipal infrastructure projects. Knowledge of municipal building codes and regulations. Valid professional engineering license preferred.",
           isActive: true
         },
         {
           id: 2,
-          title: "Product Manager",
-          description: "Join our product team to drive the development of innovative solutions. You will work closely with engineering, design, and business teams to deliver exceptional products.",
-          department: "Product",
-          location: "San Francisco, CA",
+          title: "Health Inspector",
+          description: "The Municipal Corporation seeks a qualified Health Inspector to ensure public health and safety standards within the municipal limits. Responsibilities include conducting health inspections of food establishments, monitoring sanitation standards, investigating health complaints, and enforcing municipal health regulations. The role requires regular field visits and community interaction.",
+          department: "Health Department",
+          location: "Coimbatore Municipal Corporation",
           lastDate: "2025-08-20",
+          requirements: "Bachelor's degree in Public Health, Environmental Health, or related field. 3+ years experience in health inspection or environmental health. Knowledge of municipal health codes and food safety regulations. Valid health inspector certification required.",
           isActive: true
         },
         {
           id: 3,
-          title: "UX Designer",
-          description: "We're seeking a creative UX Designer to craft intuitive and engaging user experiences. You'll conduct user research, create wireframes, and design beautiful interfaces.",
-          department: "Design",
-          location: "Remote",
+          title: "Assistant Town Planner",
+          description: "The Municipal Corporation invites applications for Assistant Town Planner position in the Urban Planning Department. The candidate will assist in preparing development plans, reviewing building permit applications, conducting site surveys, and ensuring compliance with zoning regulations. This position involves working closely with citizens, developers, and other municipal departments.",
+          department: "Urban Planning",
+          location: "Coimbatore Municipal Corporation",
           lastDate: "2025-07-30",
+          requirements: "Master's degree in Urban Planning, Architecture, or Civil Engineering. 2+ years experience in municipal planning or related field. Knowledge of urban planning software and GIS applications. Understanding of municipal planning laws and regulations.",
           isActive: false
         }
       ];
@@ -90,27 +295,114 @@ const AdminJobManager = () => {
     });
   };
 
-  const toggleJobStatus = (id) => {
+  // Form validation function
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.title.trim()) newErrors.title = 'Job title is required';
+    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!formData.department.trim()) newErrors.department = 'Department is required';
+    if (!formData.location.trim()) newErrors.location = 'Location is required';
+    if (!formData.lastDate) newErrors.lastDate = 'Application deadline is required';
+    if (!formData.requirements.trim()) newErrors.requirements = 'Requirements are required';
+
+    // Date validation - must be future date
+    if (formData.lastDate) {
+      const selectedDate = new Date(formData.lastDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        newErrors.lastDate = 'Deadline must be a future date';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Stable navigate function
+  const navigate = useCallback((path) => {
+    if (path === '/admin/job-applications/add') {
+      setCurrentView('add');
+      setEditingJobId(null);
+      setErrors({});
+      setFormData({
+        title: '',
+        description: '',
+        department: '',
+        location: '',
+        lastDate: '',
+        requirements: '',
+        isActive: true
+      });
+    } else if (path.includes('/admin/job-applications/edit/')) {
+      const id = parseInt(path.split('/').pop());
+      const jobToEdit = jobs.find(job => job.id === id);
+      if (jobToEdit) {
+        setCurrentView('edit');
+        setEditingJobId(id);
+        setErrors({});
+        setFormData({
+          title: jobToEdit.title,
+          description: jobToEdit.description,
+          department: jobToEdit.department,
+          location: jobToEdit.location,
+          lastDate: jobToEdit.lastDate,
+          requirements: jobToEdit.requirements || '',
+          isActive: jobToEdit.isActive
+        });
+      }
+    } else if (path === '/admin/job-applications') {
+      setCurrentView('list');
+      setEditingJobId(null);
+      setErrors({});
+      setFormData({
+        title: '',
+        description: '',
+        department: '',
+        location: '',
+        lastDate: '',
+        requirements: '',
+        isActive: true
+      });
+    }
+  }, [jobs]);
+
+  const toggleJobStatus = useCallback((id) => {
     setJobs(prevJobs => {
       const updatedJobs = prevJobs.map(job =>
         job.id === id ? { ...job, isActive: !job.isActive } : job
       );
       return sortJobs(updatedJobs);
     });
-  };
+  }, []);
 
-  const handleEdit = (id) => {
+  const handleEdit = useCallback((id) => {
     navigate(`/admin/job-applications/edit/${id}`);
-  };
+  }, [navigate]);
 
-  const handleInputChange = (field, value) => {
+  // Stable input change handler with error clearing
+  const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+    
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  }, [errors]);
 
-  const handleSaveJob = () => {
+  const handleSaveJob = useCallback(() => {
+    // Validate form before saving
+    if (!validateForm()) {
+      return;
+    }
+
     if (currentView === 'add') {
       const newJob = {
         id: Math.max(...jobs.map(j => j.id), 0) + 1,
@@ -127,178 +419,38 @@ const AdminJobManager = () => {
     }
     
     // Reset to list view
-    setCurrentView('list');
-    setEditingJobId(null);
-    setFormData({
-      title: '',
-      description: '',
-      department: '',
-      location: '',
-      lastDate: '',
-      isActive: true
-    });
-  };
+    navigate('/admin/job-applications');
+  }, [currentView, formData, jobs, editingJobId, navigate]);
 
-  const handleCancel = () => {
-    setCurrentView('list');
-    setEditingJobId(null);
-    setFormData({
-      title: '',
-      description: '',
-      department: '',
-      location: '',
-      lastDate: '',
-      isActive: true
-    });
-  };
-
-  // Job Form Component
-  const JobForm = ({ isEdit = false }) => (
-    <div className="bg-gray-50 dark:bg-navy-900 p-4 rounded-xl mb-6 min-h-screen">
-      {/* Header */}
-      <div className="bg-white dark:bg-[#334155] border-b border-gray-200 dark:border-[#475569]">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-200">
-                {isEdit ? 'Edit Job' : 'Add New Job'}
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
-                {isEdit ? 'Update job posting details' : 'Create a new job posting'}
-              </p>
-            </div>
-            <button
-              onClick={handleCancel}
-              className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg"
-            >
-              Back to List
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Form */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="bg-white dark:bg-[#334155] rounded-xl border border-gray-200 dark:border-[#475569] p-8">
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Job Title *
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200"
-                placeholder="Enter job title"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description *
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={6}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200"
-                placeholder="Enter detailed job description"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Department *
-                </label>
-                <input
-                  type="text"
-                  value={formData.department}
-                  onChange={(e) => handleInputChange('department', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200"
-                  placeholder="e.g., Engineering, Marketing"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Location *
-                </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200"
-                  placeholder="e.g., New York, NY or Remote"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Application Deadline *
-              </label>
-              <input
-                type="date"
-                value={formData.lastDate}
-                onChange={(e) => handleInputChange('lastDate', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-[#475569] dark:text-gray-200"
-                required
-              />
-            </div>
-
-            <div className="flex items-center gap-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Job Status
-              </label>
-              <button
-                type="button"
-                onClick={() => handleInputChange('isActive', !formData.isActive)}
-                className="flex items-center gap-2 bg-gray-100 dark:bg-[#475569] hover:bg-gray-200 dark:hover:bg-[#64748b] rounded-full px-4 py-2 transition-all"
-              >
-                {formData.isActive ? (
-                  <ToggleRight className="text-green-600" size={20} />
-                ) : (
-                  <ToggleLeft className="text-gray-400" size={20} />
-                )}
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {formData.isActive ? 'Active' : 'Inactive'}
-                </span>
-              </button>
-            </div>
-
-            <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-600">
-              <button
-                onClick={handleSaveJob}
-                className="flex items-center gap-2 bg-[#22c55e] hover:bg-[#16a34a] text-white px-8 py-3 rounded-lg transition-all duration-200 font-medium"
-              >
-                {isEdit ? 'Update Job' : 'Create Job'}
-              </button>
-              <button
-                onClick={handleCancel}
-                className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg transition-all duration-200 font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const handleCancel = useCallback(() => {
+    navigate('/admin/job-applications');
+  }, [navigate]);
 
   // Render based on current view
   if (currentView === 'add') {
-    return <JobForm isEdit={false} />;
+    return (
+      <JobForm 
+        isEdit={false}
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSave={handleSaveJob}
+        onCancel={handleCancel}
+        errors={errors}
+      />
+    );
   }
 
   if (currentView === 'edit') {
-    return <JobForm isEdit={true} />;
+    return (
+      <JobForm 
+        isEdit={true}
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSave={handleSaveJob}
+        onCancel={handleCancel}
+        errors={errors}
+      />
+    );
   }
 
   // Main job list view
@@ -314,7 +466,7 @@ const AdminJobManager = () => {
             </div>
             <button
               onClick={() => navigate('/admin/job-applications/add')}
-              className="flex items-center gap-2 bg-[#22c55e] hover:bg-[#16a34a] text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg"
             >
               <Plus size={20} />
               Add Job
@@ -335,7 +487,7 @@ const AdminJobManager = () => {
               <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">Start by creating your first job posting.</p>
               <button
                 onClick={() => navigate('/admin/job-applications/add')}
-                className="bg-[#22c55e] hover:bg-[#16a34a] text-white px-8 py-3 rounded-lg transition-all duration-200 font-medium inline-flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-all duration-200 font-medium inline-flex items-center gap-2"
               >
                 <Plus size={20} />
                 Create First Job
