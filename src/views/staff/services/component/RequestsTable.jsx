@@ -22,21 +22,20 @@ const RequestsTable = ({
   const [sortField, setSortField] = useState('id');
   const [sortDirection, setSortDirection] = useState('asc');
   const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState([]); // ✅ should be an array
+  const [formData, setFormData] = useState(null); // ✅ should be an array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchbyId = async () => {
+    
+    const fetchbyEmail = async () => {
       try {
-        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/staff/68847208a92b032b7f562914`);
-        if (Array.isArray(response.data)) {
-          console.log(response.data);
-          setFormData(response.data);
-        } else {
-          setError("Unexpected response format");
-          setFormData([]);
-        }
+        const email=localStorage.getItem("email");
+        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/email/${email}`);
+        console.log(response.data.data);
+         
+          
+          setFormData(response.data.data);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError("Failed to fetch data");
@@ -44,7 +43,7 @@ const RequestsTable = ({
         setLoading(false);
       }
     };
-    fetchbyId();
+    fetchbyEmail();
   }, []);
 
   const handleSort = (field) => {
@@ -187,47 +186,83 @@ const RequestsTable = ({
                 <th className="py-4 px-4 text-left text-sm font-bold text-navy-700 dark:text-white">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="100%" className="text-center py-6 text-gray-500">Loading requests...</td></tr>
-              ) : error ? (
-                <tr><td colSpan="100%" className="text-center py-6 text-red-500">{error}</td></tr>
-              ) : formData.length === 0 ? (
-                <tr><td colSpan="100%" className="text-center py-6 text-gray-500">No data found.</td></tr>
-              ) : (
-                formData.map((request, index) => (
-                  <tr
-                    key={request.id}
-                    className={`border-b hover:bg-gray-50 dark:hover:bg-navy-900 transition-colors ${index % 2 === 0 ? 'bg-white dark:bg-navy-800' : 'bg-gray-50/50 dark:bg-navy-700/50'}`}
-                  >
-                    <td className="py-4 px-4">{request.id}</td>
-                    <td className="py-4 px-4">{request.citizenName}</td>
-                    <td className="py-4 px-4">{request.service}</td>
-                    <td className="py-4 px-4">{request.date}</td>
-                    <td className="py-4 px-4">
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                        {request.status === 'pending' ? <MdPendingActions className="h-3.5 w-3.5" /> : <MdCheckCircleOutline className="h-3.5 w-3.5" />}
-                        <span>{request.status.charAt(0).toUpperCase() + request.status.slice(1)}</span>
-                      </span>
-                    </td>
-                    {viewMode === "completed" && (
-                      <>
-                        <td className="py-4 px-4">{request.completedDate}</td>
-                        <td className="py-4 px-4">{request.staffName}</td>
-                      </>
-                    )}
-                    <td className="py-4 px-4">
-                      <div className="flex space-x-2">
-                        <button onClick={() => handleViewDetails(request)} className="text-blue-500">View</button>
-                        {request.status === 'pending' && (
-                          <button onClick={() => handleComplete(request.id)} className="text-green-600">Complete</button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
+      <tbody>
+  {loading ? (
+    <tr>
+      <td colSpan="100%" className="text-center py-6 text-gray-500">
+        Loading requests...
+      </td>
+    </tr>
+  ) :!formData || formData.length === 0 ? (
+    <tr>
+      <td colSpan="100%" className="text-center py-6 text-gray-500">
+        No data found.
+      </td>
+    </tr>
+  ) : (
+    formData.map((request, index) => (
+      <tr
+        key={request.taskId}
+        className={`border-b hover:bg-gray-50 dark:hover:bg-navy-900 transition-colors ${
+          index % 2 === 0
+            ? 'bg-white dark:bg-navy-800'
+            : 'bg-gray-50/50 dark:bg-navy-700/50'
+        }`}
+      >
+        <td className="py-4 px-4">{request.taskId}</td>
+        <td className="py-4 px-4">{request.citizenName}</td>
+        <td className="py-4 px-4">{request.serviceName}</td>
+        <td className="py-4 px-4">{request.requested_Date}</td>
+        <td className="py-4 px-4">
+          <span
+            className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${
+              request.taskStatus === 'PENDING'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-green-100 text-green-800'
+            }`}
+          >
+            {request.taskStatus === 'PENDING' ? (
+              <>
+                <MdPendingActions className="h-3.5 w-3.5" />
+                <span>Pending</span>
+              </>
+            ) : (
+              <>
+                <MdCheckCircleOutline className="h-3.5 w-3.5" />
+                <span>Completed</span>
+              </>
+            )}
+          </span>
+        </td>
+        {viewMode === 'completed' && (
+          <>
+            <td className="py-4 px-4">{request.completedDate}</td>
+            <td className="py-4 px-4">{request.staffName}</td>
+          </>
+        )}
+        <td className="py-4 px-4">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleViewDetails(request)}
+              className="text-blue-500 hover:underline"
+            >
+              View
+            </button>
+            {request.taskStatus === 'PENDING' && (
+              <button
+                onClick={() => handleComplete(request)}
+                className="text-green-600 hover:underline"
+              >
+                Complete
+              </button>
+            )}
+          </div>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
+
           </table>
         </div>
 
