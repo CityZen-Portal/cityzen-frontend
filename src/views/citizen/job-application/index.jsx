@@ -7,26 +7,12 @@ import JobApplicationEdit from './pages/JobApplicationEdit';
 import JobApplicationList from './pages/JobApplicationList'
 
 const JobApplicationPage = () => {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formState, setFormState] = useState({
-    formData: null,
-    location: null,
-    experiences: null,
-  });
-
-  const handleFormSubmit = (formData, location, experiences) => {
-    setFormState({ formData, location, experiences });
-    setIsSubmitted(true);
-  };
-
-  const handleEdit = () => {
-    setIsSubmitted(false);
-  };
 
   return (
-    <JobApplicationList />
-  )
-}
-
+    <div>
+      
+    </div>
+  );
+};
 
 export default JobApplicationPage;

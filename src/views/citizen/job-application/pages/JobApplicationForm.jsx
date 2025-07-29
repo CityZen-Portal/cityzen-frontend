@@ -211,21 +211,25 @@ const JobApplicationForm = ({ onFormSubmit, initialData }) => {
 
 
   // Success
-  toast.success('Application submitted successfully!', {
-    position: 'top-right',
-    autoClose: 2000,
-    theme: 'colored',
-    onClose: () => navigate('/citizen/job-application/JobApplicationResponseView')
-  });
+// Success toast before navigating
+toast.success('Application submitted successfully!', {
+  position: 'top-right',
+  autoClose: 2000,
+  theme: 'colored',
+});
 
-  if (onFormSubmit) {
-    onFormSubmit(formData, location, experiences);
-  }
+// Delay calling onFormSubmit to give the toast time to show
+setTimeout(() => {
+  onFormSubmit(formData, location, experiences);
+}, 2500);
+
+
 };
 
   return (
     // <div className="min-h-screen bg-navy-900 py-10">
         <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
+          <form onSubmit={handleSubmit}>
             <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
                 <h2 className="text-2xl font-bold mb-6 text-center">Job Application Form</h2>
 
@@ -322,13 +326,13 @@ const JobApplicationForm = ({ onFormSubmit, initialData }) => {
 
                 {/* Submit */}
                 <div className="text-center">
-                <button onClick={handleSubmit} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
-                Submit Application
-                </button>
-
-
+                  <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+                    Submit Application
+                  </button>
                 </div>
-            </div>
+
+                
+            </div></form>
             <ToastContainer />
         </div>
     // </div>

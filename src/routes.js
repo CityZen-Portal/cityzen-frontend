@@ -67,6 +67,7 @@ import {
   MdAssignment,
   MdBallot,
   MdBuild,
+  MdWork
 } from "react-icons/md";
 
 import JobApplicationPage from "views/citizen/job-application";
@@ -201,7 +202,7 @@ const routes = [
     name: "Job Application",
     layout: "/citizen",
     path: "job-application",
-    icon: <MdDashboard className="h-6 w-6" />,
+    icon: <MdWork className="h-6 w-6" />,
     component: <JobApplicationPage />,
     children: [
       {
