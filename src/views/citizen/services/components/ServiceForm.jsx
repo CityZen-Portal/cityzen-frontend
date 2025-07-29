@@ -43,7 +43,7 @@ function ServiceForm() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/services/request/add",
+        "https://utility-booking-backend.onrender.com/api/services/request/add",
         payload
       );
       toast.success("Form submitted successfully!");

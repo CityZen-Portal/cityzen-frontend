@@ -5,7 +5,7 @@ const Service = () => {
   return (
     <>
    <Servicelist/>
-   <CitizenServiceRequests id="1234" />
+   <CitizenServiceRequests  />
     </>
   )
 }
