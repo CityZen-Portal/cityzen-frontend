@@ -13,6 +13,7 @@ const CompletionForm = ({
   handleInputChange,
   errors,
   setErrors,
+   fetchRequests
 }) => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -67,23 +68,23 @@ const CompletionForm = ({
     try {
 
         const uploadRes = await uploadImage(photo);
-        // console.log(uploadRes.data)
+
         imageName = uploadRes.data.name;
         imagePath = uploadRes.data.path;
-      
-      //  console.log(task);
+
       const payload = {
         serviceId: task.serviceId,
         citizenId: task.citizenId,
         staffId: task.staffId,
         status: "COMPLETED",
         completion_date: `${formData.completionDate}T00:00:00.000+00:00`,
-        image_name: imageName,
-        image_path: imagePath,
+        imageName: imageName,
+        imagePath: imagePath,
         suggestion: formData.suggestion || ""
       };
       console.log(payload);
       await axios.put(`https://utility-booking-backend.onrender.com/api/task/${selectedRequest.taskId}`, payload);
+      fetchRequests();
       setSelectedRequest(null);
       alert("Task marked as completed!");
     } catch (err) {
