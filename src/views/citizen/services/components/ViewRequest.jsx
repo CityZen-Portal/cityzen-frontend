@@ -13,9 +13,13 @@ export default function ViewRequest() {
           `https://utility-booking-backend.onrender.com/api/services/request/citizen/${id}`
         );
         console.log("API Response:", response.data);
-        if (response.data?.data?.length > 0) {
-          setUserData(response.data.data); 
-        }
+
+       if (response.data?.data?.length > 0) {
+         const shownRequests = response.data.data.filter(
+           (req) => req.show === false
+         );
+         setUserData(shownRequests); // store only show === true
+       }
       } catch (err) {
         console.error(err);
       }
