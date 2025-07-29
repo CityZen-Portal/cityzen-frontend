@@ -1,22 +1,25 @@
-import React, { useState, useEffect } from "react";
-import Card from "components/card";
-import { useNavigate, useParams } from "react-router-dom";
-import { MdAdd, MdSave, MdCancel } from "react-icons/md";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useState, useEffect } from 'react';
+import Card from 'components/card';
+import { useNavigate, useParams } from 'react-router-dom';
+import { MdAdd, MdSave, MdCancel } from 'react-icons/md';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddNews = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
+  const { id } = useParams(); // Get id from URL params
+
+  // Assuming authorId should be retrieved from authenticated user or localStorage if needed
+  const authorId = localStorage.getItem('id') || ''; // Or however you get the logged in user
 
   const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    location: "",
-    category: "",
-    othercategory: "",
-    author_id: "4",
+    title: '',
+    content: '',
+    location: '',
+    category: '',
+    othercategory: '',
+    authorId: authorId,
     isBreaking: false,
     image: null,
   });
@@ -25,32 +28,36 @@ const AddNews = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      axios
-        .get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
-        .then((res) => {
+    if (id && id !== 'new') {
+      // Fetch the news post only if editing (id is valid and not 'new')
+      axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
+        .then(res => {
           const item = res.data.data;
           setFormData({
             title: item.title,
             content: item.content,
-            location: item.location || "",
-            category: item.category || "",
-            othercategory: item.category_name || "",
-            breaking: item.breaking || false,
+            location: item.location || '',
+            category: item.category || '',
+            othercategory: item.category_name || '',
+            authorId: authorId,
+            isBreaking: item.breaking || false,
             image: null,
           });
           setIsEditing(true);
         })
-        .catch(() => navigate("/staff/news"));
+        .catch(() => {
+          toast.error('Failed to load news post.');
+          navigate('/staff/news');
+        });
     }
-  }, [id, navigate]);
+  }, [id, navigate, authorId]);
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = "Title is required";
-    if (!formData.content.trim()) errors.content = "Content is required";
-    if (!formData.location.trim()) errors.location = "Location is required";
-    if (!formData.category) errors.category = "Category is required";
+    if (!formData.title.trim()) errors.title = 'Title is required';
+    if (!formData.content.trim()) errors.content = 'Content is required';
+    if (!formData.location.trim()) errors.location = 'Location is required';
+    if (!formData.category) errors.category = 'Category is required';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -58,7 +65,7 @@ const AddNews = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    setFormErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleCheckboxChange = (e) => {
@@ -72,21 +79,17 @@ const AddNews = () => {
   };
 
   const uploadImage = async () => {
-    if (!formData.image) return { imageName: "", imagePath: "" };
+    if (!formData.image) return { imageName: '', imagePath: '' };
 
     const imageForm = new FormData();
-    imageForm.append("name", formData.title);
-    imageForm.append("imageFile", formData.image);
+    imageForm.append('name', formData.title);
+    imageForm.append('imageFile', formData.image);
 
-    const res = await axios.post(
-      "https://media-api-service-hzx2.onrender.com/api/images/upload",
-      imageForm,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const res = await axios.post('https://media-api-service-hzx2.onrender.com/api/images/upload', imageForm, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
     return {
       imageName: formData.title,
@@ -104,9 +107,9 @@ const AddNews = () => {
         title: formData.title,
         content: formData.content,
         location: formData.location,
-        breaking: formData.breaking,
-        author_id: "4",
-        ...(formData.category === "OTHERS"
+        breaking: formData.isBreaking,
+        authorId: authorId,
+        ...(formData.category === 'OTHERS'
           ? {
               category_name: formData.othercategory,
               imageName,
@@ -120,36 +123,30 @@ const AddNews = () => {
       };
 
       if (isEditing) {
-        await axios.put(
-          `https://city-news-alert-backend-new.onrender.com/api/news/update/${id}`,
-          payload
-        );
-        toast.success("News updated successfully!");
+        await axios.put(`https://city-news-alert-backend-new.onrender.com/api/news/update/${id}`, payload);
+        toast.success('News updated successfully!');
       } else {
-        await axios.post(
-          "https://city-news-alert-backend-new.onrender.com/api/news/add",
-          payload
-        );
-        toast.success("News posted successfully!");
+        await axios.post('https://city-news-alert-backend-new.onrender.com/api/news/add', payload);
+        toast.success('News posted successfully!');
       }
 
       setTimeout(() => {
-        navigate("/staff/news");
+        navigate('/staff/news');
       }, 2000);
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error('Something went wrong. Please try again.');
     }
   };
 
   const handleCancel = () => {
-    navigate("/staff/news");
+    navigate('/staff/news');
   };
 
   return (
     <div className="flex w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-10">
       <Card extra="w-full max-w-3xl p-6 sm:p-8 shadow-xl rounded-2xl bg-white dark:bg-navy-700">
         <button
-          onClick={() => navigate("/staff/news")}
+          onClick={() => navigate('/staff/news')}
           className="mb-4 flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600"
         >
           ← Back
@@ -157,7 +154,7 @@ const AddNews = () => {
 
         <div className="mb-6">
           <h2 className="mb-1 text-2xl font-bold text-navy-700 dark:text-white">
-            {isEditing ? "Edit News Post" : "Create News Post"}
+            {isEditing ? 'Edit News Post' : 'Create News Post'}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Share important updates with the community
@@ -173,6 +170,7 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
+          {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
         </div>
 
         <div className="mb-4">
@@ -183,6 +181,7 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="h-28 w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
+          {formErrors.content && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
         </div>
 
         <div className="mb-4">
@@ -194,6 +193,7 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
+          {formErrors.location && <p className="text-red-500 text-xs mt-1">{formErrors.location}</p>}
         </div>
 
         <div className="mb-4">
@@ -205,9 +205,7 @@ const AddNews = () => {
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           >
             <option value="">Select Category</option>
-            <option value="GOVERNMENT_ANNOUNCEMENT">
-              Government Announcement
-            </option>
+            <option value="GOVERNMENT_ANNOUNCEMENT">Government Announcement</option>
             <option value="INFRASTRUCTURE">Infrastructure & Maintenance</option>
             <option value="HEALTH">Health & Safety</option>
             <option value="ELECTION">Election & Participation</option>
@@ -219,8 +217,9 @@ const AddNews = () => {
             <option value="PUBLIC_NOTICE">Public Notice / Lost & Found</option>
             <option value="OTHERS">Others</option>
           </select>
+          {formErrors.category && <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>}
 
-          {formData.category === "OTHERS" && (
+          {formData.category === 'OTHERS' && (
             <input
               type="text"
               name="othercategory"
@@ -281,6 +280,7 @@ const AddNews = () => {
           )}
         </div>
       </Card>
+
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
