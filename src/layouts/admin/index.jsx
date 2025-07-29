@@ -10,7 +10,7 @@ export default function Admin(props) {
   const location = useLocation();
   const [open, setOpen] = React.useState(true);
   const [currentRoute, setCurrentRoute] = React.useState("Main Dashboard");
-
+  
   React.useEffect(() => {
     const handleResize = () => {
       window.innerWidth < 1200 ? setOpen(false) : setOpen(true);
@@ -105,6 +105,7 @@ export default function Admin(props) {
               brandText={currentRoute}
               secondary={getActiveNavbar(routes)}
               {...rest}
+              newsState={false}
             />
             <div className="pt-5s mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
               <Routes>

@@ -112,6 +112,7 @@ export default function Citizen(props) {
               brandText={currentRoute}
               secondary={getActiveNavbar(routes)}
               {...rest}
+              newsState={true}
             />
             <div className="pt-5 mx-auto mb-auto h-full min-h-[84vh] p-2 md:pr-2">
               <Routes>
