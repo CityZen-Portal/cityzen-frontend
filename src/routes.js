@@ -21,12 +21,11 @@ import ManageStaffs from "views/admin/services/component/ManageStaffs";
 import ViewTasks from "views/admin/services/component/ViewTasks";
 import ViewSchedule from "views/admin/services/component/ViewSchedule";
 import AdminAnalytics from "views/admin/services/component/analytics";
-
+import { MdMiscellaneousServices} from "react-icons/md";
 import { MdBarChart } from "react-icons/md";
 import AdminPro from "views/admin/services/component/AdminPro";
 
-import AdminCityNews from "views/admin/news";
-import AdminAddNews from "views/admin/news/components/AdminAddNews";
+
 import FeedbackManage from "views/admin/services/component/FeedbackManage";
 import ComplaintManagement from "views/admin/complaints";
 import AssignStaff from "views/admin/complaints/pages/AssignStaff";
@@ -45,7 +44,7 @@ import ViewNews from "views/staff/news/components/ViewNews";
 import NewsUpdate from "views/citizen/news/components/NewsUpdate";
 import StaffProfile from "views/staff/profile/profile";
 // Auth Views
-import SignIn from "views/auth/pages/SignIn";
+import SignIn from "views/auth/SignIn";
 import SignupCitizen from "views/auth/SignupCitizen";
 import ResetPassword from "views/auth/ResetPassword";
 
@@ -75,7 +74,12 @@ import JobApplicationPage from "views/citizen/job-application";
 import ReportForm from "views/citizen/services/components/ReportForm";
 import { layout } from "@chakra-ui/system";
 import Locker from "views/citizen/locker";
-import DocumentInfo from "views/citizen/locker/components/DocumentInfo";
+import DocumentInfo from "views/citizen/locker/components/DocumentInfo";import AppliedJobs from "views/citizen/job-application/pages/AppliedJobs";
+import AdminCityNews from "views/admin/news";
+import AdminAddNews from "views/admin/news/components/AdminAddNews";
+import AdminJobManager from "views/admin/job-applications/pages/JobApplicationsPost";
+import JobForm from "views/admin/job-applications/pages/JobForm";
+
 
 const routes = [
   // Home
@@ -199,6 +203,14 @@ const routes = [
     path: "job-application",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <JobApplicationPage />,
+    children: [
+      {
+        name: "Job Application List",
+        layout: "/citizen",
+        path: "job-application/applications",
+        component: <AppliedJobs />,
+      },
+    ]
   },
 
   // Admin Routes
@@ -269,6 +281,30 @@ const routes = [
       },
     ],
   },
+  
+  {
+    name: "Job Applications",
+    layout: "/admin",
+    path: "job-applications",
+    icon: <MdBallot className="h-6 w-6" />,
+    component: <AdminJobManager />,
+    children: [
+      {
+        name: "Add Job",
+        layout: "/admin",
+        path: "job-applications/add",
+        component: <JobForm />,
+      },
+      ,
+      {
+        name: "Edit Job",
+        layout: "/admin",
+        path: "edit/:id",
+        component: <JobForm />,
+      }
+    ]
+  },
+
   {
     name: "Profile",
     layout: "/citizen",
@@ -291,6 +327,8 @@ const routes = [
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminPro />,
   },
+
+    
 
   // Staff Routes
   {

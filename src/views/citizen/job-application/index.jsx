@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import JobApplicationForm from './pages/JobApplicationForm';
 import JobApplicationResponseView from './pages/JobApplicationResponseView';
 import JobApplicationEdit from './pages/JobApplicationEdit';
+import JobApplicationList from './pages/JobApplicationList'
 
 const JobApplicationPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -23,23 +24,9 @@ const JobApplicationPage = () => {
   };
 
   return (
-    <div>
-      {/* {!isSubmitted ? (
-        <JobApplicationForm
-          onFormSubmit={handleFormSubmit}
-          initialData={formState}
-        />
-      ) : (
-        <JobApplicationResponseView
-          formData={formState.formData}
-          location={formState.location}
-          experiences={formState.experiences}
-          onEdit={handleEdit}
-        />
-      )} */}
-      <JobApplicationEdit />
-    </div>
-  );
-};
+    <JobApplicationList />
+  )
+}
+
 
 export default JobApplicationPage;
