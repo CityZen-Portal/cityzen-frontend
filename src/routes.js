@@ -75,6 +75,10 @@ import ReportForm from "views/citizen/services/components/ReportForm";
 import { layout } from "@chakra-ui/system";
 import Locker from "views/citizen/locker";
 import DocumentInfo from "views/citizen/locker/components/DocumentInfo";import AppliedJobs from "views/citizen/job-application/pages/AppliedJobs";
+import AdminCityNews from "views/admin/news";
+import AdminAddNews from "views/admin/news/components/AdminAddNews";
+import AdminJobManager from "views/admin/job-applications/pages/JobApplicationsPost";
+import JobForm from "views/admin/job-applications/pages/JobForm";
 
 
 const routes = [
@@ -277,6 +281,30 @@ const routes = [
       },
     ],
   },
+  
+  {
+    name: "Job Applications",
+    layout: "/admin",
+    path: "job-applications",
+    icon: <MdBallot className="h-6 w-6" />,
+    component: <AdminJobManager />,
+    children: [
+      {
+        name: "Add Job",
+        layout: "/admin",
+        path: "job-applications/add",
+        component: <JobForm />,
+      },
+      ,
+      {
+        name: "Edit Job",
+        layout: "/admin",
+        path: "edit/:id",
+        component: <JobForm />,
+      }
+    ]
+  },
+
   {
     name: "Profile",
     layout: "/citizen",
