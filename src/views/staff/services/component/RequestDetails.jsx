@@ -1,9 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Card from "components/card";
 import { MdOutlineAssignment, MdCheckCircleOutline, MdPendingActions, MdPhotoCamera, MdPerson } from "react-icons/md";
 import { Link } from 'react-router-dom';
-const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
-  if (!viewingDetails) return null;
+const RequestDetails = ({ viewingDetails, setViewingDetails,selectedRequest }) => {
+  const [task, setTask] = useState(null);
+ 
+   useEffect(() => {
+    if (!viewingDetails) return;
+    const fetchTask = async () => {
+      try {
+        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/${viewingDetails.taskId}`);
+        setTask(response.data.data);
+        // console.log(response.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTask();
+  }, [viewingDetails?.taskId]);
+   if (!viewingDetails) return null;
+  
+   function formatDate(isoString) {
+    const date = new Date(isoString);
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleString('en-IN', options);
+  }
   
   return (
     <Card extra="mt-7">
@@ -31,7 +60,7 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
             <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-2 dark:border-navy-700">
               <MdPerson className="h-5 w-5 text-brand-500" />
               <p className="font-bold text-navy-700 dark:text-white">
-                Staff Information
+               Citizen Information
               </p>
             </div>
             <div className="space-y-3">
@@ -39,7 +68,7 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
                 <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                   Name:
                 </span>
-                {viewingDetails.staffName}
+                {viewingDetails.citizenName}
               </p>
               <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
@@ -51,14 +80,9 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
                 <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                   Request Date:
                 </span>
-                {viewingDetails.completedDate===null? "Not Completed Yet":viewingDetails.completedDate}
+                {task?.completion_date===null? "Not Completed Yet":formatDate(task.completion_date)}
               </p>
-              <p className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
-                <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                  Description:
-                </span>
-                {viewingDetails.description===null ? "No Description":viewingDetails.description}
-              </p>
+            
             </div>
 
             {viewingDetails.status === "completed" && (
