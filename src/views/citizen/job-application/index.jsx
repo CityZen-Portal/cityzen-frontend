@@ -9,7 +9,6 @@ const JobApplicationPage = () => {
 
   return (
     <div>
-      
     </div>
   );
 };
