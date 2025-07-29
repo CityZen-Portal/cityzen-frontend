@@ -80,6 +80,9 @@ import AdminCityNews from "views/admin/news";
 import AdminAddNews from "views/admin/news/components/AdminAddNews";
 import AdminJobManager from "views/admin/job-applications/pages/JobApplicationsPost";
 import JobForm from "views/admin/job-applications/pages/JobForm";
+import JobApplicationForm from "views/citizen/job-application/pages/JobApplicationForm";
+import AdminJobApplicants from "views/admin/job-applications/pages/AdminJobApplicants";
+import ApplicantDetails from "views/admin/job-applications/pages/ApplicantDetails";
 
 
 const routes = [
@@ -204,7 +207,14 @@ const routes = [
     path: "job-application",
     icon: <MdWork className="h-6 w-6" />,
     component: <JobApplicationPage />,
+    
     children: [
+       {
+        name: "Job Application List",
+        layout: "/citizen",
+        path: "job-application/form",
+        component: <JobApplicationForm />,
+      },
       {
         name: "Job Application List",
         layout: "/citizen",
@@ -296,12 +306,23 @@ const routes = [
         path: "job-applications/add",
         component: <JobForm />,
       },
-      ,
       {
         name: "Edit Job",
         layout: "/admin",
-        path: "edit/:id",
+        path: "job-applications/edit/:id",
         component: <JobForm />,
+      },
+      {
+        name: "View Applicants",
+        layout: "/admin",
+        path: "job-applications/applicants/:jobId",
+        component: <AdminJobApplicants />,
+      },
+      {
+        name: "Applicants Details",
+        layout: "/admin",
+        path: "job-applications/applicants/:jobId/details/:applicantId",
+        component: <ApplicantDetails />,
       }
     ]
   },

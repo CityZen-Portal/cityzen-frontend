@@ -92,7 +92,8 @@ const JobApplicationList = () => {
 
   const handleApply = (job) => {
     setAppliedJobs((prev) => [...prev, job]);
-    alert(`Applied for ${job.title}`);
+    // alert(`Applied for ${job.title}`);
+    navigate('/citizen/job-application/form');
   };
 
   return (

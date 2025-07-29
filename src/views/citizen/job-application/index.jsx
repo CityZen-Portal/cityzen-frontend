@@ -9,7 +9,8 @@ import JobApplicationList from './pages/JobApplicationList'
 const JobApplicationPage = () => {
 
   return (
-    <div>
+    <div>]
+      <JobApplicationList />]
     </div>
   );
 };

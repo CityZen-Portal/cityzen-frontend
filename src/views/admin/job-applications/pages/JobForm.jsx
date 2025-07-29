@@ -28,17 +28,33 @@ const JobForm = () => {
         setJobs(parsedJobs);
         
         if (id) {
-          const jobToEdit = parsedJobs.find(job => job.id === id);
+          // For editing, find the job by id
+          const jobToEdit = parsedJobs.find(job => job.id.toString() === id.toString());
           if (jobToEdit) {
             setFormData(jobToEdit);
           } else {
             navigate('/admin/job-applications', { replace: true });
           }
+        } else {
+          // For new job, reset form data
+          setFormData({
+            id: '',
+            title: '',
+            description: '',
+            department: '',
+            location: '',
+            lastDate: '',
+            requirements: '',
+            isActive: true
+          });
         }
       } catch (error) {
         console.error('Failed to parse jobs', error);
         setJobs([]);
       }
+    } else {
+      // Initialize with empty array if no jobs exist
+      setJobs([]);
     }
   }, [id, navigate]);
 
@@ -82,21 +98,29 @@ const JobForm = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setJobs(prevJobs => {
-      let updatedJobs;
-      if (id) {
-        updatedJobs = prevJobs.map(job => 
-          job.id === id ? formData : job
-        );
-      } else {
-        const newJob = { ...formData, id: Date.now().toString() };
-        updatedJobs = [...prevJobs, newJob];
-      }
-      
-      localStorage.setItem('jobs', JSON.stringify(updatedJobs));
-      return updatedJobs;
-    });
+    // Get current jobs from localStorage to ensure we have the latest data
+    const currentJobs = JSON.parse(localStorage.getItem('jobs') || '[]');
+    
+    let updatedJobs;
+    if (id) {
+      // Update existing job
+      updatedJobs = currentJobs.map(job => 
+        job.id.toString() === id.toString() ? { ...formData, id: job.id } : job
+      );
+    } else {
+      // Create new job with unique ID
+      const newId = currentJobs.length > 0 ? Math.max(...currentJobs.map(j => parseInt(j.id) || 0)) + 1 : 1;
+      const newJob = { ...formData, id: newId.toString() };
+      updatedJobs = [...currentJobs, newJob];
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('jobs', JSON.stringify(updatedJobs));
+    
+    // Update local state
+    setJobs(updatedJobs);
 
+    // Navigate back to job list
     navigate('/admin/job-applications');
   };
 
@@ -336,3 +360,4 @@ const JobForm = () => {
 };
 
 export default JobForm;
+
