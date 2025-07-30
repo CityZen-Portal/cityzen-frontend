@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaEllipsisV } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 import {
   CheckCircleIcon,
   EyeSlashIcon,
@@ -16,10 +17,9 @@ const cardStyle =
   "rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg flex flex-col items-start gap-2 transition-colors duration-300";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [theme, setTheme] = useState("light");
-  const [showComplaints, setShowComplaints] = useState(false);
   const [showRequests, setShowRequests] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -30,152 +30,156 @@ export default function AdminDashboard() {
     }
   }, [theme]);
 
-  return (
-    <div className="flex min-h-screen font-sans bg-slate-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
-      <div className="flex-1 p-6">
-        {showComplaints ? (
-          <ComplaintsTable onBack={() => setShowComplaints(false)} />
-        ) : showRequests ? (
-          <RequestsTable onBack={() => setShowRequests(false)} />
-        ) : showFeedback ? (
-          <FeedbackTable onBack={() => setShowFeedback(false)} />
-        ) : (
-          <>
-            {/* Stats */}
-            <div className="mb-6 grid grid-cols-1 gap-10 md:grid-cols-3">
-              {["Grievences Raised", "Resolved Complaints", "Service Requests", "Feedback Received", "Staff Tasks", "Citizen Registered"].map((title, i) => (
-                <div key={i} className={cardStyle}>
-                  <div className="text-sm font-semibold text-black-700 dark:text-gray-300">{title}</div>
-                  <div className="text-xl font-bold text-black dark:text-white">0</div>
-                </div>
-              ))}
-            </div>
+ return (
+  <div className="flex min-h-screen font-sans bg-slate-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+    <div className="flex-1 p-6">
+      {showRequests ? (
+        <RequestsTable onBack={() => setShowRequests(false)} />
+      ) : (
+        <>
+          {/* Stats */}
+          <div className="mb-6 grid grid-cols-1 gap-10 md:grid-cols-3">
+            {[
+              "Grievences Raised",
+              "Resolved Complaints",
+              "Service Requests",
+              "Feedback Received",
+              "Staff Tasks",
+              "Citizen Registered",
+            ].map((title, i) => (
+              <div key={i} className={cardStyle}>
+                <div className="text-sm font-semibold text-black-700 dark:text-gray-300">{title}</div>
+                <div className="text-xl font-bold text-black dark:text-white">0</div>
+              </div>
+            ))}
+          </div>
 
-            {/* Actions */}
-            <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-              <ActionCard
-                title="View Complaints"
-                description="Monitor all citizen grievances raised across departments."
-                onClick={() => setShowComplaints(true)}
-              />
-              <ActionCard
-                title="View Requests"
-                description="Access service requests like electricity, water, sanitation."
-                onClick={() => setShowRequests(true)}
-              />
-              <ActionCard
-                title="View Messages"
-                description="Review citizen feedback to improve service quality."
-                onClick={() => setShowFeedback(true)}
-              />
-            </div>
+          {/* Actions */}
+          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+            <ActionCard
+              title="View Complaints"
+              description="Monitor all citizen grievances raised across departments."
+              onClick={() => navigate("/admin/complaints")}
+            />
+            <ActionCard
+              title="View Requests"
+              description="Access service requests like electricity, water, sanitation."
+              onClick={() => setShowRequests(true)}
+            />
+            <ActionCard
+              title="View Messages"
+              description="Review citizen feedback to improve service quality."
+              onClick={() => navigate("/admin/services/feedback")}
+            />
+          </div>
 
-            {/* Summary Section */}
-            <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
-              {/* Civic Issue Summary */}
-              <div className="col-span-2 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg transition-colors">
-                <div className="mb-4 text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                  📋 <span>Civic Issue Summary</span>
-                </div>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-black dark:text-gray-300">
-                      <th className="pb-2">Name</th>
-                      <th className="pb-2">Status</th>
-                      <th className="pb-2">Date</th>
-                      <th className="pb-2">Progress</th>
+          {/* Summary Section */}
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
+            {/* Civic Issue Summary */}
+            <div className="col-span-2 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg transition-colors">
+              <div className="mb-4 text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                📋 <span>Civic Issue Summary</span>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-black dark:text-gray-300">
+                    <th className="pb-2">Name</th>
+                    <th className="pb-2">Status</th>
+                    <th className="pb-2">Date</th>
+                    <th className="pb-2">Progress</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    {
+                      name: "Road Maintenance",
+                      status: "Approved",
+                      icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
+                      date: "24Jan'25",
+                      color: "bg-green-500",
+                      progress: "80%",
+                    },
+                    {
+                      name: "Garbage Collection",
+                      status: "Disable",
+                      icon: <XCircleIcon className="h-5 w-5 text-gray-500" />,
+                      date: "15Feb'25",
+                      color: "bg-red-500",
+                      progress: "30%",
+                    },
+                    {
+                      name: "Street Light Repair",
+                      status: "Error",
+                      icon: <ExclamationTriangleIcon className="h-5 w-5 text-gray-500" />,
+                      date: "20Mar'25",
+                      color: "bg-orange-500",
+                      progress: "50%",
+                    },
+                    {
+                      name: "Water Leakage",
+                      status: "Approved",
+                      icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
+                      date: "12Apr'25",
+                      color: "bg-green-500",
+                      progress: "70%",
+                    },
+                  ].map((item, i) => (
+                    <tr key={i} className="border-t border-gray-200 dark:border-gray-700">
+                      <td className="py-3 font-medium text-black dark:text-white">{item.name}</td>
+                      <td className="py-3 flex items-center gap-2 text-black dark:text-white">
+                        {item.icon} {item.status}
+                      </td>
+                      <td className="py-3 text-black dark:text-white">{item.date}</td>
+                      <td className="py-3">
+                        <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded">
+                          <div className={`h-2 rounded ${item.color}`} style={{ width: item.progress }}></div>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      {
-                        name: "Road Maintenance",
-                        status: "Approved",
-                        icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
-                        date: "24Jan'25",
-                        color: "bg-green-500",
-                        progress: "80%",
-                      },
-                      {
-                        name: "Garbage Collection",
-                        status: "Disable",
-                        icon: <XCircleIcon className="h-5 w-5 text-gray-500" />,
-                        date: "15Feb'25",
-                        color: "bg-red-500",
-                        progress: "30%",
-                      },
-                      {
-                        name: "Street Light Repair",
-                        status: "Error",
-                        icon: <ExclamationTriangleIcon className="h-5 w-5 text-gray-500" />,
-                        date: "20Mar'25",
-                        color: "bg-orange-500",
-                        progress: "50%",
-                      },
-                      {
-                        name: "Water Leakage",
-                        status: "Approved",
-                        icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
-                        date: "12Apr'25",
-                        color: "bg-green-500",
-                        progress: "70%",
-                      },
-                    ].map((item, i) => (
-                      <tr key={i} className="border-t border-gray-200 dark:border-gray-700">
-                        <td className="py-3 font-medium text-black dark:text-white">{item.name}</td>
-                        <td className="py-3 flex items-center gap-2 text-black dark:text-white">
-                          {item.icon} {item.status}
-                        </td>
-                        <td className="py-3 text-black dark:text-white">{item.date}</td>
-                        <td className="py-3">
-                          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded">
-                            <div className={`h-2 rounded ${item.color}`} style={{ width: item.progress }}></div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Tasks */}
-              <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="flex items-center text-xl font-bold text-gray-800 dark:text-white">
-                    <ClipboardDocumentListIcon className="h-5 w-5 mr-2" />
-                    Tasks
-                  </h2>
-                </div>
-                <ul className="space-y-4">
-                  {["Sanitation", "Fire and Emergency", "Electricity and Street Lights", "Water Supply Management", "Waste Management"].map((task, index) => (
-                    <li key={index} className="flex items-center justify-between">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 text-violet-500 rounded focus:ring-violet-400"
-                        />
-                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {task}
-                        </span>
-                      </label>
-                    </li>
                   ))}
-                </ul>
-              </div>
-
-              {/* Calendar */}
-              <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-                <div className="mb-4 text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-white">
-                  📅 <span>Events Calendar</span>
-                </div>
-                <CustomCalendar />
-              </div>
+                </tbody>
+              </table>
             </div>
-          </>
-        )}
-      </div>
+
+            {/* Tasks */}
+            <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="flex items-center text-xl font-bold text-gray-800 dark:text-white">
+                  <ClipboardDocumentListIcon className="h-5 w-5 mr-2" />
+                  Tasks
+                </h2>
+              </div>
+              <ul className="space-y-4">
+                {["Sanitation", "Fire and Emergency", "Electricity and Street Lights", "Water Supply Management", "Waste Management"].map((task, index) => (
+                  <li key={index} className="flex items-center justify-between">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-violet-500 rounded focus:ring-violet-400"
+                      />
+                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                        {task}
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Calendar */}
+            <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
+              <div className="mb-4 text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-white">
+                📅 <span>Events Calendar</span>
+              </div>
+              <CustomCalendar />
+            </div>
+          </div>
+        </>
+      )}
     </div>
-  );
+  </div>
+);
+
 }
 
 function ActionCard({ title, description, onClick }) {
@@ -195,88 +199,6 @@ function ActionCard({ title, description, onClick }) {
   );
 }
 
-// Complaints Table
-function ComplaintsTable({ onBack }) {
-  const complaints = [
-    {
-      id: 1,
-      name: "Priya Sharma",
-      department: "Water",
-      complaint: "No supply in Sector 12",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Amit Verma",
-      department: "Sanitation",
-      complaint: "Garbage not collected for 3 days",
-      status: "In Progress",
-    },
-    {
-      id: 3,
-      name: "Neha Joshi",
-      department: "Electricity",
-      complaint: "Streetlights not working on 5th Avenue",
-      status: "Resolved",
-    },
-    {
-      id: 4,
-      name: "Rahul Mehta",
-      department: "Roads",
-      complaint: "Potholes in front of Block C",
-      status: "Pending",
-    },
-  ];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "text-red-600";
-      case "In Progress":
-        return "text-yellow-600";
-      case "Resolved":
-        return "text-green-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  return (
-    <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-      <button
-        className="text-lg font-bold text-indigo-600 underline mb-4"
-        onClick={onBack}
-      >
-        ← Back
-      </button>
-      <h2 className="text-xl font-semibold mb-4">Manage Complaints</h2>
-      <table className="w-full text-sm text-left border">
-        <thead className="text-xs uppercase bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200">
-          <tr>
-            <th className="px-4 py-2">#</th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Department</th>
-            <th className="px-4 py-2">Complaint</th>
-            <th className="px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {complaints.map((c) => (
-            <tr key={c.id} className="border-b">
-              <td className="px-4 py-2">{c.id}</td>
-              <td className="px-4 py-2">{c.name}</td>
-              <td className="px-4 py-2">{c.department}</td>
-              <td className="px-4 py-2">{c.complaint}</td>
-              <td className={`px-4 py-2 font-semibold ${getStatusColor(c.status)}`}>
-                {c.status}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 
 // Requests Table with Hide and Remove
@@ -480,72 +402,10 @@ function RequestsTable({ onBack }) {
           )}
         </div>
       )}
+      
     </div>
   );
 }
-
-// Feedback Table
-function FeedbackTable({ onBack }) {
-  
-const [messages, setMessages] = useState([
-    {
-      id: 1,
-      name: "Amit Kumar",
-      department: "Electricity",
-      message: "Has my electricity complaint been resolved yet?",
-    },
-    {
-      id: 2,
-      name: "Sunita Mehta",
-      department: "Water",
-      message: "I want to know how to apply for a new water connection.",
-    },
-  ]);
-
-  return (
-    <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-      <button
-        className="text-lg font-bold text-indigo-600 underline mb-4"
-        onClick={onBack}
-      >
-        ← Back
-      </button>
-
-      {/* User Messages Section */}
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
-        User Messages
-      </h2>
-
-      {messages.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-300">No messages yet.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left border border-gray-200 dark:border-gray-600">
-            <thead className="text-xs uppercase bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-200">
-              <tr>
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">Citizen</th>
-                <th className="px-4 py-2">Department</th>
-                <th className="px-4 py-2">Message</th>
-              </tr>
-            </thead>
-            <tbody>
-              {messages.map((msg, index) => (
-                <tr key={msg.id} className="border-b dark:border-gray-700">
-                  <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2">{msg.name}</td>
-                  <td className="px-4 py-2">{msg.department}</td>
-                  <td className="px-4 py-2">{msg.message}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
-
 
 // Calendar component
 function CustomCalendar() {

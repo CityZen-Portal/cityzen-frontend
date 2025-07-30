@@ -12,7 +12,6 @@ const AdminJobApplicants = () => {
   const [sortBy, setSortBy] = useState('appliedDate');
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Sample appliedJobs data with citizen form data
   const appliedJobs = [
     {
       id: 1,

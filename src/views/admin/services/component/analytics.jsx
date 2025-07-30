@@ -65,7 +65,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6 dark:bg-navy-700">
+    <div className="p-6 space-y-6 dark:bg-navy-700 dark:text-white">
       {/* Metric Cards */}
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

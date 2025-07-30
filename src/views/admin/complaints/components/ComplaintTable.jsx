@@ -3,6 +3,7 @@ import PageNavigator from './PageNavigator';
 import Rows from './Rows';
 import { MdArrowUpward, MdArrowDownward, MdUnfoldMore } from 'react-icons/md';
 
+
 const ComplaintTable = ({ complaints }) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
