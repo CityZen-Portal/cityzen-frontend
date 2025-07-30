@@ -19,8 +19,6 @@ import FeedbackReceivedCard from "./cards/FeedbackReceivedCard";
 import StaffTasksCard from "./cards/StaffTasksCard";
 import CitizenRegisteredCard from "./cards/CitizenRegisteredCard";
 
-const cardStyle =
-  "rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg flex flex-col items-start gap-2 transition-colors duration-300";
 
 export default function AdminDashboard() {
   const [theme, setTheme] = useState("light");

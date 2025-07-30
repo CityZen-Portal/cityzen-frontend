@@ -6,7 +6,6 @@ import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import Footer from "components/footer/FooterAuthDefault";
 import axios from "axios";
-import { ProgressCircleCircle } from "@chakra-ui/react";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -15,12 +14,9 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const apiurl = process.env.REACT_APP_API_UMS_URL;
   console.log(apiurl);
-
-  const [userRole, setUserRole] = useState("");
 
   const handleForgotPassword = () => {
     if (!email.trim()) {
@@ -85,10 +81,13 @@ export default function SignIn() {
     }
 
     try {
-      const response = await axios.post(`${apiurl}/api/auth/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `https://auth-backend-obcu.onrender.com/api/auth/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       const token = response.data.data.token;
       const roles = response.data.data.roles[0];
