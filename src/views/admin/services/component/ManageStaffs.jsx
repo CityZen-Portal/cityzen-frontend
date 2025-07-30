@@ -28,6 +28,13 @@ const initialNewStaffState = {
 function ManageStaffs() {
   const navigate = useNavigate();
   const [departments, setDepartments] = useState([]);
+  const [staffs, setStaffs] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [newStaff, setNewStaff] = useState(initialNewStaffState);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     const fetchDepartment = async () => {
@@ -36,25 +43,12 @@ function ManageStaffs() {
           "https://utility-booking-backend.onrender.com/api/service/all"
         );
         const serviceList = response.data.data;
-        // setList(serviceList);
-
-        // Extract unique service names into departments
-        const extractedDepartments = serviceList.map(
-          (item) => item.serviceName
-        );
+        const extractedDepartments = serviceList.map((item) => item.serviceName);
         setDepartments(extractedDepartments);
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     };
     fetchDepartment();
   }, []);
-
-  const [staffs, setStaffs] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [newStaff, setNewStaff] = useState(initialNewStaffState);
 
   useEffect(() => {
     const fetchStaff = async () => {
@@ -65,7 +59,6 @@ function ManageStaffs() {
         const staffData = response.data?.data.data;
         setStaffs(Array.isArray(staffData) ? staffData : []);
       } catch (err) {
-        console.error("Failed to fetch staff data:", err);
         toast.error("Failed to fetch staff data. Please try again.");
         setStaffs([]);
       } finally {
@@ -86,6 +79,7 @@ function ManageStaffs() {
         password: staff.password || "",
         fullAddress: staff.fullAddress || "",
         dob: staff.dob || "",
+        aadharNumber: staff.aadharNumber || "",
       });
     } else {
       setEditId(null);
@@ -104,6 +98,15 @@ function ManageStaffs() {
     setNewStaff((prev) => ({ ...prev, [name]: value }));
   };
 
+  const isValidEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const isValidPhone = (number) =>
+    /^\d{10}$/.test(number);
+
+  const isValidAadhar = (number) =>
+    /^\d{12}$/.test(number);
+
   const handleAddOrUpdateStaff = async () => {
     const requiredFields = [
       "fullName",
@@ -121,9 +124,23 @@ function ManageStaffs() {
       return;
     }
 
+    if (!isValidEmail(newStaff.emailAddress)) {
+      toast.error("Enter a valid email address.");
+      return;
+    }
+
+    if (!isValidPhone(newStaff.contactNumber)) {
+      toast.error("Contact number must be 10 digits.");
+      return;
+    }
+
+    if (!isValidAadhar(newStaff.aadharNumber)) {
+      toast.error("Aadhar number must be 12 digits.");
+      return;
+    }
+
     try {
       if (editId) {
-        // Update staff
         await axios.put(
           `https://utility-booking-backend.onrender.com/api/staff/${editId}`,
           newStaff
@@ -135,10 +152,8 @@ function ManageStaffs() {
         );
         toast.success("Staff updated successfully!");
       } else {
-        // Add new staff
         const response = await axios.post(
           "https://utility-booking-backend.onrender.com/api/staff/add",
-          // "http://localhost:5000/api/staff/add",
           newStaff
         );
         const createdStaff = response.data?.data;
@@ -147,23 +162,27 @@ function ManageStaffs() {
       }
       handleClose();
     } catch (error) {
-      console.error("Error saving staff:", error);
       toast.error("Failed to save staff. Please try again.");
     }
   };
 
-  const handleDeleteStaff = async (id) => {
-    if (window.confirm("Are you sure you want to delete this staff member?")) {
-      try {
-        await axios.delete(
-          `https://utility-booking-backend.onrender.com/api/staff/${id}`
-        );
-        setStaffs((prev) => prev.filter((s) => s.id !== id));
-        toast.success("Staff deleted successfully!");
-      } catch (error) {
-        console.error("Failed to delete staff:", error);
-        toast.error("Failed to delete staff. Please try again.");
-      }
+  const confirmDeleteStaff = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteStaff = async () => {
+    try {
+      await axios.delete(
+        `https://utility-booking-backend.onrender.com/api/staff/${deleteId}`
+      );
+      setStaffs((prev) => prev.filter((s) => s.id !== deleteId));
+      toast.success("Staff deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete staff. Please try again.");
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteId(null);
     }
   };
 
@@ -271,14 +290,12 @@ function ManageStaffs() {
                     <button
                       onClick={() => handleOpen(staff)}
                       className="text-yellow-500 transition-colors hover:text-yellow-600"
-                      aria-label="Edit Staff"
                     >
                       <PencilSquareIcon className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => handleDeleteStaff(staff.id)}
+                      onClick={() => confirmDeleteStaff(staff.id)}
                       className="text-red-500 transition-colors hover:text-red-600"
-                      aria-label="Delete Staff"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -295,90 +312,41 @@ function ManageStaffs() {
               {editId ? "Edit Staff Member" : "Add New Staff Member"}
             </h2>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <input
-                name="fullName"
-                placeholder="Full Name"
-                value={newStaff.fullName}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              />
-              <select
-                name="department"
-                value={newStaff.department}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              >
-                <option value="" disabled>
-                  Select Department
-                </option>
+              <input name="fullName" placeholder="Full Name" value={newStaff.fullName} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              <select name="department" value={newStaff.department} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
+                <option value="" disabled>Select Department</option>
                 {departments.map((dep) => (
-                  <option key={dep} value={dep}>
-                    {dep}
-                  </option>
+                  <option key={dep} value={dep}>{dep}</option>
                 ))}
               </select>
-              <input
-                name="contactNumber"
-                placeholder="Contact Number"
-                value={newStaff.contactNumber}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              />
-              <input
-                name="aadharNumber"
-                placeholder="Aadhaar Number"
-                value={newStaff.aadharNumber}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              />
-
-              <input
-                name="dob"
-                type="date"
-                value={newStaff.dob}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              />
-              <input
-                name="emailAddress"
-                placeholder="Email Address"
-                value={newStaff.emailAddress}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              />
-              <input
-                name="password"
-                type="password"
-                placeholder="Password"
-                value={newStaff.password}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              />
-              <input
-                name="fullAddress"
-                placeholder="Full Address"
-                value={newStaff.fullAddress}
-                onChange={handleInputChange}
-                className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
-              />
+              <input name="contactNumber" placeholder="Contact Number" value={newStaff.contactNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              <input name="aadharNumber" placeholder="Aadhaar Number" value={newStaff.aadharNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              <input name="dob" type="date" value={newStaff.dob} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              <input name="emailAddress" placeholder="Email Address" value={newStaff.emailAddress} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              <input name="password" type="password" placeholder="Password" value={newStaff.password} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              <input name="fullAddress" placeholder="Full Address" value={newStaff.fullAddress} onChange={handleInputChange} className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
             </div>
             <div className="mt-8 flex justify-end gap-4">
-              <button
-                onClick={handleClose}
-                className="rounded-lg border px-5 py-2.5 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddOrUpdateStaff}
-                className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700"
-              >
-                {editId ? "Update Staff" : "Add Staff"}
-              </button>
+              <button onClick={handleClose} className="rounded-lg border px-5 py-2.5 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700">Cancel</button>
+              <button onClick={handleAddOrUpdateStaff} className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700">{editId ? "Update Staff" : "Add Staff"}</button>
             </div>
           </div>
         </div>
       )}
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+          <div className="rounded-xl bg-white p-6 shadow-xl dark:bg-navy-800">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Confirm Delete</h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Are you sure you want to delete this staff member?</p>
+            <div className="mt-4 flex justify-end gap-3">
+              <button onClick={() => setShowDeleteModal(false)} className="rounded-lg border px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700">Cancel</button>
+              <button onClick={handleDeleteStaff} className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
