@@ -1,9 +1,40 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaExclamationCircle, FaHistory } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ComplaintDetails = () => {
-  const navigate = useNavigate()
+  const path = useParams();
+  const navigate = useNavigate();
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const BASE_URL = 'http://localhost:10101/api/helpdesk';
+
+  useEffect( () => {
+    setLoading(true);
+    axios.get(`${BASE_URL}/admin/complaints`)
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setComplaints(data);
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+  }, []);
+
+
   
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -55,13 +86,13 @@ const ComplaintDetails = () => {
             <FaExclamationCircle className="text-2xl sm:text-3xl text-blue-600 flex-shrink-0" />
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                Complaint #{complaintData.id}
+                Complaint #{complaints.id}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-sm">Manage your complaint details</p>
             </div>
           </div>
-          <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(complaintData.status)} self-start sm:self-auto`}>
-            {getStatusText(complaintData.status)}
+          <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(complaints.status)} self-start sm:self-auto`}>
+            {getStatusText(complaints.status)}
           </span>
         </div>
 
@@ -93,15 +124,15 @@ const ComplaintDetails = () => {
                   </h2>
                   <div className="break-words">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Complaint Type</label>
-                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData.complaintType}</p>
+                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaints.complaintType}</p>
                   </div>
                   <div className="break-words">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Issue</label>
-                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData.Issue}</p>
+                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaints.issue}</p>
                   </div>
                   <div className="break-words">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData.description}</p>
+                    <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaints.issueDescription}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image</label>
@@ -130,7 +161,7 @@ const ComplaintDetails = () => {
                 <FaHistory className="mr-2 text-blue-600 flex-shrink-0" /> Status History
               </h2>
               <div className="space-y-4">
-                {complaintData.statusHistory.map((entry, index) => (
+                {complaints.complaintHistory.map((entry, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-1.5">
                       <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
@@ -152,7 +183,7 @@ const ComplaintDetails = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize mb-1">
                     {field.replace(/([A-Z])/g, ' $1').trim()}
                   </label>
-                  <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaintData[field]}</p>
+                  <p className="text-gray-900 dark:text-white text-sm sm:text-base">{complaints[field]}</p>
                 </div>
               ))}
             </div>
@@ -174,7 +205,7 @@ const ComplaintDetails = () => {
       </div>
 
       {/* Image Modal */}
-      {showImageModal && complaintData.imageUrl && (
+      {showImageModal && complaints.attachments && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-navy-800 rounded-xl p-4 max-w-3xl w-full max-h-[90vh] overflow-auto">
             <div className="flex justify-between items-center mb-4">
@@ -187,13 +218,14 @@ const ComplaintDetails = () => {
               </button>
             </div>
             <img
-              src={complaintData.imageUrl}
+              src={complaints.attachment}
               alt="Complaint"
               className="w-full rounded-md"
             />
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

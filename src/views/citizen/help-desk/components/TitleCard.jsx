@@ -12,8 +12,8 @@ const TitleCard = ({Icon, title, complaintStatus, getStatusColor, getStatusText}
             <p className="text-gray-600 dark:text-gray-300 text-sm">Manage your complaint details</p>
         </div>
         </div>
-        <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(complaintStatus)}`}>
-        {getStatusText(complaintStatus)}
+        <span className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(complaintStatus?.toLowerCase())}`}>
+        {getStatusText(complaintStatus?.toLowerCase())}
         </span>
     </div>
   )

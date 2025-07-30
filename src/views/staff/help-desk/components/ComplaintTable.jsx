@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import PageNavigator from './PageNavigator';
 import Rows from './Rows';
 import { MdArrowUpward, MdArrowDownward, MdUnfoldMore } from 'react-icons/md';
+import {
+  getStatusColor,
+  getStatusText,
+  filterComplaints,
+  sortComplaints,
+} from '../../../citizen/help-desk/utils/helpers';
 
 const ComplaintTable = ({ extra, complaints }) => {
   const [statusFilter, setStatusFilter] = useState('');
@@ -9,70 +15,10 @@ const ComplaintTable = ({ extra, complaints }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
+  
+  const filteredComplaints = filterComplaints(complaints, statusFilter, searchTerm);
 
-  const statusPriority = {
-    'pending': 1,
-    'under-review': 2,
-    'assigned': 3,
-    'in-progress': 4,
-    'on-hold': 5,
-    'resolved': 6,
-    'rejected': 7,
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900';
-      case 'under-review': return 'bg-amber-100 text-amber-800 dark:bg-amber-200 dark:text-amber-900';
-      case 'assigned': return 'bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900';
-      case 'in-progress': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-200 dark:text-indigo-900';
-      case 'on-hold': return 'bg-gray-200 text-gray-700 dark:bg-gray-400 dark:text-gray-900';
-      case 'resolved': return 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900';
-      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-200 dark:text-red-900';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-200 dark:text-gray-900';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'pending': return 'Pending';
-      case 'under-review': return 'Under Review';
-      case 'assigned': return 'Assigned';
-      case 'in-progress': return 'In Progress';
-      case 'on-hold': return 'On Hold';
-      case 'resolved': return 'Resolved';
-      case 'rejected': return 'Rejected';
-      default: return status.charAt(0).toUpperCase() + status.slice(1);
-    }
-  };
-
-  const filteredComplaints = complaints.filter(c => {
-    const matchesStatus = statusFilter ? c.status.toLowerCase() === statusFilter.toLowerCase() : true;
-    const matchesSearch = searchTerm
-      ? c.issue.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.id.toString().includes(searchTerm)
-      : true;
-    return matchesStatus && matchesSearch;
-  });
-
-  const sortedComplaints = [...filteredComplaints].sort((a, b) => {
-    const { key, direction } = sortConfig;
-    if (!key) return 0;
-
-    if (key === 'status') {
-      const aPriority = statusPriority[a.status.toLowerCase()] || 999;
-      const bPriority = statusPriority[b.status.toLowerCase()] || 999;
-      return direction === 'asc' ? aPriority - bPriority : bPriority - aPriority;
-    }
-
-    const aVal = a[key]?.toString().toLowerCase();
-    const bVal = b[key]?.toString().toLowerCase();
-    if (aVal < bVal) return direction === 'asc' ? -1 : 1;
-    if (aVal > bVal) return direction === 'asc' ? 1 : -1;
-    return 0;
-  });
+  const sortedComplaints = sortComplaints(complaints, sortConfig);
 
   const totalPages = Math.ceil(filteredComplaints.length / rowsPerPage);
   const paginatedComplaints = sortedComplaints.slice(
@@ -116,10 +62,10 @@ const ComplaintTable = ({ extra, complaints }) => {
             >
               <option value="">All</option>
               <option value="pending">Pending</option>
-              <option value="under-review">Under Review</option>
+              <option value="under review">Under Review</option>
               <option value="assigned">Assigned</option>
-              <option value="in-progress">In Progress</option>
-              <option value="on-hold">On Hold</option>
+              <option value="in progress">In Progress</option>
+              <option value="on hold">On Hold</option>
               <option value="resolved">Resolved</option>
               <option value="rejected">Rejected</option>
             </select>
@@ -176,8 +122,8 @@ const ComplaintTable = ({ extra, complaints }) => {
                     { label: 'ID', key: 'id' },
                     { label: 'Issue', key: 'issue' },
                     { label: 'Department', key: 'department' },
-                    { label: 'Location', key: 'location' },
-                    { label: 'Date', key: 'dateLogged' },
+                    { label: 'Location', key: 'street' },
+                    { label: 'Date', key: 'complaintDate' },
                     { label: 'Status', key: 'status' },
                     { label: 'Actions', key: '' },
                   ].map(({ label, key }, idx) => (
