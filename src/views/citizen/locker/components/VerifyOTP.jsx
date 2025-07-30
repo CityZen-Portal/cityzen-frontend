@@ -2,10 +2,9 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const CORRECT_OTP = "123456";
 
 const url = "https://otp-service-4nd9.onrender.com";
-// const url = "http://localhost:8500";
+// const url = "http://localhost:9999";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
