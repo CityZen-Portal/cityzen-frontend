@@ -85,6 +85,7 @@ import AdminJobApplicants from "views/admin/job-applications/pages/AdminJobAppli
 import ApplicantDetails from "views/admin/job-applications/pages/ApplicantDetails";
 import JobApplicationResponseView from "views/citizen/job-application/pages/JobApplicationResponseView";
 import JobApplicationEdit from "views/citizen/job-application/pages/JobApplicationEdit";
+import NewsHomeDetails from "views/citizen/news/components/NewsHomeDetails";
 
 
 const routes = [
@@ -437,6 +438,12 @@ const routes = [
         layout: "/citizen",
         path: "/newsupdate/newsdetails/:id",
         component: <NewsDetails />,
+      },
+      {
+        name: "News Details",
+        layout: "/citizen",
+        path: "/newsupdate/newshomedetails",
+        component: <NewsHomeDetails/>,
       },
     ],
   },
