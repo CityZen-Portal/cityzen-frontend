@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import loading_gif from '../../../../assets/img/loading/loading_gif.gif';
+import axios from "axios";
 
 const FeedbackForm = () => {
+  const {id} = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "Jeghan",
@@ -11,9 +14,12 @@ const FeedbackForm = () => {
     complaint: "Water Supply Issue",
     comments: "",
     rating: 0,
-    resolved: "",
+    isResolved: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -25,6 +31,8 @@ const FeedbackForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    setLoading(true);
 
     if (!formData.name.trim() || !formData.complaintId.trim() || !formData.complaint.trim()) {
       toast.error("Missing complaint data", {
@@ -35,7 +43,7 @@ const FeedbackForm = () => {
       return;
     }
 
-    if (!formData.resolved) {
+    if (!formData.isResolved) {
       toast.error("Please select if the issue was resolved", {
         position: "top-right",
         autoClose: 1000,
@@ -53,18 +61,49 @@ const FeedbackForm = () => {
       return;
     }
 
-    console.log(formData);
+    const feedback = {
+      isResolved: (formData.isResolved).toLowerCase() === 'yes',
+      rating: formData.rating,
+      comments: formData.comments
+    }
+    
+    const BASE_URL = 'http://localhost:10101/api/helpdesk';
 
-    toast.success("Feedback Submitted Successfully!", {
-      position: "top-right",
-      autoClose: 1000,
-      theme: "colored",
-      onClose: () => navigate("/citizen/help-desk/complaint/log"),
-    });
+    axios.put(`${BASE_URL}/citizen/complaints/${id}/feedback`, feedback)
+      .then(() => {
+          toast.success("Feedback Submitted Successfully!", {
+            position: "top-right",
+            autoClose: 1000,
+            theme: "colored",
+            onClose: () => navigate("/citizen/help-desk/complaint/log"),
+          });
+          return;
+        })
+        .catch(err => {
+          toast.error('Server Error! Unable to Submit Feedback', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => setLoading(false)); 
+
+    console.log(feedback);    
   };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-navy-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
         className="bg-white dark:bg-navy-700 rounded-lg sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 lg:p-8 w-[95vw] max-w-md sm:max-w-lg lg:max-w-2xl"
@@ -81,13 +120,13 @@ const FeedbackForm = () => {
             <input
               type="text"
               name="complaintId"
-              value={formData.complaintId}
+              value={id}
               disabled
               className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-sm sm:text-base"
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base text-black dark:text-white">
               Name
             </label>
@@ -98,10 +137,10 @@ const FeedbackForm = () => {
               disabled
               className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-sm sm:text-base"
             />
-          </div>
+          </div> */}
         </div>
 
-        <label className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base text-black dark:text-white">
+        {/* <label className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base text-black dark:text-white">
           Complaint
         </label>
         <input
@@ -110,7 +149,7 @@ const FeedbackForm = () => {
           value={formData.complaint}
           disabled
           className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 mb-4 sm:mb-6 text-sm sm:text-base"
-        />
+        /> */}
 
         <label className="block mb-2 sm:mb-3 font-medium text-sm sm:text-base text-black dark:text-white">
           Was the issue resolved?
@@ -120,7 +159,7 @@ const FeedbackForm = () => {
             <label key={option} className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="radio"
-                name="resolved"
+                name="isResolved"
                 value={option}
                 onChange={handleChange}
                 className="accent-black dark:accent-white h-4 w-4"
