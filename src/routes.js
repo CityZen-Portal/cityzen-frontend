@@ -83,6 +83,8 @@ import JobForm from "views/admin/job-applications/pages/JobForm";
 import JobApplicationForm from "views/citizen/job-application/pages/JobApplicationForm";
 import AdminJobApplicants from "views/admin/job-applications/pages/AdminJobApplicants";
 import ApplicantDetails from "views/admin/job-applications/pages/ApplicantDetails";
+import JobApplicationResponseView from "views/citizen/job-application/pages/JobApplicationResponseView";
+import JobApplicationEdit from "views/citizen/job-application/pages/JobApplicationEdit";
 
 
 const routes = [
@@ -221,6 +223,19 @@ const routes = [
         path: "job-application/applications",
         component: <AppliedJobs />,
       },
+      {
+        name: "Job Application List",
+        layout: "/citizen",
+        path: "job-application/response/:jobId",
+        component: <JobApplicationResponseView />,
+      },
+      {
+        name: "Job Application List",
+        layout: "/citizen",
+        path: "job-application/edit/:jobId",
+        component: <JobApplicationEdit />,
+      }
+
     ]
   },
 
