@@ -90,7 +90,6 @@ export default function AdminDashboard() {
                       <th className="pb-2">Name</th>
                       <th className="pb-2">Status</th>
                       <th className="pb-2">Date</th>
-                      <th className="pb-2">Progress</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -101,17 +100,13 @@ export default function AdminDashboard() {
                         icon: (
                           <CheckCircleIcon className="h-5 w-5 text-gray-500" />
                         ),
-                        date: "24Jan'25",
-                        color: "bg-green-500",
-                        progress: "80%",
+                        date: "24Jan'25"
                       },
                       {
                         name: "Garbage Collection",
                         status: "Disable",
                         icon: <XCircleIcon className="h-5 w-5 text-gray-500" />,
-                        date: "15Feb'25",
-                        color: "bg-red-500",
-                        progress: "30%",
+                        date: "15Feb'25"
                       },
                       {
                         name: "Street Light Repair",
@@ -119,9 +114,7 @@ export default function AdminDashboard() {
                         icon: (
                           <ExclamationTriangleIcon className="h-5 w-5 text-gray-500" />
                         ),
-                        date: "20Mar'25",
-                        color: "bg-orange-500",
-                        progress: "50%",
+                        date: "20Mar'25"
                       },
                       {
                         name: "Water Leakage",
@@ -129,9 +122,7 @@ export default function AdminDashboard() {
                         icon: (
                           <CheckCircleIcon className="h-5 w-5 text-gray-500" />
                         ),
-                        date: "12Apr'25",
-                        color: "bg-green-500",
-                        progress: "70%",
+                        date: "12Apr'25"
                       },
                     ].map((item, i) => (
                       <tr
