@@ -9,6 +9,7 @@ import {
   sortComplaints,
 } from '../../../citizen/help-desk/utils/helpers';
 
+
 const ComplaintTable = ({ complaints }) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
