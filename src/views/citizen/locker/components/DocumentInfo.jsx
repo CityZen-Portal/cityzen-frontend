@@ -1,19 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-function formatBytes(bytes) {
-  if (!bytes && bytes !== 0) return "-";
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
 
 export default function DocumentInfo() {
   const MEDIA_API = process.env.REACT_APP_API_MEDIA_URL;
   const LOCKER_API = process.env.REACT_APP_API_LOCKER_URL;
   const USER_API = process.env.REACT_APP_API_UMS_URL;
+  // const LOCKER_API = "http://localhost:4000";
+
+  const token = localStorage.getItem("token");
 
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,7 +35,12 @@ export default function DocumentInfo() {
       try {
         setLoading(true);
         const userRes = await axios.get(
-          `${USER_API}/api/auth/getUser/${userInfo.email}`
+          `${USER_API}/api/auth/getUser/${userInfo.email}`,
+          {
+            headers: {
+              token,
+            },
+          }
         );
         const aadharNumber = userRes.data.data.aadharNumber;
 
@@ -48,7 +48,12 @@ export default function DocumentInfo() {
         setUserInfo(newUser);
 
         const docsRes = await axios.get(
-          `${LOCKER_API}/api/lock/listDocument/${aadharNumber}`
+          `${LOCKER_API}/api/lock/listDocument/${aadharNumber}`,
+          {
+            headers: {
+              token,
+            },
+          }
         );
         setDocs(docsRes.data.data || []);
         setLoading(false);
@@ -67,7 +72,12 @@ export default function DocumentInfo() {
   const refreshDocuments = async () => {
     try {
       const res = await axios.get(
-        `${LOCKER_API}/api/lock/listDocument/${userInfo.aadharNumber}`
+        `${LOCKER_API}/api/lock/listDocument/${userInfo.aadharNumber}`,
+        {
+          headers: {
+            token,
+          },
+        }
       );
       setDocs(res.data.data || []);
     } catch (err) {
@@ -86,15 +96,28 @@ export default function DocumentInfo() {
 
       const mediaRes = await axios.post(
         `${MEDIA_API}/api/images/upload`,
-        formData
+        formData,
+        {
+          headers: {
+            token,
+          },
+        }
       );
       const { name: fileName, path: filePath } = mediaRes.data.data;
 
-      await axios.post(`${LOCKER_API}/api/lock/add`, {
-        aadharNumber: userInfo.aadharNumber,
-        fileName,
-        filePath,
-      });
+      await axios.post(
+        `${LOCKER_API}/api/lock/add`,
+        {
+          aadharNumber: userInfo.aadharNumber,
+          fileName,
+          filePath,
+        },
+        {
+          headers: {
+            token,
+          },
+        }
+      );
 
       setSuccessMsg("Document uploaded successfully");
       setTimeout(() => setSuccessMsg(""), 3000);
@@ -128,7 +151,12 @@ export default function DocumentInfo() {
   const deleteDoc = async (fileId) => {
     try {
       await axios.delete(
-        `${LOCKER_API}/api/lock/delete/${userInfo.aadharNumber}/${fileId}`
+        `${LOCKER_API}/api/lock/delete/${userInfo.aadharNumber}/${fileId}`,
+        {
+          headers: {
+            token,
+          },
+        }
       );
       refreshDocuments();
     } catch (err) {
@@ -180,18 +208,31 @@ export default function DocumentInfo() {
 
         const uploadRes = await axios.post(
           `${MEDIA_API}/api/images/upload`,
-          updateForm
+          updateForm,
+          {
+            headers: {
+              token,
+            },
+          }
         );
         fileName = uploadRes.data.data.name;
         filePath = uploadRes.data.data.path;
       }
 
-      await axios.put(`${LOCKER_API}/api/lock/update`, {
-        aadharNumber: userInfo.aadharNumber,
-        fileId: editingDoc.fileId,
-        fileName,
-        filePath,
-      });
+      await axios.put(
+        `${LOCKER_API}/api/lock/update`,
+        {
+          aadharNumber: userInfo.aadharNumber,
+          fileId: editingDoc.fileId,
+          fileName,
+          filePath,
+        },
+        {
+          headers: {
+            token,
+          },
+        }
+      );
 
       setSuccessMsg("Document updated");
       setTimeout(() => setSuccessMsg(""), 3000);

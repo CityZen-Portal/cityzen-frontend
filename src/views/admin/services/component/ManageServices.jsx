@@ -144,7 +144,7 @@ function ManageServices() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <h2 className="text-3xl font-extrabold mb-8 text-blue-700">
+      <h2 className="text-3xl font-extrabold mb-8 text-white">
         {editServiceId ? "Edit Service" : "Add New Service"}
       </h2>
 
@@ -156,11 +156,11 @@ function ManageServices() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 bg-white p-8 rounded-xl shadow-lg max-w-2xl mx-auto"
+        className="space-y-6 bg-white p-8 rounded-xl shadow-lg max-w-2xl mx-auto dark:bg-navy-800"
         noValidate
       >
         <div>
-          <label className="block mb-2 font-semibold text-gray-700">
+          <label className="block mb-2 font-semibold text-gray-700 ">
             Select Category <span className="text-red-500">*</span>
           </label>
           <select
@@ -168,7 +168,7 @@ function ManageServices() {
             onChange={(e) =>
               setFormData({ ...formData, category: e.target.value, serviceName: "" })
             }
-            className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+            className="w-full border border-gray-300 dark:border-navy-700 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
             required
           >
             <option value="" disabled>
@@ -191,7 +191,7 @@ function ManageServices() {
             placeholder="Enter Service Name"
             value={formData.serviceName}
             onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
-            className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+            className="w-full border border-gray-300 dark:border-navy-700 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
             required
           />
         </div>
@@ -210,7 +210,7 @@ function ManageServices() {
         </div>
 
         <div>
-          <label className="block mb-2 font-semibold text-gray-700">Upload Image (optional)</label>
+          <label className="block mb-2 font-semibold text-gray-700">Upload Image</label>
           <input
             type="file"
             accept="image/*"
@@ -243,8 +243,8 @@ function ManageServices() {
           className={`w-full mt-6 py-3 rounded-lg font-semibold text-white transition 
             ${
               formData.category && formData.serviceName && formData.description
-                ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                : "bg-blue-300 cursor-not-allowed"
+                ? "bg-navy-700 hover:bg-navy-800 cursor-pointer"
+                : "bg-navy-300 cursor-not-allowed"
             }
           `}
         >
@@ -252,7 +252,7 @@ function ManageServices() {
         </button>
       </form>
 
-      <h3 className="text-2xl font-extrabold mt-14 mb-8 text-gray-800">
+      <h3 className="text-2xl font-extrabold mt-14 mb-8 text-white">
         All Services
       </h3>
 
@@ -260,7 +260,7 @@ function ManageServices() {
         {services.map((service) => (
           <div
             key={service.id}
-            className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between hover:shadow-xl transition"
+            className="bg-white rounded-2xl dark:bg-navy-800 shadow-lg p-6 flex flex-col justify-between hover:shadow-xl transition"
           >
             <div>
               <p className="text-sm text-gray-500 mb-1">
@@ -281,7 +281,7 @@ function ManageServices() {
             <div className="flex gap-3">
               <button
                 onClick={() => handleEdit(service)}
-                className="flex-1 bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition"
+                className="flex-1 bg-navy-700 text-white font-semibold py-2 rounded-lg hover:bg-navy-300 transition"
               >
                 Edit
               </button>
