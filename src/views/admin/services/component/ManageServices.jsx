@@ -3,17 +3,80 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const categories = {
-  Utilities: ["Water Supply", "Electricity", "Gas", "Internet"],
-  Sanitation: ["Waste Management", "Solid Waste Collection", "Public Health & Sanitation"],
-  Infrastructure: ["Road Maintenance", "Street Lighting", "Building Permits"],
-  Environment: ["Environmental Services", "Disaster Management", "Animal Control"],
-  "Community Services": [
-    "Public Parks & Recreation",
-    "Fire and Emergency Services",
-    "Community Welfare Services",
+const categories =
+{
+  "Utilities": [
+    "Electricity Board",
+    "Water Supply Department",
+    "Gas Supply Department",
+    "Telecom Services",
+    "Public Works - Utility Maintenance Wing"
   ],
+  "Sanitation": [
+    "Municipal Sanitation Department",
+    "Solid Waste Management Board",
+    "Drainage & Sewerage Department",
+    "Public Toilets Management",
+    "Health Department (Vector Control Unit)"
+  ],
+  "Infrastructure": [
+    "Public Works Department (PWD)",
+    "Highways Department",
+    "Urban Planning Authority",
+    "Railway Infrastructure Division",
+    "Metro Rail Corporation"
+  ],
+  "Environment": [
+    "Forest Department",
+    "Pollution Control Board",
+    "Environmental Monitoring Wing",
+    "Climate Change Cell",
+    "Water Resource Department"
+  ],
+  "Community Services": [
+    "Social Welfare Department",
+    "Education Department",
+    "Health Department",
+    "Food & Civil Supplies Department",
+    "Labour Welfare Department"
+  ],
+  "Health and Family Welfare": [
+    "Primary Health Centers (PHC)",
+    "Government Hospitals Department",
+    "National Health Mission",
+    "Immunization Department",
+    "Medical Education & Research Directorate"
+  ],
+  "Education": [
+    "School Education Department",
+    "Higher Education Department",
+    "Technical Education Department",
+    "Adult Literacy Mission",
+    "Teachers Recruitment Board"
+  ],
+  "Transport": [
+    "Road Transport Department",
+    "Railway Department",
+    "Metro Rail Corporation",
+    "Transport Commissioner’s Office",
+    "State Transport Corporation"
+  ],
+  "Revenue and Land Records": [
+    "Revenue Department",
+    "Survey and Settlement Department",
+    "Registration Department",
+    "Land Reforms Department",
+    "Disaster Management and Mitigation Department"
+  ],
+  "Law and Order": [
+    "Police Department",
+    "Home Department",
+    "Judiciary",
+    "Fire and Rescue Services",
+    "Prison Department"
+  ]
 };
+
 
 function ManageServices() {
   const [formData, setFormData] = useState({
@@ -186,14 +249,22 @@ function ManageServices() {
           <label className="block mb-2 font-semibold text-gray-700">
             Service Name <span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
-            placeholder="Enter Service Name"
+          <select
             value={formData.serviceName}
             onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
             className="w-full border border-gray-300 dark:border-navy-700 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
             required
-          />
+          >
+            <option value="" disabled>
+              Choose Service Name
+            </option>
+            {selectedSubServices.map((subService) => (
+              <option key={subService} value={subService}>
+                {subService}
+              </option>
+            ))}
+          </select>
+
         </div>
 
         <div>
@@ -241,10 +312,9 @@ function ManageServices() {
           type="submit"
           disabled={!formData.category || !formData.serviceName || !formData.description}
           className={`w-full mt-6 py-3 rounded-lg font-semibold text-white transition 
-            ${
-              formData.category && formData.serviceName && formData.description
-                ? "bg-navy-700 hover:bg-navy-800 cursor-pointer"
-                : "bg-navy-300 cursor-not-allowed"
+            ${formData.category && formData.serviceName && formData.description
+              ? "bg-navy-700 hover:bg-navy-800 cursor-pointer"
+              : "bg-navy-300 cursor-not-allowed"
             }
           `}
         >
