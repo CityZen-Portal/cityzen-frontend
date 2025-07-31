@@ -8,10 +8,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const AddNews = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get id from URL params
-
-  // Assuming authorId should be retrieved from authenticated user or localStorage if needed
-  const authorId = localStorage.getItem('id') || ''; // Or however you get the logged in user
+  const { id } = useParams();
+  const authorId = localStorage.getItem('id') || '';
 
   const [formData, setFormData] = useState({
     title: '',
@@ -29,7 +27,6 @@ const AddNews = () => {
 
   useEffect(() => {
     if (id && id !== 'new') {
-      // Fetch the news post only if editing (id is valid and not 'new')
       axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
         .then(res => {
           const item = res.data.data;
@@ -54,13 +51,45 @@ const AddNews = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = 'Title is required';
-    if (!formData.content.trim()) errors.content = 'Content is required';
-    if (!formData.location.trim()) errors.location = 'Location is required';
-    if (!formData.category) errors.category = 'Category is required';
+    let isValid = true;
+
+    if (!formData.title.trim()) {
+      errors.title = 'Title is required';
+      isValid = false;
+    }
+
+    if (!formData.content.trim()) {
+      errors.content = 'Content is required';
+      isValid = false;
+    }
+
+    if (!formData.location.trim()) {
+      errors.location = 'Location is required';
+      isValid = false;
+    }
+
+    if (!formData.category) {
+      errors.category = 'Category is required';
+      isValid = false;
+    }
+
+    // Optional: Validate othercategory if "OTHERS" is selected
+    if (formData.category === 'OTHERS' && !formData.othercategory.trim()) {
+      errors.othercategory = 'Please enter a custom category';
+      isValid = false;
+    }
+
+    // Validate image only when creating new news (not editing)
+    if (!isEditing && !formData.image) {
+      errors.image = 'Image is required';
+      isValid = false;
+    }
+
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    Object.values(errors).forEach((msg) => toast.error(msg));
+    return isValid;
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -111,15 +140,15 @@ const AddNews = () => {
         authorId: authorId,
         ...(formData.category === 'OTHERS'
           ? {
-              category_name: formData.othercategory,
-              imageName,
-              imagePath,
-            }
+            category_name: formData.othercategory,
+            imageName,
+            imagePath,
+          }
           : {
-              category: formData.category,
-              imageName,
-              imagePath,
-            }),
+            category: formData.category,
+            imageName,
+            imagePath,
+          }),
       };
 
       if (isEditing) {

@@ -54,7 +54,7 @@ const ViewNews = () => {
   useEffect(() => {
     const fetchNewsData = async () => {
       try {
-        const id=localStorage.getItem("id");
+        const id = localStorage.getItem("id");
         const response = await axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/author/${id}`);
         setNewsData(response.data.data);
       } catch (err) {
@@ -239,7 +239,21 @@ const ViewNews = () => {
           </div>
         </div>
       )}
-       <NewsHome/>
+      <section className=" mx-auto p-6">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-navy-800 dark:text-white">
+             News
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm md:text-base">
+            Stay updated with the latest announcements and updates
+          </p>
+        </div>
+
+       
+          <NewsHome />
+       
+      </section>
+
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
