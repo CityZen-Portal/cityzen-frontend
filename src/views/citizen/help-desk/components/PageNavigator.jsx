@@ -33,7 +33,7 @@ const PageNavigator = ({ filteredComplaints, rowsPerPage, currentPage, totalPage
             key={num}
             onClick={() => handlePageChange(num)}
             className={`px-3 py-1 rounded ${currentPage === num
-              ? 'bg-blue-600 text-white'
+              ? 'bg-brand-600 text-white'
               : 'bg-gray-100 hover:bg-gray-300'}`}
           >
             {num}

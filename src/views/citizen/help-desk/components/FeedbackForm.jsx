@@ -46,6 +46,7 @@ const FeedbackForm = () => {
         autoClose: 1000,
         theme: "colored",
       });
+      setLoading(false)
       return;
     }
 
@@ -55,6 +56,7 @@ const FeedbackForm = () => {
         autoClose: 1000,
         theme: "colored",
       });
+      setLoading(false)
       return;
     }
 
@@ -64,6 +66,7 @@ const FeedbackForm = () => {
         autoClose: 1000,
         theme: "colored",
       });
+      setLoading(false)
       return;
     }
 
@@ -89,7 +92,6 @@ const FeedbackForm = () => {
             theme: "colored",
             onClose: () => navigate("/citizen/help-desk/complaint/log"),
           });
-          return;
         })
         .catch(err => {
           toast.error('Server Error! Unable to Submit Feedback', {
