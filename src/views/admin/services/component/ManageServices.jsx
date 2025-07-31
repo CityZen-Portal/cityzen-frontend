@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
 
 const categories = {
   "Utilities": [
@@ -74,11 +73,13 @@ const categories = {
     "Judiciary",
     "Fire and Rescue Services",
     "Prison Department"
+  ],
+  "others":[
+    
   ]
 };
 
 function ManageServices() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     category: "",
     serviceName: "",
@@ -105,17 +106,23 @@ function ManageServices() {
   useEffect(() => {
     loadServices();
   }, []);
-
+  const [validationErrors, setValidationErrors] = useState({});
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    
+
 
     const { category, serviceName, description } = formData;
 
-    if (!category || !serviceName || !description) {
-      setError("All fields marked * are required.");
-      return;
-    }
+     const errors = validateForm();
+
+     if (Object.keys(errors).length > 0) {
+      
+       setValidationErrors(errors);
+       return;
+     }
+
 
     try {
       let uploadedImage = { imageName: "", imagePath: "" };
@@ -197,38 +204,65 @@ function ManageServices() {
   };
 
   const selectedSubServices = formData.category ? categories[formData.category] || [] : [];
+  const finalCategory =
+    formData.category === "others"
+      ? formData.customCategory
+      : formData.category;
+  const validateForm = () => {
+    const errors = {};
 
+    if (
+      !formData.category ||
+      (formData.category === "others" && !formData.customCategory)
+    ) {
+      errors.category = "Category is required";
+    }
+
+    if (!formData.serviceName || formData.serviceName.trim() === "") {
+      errors.serviceName = "Service Name is required";
+    }
+
+    if (!formData.description || formData.description.trim() === "") {
+      errors.description = "Description is required";
+    }
+
+    if (!formData.image) {
+      errors.image = "Image is required";
+    }
+
+    return errors;
+  };
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 px-6 py-10">
-      <div className="max-w-5xl mx-auto">
-               <button
-          onClick={() => navigate("/admin/services")}
-          className="mb-2 flex items-center gap-2 text-sm text-gray-800 dark:text-white"
-        >
-          <span>←</span> Back to Services
-        </button>
-        <h2 className="text-3xl font-bold text-center mb-10 text-gray-800 dark:text-white">
+    <div className="min-h-screen bg-gray-100 px-6 py-10 dark:bg-navy-900">
+      <div className="mx-auto max-w-5xl">
+        <h2 className="mb-10 text-center text-3xl font-bold text-gray-800 dark:text-white">
           {editServiceId ? "Edit Service" : "Add New Service"}
         </h2>
 
         {error && (
-          <div className="mb-6 text-red-600 bg-red-100 border border-red-300 rounded p-3">
+          <div className="mb-6 rounded border border-red-300 bg-red-100 p-3 text-red-600">
             {error}
           </div>
         )}
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-navy-800 shadow-lg rounded-xl p-8 space-y-6"
+          className="space-y-6 rounded-xl bg-white p-8 shadow-lg dark:bg-navy-800"
         >
           <div>
-            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+            <label className="mb-2 block font-semibold text-gray-700 dark:text-gray-300">
               Category <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value, serviceName: "" })}
-              className="w-full p-3 border border-gray-300 dark:border-navy-600 rounded-md dark:bg-navy-700 dark:text-white"
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  category: e.target.value,
+                  serviceName: "",
+                })
+              }
+              className="w-full rounded-md border border-gray-300 p-3 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
               required
             >
               <option value="">Select a Category</option>
@@ -238,40 +272,110 @@ function ManageServices() {
                 </option>
               ))}
             </select>
+            {formData.category === "others" && (
+              <input
+                type="text"
+                placeholder="Enter custom category"
+                value={formData.customCategory || ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    customCategory: e.target.value,
+                    serviceName: "", // optional if needed
+                  })
+                }
+                className="mt-2 w-full rounded-md border border-gray-300 p-3 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
+              />
+            )}
+            {validationErrors.customCategory && (
+              <p className="mt-1 text-sm text-red-500">
+                {validationErrors.customCategory}
+              </p>
+            )}
           </div>
-
-          <div>
-            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+          {/* <div>
+            <label className="mb-2 block font-semibold text-gray-700 dark:text-gray-300">
               Service Name <span className="text-red-500">*</span>
             </label>
+            
             <select
               value={formData.serviceName}
-              onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
-              className="w-full p-3 border border-gray-300 dark:border-navy-600 rounded-md dark:bg-navy-700 dark:text-white"
+              onChange={(e) =>
+                setFormData({ ...formData, serviceName: e.target.value })
+              }
+              className="w-full rounded-md border border-gray-300 p-3 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
               required
             >
               <option value="">Choose Service Name</option>
               {selectedSubServices.map((sub) => (
-                <option key={sub} value={sub}>{sub}</option>
+                <option key={sub} value={sub}>
+                  {sub}
+                </option>
               ))}
             </select>
-          </div>
+          </div> */}
+          <div className="mt-4">
+            <label className="mb-2 block font-semibold text-gray-700 dark:text-gray-300">
+              Service Name <span className="text-red-500">*</span>
+            </label>
 
+            {formData.category === "others" ? (
+              <input
+                type="text"
+                placeholder="Enter custom service name"
+                value={formData.serviceName}
+                onChange={(e) =>
+                  setFormData({ ...formData, serviceName: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 p-3 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
+                required
+              />
+            ) : (
+              <select
+                value={formData.serviceName}
+                onChange={(e) =>
+                  setFormData({ ...formData, serviceName: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 p-3 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
+                required
+              >
+                <option value="">Choose Service Name</option>
+                {selectedSubServices.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          {validationErrors.serviceName && (
+            <p className="mt-1 text-sm text-red-500">
+              {validationErrors.serviceName}
+            </p>
+          )}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+            <label className="mb-2 block font-semibold text-gray-700 dark:text-gray-300">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full p-3 border border-gray-300 dark:border-navy-600 rounded-md dark:bg-navy-700 dark:text-white min-h-[100px]"
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              className="min-h-[100px] w-full rounded-md border border-gray-300 p-3 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
               placeholder="Enter a brief description"
               required
             />
           </div>
-
+          {validationErrors.description && (
+            <p className="mt-1 text-sm text-red-500">
+              {validationErrors.description}
+            </p>
+          )}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">Upload Image</label>
+            <label className="mb-2 block font-semibold text-gray-700 dark:text-gray-300">
+              Upload Image
+            </label>
             <input
               type="file"
               accept="image/*"
@@ -287,64 +391,59 @@ function ManageServices() {
               className="w-full"
             />
           </div>
-
           {previewImage && (
             <div className="flex justify-center">
               <img
                 src={previewImage}
                 alt="Preview"
-                className="w-40 h-40 object-cover rounded-xl border mt-4 shadow-md"
+                className="mt-4 h-40 w-40 rounded-xl border object-cover shadow-md"
               />
             </div>
           )}
-
           <button
             type="submit"
-            className={`w-full py-3 rounded-lg font-bold text-white ${
-              formData.category && formData.serviceName && formData.description
-                ? "bg-navy-700 hover:bg-navy-800"
-                : "bg-navy-300 cursor-not-allowed"
-            }`}
-            disabled={!formData.category || !formData.serviceName || !formData.description}
+            className="text-white w-full flex-1 rounded-lg rounded-md bg-blue-600 py-2 py-3 font-bold hover:bg-blue-700"
           >
             {editServiceId ? "Update Service" : "Add Service"}
           </button>
         </form>
 
-        <h3 className="text-2xl font-bold mt-12 mb-6 text-gray-800 dark:text-white text-center">
+        <h3 className="mb-6 mt-12 text-center text-2xl font-bold text-gray-800 dark:text-white">
           All Services
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <div
               key={service.id}
-              className="bg-white dark:bg-navy-800 p-6 rounded-xl shadow-md hover:shadow-xl transition"
+              className="rounded-xl bg-white p-6 shadow-md transition hover:shadow-xl dark:bg-navy-800"
             >
               {service.imagePath && (
                 <img
                   src={service.imagePath}
                   alt={service.imageName}
-                  className="w-full h-40 object-cover rounded-md mb-4"
+                  className="mb-4 h-40 w-full rounded-md object-cover"
                 />
               )}
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+              <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
                 <strong>Category:</strong> {service.category}
               </p>
-              <h4 className="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-2">
+              <h4 className="mb-2 text-lg font-semibold text-blue-700 dark:text-blue-400">
                 {service.serviceName}
               </h4>
-              <p className="text-gray-700 dark:text-gray-200 line-clamp-4 mb-4">{service.description}</p>
+              <p className="mb-4 line-clamp-4 text-gray-700 dark:text-gray-200">
+                {service.description}
+              </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEdit(service)}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
+                  className="flex-1 rounded-md bg-blue-600 py-2 text-white hover:bg-blue-700"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(service.id)}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-md"
+                  className="flex-1 rounded-md bg-red-600 py-2 text-white hover:bg-red-700"
                 >
                   Delete
                 </button>
