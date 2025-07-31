@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FilterButtons, RequestDetails, CompletionForm, RequestsTable } from './component';
 
@@ -18,7 +18,16 @@ const StaffService = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch from backend
+
+  const formRef = useRef(null);
+
+  const scrollToForm = () => {
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+
   const fetchRequests = async () => {
     try {
       const email = localStorage.getItem("email");
@@ -76,11 +85,13 @@ const StaffService = () => {
     setPhotoPreview(null);
     setViewingDetails(null);
     setErrors({});
+    scrollToForm(); 
   };
 
   const handleViewDetails = (request) => {
     setViewingDetails(request);
     setSelectedRequest(null);
+    scrollToForm(); 
   };
 
   const handleSubmitCompletion = async (e) => {
@@ -103,7 +114,7 @@ const StaffService = () => {
         completedDate: formData.completionDate,
         staffName: formData.staffName,
         suggestion: formData.suggestion,
-        photo: photoPreview // Optional: send base64
+        photo: photoPreview
       };
 
       await axios.put(`https://utility-booking-backend.onrender.com/api/task/${selectedRequest.id}`, updatePayload);
@@ -144,17 +155,20 @@ const StaffService = () => {
         handleViewDetails={handleViewDetails}
         handleComplete={handleComplete}
       />
-      <CompletionForm
-        selectedRequest={selectedRequest}
-        setSelectedRequest={setSelectedRequest}
-        formData={formData}
-        handleInputChange={handleInputChange}
-        handlePhotoChange={handlePhotoChange}
-        photoPreview={photoPreview}
-        errors={errors}
-        handleSubmitCompletion={handleSubmitCompletion}
-        fetchRequests={fetchRequests}
-      />
+   
+      <div ref={formRef}>
+        <CompletionForm
+          selectedRequest={selectedRequest}
+          setSelectedRequest={setSelectedRequest}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handlePhotoChange={handlePhotoChange}
+          photoPreview={photoPreview}
+          errors={errors}
+          handleSubmitCompletion={handleSubmitCompletion}
+          fetchRequests={fetchRequests}
+        />
+      </div>
       <RequestDetails
         selectedRequest={selectedRequest}
         viewingDetails={viewingDetails}

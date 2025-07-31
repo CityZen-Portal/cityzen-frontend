@@ -54,13 +54,43 @@ const AddNews = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = 'Title is required';
-    if (!formData.content.trim()) errors.content = 'Content is required';
-    if (!formData.location.trim()) errors.location = 'Location is required';
-    if (!formData.category) errors.category = 'Category is required';
+    let isValid = true;
+
+    if (!formData.title.trim()) {
+      errors.title = 'Title is required';
+      isValid = false;
+    }
+
+    if (!formData.content.trim()) {
+      errors.content = 'Content is required';
+      isValid = false;
+    }
+
+    if (!formData.location.trim()) {
+      errors.location = 'Location is required';
+      isValid = false;
+    }
+
+    if (!formData.category) {
+      errors.category = 'Category is required';
+      isValid = false;
+    }
+
+    if (formData.category === 'OTHERS' && !formData.othercategory.trim()) {
+      errors.othercategory = 'Custom category is required';
+      isValid = false;
+    }
+
+    if (!isEditing && !formData.image) {
+      errors.image = 'Image is required';
+      isValid = false;
+    }
+
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    Object.values(errors).forEach((msg) => toast.error(msg));
+    return isValid;
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -111,15 +141,15 @@ const AddNews = () => {
         authorId: authorId,
         ...(formData.category === 'OTHERS'
           ? {
-              category_name: formData.othercategory,
-              imageName,
-              imagePath,
-            }
+            category_name: formData.othercategory,
+            imageName,
+            imagePath,
+          }
           : {
-              category: formData.category,
-              imageName,
-              imagePath,
-            }),
+            category: formData.category,
+            imageName,
+            imagePath,
+          }),
       };
 
       if (isEditing) {

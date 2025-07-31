@@ -145,42 +145,9 @@ export default function AdminDashboard() {
                 </table>
               </div>
 
-              {/* Tasks */}
-              <div className="col-span-1 rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="flex items-center text-xl font-bold text-gray-800 dark:text-white">
-                    <ClipboardDocumentListIcon className="mr-2 h-5 w-5" />
-                    Tasks
-                  </h2>
-                </div>
-                <ul className="space-y-4">
-                  {[
-                    "Sanitation",
-                    "Fire and Emergency",
-                    "Electricity and Street Lights",
-                    "Water Supply Management",
-                    "Waste Management",
-                  ].map((task, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center justify-between"
-                    >
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded text-violet-500 focus:ring-violet-400"
-                        />
-                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {task}
-                        </span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
               {/* Calendar */}
-              <div className="col-span-1 rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
+              <div className="col-span-2 rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
                 <div className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-white">
                   📅 <span>Events Calendar</span>
                 </div>
