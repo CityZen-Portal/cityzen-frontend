@@ -93,9 +93,9 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
                   navigate(link);
                   window.scrollTo(0, 0);
                 }}
-                disabled={complaint.status !== 'resolved'}
+                disabled={(complaint.status).toLowerCase() !== 'resolved'}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  complaint.status === 'resolved'
+                  (complaint.status).toLowerCase() === 'resolved'
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
                 }`}

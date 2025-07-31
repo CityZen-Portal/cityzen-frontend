@@ -13,41 +13,28 @@ import loading_gif from '../../../../assets/img/loading/loading_gif.gif';
 
 
 const ComplaintDetails = () => {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [complaint, setComplaint] = useState({});
 
-  // const complaintData = {
-  //   id: '0001',
-  //   issue: 'Water Leakage',
-  //   department: 'Water Resource',
-  //   dateLogged: '19/04/2025',
-  //   status: 'pending',
-  //   complaintant: 'John Richard',
-  //   location: 'Anna Nagar, Chennai',
-  //   address: '123 Main Street, Anna Nagar',
-  //   wardNumber: '45',
-  //   pincode: '600040',
-  //   complaintType: 'Infrastructure',
-  //   Issue: 'Water Pipeline Burst',
-  //   description: 'The main water pipeline has burst near the junction of Anna Nagar main road. Water is flowing continuously causing inconvenience to residents and potential damage to nearby properties.',
-  //   fileUrl: auth,
-  //   staff: {staffName: "Davis Wanbros", department: "Water Supply", role: "Maintenance Technicians"},
-  //   statusHistory: [
-  //     { status: 'Submitted', date: '19/04/2025 10:00 AM', note: 'Complaint received' },
-  //     { status: 'Pending', date: '19/04/2025 10:15 AM', note: 'Assigned to Water Resource team' },
-  //     { status: 'Under Review', date: '20/04/2025 10:55 AM', note: 'Reviewing under Water Resource team' },
-  //   ]
-  // };
-  
-  const BASE_URL = 'http://localhost:10101/api/helpdesk';
-
   useEffect(() => {
     setLoading(true);
   
-    console.log(id);
-
-    axios.get(`${BASE_URL}/citizen/complaints/${id}`)
+    axios.get(`http://localhost:10101/api/helpdesk/citizen/complaints/${id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
@@ -62,10 +49,9 @@ const ComplaintDetails = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
-          console.log(complaint.id);
           setLoading(false);
         });
-  }, [id, complaint.id])
+  }, [id, complaint.id, token, email, citizenId])
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -122,7 +108,7 @@ const ComplaintDetails = () => {
                     title={'Location Details'}
                     Icon={MdLocationOn}
                     complaintData={complaint}
-                    fields={['citizenName', 'street', 'wardNumber', 'pincode', 'email']}
+                    fields={['citizenName', 'street', 'wardNumber', 'pincode', 'citizenEmail']}
                   />
 
                   {/* Complaint Details */}

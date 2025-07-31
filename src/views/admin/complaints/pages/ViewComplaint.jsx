@@ -6,16 +6,28 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ComplaintDetails = () => {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const path = useParams();
   const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const BASE_URL = 'http://localhost:10101/api/helpdesk';
-
   useEffect( () => {
     setLoading(true);
-    axios.get(`${BASE_URL}/admin/complaints`)
+    axios.get(`${HELPDESK_API}/admin/complaints`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data

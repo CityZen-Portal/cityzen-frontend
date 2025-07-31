@@ -6,8 +6,14 @@ import axios from 'axios';
 import loading_gif from '../../../../assets/img/loading/loading_gif.gif'
 
 function ComplaintForm() {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const navigate = useNavigate();
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);  
   
   const [complaintType, setComplaintType] = useState('');
   const [others, setOthers] = useState('');
@@ -49,7 +55,7 @@ function ComplaintForm() {
   };
 
   const options = {method: 'GET', headers: {accept: 'application/json'}};
-  const LOCATION_BASE_URL = 'https://us1.locationiq.com/v1/reverse'  
+  const LOCATION_BASE_URL = 'https://us1.locationiq.com/v1/reverse'
 
   const getLocation = async () => {
     const LOCATIONIQ_API_KEY = "pk.fa68c2e9928bf498051000f918028096";
@@ -93,63 +99,75 @@ function ComplaintForm() {
   };
 
   const handleSubmit = (e) => {
+  
     e.preventDefault();
     setLoadingSubmit(true);
 
     if (!street.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter the street');
       return;
     }
     if (!taluk.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter taluk');
       return;
     }
     if (!district.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter district');
       return;
     }
     if (!state.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter state');
       return;
     }
     if(!pincode){
+      setLoadingSubmit(false)
       toast.error('Please enter pincode');
       return;
     }
     if (!/^[0-9]{6}$/.test(pincode)) {
+      setLoadingSubmit(false)
       toast.error('Please enter a valid 6-digit pincode');
       return;
     }
     if(!wardNumber){
+      setLoadingSubmit(false)
       toast.error('Please enter Ward Number');
       return;
     }
     if (!/^[0-9]+$/.test(wardNumber)) {
+      setLoadingSubmit(false)
       toast.error('Ward number must be numeric');
       return;
     }
     if (!complaintType.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please select a complaint type');
       return;
     }
     if (complaintType === 'Other' && !others.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please describe the issue under "Other"');
       return;
     }
     if(!issue.trim()){
+      setLoadingSubmit(false)
       toast.error('Please enter the issue');
       return;
     }
     if (!description.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter a description');
       return;
     }
     if (file && file.type !== 'application/pdf') {
+      setLoadingSubmit(false)
       toast.error('Only PDF files are allowed.');
       return;
     }
-
-    const BASE_URL = 'http://localhost:10101/api/helpdesk';
 
     const postData = {
       citizenId: 1,
@@ -164,7 +182,16 @@ function ComplaintForm() {
       issueDescription: description,
     };
 
-    axios.post(`${BASE_URL}/citizen/complaint-form`, postData)
+
+    axios.post(`${HELPDESK_API}/citizen/complaint-form`, postData,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
     .then(res => {
       console.log('Response:', res.data);
       toast.success('Complaint submitted successfully!', {

@@ -12,6 +12,12 @@ import ResponseCard from 'views/citizen/help-desk/components/ResponseCard';
 import StatusHistory from 'views/citizen/help-desk/components/StatusHistory';
 
 const UpdateComplaintDetails = () => {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const { id } = useParams();
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false);
@@ -49,8 +55,6 @@ const UpdateComplaintDetails = () => {
   const [resolution, setResolution] = useState("")
   const [status, setStatus] = useState("")
 
-  
-  const BASE_URL = 'http://localhost:10101/api/helpdesk';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -70,7 +74,15 @@ const UpdateComplaintDetails = () => {
       attachment:"null"
     }
 
-    axios.put(`${BASE_URL}/staff/complaints/${id}`, putData)
+    axios.put(`${HELPDESK_API}/staff/complaints/${id}`, putData,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(() => {
           toast.success("Response Submitted Successfully!", {
             position: "top-right",
@@ -106,7 +118,15 @@ const UpdateComplaintDetails = () => {
   useEffect(() => {
     setLoading(true);
 
-    axios.get(`${BASE_URL}/staff/complaints/${id}`)
+    axios.get(`${HELPDESK_API}/staff/complaints/${id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
@@ -124,7 +144,7 @@ const UpdateComplaintDetails = () => {
         .finally(() => {
           setLoading(false);
         });
-  }, [id])
+  }, [id, HELPDESK_API, citizenId, email, token])
 
   
 

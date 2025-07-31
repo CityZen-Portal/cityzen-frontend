@@ -31,6 +31,12 @@ const deptList = [
 ];
 
 const AssignStaff = () => {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -74,13 +80,18 @@ const AssignStaff = () => {
   };
 
   
-  const BASE_URL = 'http://localhost:10101/api/helpdesk';
-
-  
   useEffect(() => {
     setLoading(true);
-
-    axios.get(`${BASE_URL}/admin/complaints`)
+  
+    axios.get(`http://localhost:10101/api/helpdesk/admin/complaints/${id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
@@ -95,9 +106,10 @@ const AssignStaff = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
+          console.log(complaint.id);
           setLoading(false);
         });
-  }, [id])
+  }, [id, complaint.id, token, email, citizenId])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -121,13 +133,22 @@ const AssignStaff = () => {
     }
 
     const putData = {
-      staffId: 51,
+      staffId: "staff@staff.com",
       department: assignedDepartment
     }
 
-    axios.put(`${BASE_URL}/admin/complaints/${id}`, null, {
+    axios.put(
+      `${HELPDESK_API}/admin/complaints/${id}`,
+      null,
+      {
+        headers: {
+          token,
+          email,
+          id: citizenId,
+        },
         params: putData,
-      })
+      }
+    )
       .then(() => {
           toast.success("Staff assigned successfully!!", {
             position: "top-right",
@@ -173,22 +194,22 @@ const AssignStaff = () => {
                 <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6 h-full">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 h-full">
                     {/* Location Details */}
-                    <DetailsList
-                      key={1}
-                      title={'Location Details'}
-                      Icon={MdLocationOn}
-                      complaintData={complaint}
-                      fields={['citizenName', 'street', 'wardNumber', 'pincode', 'department']}
-                    />
+                  <DetailsList
+                    key={1}
+                    title={'Location Details'}
+                    Icon={MdLocationOn}
+                    complaintData={complaint}
+                    fields={['citizenName', 'street', 'wardNumber', 'pincode', 'citizenEmail']}
+                  />
 
-                    {/* Complaint Details */}
-                    <DetailsList
-                      key={2}
-                      title={'Complaint Details'}
-                      Icon={MdError}
-                      complaintData={complaint}
-                      fields={['category','department', 'issue', 'issueDescription', 'attachment']}
-                    />
+                  {/* Complaint Details */}
+                  <DetailsList
+                    key={2}
+                    title={'Complaint Details'}
+                    Icon={MdError}
+                    complaintData={complaint}
+                    fields={['category','department', 'issue', 'issueDescription', 'attachment']}
+                  />
 
                   </div>
                 </div>

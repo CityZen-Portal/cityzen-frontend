@@ -6,6 +6,12 @@ import loading_gif from '../../../../assets/img/loading/loading_gif.gif';
 import axios from "axios";
 
 const FeedbackForm = () => {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const {id} = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -66,10 +72,16 @@ const FeedbackForm = () => {
       rating: formData.rating,
       comments: formData.comments
     }
-    
-    const BASE_URL = 'http://localhost:10101/api/helpdesk';
 
-    axios.put(`${BASE_URL}/citizen/complaints/${id}/feedback`, feedback)
+    axios.put(`${HELPDESK_API}/citizen/complaints/${id}/feedback`, feedback,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(() => {
           toast.success("Feedback Submitted Successfully!", {
             position: "top-right",
