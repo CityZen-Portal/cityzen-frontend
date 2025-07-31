@@ -15,7 +15,8 @@ const RequestsTable = ({
   filteredRequests,
   handleViewDetails,
   handleComplete,
-  loading
+  loading,
+  scrollToForm // 👈 NEW PROP
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -224,17 +225,22 @@ const RequestsTable = ({
                     )}
                     <td className="py-4 px-4">
                       <div className="flex space-x-2">
-                      
                         <button
-                          onClick={() => handleViewDetails(request)}
+                          onClick={() => {
+                            handleViewDetails(request);
+                            scrollToForm?.();
+                          }}
                           className="text-blue-500 hover:underline"
                         >
                           View
                         </button>
-                        
+
                         {request.taskStatus === 'PENDING' && (
                           <button
-                            onClick={() => handleComplete(request)}
+                            onClick={() => {
+                              handleComplete(request);
+                              scrollToForm?.();
+                            }}
                             className="text-green-600 hover:underline"
                           >
                             Complete
