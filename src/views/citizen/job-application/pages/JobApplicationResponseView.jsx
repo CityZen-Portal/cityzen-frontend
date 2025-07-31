@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   MdEdit,
   MdAccountBox,
@@ -11,7 +12,13 @@ import {
   MdBusinessCenter
 } from 'react-icons/md';
 
-const JobApplicationResponseView = ({ formData = {}, location = {}, experiences = [], jobDetails = {}, onEdit }) => {
+const JobApplicationResponseView = ({ formData = {}, location = {}, experiences = [], jobDetails = {} }) => {
+  const navigate = useNavigate();
+  
+  const onEdit = () => {
+    navigate(`/job-application/edit/${formData.jobId}`);
+  };
+
   const combinedLocation = `${location.taluk || ''}, ${location.district || ''}, ${location.state || ''}, ${location.pincode || ''}`.trim();
 
   return (
@@ -118,3 +125,4 @@ const Detail = ({ label, value }) => (
 );
 
 export default JobApplicationResponseView;
+

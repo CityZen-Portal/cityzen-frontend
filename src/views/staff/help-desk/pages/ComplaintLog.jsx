@@ -1,24 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import ComplaintTable from '../components/ComplaintTable';
 import { MdTrackChanges, MdPendingActions, MdAssignment, MdCheckCircleOutline, MdListAlt } from 'react-icons/md';
+import loading_gif from '../../../../assets/img/loading/loading_gif.gif'
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ComplaintLog = () => {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+  console.log(citizenId)
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const [complaints, setComplaints] = useState([]);
 
-  useEffect(() => {
-    const mockData = [
-      { id: 'T001', citizen: 'John Doe', issue: 'Road Repair', department: 'Public Works', status: 'pending', dateLogged: '2025-07-08', location: 'Anna Nagar' },
-      { id: 'T002', citizen: 'Jane Smith', issue: 'Waste Collection', department: 'Sanitation', status: 'in-progress', dateLogged: '2025-07-09', location: 'T. Nagar' },
-      { id: 'T003', citizen: 'Robert Johnson', issue: 'Street Light Repair', department: 'Maintenance', status: 'resolved', dateLogged: '2025-07-07', location: 'Adyar' },
-      { id: 'T004', citizen: 'Emily Davis', issue: 'Tree Trimming', department: 'Maintenance', status: 'pending', dateLogged: '2025-07-06', location: 'Mylapore' },
-      { id: 'T005', citizen: 'Michael Brown', issue: 'Water Supply', department: 'Water Works', status: 'assigned', dateLogged: '2025-07-05', location: 'Velachery' },
-      { id: 'T006', citizen: 'Sarah Wilson', issue: 'Drainage', department: 'Public Works', status: 'under-review', dateLogged: '2025-07-04', location: 'Guindy' },
-      { id: 'T007', citizen: 'David Taylor', issue: 'Park Maintenance', department: 'Parks', status: 'on-hold', dateLogged: '2025-07-03', location: 'Nungambakkam' },
-      { id: 'T008', citizen: 'Lisa Anderson', issue: 'Traffic Signal', department: 'Traffic', status: 'closed', dateLogged: '2025-07-02', location: 'Besant Nagar' },
-      { id: 'T009', citizen: 'Tom Wilson', issue: 'Noise Complaint', department: 'Municipal', status: 'rejected', dateLogged: '2025-07-01', location: 'Mount Road' },
-      { id: 'T010', citizen: 'Amy Johnson', issue: 'Building Permit', department: 'Planning', status: 'resolved', dateLogged: '2025-06-30', location: 'Kodambakkam' },
-    ];
-    setComplaints(mockData);
+  const [loading, setLoading] = useState(false);
+
+  useEffect( () => {
+    setLoading(true);
+    axios.get(`${HELPDESK_API}/staff/complaints`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setComplaints(data);
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
   }, []);
 
   const iconMap = {
@@ -87,7 +113,15 @@ const ComplaintLog = () => {
       </div>
 
       {/* Table */}
-      <ComplaintTable extra={"mt-8"} complaints={complaints} />
+      
+          {loading ? (
+            <div className="flex justify-center items-center py-16">
+              <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
+            </div>
+          ) : (
+            <ComplaintTable extra={"mt-8"} complaints={complaints} />
+          )}
+          <ToastContainer />
     </div>
   );
 };

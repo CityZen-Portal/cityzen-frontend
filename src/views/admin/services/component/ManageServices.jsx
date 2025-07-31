@@ -4,15 +4,76 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const categories = {
-  Utilities: ["Water Supply", "Electricity", "Gas", "Internet"],
-  Sanitation: ["Waste Management", "Solid Waste Collection", "Public Health & Sanitation"],
-  Infrastructure: ["Road Maintenance", "Street Lighting", "Building Permits"],
-  Environment: ["Environmental Services", "Disaster Management", "Animal Control"],
-  "Community Services": [
-    "Public Parks & Recreation",
-    "Fire and Emergency Services",
-    "Community Welfare Services",
+  "Utilities": [
+    "Electricity Board",
+    "Water Supply Department",
+    "Gas Supply Department",
+    "Telecom Services",
+    "Public Works - Utility Maintenance Wing"
   ],
+  "Sanitation": [
+    "Municipal Sanitation Department",
+    "Solid Waste Management Board",
+    "Drainage & Sewerage Department",
+    "Public Toilets Management",
+    "Health Department (Vector Control Unit)"
+  ],
+  "Infrastructure": [
+    "Public Works Department (PWD)",
+    "Highways Department",
+    "Urban Planning Authority",
+    "Railway Infrastructure Division",
+    "Metro Rail Corporation"
+  ],
+  "Environment": [
+    "Forest Department",
+    "Pollution Control Board",
+    "Environmental Monitoring Wing",
+    "Climate Change Cell",
+    "Water Resource Department"
+  ],
+  "Community Services": [
+    "Social Welfare Department",
+    "Education Department",
+    "Health Department",
+    "Food & Civil Supplies Department",
+    "Labour Welfare Department"
+  ],
+  "Health and Family Welfare": [
+    "Primary Health Centers (PHC)",
+    "Government Hospitals Department",
+    "National Health Mission",
+    "Immunization Department",
+    "Medical Education & Research Directorate"
+  ],
+  "Education": [
+    "School Education Department",
+    "Higher Education Department",
+    "Technical Education Department",
+    "Adult Literacy Mission",
+    "Teachers Recruitment Board"
+  ],
+  "Transport": [
+    "Road Transport Department",
+    "Railway Department",
+    "Metro Rail Corporation",
+    "Transport Commissioner’s Office",
+    "State Transport Corporation"
+  ],
+  "Revenue and Land Records": [
+    "Revenue Department",
+    "Survey and Settlement Department",
+    "Registration Department",
+    "Land Reforms Department",
+    "Disaster Management and Mitigation Department"
+  ],
+  "Law and Order": [
+    "Police Department",
+    "Home Department",
+    "Judiciary",
+    "Fire and Rescue Services",
+    "Prison Department"
+  ]
 };
 
 function ManageServices() {
@@ -133,22 +194,21 @@ function ManageServices() {
     }
   };
 
+  const selectedSubServices = formData.category ? categories[formData.category] || [] : [];
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-navy-900 px-6 py-10">
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
         <h2 className="text-3xl font-bold text-center mb-10 text-gray-800 dark:text-white">
           {editServiceId ? "Edit Service" : "Add New Service"}
         </h2>
 
-        {/* Error message */}
         {error && (
           <div className="mb-6 text-red-600 bg-red-100 border border-red-300 rounded p-3">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form
           onSubmit={handleSubmit}
           className="bg-white dark:bg-navy-800 shadow-lg rounded-xl p-8 space-y-6"
@@ -176,14 +236,17 @@ function ManageServices() {
             <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
               Service Name <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <select
               value={formData.serviceName}
               onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
               className="w-full p-3 border border-gray-300 dark:border-navy-600 rounded-md dark:bg-navy-700 dark:text-white"
-              placeholder="Enter service name"
               required
-            />
+            >
+              <option value="">Choose Service Name</option>
+              {selectedSubServices.map((sub) => (
+                <option key={sub} value={sub}>{sub}</option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -240,7 +303,6 @@ function ManageServices() {
           </button>
         </form>
 
-        {/* Services List */}
         <h3 className="text-2xl font-bold mt-12 mb-6 text-gray-800 dark:text-white text-center">
           All Services
         </h3>

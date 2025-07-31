@@ -1,6 +1,7 @@
 import React from 'react'
 // import NewsNav from './NewsNav';
 import NewsCard from './NewsCard';
+import NewsHome from './NewsHome';
 
 function NewsUpdate() {
   return (
@@ -8,8 +9,10 @@ function NewsUpdate() {
       {/* <NewsNav /> */}
       
       <div>
-        <h1 className="p-4 text-2xl font-bold text-gray-800 dark:text-white">Latest News</h1>
+        <h1 className="p-4 text-2xl font-bold text-gray-800 dark:text-white">Updates</h1>
         <NewsCard />
+        <h1 className="p-4 text-2xl font-bold text-gray-800 dark:text-white">Updates</h1>
+        <NewsHome/>
       </div>
     </>
   );
