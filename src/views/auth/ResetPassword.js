@@ -4,24 +4,22 @@ import InputField from "components/fields/InputField";
 import Footer from "components/footer/FooterAuthDefault";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Lock } from "lucide-react";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: '',
   });
-
   const [errors, setErrors] = useState({
     newPassword: '',
     confirmPassword: ''
   });
-
   const [isLoading, setIsLoading] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  
   const validatePassword = (password) => {
     if (!password) return 'New password is required';
     if (password.length < 8) return 'Password must be at least 8 characters';
@@ -34,30 +32,24 @@ export default function ResetPassword() {
   useEffect(() => {
     const { newPassword, confirmPassword } = formData;
     const newErrors = {};
-
     newErrors.newPassword = validatePassword(newPassword);
-
     if (confirmPassword && confirmPassword.trim() !== newPassword.trim()) {
       newErrors.confirmPassword = 'Passwords do not match';
     } else {
       newErrors.confirmPassword = '';
     }
-
     setErrors(prev => ({ ...prev, ...newErrors }));
   }, [formData]);
 
   const validateForm = () => {
     const { newPassword, confirmPassword } = formData;
     const newErrors = {};
-
     newErrors.newPassword = validatePassword(newPassword);
-
     if (!confirmPassword.trim()) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (confirmPassword.trim() !== newPassword.trim()) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).every(key => !newErrors[key]);
   };
@@ -65,68 +57,113 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     toast.dismiss();
-
     if (!validateForm()) {
       if (errors.newPassword) {
-        toast.error(errors.newPassword);
+        toast.error(errors.newPassword, {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "colored",
+        });
       } else if (errors.confirmPassword) {
-        toast.error(errors.confirmPassword);
+        toast.error(errors.confirmPassword, {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "colored",
+        });
       }
       return;
     }
-
     setIsLoading(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Password reset successfully! Redirecting...', { autoClose: 2000 });
-      setTimeout(() => navigate('/auth/signin'), 2000);
+      toast.success('Password reset successfully! Redirecting...', {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "colored",
+        onClose: () => navigate('/auth/signin')
+      });
     } catch (error) {
-      toast.error(error.message || 'Failed to reset password.');
+      toast.error(error.message || 'Failed to reset password.', {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-300 via-blue-200 to-blue-100 
-                    dark:from-gray-800 dark:via-gray-800 dark:to-gray-800">
+    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-100 via-blue-200 to-purple-100 
+                    dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
+                    transition-all duration-300 overflow-y-auto">
       
-      <ToastContainer position="top-center" autoClose={5000} />
-
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="relative w-full max-w-md p-8 rounded-2xl shadow-2xl bg-white/80 dark:bg-gray-700/90 backdrop-blur-md">
-          <h2 className="text-3xl font-bold mb-2 text-center text-blue-600 dark:text-white">
-            Reset Password
-          </h2>
-          <p className="text-center text-sm text-gray-600 dark:text-gray-300 mb-6">
-            Enter your new password and confirm it below
-          </p>
-
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+      
+      {/* Decorative Gradient Blobs */}
+      <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-500 rounded-full filter blur-3xl opacity-40"></div>
+      <div className="absolute top-10 right-10 w-64 h-64 bg-purple-600 rounded-full filter blur-2xl opacity-30"></div>
+      <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-indigo-400 rounded-full filter blur-2xl opacity-25"></div>
+      
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center p-4 w-full">
+        <div className="relative z-10 w-full max-w-2xl p-10 rounded-2xl shadow-2xl 
+                        border border-blue-200 dark:border-gray-700 
+                        bg-white/95 dark:bg-gray-700/95 backdrop-blur-md 
+                        transition-all duration-300 my-8">
+          <div className="text-center mb-10">
+            <div className="flex justify-center mb-4">
+              {/* Logo with black outline */}
+              <div className="w-16 h-16 flex items-center justify-center">
+                <img
+                  src="/brand-logo.png"
+                  alt="CityZen Logo"
+                  className="w-14 h-14 rounded-lg border-2 border-black shadow-md"
+                />
+              </div>
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              Reset Your Password
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              Enter your new password and confirm it below
+            </p>
+          </div>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* New Password */}
+            {/* New Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 New Password*
               </label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Lock className="h-5 w-5 text-blue-500" />
+                </div>
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   value={formData.newPassword}
                   onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                   placeholder="Enter your new password"
-                  className={`w-full px-4 py-3 rounded-xl transition duration-200 focus:outline-none
-                    bg-white dark:bg-gray-800 dark:text-white
-                    ${errors.newPassword 
-                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} 
-                    border`}
+                  className={`w-full pl-10 pr-12 py-3 border ${errors.newPassword ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                 >
                   {showNewPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,34 +177,32 @@ export default function ResetPassword() {
                   )}
                 </button>
               </div>
-              {errors.newPassword && <p className="text-sm text-red-500 mt-1">{errors.newPassword}</p>}
+              {errors.newPassword && <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>}
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Must contain: uppercase, lowercase, number, and special character
               </p>
             </div>
-
-            {/* Confirm Password */}
+            
+            {/* Confirm Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Confirm Password*
               </label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Lock className="h-5 w-5 text-blue-500" />
+                </div>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   placeholder="Repeat new password"
-                  className={`w-full px-4 py-3 rounded-xl transition duration-200 focus:outline-none
-                    bg-white dark:bg-gray-800 dark:text-white
-                    ${errors.confirmPassword 
-                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} 
-                    border`}
+                  className={`w-full pl-10 pr-12 py-3 border ${errors.confirmPassword ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                 >
                   {showConfirmPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,36 +216,39 @@ export default function ResetPassword() {
                   )}
                 </button>
               </div>
-              {errors.confirmPassword && <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             </div>
-
-            {/* Submit Button */}
+            
+            {/* Reset Password Button */}
             <button
               type="submit"
               disabled={isLoading}
               className={`w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r
-                         from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
-                         transition-transform duration-300 transform ${
-                           isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:scale-105'
-                         } shadow-lg`}
+                       from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
+                       transition-all duration-300 shadow-lg mt-6 flex items-center justify-center hover:scale-[1.01] hover:shadow-xl
+                       ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isLoading ? 'Resetting...' : 'Reset Password'}
             </button>
+            
+            {/* Back to Sign In Link */}
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => navigate('/auth/signin')}
+                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+              >
+                Back to Sign In
+              </button>
+            </div>
           </form>
-
-          {/* Navigation */}
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => navigate('/auth/signin')}
-              className="text-blue-600 hover:text-blue-800 text-sm"
-            >
-              Back to Sign In
-            </button>
-          </div>
         </div>
       </div>
-
-      <Footer />
+      
+      {/* Footer */}
+      <div className="w-full py-4">
+        <Footer />
+      </div>
     </div>
   );
 }
