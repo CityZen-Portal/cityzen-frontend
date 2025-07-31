@@ -82,7 +82,7 @@ const CompletionForm = ({
         imagePath: imagePath,
         suggestion: formData.suggestion || ""
       };
-      console.log(payload);
+      // console.log(payload);
       await axios.put(`https://utility-booking-backend.onrender.com/api/task/${selectedRequest.taskId}`, payload);
       fetchRequests();
       setSelectedRequest(null);
@@ -127,7 +127,7 @@ const CompletionForm = ({
             <div className="bg-white dark:bg-navy-800 p-4 rounded-xl shadow-md">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200 dark:border-navy-700">
                 <MdPerson className="h-5 w-5 text-brand-500" />
-                <p className="font-bold text-navy-700 dark:text-white">Staff Information</p>
+                {/* <p className="font-bold text-navy-700 dark:text-white">Staff Information</p> */}
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-navy-700 dark:text-white mb-2">
