@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function FeedbackManage() {
+  const navigate = useNavigate();
   const [userData, setData] = useState([]);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +18,7 @@ function FeedbackManage() {
           "https://utility-booking-backend.onrender.com/api/feedback/all"
         );
         const responseData = result.data;
+       
         if (Array.isArray(responseData)) {
           setData(responseData);
         } else if (
@@ -39,6 +42,12 @@ function FeedbackManage() {
   return (
     <div className="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md mt-12">
       <h2 className="text-xl text-black dark:text-white font-semibold mb-2">Feedback Management</h2>
+                  <button
+              onClick={() => navigate("/admin/services")}
+              className="mb-2 flex items-center gap-2 text-sm text-navy-700 transition-colors hover:text-navy-600"
+            >
+              <span>←</span> Back to Services
+            </button>
       <div className="w-full mt-10">
         <div className="min-h-screen bg-gray-100 dark:bg-navy-900 p-6">
           <div className="mx-auto max-w-5xl rounded-md shadow-lg bg-white dark:bg-navy-800">
