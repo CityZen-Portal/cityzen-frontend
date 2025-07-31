@@ -21,7 +21,7 @@ const ResponseCard = ({extra, responses = []}) => {
                 Responses
             </label>
             <ul className="">
-                {responses.length === 0 && <p>N/A</p>}
+                {responses.length === 0 && <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>N/A</p>}
                 {responses.map((response, index) => (
                     <div key={index} className="flex items-start space-x-3 space-y-2">
                         <div className="flex-shrink-0">
@@ -41,7 +41,7 @@ const ResponseCard = ({extra, responses = []}) => {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
                 Resolution
             </label>
-                {responses.length === 0 && <p>N/A</p>}
+                {responses.length === 0 && <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>N/A</p>}
                 {responses.map((response, index) => (
                     response.resolutionDetails && (
                         <div key={index} className="flex items-start space-x-3 space-y-2">
