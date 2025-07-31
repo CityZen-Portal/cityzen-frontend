@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import Footer from "components/footer/FooterAuthDefault";
 import axios from "axios";
-
+import { useUser } from "../../../contexts/UserContext"; // new import
 export default function SignIn() {
   const navigate = useNavigate();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -14,6 +14,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
+  const { login } = useUser(); // use context
 
   const apiurl = process.env.REACT_APP_API_UMS_URL;
   console.log(apiurl);
@@ -92,12 +93,13 @@ export default function SignIn() {
       const token = response.data.data.token;
       const roles = response.data.data.roles[0];
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("username", response.data.data.username);
-      localStorage.setItem("email", response.data.data.email);
-      localStorage.setItem("role", JSON.stringify(roles));
-      localStorage.setItem("id", response.data.data.id);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    login({
+        token: token,
+        username: response.data.data.username,
+        email: response.data.data.email,
+        role: response.data.data.roles, // pass full roles array so ProtectedRoute works
+        id: response.data.data.id,
+      });
 
       toast.success("Login successful", {
         position: "top-right",
