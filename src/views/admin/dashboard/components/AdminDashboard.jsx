@@ -20,11 +20,12 @@ import FeedbackReceivedCard from "./cards/FeedbackReceivedCard";
 import StaffTasksCard from "./cards/StaffTasksCard";
 import CitizenRegisteredCard from "./cards/CitizenRegisteredCard";
 
-
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [theme, setTheme] = useState("light");
   const [showRequests, setShowRequests] = useState(false);
+  const [showComplaints, setShowComplaints] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -35,29 +36,7 @@ export default function AdminDashboard() {
     }
   }, [theme]);
 
- return (
-  <div className="flex min-h-screen font-sans bg-slate-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
-    <div className="flex-1 p-6">
-      {showRequests ? (
-        <RequestsTable onBack={() => setShowRequests(false)} />
-      ) : (
-        <>
-          {/* Stats */}
-          <div className="mb-6 grid grid-cols-1 gap-10 md:grid-cols-3">
-            {[
-              "Grievences Raised",
-              "Resolved Complaints",
-              "Service Requests",
-              "Feedback Received",
-              "Staff Tasks",
-              "Citizen Registered",
-            ].map((title, i) => (
-              <div key={i} className={cardStyle}>
-                <div className="text-sm font-semibold text-black-700 dark:text-gray-300">{title}</div>
-                <div className="text-xl font-bold text-black dark:text-white">0</div>
-              </div>
-            ))}
-          </div>
+  const cardStyle = "rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md transition-colors";
 
   return (
     <div className="bg-slate-100 flex min-h-screen font-sans text-gray-900 transition-colors duration-300 dark:bg-gray-900 dark:text-white">
@@ -80,89 +59,24 @@ export default function AdminDashboard() {
               <CitizenRegisteredCard />
             </div>
 
-
-          {/* Actions */}
-          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <ActionCard
-              title="View Complaints"
-              description="Monitor all citizen grievances raised across departments."
-              onClick={() => navigate("/admin/complaints")}
-            />
-            <ActionCard
-              title="View Requests"
-              description="Access service requests like electricity, water, sanitation."
-              onClick={() => setShowRequests(true)}
-            />
-            <ActionCard
-              title="View Messages"
-              description="Review citizen feedback to improve service quality."
-              onClick={() => navigate("/admin/services/feedback")}
-            />
-          </div>
-
-          {/* Summary Section */}
-          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
-            {/* Civic Issue Summary */}
-            <div className="col-span-2 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-lg transition-colors">
-              <div className="mb-4 text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                📋 <span>Civic Issue Summary</span>
-              </div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-black dark:text-gray-300">
-                    <th className="pb-2">Name</th>
-                    <th className="pb-2">Status</th>
-                    <th className="pb-2">Date</th>
-                    <th className="pb-2">Progress</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    {
-                      name: "Road Maintenance",
-                      status: "Approved",
-                      icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
-                      date: "24Jan'25",
-                      color: "bg-green-500",
-                      progress: "80%",
-                    },
-                    {
-                      name: "Garbage Collection",
-                      status: "Disable",
-                      icon: <XCircleIcon className="h-5 w-5 text-gray-500" />,
-                      date: "15Feb'25",
-                      color: "bg-red-500",
-                      progress: "30%",
-                    },
-                    {
-                      name: "Street Light Repair",
-                      status: "Error",
-                      icon: <ExclamationTriangleIcon className="h-5 w-5 text-gray-500" />,
-                      date: "20Mar'25",
-                      color: "bg-orange-500",
-                      progress: "50%",
-                    },
-                    {
-                      name: "Water Leakage",
-                      status: "Approved",
-                      icon: <CheckCircleIcon className="h-5 w-5 text-gray-500" />,
-                      date: "12Apr'25",
-                      color: "bg-green-500",
-                      progress: "70%",
-                    },
-                  ].map((item, i) => (
-                    <tr key={i} className="border-t border-gray-200 dark:border-gray-700">
-                      <td className="py-3 font-medium text-black dark:text-white">{item.name}</td>
-                      <td className="py-3 flex items-center gap-2 text-black dark:text-white">
-                        {item.icon} {item.status}
-                      </td>
-                      <td className="py-3 text-black dark:text-white">{item.date}</td>
-                      <td className="py-3">
-                        <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded">
-                          <div className={`h-2 rounded ${item.color}`} style={{ width: item.progress }}></div>
-                        </div>
-                      </td>
-                    </tr>
+            {/* Actions */}
+            <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+              <ActionCard
+                title="View Complaints"
+                description="Monitor all citizen grievances raised across departments."
+                onClick={() => setShowComplaints(true)}
+              />
+              <ActionCard
+                title="View Requests"
+                description="Access service requests like electricity, water, sanitation."
+                onClick={() => setShowRequests(true)}
+              />
+              <ActionCard
+                title="View Messages"
+                description="Review citizen feedback to improve service quality."
+                onClick={() => setShowFeedback(true)}
+              />
+            </div>
 
             {/* Summary Section */}
             <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
@@ -173,7 +87,7 @@ export default function AdminDashboard() {
                 </div>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-black text-left dark:text-gray-300">
+                    <tr className="text-left text-black dark:text-gray-300">
                       <th className="pb-2">Name</th>
                       <th className="pb-2">Status</th>
                       <th className="pb-2">Date</th>
@@ -216,22 +130,14 @@ export default function AdminDashboard() {
                         key={i}
                         className="border-t border-gray-200 dark:border-gray-700"
                       >
-                        <td className="text-black py-3 font-medium dark:text-white">
+                        <td className="py-3 font-medium text-black dark:text-white">
                           {item.name}
                         </td>
-                        <td className="text-black flex items-center gap-2 py-3 dark:text-white">
+                        <td className="flex items-center gap-2 py-3 text-black dark:text-white">
                           {item.icon} {item.status}
                         </td>
-                        <td className="text-black py-3 dark:text-white">
+                        <td className="py-3 text-black dark:text-white">
                           {item.date}
-                        </td>
-                        <td className="py-3">
-                          <div className="h-2 w-full rounded bg-gray-200 dark:bg-gray-700">
-                            <div
-                              className={`h-2 rounded ${item.color}`}
-                              style={{ width: item.progress }}
-                            ></div>
-                          </div>
                         </td>
                       </tr>
                     ))}
@@ -262,48 +168,16 @@ export default function AdminDashboard() {
                       <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
-                          className="text-violet-500 focus:ring-violet-400 h-4 w-4 rounded"
+                          className="h-4 w-4 rounded text-violet-500 focus:ring-violet-400"
                         />
                         <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                           {task}
                         </span>
                       </label>
                     </li>
-
                   ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Tasks */}
-            <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="flex items-center text-xl font-bold text-gray-800 dark:text-white">
-                  <ClipboardDocumentListIcon className="h-5 w-5 mr-2" />
-                  Tasks
-                </h2>
+                </ul>
               </div>
-              <ul className="space-y-4">
-                {["Sanitation", "Fire and Emergency", "Electricity and Street Lights", "Water Supply Management", "Waste Management"].map((task, index) => (
-                  <li key={index} className="flex items-center justify-between">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 text-violet-500 rounded focus:ring-violet-400"
-                      />
-                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {task}
-                      </span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Calendar */}
-            <div className="col-span-1 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-md">
-              <div className="mb-4 text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-white">
-                📅 <span>Events Calendar</span>
 
               {/* Calendar */}
               <div className="col-span-1 rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
@@ -311,17 +185,13 @@ export default function AdminDashboard() {
                   📅 <span>Events Calendar</span>
                 </div>
                 <CustomCalendar />
-
               </div>
-              <CustomCalendar />
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
-  </div>
-);
-
+  );
 }
 
 function ActionCard({ title, description, onClick }) {
@@ -429,7 +299,6 @@ function ComplaintsTable({ onBack }) {
     </div>
   );
 }
-
 
 // Requests Table with Hide and Remove
 function RequestsTable({ onBack }) {
@@ -635,7 +504,6 @@ function RequestsTable({ onBack }) {
           )}
         </div>
       )}
-      
     </div>
   );
 }

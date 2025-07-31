@@ -16,12 +16,11 @@ export default function SignUp() {
     aadharNumber: '',
     phoneNumber: ''
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [agreeTerms, setAgreeTerms] = useState(false);
-
-  // Aadhaar verification states
   const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [aadhaarSending, setAadhaarSending] = useState(false);
 
@@ -59,129 +58,58 @@ export default function SignUp() {
     // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
-      toast.error("Name is required", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     }
 
     // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-      toast.error("Email is required", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
       newErrors.email = 'Please enter a valid email address';
-      toast.error("Please enter a valid email address", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     }
 
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
-      toast.error("Password is required", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
-      toast.error("Password must be at least 8 characters", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}/.test(formData.password)) {
       newErrors.password = 'Password must contain uppercase, lowercase, number and special character';
-      toast.error("Password must contain uppercase, lowercase, number and special character", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     }
 
     // Confirm Password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
-      toast.error("Please confirm your password", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
-      toast.error("Passwords do not match", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     }
 
     // Phone validation
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
-      toast.error("Phone number is required", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
       newErrors.phoneNumber = 'Phone number must be 10 digits';
-      toast.error("Phone number must be 10 digits", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     }
 
     // Aadhar validation
     if (!formData.aadharNumber.trim()) {
       newErrors.aadharNumber = 'Aadhar number is required';
-      toast.error("Aadhar number is required", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     } else if (!/^\d{12}$/.test(formData.aadharNumber.replace(/\s/g, ''))) {
       newErrors.aadharNumber = 'Aadhar number must be 12 digits';
-      toast.error("Aadhar number must be 12 digits", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     }
 
     // Terms validation
     if (!agreeTerms) {
       newErrors.terms = 'You must agree to the terms and policy';
-      toast.error("You must agree to the terms and policy", {
-        position: 'top-right',
-        autoClose: 3000,
-        theme: 'colored',
-      });
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      toast.success("Account created successfully! Redirecting...", {
-        position: 'top-right',
-        autoClose: 1000,
-        theme: 'colored',
-        onClose: () => navigate("/citizen/dashboard"),
-      });
-    } else {
+    
+    if (!validateForm()) {
       Object.values(errors).forEach(error => {
         if (error && typeof error === 'string') {
           toast.error(error, {
@@ -190,6 +118,53 @@ export default function SignUp() {
             theme: 'colored',
           });
         }
+      });
+      return;
+    }
+
+    // Prepare user data for backend
+    const userData = {
+      username: formData.name,
+      email: formData.email,
+      password: formData.password,
+      aadharNumber: parseInt(formData.aadharNumber.replace(/\s/g, '')),
+      phoneNumber: formData.phoneNumber,
+      role: ["user"] // Default role
+    };
+
+    try {
+      const response = await fetch("https://auth-backend-obcu.onrender.com/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(userData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Account created successfully! Redirecting...", {
+          position: 'top-right',
+          autoClose: 1000,
+          theme: 'colored',
+          onClose: () => navigate("/citizen/dashboard"),
+        });
+      } else {
+        // Handle backend validation errors
+        const errorMsg = result.message || result.error || "Registration failed";
+        toast.error(errorMsg, {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored',
+        });
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Network error. Please try again.", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
       });
     }
   };
@@ -220,16 +195,50 @@ export default function SignUp() {
     setAadhaarSending(true);
     setErrors(prev => ({ ...prev, aadharNumber: '' }));
 
-    // Mock API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch(`https://auth-backend-obcu.onrender.com/api/auth/userInfo/${cleanAadhaar}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
 
-    setAadhaarVerified(true);
-    setAadhaarSending(false);
-    toast.success("Aadhaar number verified successfully!", {
-      position: 'top-right',
-      autoClose: 3000,
-      theme: 'colored',
-    });
+      const result = await response.json();
+
+      if (response.ok) {
+        if (result.data === true) {
+          toast.error("Aadhaar number already registered", {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored',
+          });
+          setErrors(prev => ({ ...prev, aadharNumber: 'Aadhaar number already registered' }));
+        } else {
+          setAadhaarVerified(true);
+          toast.success("Aadhaar number verified successfully!", {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored',
+          });
+        }
+      } else {
+        setAadhaarVerified(true); // Assuming verification passes if not found in system
+        toast.success("Aadhaar number verified successfully!", {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored',
+        });
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      toast.error("Verification service unavailable. Please try again.", {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored',
+      });
+    } finally {
+      setAadhaarSending(false);
+    }
   };
 
   return (
