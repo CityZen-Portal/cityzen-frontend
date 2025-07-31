@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const categories = {
   "Utilities": [
@@ -77,6 +78,7 @@ const categories = {
 };
 
 function ManageServices() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     category: "",
     serviceName: "",
@@ -199,6 +201,12 @@ function ManageServices() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-navy-900 px-6 py-10">
       <div className="max-w-5xl mx-auto">
+               <button
+          onClick={() => navigate("/admin/services")}
+          className="mb-2 flex items-center gap-2 text-sm text-gray-800 dark:text-white"
+        >
+          <span>←</span> Back to Services
+        </button>
         <h2 className="text-3xl font-bold text-center mb-10 text-gray-800 dark:text-white">
           {editServiceId ? "Edit Service" : "Add New Service"}
         </h2>
