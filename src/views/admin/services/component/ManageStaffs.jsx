@@ -134,36 +134,36 @@ function ManageStaffs() {
       "aadharNumber",
     ];
     const missing = requiredFields.filter((field) => !newStaff[field]);
-    // if (missing.length) {
-    //   toast.error(`Please fill all fields: ${missing.join(", ")}`);
-    //   return;
-    // }
+    if (missing.length) {
+      toast.error(`Please fill all fields: ${missing.join(", ")}`);
+      return;
+    }
 
-    // if (!isValidEmail(newStaff.emailAddress)) {
-    //   toast.error("Enter a valid email address.");
-    //   return;
-    // }
+    if (!isValidEmail(newStaff.emailAddress)) {
+      toast.error("Enter a valid email address.");
+      return;
+    }
 
-    // if (!isValidPhone(newStaff.contactNumber)) {
-    //   toast.error("Contact number must be 10 digits.");
-    //   return;
-    // }
+    if (!isValidPhone(newStaff.contactNumber)) {
+      toast.error("Contact number must be 10 digits.");
+      return;
+    }
 
-    // if (!isValidAadhar(newStaff.aadharNumber)) {
-    //   toast.error("Aadhar number must be 12 digits.");
-    //   return;
-    // }
+    if (!isValidAadhar(newStaff.aadharNumber)) {
+      toast.error("Aadhar number must be 12 digits.");
+      return;
+    }
 
-    // const age = calculateAge(newStaff.dob);
-    // if (age < 18 || age > 60) {
-    //   toast.error("Staff age must be between 18 and 60 years.");
-    //   return;
-    // }
+    const age = calculateAge(newStaff.dob);
+    if (age < 18 || age > 60) {
+      toast.error("Staff age must be between 18 and 60 years.");
+      return;
+    }
 
-    // if (new Date(newStaff.dob) > new Date()) {
-    //   toast.error("DOB cannot be a future date.");
-    //   return;
-    // }
+    if (new Date(newStaff.dob) > new Date()) {
+      toast.error("DOB cannot be a future date.");
+      return;
+    }
 
     try {
       if (editId) {
@@ -182,14 +182,20 @@ function ManageStaffs() {
           "https://utility-booking-backend.onrender.com/api/staff/add",
           newStaff
         );
-         console.log(response);
+         console.log(response.data);
         const createdStaff = response.data?.data;
         setStaffs((prev) => [...prev, createdStaff]);
         toast.success("Staff added successfully!");
       }
       handleClose();
     } catch (error) {
-      toast.error("Failed to save staff. Please try again.");
+      if(error.response.data.statusCode===409)
+      {
+         toast.error("Failed to save staff. Email is Already registered ");
+      }else{
+         toast.error("Failed to save staff. Please try again.");
+      }
+     
     }
   };
 
