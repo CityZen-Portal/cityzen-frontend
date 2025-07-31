@@ -6,87 +6,26 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ComplaintLog = () => {
-  // const [compl] = useState([
-  //   {
-  //     id: '0001',
-  //     issue: 'Water Leakage',
-  //     category: 'Water Resource',
-  //     complaintDate: '2025-04-19',
-  //     status: 'pending'
-  //   },
-  //   {
-  //     id: '0002',
-  //     issue: 'Street Light Issue',
-  //     category: 'Electricity',
-  //     complaintDate: '2025-05-12',
-  //     status: 'in-progress'
-  //   },
-  //   {
-  //     id: '0003',
-  //     issue: 'Garbage Collection',
-  //     category: 'Sanitation',
-  //     complaintDate: '2025-06-30',
-  //     status: 'resolved'
-  //   },
-  //   {
-  //     id: '0004',
-  //     issue: 'Water Leakage',
-  //     category: 'Water Resource',
-  //     complaintDate: '2025-04-19',
-  //     status: 'on-hold'
-  //   },
-  //   {
-  //     id: '0005',
-  //     issue: 'Street Light Issue',
-  //     category: 'Electricity',
-  //     complaintDate: '2025-04-20',
-  //     status: 'in-progress'
-  //   },
-  //   {
-  //     id: '0006',
-  //     issue: 'Garbage Collection',
-  //     category: 'Sanitation',
-  //     complaintDate: '2025-04-21',
-  //     status: 'resolved'
-  //   },
-  //   {
-  //     id: '0007',
-  //     issue: 'Water Leakage',
-  //     category: 'Water Resource',
-  //     complaintDate: '2025-01-23',
-  //     status: 'pending'
-  //   },
-  //   {
-  //     id: '0008',
-  //     issue: 'Street Light Issue',
-  //     category: 'Electricity',
-  //     complaintDate: '2025-01-20',
-  //     status: 'in-progress'
-  //   },
-  //   {
-  //     id: '0009',
-  //     issue: 'Garbage Collection',
-  //     category: 'Sanitation',
-  //     complaintDate: '2025-01-21',
-  //     status: 'resolved'
-  //   },
-  //   {
-  //     id: '0010',
-  //     issue: 'Water Leakage',
-  //     category: 'Water Resource',
-  //     complaintDate: '2025-03-19',
-  //     status: 'under-review'
-  //   }
-  // ]);
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
 
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const BASE_URL = 'http://localhost:10101/api/helpdesk';
-
   useEffect( () => {
     setLoading(true);
-    axios.get(`${BASE_URL}/citizen/complaints`)
+    axios.get(`${HELPDESK_API}/citizen/complaints`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
@@ -103,7 +42,7 @@ const ComplaintLog = () => {
         .finally(() => {
           setLoading(false);
         });
-  }, []);
+  }, [token, email, citizenId, HELPDESK_API]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl">

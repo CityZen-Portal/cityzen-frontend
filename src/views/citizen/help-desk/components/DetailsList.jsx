@@ -17,7 +17,7 @@ const DetailsList = ({ Icon, title, complaintData, fields }) => {
                     <AttachmentCard 
                         fileUrl={complaintData.fileUrl}
                     />
-                    : (<p className="mt-1 text-gray-900 dark:text-white">{complaintData[field]}</p>)
+                    : (<p className="mt-1 text-gray-900 dark:text-white">{complaintData[field] || "N/A"}</p>)
                 }
                 
             </div>

@@ -23,7 +23,7 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
       {/* Department */}
       <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">
         <div className="max-w-24 sm:max-w-32 lg:max-w-none truncate" title={complaint.department}>
-          {complaint.department}
+          {complaint.department || <p>N/A</p>}
         </div>
       </td>
 

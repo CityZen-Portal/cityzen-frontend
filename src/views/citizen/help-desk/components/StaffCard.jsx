@@ -14,7 +14,7 @@ const StaffCard = ({ extra, complaintData, fields }) => {
               </div>
               <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">{field.replace(/([A-Z])/g, ' $1').trim()}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 my-1">{complaintData[field]}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 my-1">{complaintData[field] || "N/A"}</p>
               </div>
               </div>
           ))}
