@@ -224,14 +224,14 @@ const RequestsTable = ({
                     )}
                     <td className="py-4 px-4">
                       <div className="flex space-x-2">
-                        {request.taskStatus === 'COMPLETED' && (
+                      
                         <button
                           onClick={() => handleViewDetails(request)}
                           className="text-blue-500 hover:underline"
                         >
                           View
                         </button>
-                        )}
+                        
                         {request.taskStatus === 'PENDING' && (
                           <button
                             onClick={() => handleComplete(request)}
