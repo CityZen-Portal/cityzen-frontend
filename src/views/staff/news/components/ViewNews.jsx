@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from 'components/pagination';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
+import NewsHome from 'views/citizen/news/components/NewsHome';
 
 const ViewNews = () => {
   const navigate = useNavigate();
@@ -238,7 +239,7 @@ const ViewNews = () => {
           </div>
         </div>
       )}
-
+       <NewsHome/>
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
