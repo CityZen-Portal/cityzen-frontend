@@ -6,10 +6,10 @@ export default function FeedbackReceivedCard() {
   const [num, setNum] = useState(0);
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axios.get(`${url}/api/feedback/all`);
+      const response = await axios.get(`${url}/api/admin/service/task`);
 
-      console.log(response.data.data.length);
-      setNum(response.data.data.length);
+      console.log(response.data.feedbackCount);
+      setNum(response.data.feedbackCount);
     };
     fetchData();
   }, []);
