@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardCard from "../DashboardCard";
 import axios from "axios";
-const url = process.env.REACT_APP_API_UTITLITY_URL;
+const url = process.env.REACT_APP_API_UTILITY_URL;
 export default function FeedbackReceivedCard() {
   const [num, setNum] = useState(0);
   useEffect(() => {
