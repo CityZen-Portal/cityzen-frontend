@@ -79,7 +79,49 @@ useEffect(() => {
                 </p>
                 <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                   <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                    Request Date:
+                    Address:
+                  </span>
+                  {viewingDetails.address}
+                </p>
+                 <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                   City:
+                  </span>
+                  {viewingDetails.city}
+                </p>
+                                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Requested Time:
+                  </span>
+                  {viewingDetails.time}
+                </p>
+                                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                   Postcode:
+                  </span>
+                  {viewingDetails.postcode}
+                </p>
+                                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Description:
+                  </span>
+                  {viewingDetails.description}
+                </p>
+                                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Phone Number:
+                  </span>
+                  {viewingDetails.phone}
+                </p>
+                                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Requested Date:
+                  </span>
+                  {viewingDetails.requested_Date}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Completion Date And Time:
                   </span>
                    {task && task.completion_date ? formatDate(task.completion_date) : "Not Completed Yet"}
 
