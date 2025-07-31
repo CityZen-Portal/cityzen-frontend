@@ -14,7 +14,7 @@ const ResponseCard = ({extra, responses = []}) => {
   return (
     <div className={`${extra}`}>
         <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6 col-span-2">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-4"> <MdSend className="mr-2 text-blue-600 h-6 w-6"  /> Responses & Resolutions</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-4"> <MdSend className="mr-2 text-brand-500 h-6 w-6"  /> Responses & Resolutions</h2>
             {/* Response */}
             <div className="my-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
@@ -25,7 +25,7 @@ const ResponseCard = ({extra, responses = []}) => {
                 {responses.map((response, index) => (
                     <div key={index} className="flex items-start space-x-3 space-y-2">
                         <div className="flex-shrink-0">
-                        <div className="h-2 w-2 bg-blue-600 rounded-full mt-4"></div>
+                        <div className="h-2 w-2 bg-brand-500 rounded-full mt-4"></div>
                         </div>
                         <div>
                         <p className="text-md font-medium text-gray-900 dark:text-white">{response.responseDetails}</p>
@@ -46,7 +46,7 @@ const ResponseCard = ({extra, responses = []}) => {
                     response.resolutionDetails && (
                         <div key={index} className="flex items-start space-x-3 space-y-2">
                             <div className="flex-shrink-0">
-                                <div className="h-2 w-2 bg-blue-600 rounded-full mt-4"></div>
+                                <div className="h-2 w-2 bg-brand-500 rounded-full mt-4"></div>
                             </div>
                             <div>
                                 <p className="text-md font-medium text-gray-900 dark:text-white">{response.resolutionDetails}</p>

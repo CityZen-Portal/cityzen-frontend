@@ -297,7 +297,7 @@ function ComplaintForm() {
           <div className=' w-full flex align-middle justify-center items-center col-span-2'>
             <button 
               type="button" 
-              className="bg-blue-600 text-white font-bold px-9 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
+              className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
               onClick={() => getLocation()}
             >
               Get Location
@@ -370,7 +370,7 @@ function ComplaintForm() {
               type="file"
               accept="application/pdf"
               onChange={(e) => setFile(e.target.files[0])}
-              className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-navy-500"
+              className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-brand-500 file:text-white hover:file:bg-brand-600 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-brand-500"
             />
             {file && (
               <p className="text-xs text-green-600 mt-1">Selected: {file.name}</p>
@@ -380,7 +380,7 @@ function ComplaintForm() {
           <div className="text-center pt-2 sm:pt-4">
             <button
               type="submit"
-              className="bg-blue-600 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
+              className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
             >
               Submit Complaint
             </button>

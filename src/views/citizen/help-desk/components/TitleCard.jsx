@@ -4,7 +4,7 @@ const TitleCard = ({Icon, title, complaintStatus, getStatusColor, getStatusText}
   return (
     <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-4">
-        <Icon className="text-3xl text-blue-600 h-9 w-8" />
+        <Icon className="text-3xl text-brand-500 h-9 w-8" />
         <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               {title}

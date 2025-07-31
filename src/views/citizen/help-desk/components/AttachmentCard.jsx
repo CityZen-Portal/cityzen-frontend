@@ -13,7 +13,7 @@ const AttachmentCard = ({fileUrl}) => {
                     alt={fileUrl.endsWith('.pdf') ? "PDF" : "Complaint"}
                     className="rounded-md cursor-pointer hover:opacity-80 h-20"
                 />
-                <span className="text-sm font-medium text-blue-600 dark:text-blue-400 wrap">
+                <span className="text-sm font-medium text-brand-600 dark:text-brand-400 wrap">
                     {`${fileUrl.split('/').pop().slice(0, 20)}...`}
                 </span>
                 </div>

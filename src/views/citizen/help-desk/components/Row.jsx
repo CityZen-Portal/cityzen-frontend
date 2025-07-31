@@ -22,7 +22,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
         <td className="px-6 py-4 border-r whitespace-nowrap text-sm text-gray-900 dark:text-white">
           <button 
             onClick={() => navigate(`/citizen/help-desk/complaint/view/${complaint.id}`)}
-            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center text-sm transition-colors duration-200">
+            className="text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300 flex items-center text-sm transition-colors duration-200">
             <FaEye className="mr-1 text-xs" /> View
           </button>
         </td>
@@ -36,7 +36,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
             disabled={complaint.status !== 'resolved'}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
               complaint.status === 'resolved'
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-brand-500 text-white hover:bg-brand-600'
                 : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
             }`}
           >
@@ -84,7 +84,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
             <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
               <button 
                 onClick={() => navigate(`/citizen/help-desk/complaint/view/${complaint.id}`)}
-                className="flex items-center justify-center px-4 py-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 border border-blue-600 dark:border-blue-400 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                className="flex items-center justify-center px-4 py-2 text-brand-600 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 border border-brand-600 dark:border-brand-400 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20">
                 <FaEye className="mr-2 text-xs" /> View Details
               </button>
               
@@ -96,11 +96,11 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
                 disabled={(complaint.status).toLowerCase() !== 'resolved'}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                   (complaint.status).toLowerCase() === 'resolved'
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-brand-500 text-white hover:bg-brand-600'
                     : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
                 }`}
               >
-                Give Feedback
+                Give Feedbackk
               </button>
             </div>
           </div>
