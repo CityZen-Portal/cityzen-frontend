@@ -12,11 +12,11 @@ export default function NewsHome() {
         const fetchNews = async () => {
             try {
                 const response = await axios.get(
-                    "https://newsapi.org/v2/everything?q=Coimbatore&language=en&apiKey=fcfce62893e34a8faaf91490d1919e95"
+                    "https://city-news-alert-backend.onrender.com/api/news/open-api"
                 );
 
                 const filteredAndSorted = response.data.articles
-                    .filter(article => article.urlToImage) // remove if urlToImage is null
+                    .filter(article => article.urlToImage) 
                     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)); // sort by date
 
                 setData(filteredAndSorted);
