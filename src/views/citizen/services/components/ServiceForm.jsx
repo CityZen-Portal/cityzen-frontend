@@ -1,17 +1,16 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function ServiceForm() {
   const { serviceName } = useParams();
   const navigate = useNavigate();
-  const location=useLocation();
-  const services=location.state?.nameOfService;
-  console.log(services);
-  const id=localStorage.getItem("id");
+  const location = useLocation();
+  const services = location.state?.nameOfService;
+  const id = localStorage.getItem("id");
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,9 +21,9 @@ function ServiceForm() {
     area: "",
     city: "",
     postcode: "",
-    description:"",
-    citizenId:id,
-    services
+    description: "",
+    citizenId: id,
+    services,
   });
 
   const handleChange = (e) => {
@@ -35,33 +34,63 @@ function ServiceForm() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    
-    const payload = {
-      ...formData,
-      services: serviceName || "",
-    };
+  const errors = [];
 
-    try {
-      const res = await axios.post(
-        "https://utility-booking-backend.onrender.com/api/services/request/add",
-        payload
-      );
-      console.log(payload);
-      toast.success("Form submitted successfully!");
-      setTimeout(() => {
-        navigate("/citizen/Services");
-      }, 2000);
-    } catch (error) {
-      console.error(
-        "Error submitting form:",
-        error.response?.data || error.message
-      );
-      toast.error("Failed to submit form.");
-    }
+  if (!formData.name.trim()) {
+    errors.push("Full Name is required.");
+  }
+  if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone)) {
+    errors.push("Enter a valid 10-digit phone number.");
+  }
+  if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
+    errors.push("Enter a valid email address.");
+  }
+  if (!formData.date) {
+    errors.push("Please select a date.");
+  }
+  if (!formData.time) {
+    errors.push("Please select a time.");
+  }
+  if (!formData.address.trim()) {
+    errors.push("Address is required.");
+  }
+  if (!formData.area.trim()) {
+    errors.push("Area is required.");
+  }
+  if (!formData.city.trim()) {
+    errors.push("City is required.");
+  }
+  if (!formData.postcode.trim()) {
+    errors.push("Post Code is required.");
+  }
+
+  if (errors.length > 0) {
+    errors.forEach((err) => toast.error(err));
+    return;
+  }
+
+  const payload = {
+    ...formData,
+    services: serviceName || "",
   };
+
+  try {
+    const res = await axios.post(
+      "https://utility-booking-backend.onrender.com/api/services/request/add",
+      payload
+    );
+    toast.success("Form submitted successfully!");
+    setTimeout(() => {
+      navigate("/citizen/Services");
+    }, 2000);
+  } catch (error) {
+    toast.error("Failed to submit form.");
+  }
+};
+
 
   return (
     <>
@@ -78,12 +107,8 @@ function ServiceForm() {
               </button>
             </div>
 
-            {/* Name */}
             <div className="m-8 dark:text-white">
-              <label
-                htmlFor="name"
-                className="mb-2 block text-lg font-semibold"
-              >
+              <label htmlFor="name" className="mb-2 block text-lg font-semibold">
                 Full Name
               </label>
               <input
@@ -96,12 +121,8 @@ function ServiceForm() {
               />
             </div>
 
-            {/* Phone */}
             <div className="m-8">
-              <label
-                htmlFor="phone"
-                className="mb-2 block text-lg font-semibold dark:text-white"
-              >
+              <label htmlFor="phone" className="mb-2 block text-lg font-semibold dark:text-white">
                 Phone Number
               </label>
               <input
@@ -114,12 +135,8 @@ function ServiceForm() {
               />
             </div>
 
-            {/* Email */}
             <div className="m-8">
-              <label
-                htmlFor="email"
-                className="mb-2 block text-lg font-semibold dark:text-white"
-              >
+              <label htmlFor="email" className="mb-2 block text-lg font-semibold dark:text-white">
                 Email Address
               </label>
               <input
@@ -132,14 +149,10 @@ function ServiceForm() {
               />
             </div>
 
-            {/* Date & Time */}
             <div className="flex flex-wrap">
               <div className="w-full px-3 sm:w-1/2">
                 <div className="m-5">
-                  <label
-                    htmlFor="date"
-                    className="mb-2 block font-semibold dark:text-white"
-                  >
+                  <label htmlFor="date" className="mb-2 block font-semibold dark:text-white">
                     Date
                   </label>
                   <input
@@ -154,10 +167,7 @@ function ServiceForm() {
 
               <div className="w-full px-3 sm:w-1/2">
                 <div className="m-5">
-                  <label
-                    htmlFor="time"
-                    className="mb-2 block font-semibold dark:text-white"
-                  >
+                  <label htmlFor="time" className="mb-2 block font-semibold dark:text-white">
                     Time
                   </label>
                   <input
@@ -170,6 +180,7 @@ function ServiceForm() {
                 </div>
               </div>
             </div>
+
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
                 Description
@@ -184,7 +195,6 @@ function ServiceForm() {
               />
             </div>
 
-            {/* Address */}
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
                 Address
@@ -199,7 +209,6 @@ function ServiceForm() {
               />
             </div>
 
-            {/* Area & City & Postcode */}
             <div className="-mx-4 flex flex-wrap">
               <div className="w-full px-6 sm:w-1/2">
                 <div className="m-4">
