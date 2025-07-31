@@ -36,7 +36,7 @@ const App = () => {
           element={
              <ProtectedRoute requiredRole="ROLE_STAFF" role={role}>
               <StaffLayout />
-             </ProtectedRoute>
+              </ProtectedRoute>
           }
         />
         <Route path="/*" element={<CitizenLayout />} />
