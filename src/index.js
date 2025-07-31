@@ -4,11 +4,14 @@ import "./index.css";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import App from "./App";
+import { UserProvider } from "./contexts/UserContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <BrowserRouter>
-    <App />
+    <UserProvider>
+      <App />
+    </UserProvider>
   </BrowserRouter>
 );
