@@ -79,13 +79,15 @@ import DocumentInfo from "views/citizen/locker/components/DocumentInfo";import A
 import AdminCityNews from "views/admin/news";
 import AdminAddNews from "views/admin/news/components/AdminAddNews";
 import AdminJobManager from "views/admin/job-applications/pages/JobApplicationsPost";
-import JobForm from "views/admin/job-applications/pages/JobForm";
+// import JobForm from "views/admin/job-applications/pages/JobForm";
 import JobApplicationForm from "views/citizen/job-application/pages/JobApplicationForm";
-import AdminJobApplicants from "views/admin/job-applications/pages/AdminJobApplicants";
-import ApplicantDetails from "views/admin/job-applications/pages/ApplicantDetails";
+// import AdminJobApplicants from "views/admin/job-applications/pages/AdminJobApplicants";
+// import ApplicantDetails from "views/admin/job-applications/pages/ApplicantDetails";
 import JobApplicationResponseView from "views/citizen/job-application/pages/JobApplicationResponseView";
 import JobApplicationEdit from "views/citizen/job-application/pages/JobApplicationEdit";
 import NewsHomeDetails from "views/citizen/news/components/NewsHomeDetails";
+import JobApplicationsPost from "views/admin/job-applications/pages/JobApplicationsPost";
+import JobFormPages from "views/admin/job-applications/pages/JobFormPages";
 
 
 const routes = [
@@ -309,37 +311,38 @@ const routes = [
     ],
   },
   
-  {
+ {
     name: "Job Applications",
     layout: "/admin",
     path: "job-applications",
     icon: <MdBallot className="h-6 w-6" />,
-    component: <AdminJobManager />,
+    component: <JobApplicationsPost />,
     children: [
       {
         name: "Add Job",
         layout: "/admin",
         path: "job-applications/add",
-        component: <JobForm />,
+        component: <JobFormPages />,
       },
       {
         name: "Edit Job",
         layout: "/admin",
         path: "job-applications/edit/:id",
-        component: <JobForm />,
+        component: <JobFormPages />,
       },
-      {
-        name: "View Applicants",
-        layout: "/admin",
-        path: "job-applications/applicants/:jobId",
-        component: <AdminJobApplicants />,
-      },
-      {
-        name: "Applicants Details",
-        layout: "/admin",
-        path: "job-applications/applicants/:jobId/details/:applicantId",
-        component: <ApplicantDetails />,
-      }
+      // Uncomment and adjust paths if these components exist
+      // {
+      //   name: "View Applicants",
+      //   layout: "/admin",
+      //   path: "job-applications/applicants/:jobId",
+      //   component: <AdminJobApplicants />,
+      // },
+      // {
+      //   name: "Applicants Details",
+      //   layout: "/admin",
+      //   path: "job-applications/applicants/:jobId/details/:applicantId",
+      //   component: <ApplicantDetails />,
+      // }
     ]
   },
 

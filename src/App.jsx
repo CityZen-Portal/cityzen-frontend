@@ -56,7 +56,7 @@ const App = () => {
           element={
             <ProtectedRoute requiredRole="ROLE_ADMIN">
               <AdminLayout />
-            </ProtectedRoute>
+             </ProtectedRoute>
           }
         />
         <Route
