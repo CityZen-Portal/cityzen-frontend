@@ -1,4 +1,6 @@
 import React from "react";
+import {useEffect, useState} from "react";
+import axios from "axios";
 import {
   BarChart,
   Bar,
@@ -18,7 +20,7 @@ import {
   FaIdCard,
   FaStar,
   FaClock,
-} from "react-icons/fa"; // updated icons
+} from "react-icons/fa";
 
 const Dashboard = () => {
   const metricCards = [
@@ -65,7 +67,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6 dark:bg-navy-700">
+    <div className="p-6 space-y-6 dark:bg-navy-700 dark:text-white">
       {/* Metric Cards */}
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -171,7 +173,7 @@ const Dashboard = () => {
 
         <div className="p-6 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow">
           <h3 className="text-sm">Requests this Month</h3>
-          <h1 className="text-4xl font-bold">3,240</h1>
+         
         </div>
       </div>
     </div>

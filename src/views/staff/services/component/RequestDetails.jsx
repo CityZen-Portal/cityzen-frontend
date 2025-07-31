@@ -1,12 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Card from "components/card";
 import { MdOutlineAssignment, MdCheckCircleOutline, MdPendingActions, MdPhotoCamera, MdPerson } from "react-icons/md";
 import { Link } from 'react-router-dom';
-const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
+const RequestDetails = ({ viewingDetails, setViewingDetails, selectedRequest }) => {
+  const [task, setTask] = useState(null);
+  useEffect(() => {
+    if (!viewingDetails) return;
+    const fetchTask = async () => {
+      try {
+        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/${viewingDetails.taskId}`);
+        console.log("API response:", response.data);
+        setTask(response.data.data);
+        console.log("Task assigned:", response.data.data);
+      } catch (err) {
+        console.error("Error fetching task:", err);
+      }
+    };
+    fetchTask();
+  }, [viewingDetails?.taskId]);
+
   if (!viewingDetails) return null;
-  
+
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleString('en-IN', options);
+  }
+
   return (
     <Card extra="mt-7">
+
       <div className="p-5">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -14,7 +45,7 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
               <MdOutlineAssignment className="h-6 w-6" />
             </div>
             <h5 className="text-xl font-bold text-navy-700 dark:text-white">
-              Request Details
+              {/* Completed Details{task.serviceId} */}
             </h5>
           </div>
           <button
@@ -24,122 +55,174 @@ const RequestDetails = ({ viewingDetails, setViewingDetails }) => {
             Close
           </button>
         </div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-xl bg-gray-50 p-4 dark:bg-navy-900">
-            <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-2 dark:border-navy-700">
-              <MdPerson className="h-5 w-5 text-brand-500" />
-              <p className="font-bold text-navy-700 dark:text-white">
-                Citizen Information
-              </p>
-            </div>
-            <div className="space-y-3">
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                  Name:
-                </span>
-                {viewingDetails.citizenName}
-              </p>
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                  Service Type:
-                </span>
-                {viewingDetails.service}
-              </p>
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                  Request Date:
-                </span>
-                {viewingDetails.date}
-              </p>
-              <p className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
-                <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                  Description:
-                </span>
-                {viewingDetails.description}
-              </p>
-            </div>
-
-            {viewingDetails.status === "completed" && (
-              <div className="mt-4 border-t border-gray-200 pt-2 dark:border-navy-700">
-                <div className="mb-4 flex items-center gap-2">
-                  <MdCheckCircleOutline className="h-5 w-5 text-green-500" />
-                  <p className="font-bold text-navy-700 dark:text-white">
-                    Completion Details
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                    <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                      Completed Date:
-                    </span>
-                    {viewingDetails.completedDate}
-                  </p>
-                  <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                    <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                      Staff Member:
-                    </span>
-                    {viewingDetails.staffName}
-                  </p>
-                  <p className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
-                    <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                      Notes:
-                    </span>
-                    {viewingDetails.suggestion || "None"}
-                  </p>
-                  <div className="flex justify-center">
-                    <Link
-                      to="/Services/feedform"
-                      className=" rounded-xl bg-red-400 px-5 py-[6px] text-white shadow-md transition-all duration-200 hover:bg-red-600 dark:bg-red-400 dark:text-white dark:hover:bg-red-600"
-                    >
-                      Give FeedBack
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {viewingDetails.status === "completed" && viewingDetails.photo ? (
+        {viewingDetails.staffName !== null &&
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="rounded-xl bg-gray-50 p-4 dark:bg-navy-900">
               <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-2 dark:border-navy-700">
-                <MdPhotoCamera className="h-5 w-5 text-brand-500" />
+                <MdPerson className="h-5 w-5 text-brand-500" />
                 <p className="font-bold text-navy-700 dark:text-white">
-                  Completion Photo
+                  Citizen Information
                 </p>
               </div>
+              <div className="space-y-3">
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Name:
+                  </span>
+                  {viewingDetails.citizenName}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Service Type:
+                  </span>
+                  {viewingDetails.serviceName}
+                </p>
+                <p className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Address:
+                  </span>
+                  <span className="font-medium dark:text-white space-y-1 flex flex-col">
+                    {viewingDetails.address.split(',').map((line, index) => (
+                      <span key={index}>{line.trim()}</span>
+                    ))}
+                  </span>
+                </p>
 
-              <div className="overflow-hidden rounded-xl shadow-lg">
-                <img
-                  src={viewingDetails.photo}
-                  alt="Completion Proof"
-                  className="h-64 w-full object-cover transition-transform duration-300 hover:scale-105"
-                />
+
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    City:
+                  </span>
+                  {viewingDetails.city}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Requested Time:
+                  </span>
+                  {viewingDetails.time}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Postcode:
+                  </span>
+                  {viewingDetails.postcode}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Description:
+                  </span>
+                  {viewingDetails.description}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Phone Number:
+                  </span>
+                  {viewingDetails.phone}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Requested Date:
+                  </span>
+                  {viewingDetails.requested_Date}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Completion Date And Time:
+                  </span>
+                  {task && task.completion_date ? formatDate(task.completion_date) : "Not Completed Yet"}
+
+                </p>
+
+
               </div>
+
+              {viewingDetails.status === "completed" && (
+                <div className="w-full sm:w-[600px] md:w-[700px] lg:w-[800px] mx-auto mt-4 border-t border-gray-200 pt-2 dark:border-navy-700">
+                  <div className="mb-4 flex items-center gap-2">
+                    <MdCheckCircleOutline className="h-5 w-5 text-green-500" />
+                    <p className="font-bold text-navy-700 dark:text-white">Completion Details</p>
+                  </div>
+
+                  <div className="space-y-3 text-sm sm:text-base">
+                    <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-gray-700 dark:text-gray-300">
+                      <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                        Completed Date:
+                      </span>
+                      <span className="break-words">{viewingDetails.completedDate}</span>
+                    </p>
+
+                    <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-gray-700 dark:text-gray-300">
+                      <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                        Staff Member:
+                      </span>
+                      <span className="break-words">{viewingDetails.staffName}</span>
+                    </p>
+
+                    <p className="flex flex-col sm:flex-row gap-1 sm:gap-2 text-gray-700 dark:text-gray-300">
+                      <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                        Notes:
+                      </span>
+                      <span className="whitespace-pre-wrap break-words">{viewingDetails.suggestion || "None"}</span>
+                    </p>
+
+                    <div className="flex justify-center pt-2">
+                      <Link
+                        to="/Services/feedform"
+                        className="rounded-xl bg-red-500 px-6 py-2 text-white shadow-md transition duration-200 hover:bg-red-600 dark:bg-red-400 dark:text-white dark:hover:bg-red-600"
+                      >
+                        Give Feedback
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+
+              )}
             </div>
-          ) : viewingDetails.status === "pending" ? (
-            <div className="flex flex-col items-center justify-center rounded-xl bg-gray-50 p-4 dark:bg-navy-900">
-              <div className="mb-3 rounded-full bg-yellow-100 p-4">
-                <MdPendingActions className="h-10 w-10 text-yellow-600" />
+
+            {viewingDetails.status === "completed" && viewingDetails.photo ? (
+              <div className="rounded-xl bg-gray-50 p-4 dark:bg-navy-900">
+                <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-2 dark:border-navy-700">
+                  <MdPhotoCamera className="h-5 w-5 text-brand-500" />
+                  <p className="font-bold text-navy-700 dark:text-white">
+                    Completion Photo
+                  </p>
+                </div>
+
+                <div className="overflow-hidden rounded-xl shadow-lg">
+                  <img
+                    src={viewingDetails.photo}
+                    alt="Completion Proof"
+                    className="h-64 w-full object-cover transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
               </div>
-              <p className="mb-2 text-lg font-medium text-navy-700 dark:text-white">
-                Request Pending
-              </p>
-              <p className="text-center text-gray-600 dark:text-gray-400">
-                This service request is waiting to be completed by a staff
-                member.
-              </p>
-              <div className="flex justify-center">
-                <Link
-                  to="/Services/reportform"
-                  className=" rounded-xl bg-red-400 mt-3 px-5 py-[6px] text-white shadow-md transition-all duration-200 hover:bg-red-600 dark:bg-red-400 dark:text-white dark:hover:bg-red-600"
-                >
-                  Report
-                </Link>
+            ) : viewingDetails.status === "pending" ? (
+              <div className="flex flex-col items-center justify-center rounded-xl bg-gray-50 p-4 dark:bg-navy-900">
+                <div className="mb-3 rounded-full bg-yellow-100 p-4">
+                  <MdPendingActions className="h-10 w-10 text-yellow-600" />
+                </div>
+                <p className="mb-2 text-lg font-medium text-navy-700 dark:text-white">
+                  Request Pending
+                </p>
+                <p className="text-center text-gray-600 dark:text-gray-400">
+                  This service request is waiting to be completed by a staff
+                  member.
+                </p>
+                <div className="flex justify-center">
+                  <Link
+                    to="/Services/reportform"
+                    className=" rounded-xl bg-red-400 mt-3 px-5 py-[6px] text-white shadow-md transition-all duration-200 hover:bg-red-600 dark:bg-red-400 dark:text-white dark:hover:bg-red-600"
+                  >
+                    Report
+                  </Link>
+                </div>
               </div>
-            </div>
-          ) : null}
-        </div>
+            ) : null}
+          </div>}
+        {viewingDetails.staffName === null &&
+
+          <div>No staff is assigned yet</div>}
       </div>
     </Card>
   );

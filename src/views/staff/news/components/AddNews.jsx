@@ -7,8 +7,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const AddNews = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const authorId = localStorage.getItem('id') || '';
 
   const [formData, setFormData] = useState({
     title: '',
@@ -16,7 +17,7 @@ const AddNews = () => {
     location: '',
     category: '',
     othercategory: '',
-    author_id: '4',
+    authorId: authorId,
     isBreaking: false,
     image: null,
   });
@@ -25,7 +26,7 @@ const AddNews = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (id) {
+    if (id && id !== 'new') {
       axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
         .then(res => {
           const item = res.data.data;
@@ -35,24 +36,60 @@ const AddNews = () => {
             location: item.location || '',
             category: item.category || '',
             othercategory: item.category_name || '',
-            breaking: item.breaking || false,
+            authorId: authorId,
+            isBreaking: item.breaking || false,
             image: null,
           });
           setIsEditing(true);
         })
-        .catch(() => navigate('/staff/news'));
+        .catch(() => {
+          toast.error('Failed to load news post.');
+          navigate('/staff/news');
+        });
     }
-  }, [id, navigate]);
+  }, [id, navigate, authorId]);
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = 'Title is required';
-    if (!formData.content.trim()) errors.content = 'Content is required';
-    if (!formData.location.trim()) errors.location = 'Location is required';
-    if (!formData.category) errors.category = 'Category is required';
+    let isValid = true;
+
+    if (!formData.title.trim()) {
+      errors.title = 'Title is required';
+      isValid = false;
+    }
+
+    if (!formData.content.trim()) {
+      errors.content = 'Content is required';
+      isValid = false;
+    }
+
+    if (!formData.location.trim()) {
+      errors.location = 'Location is required';
+      isValid = false;
+    }
+
+    if (!formData.category) {
+      errors.category = 'Category is required';
+      isValid = false;
+    }
+
+    // Optional: Validate othercategory if "OTHERS" is selected
+    if (formData.category === 'OTHERS' && !formData.othercategory.trim()) {
+      errors.othercategory = 'Please enter a custom category';
+      isValid = false;
+    }
+
+    // Validate image only when creating new news (not editing)
+    if (!isEditing && !formData.image) {
+      errors.image = 'Image is required';
+      isValid = false;
+    }
+
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    Object.values(errors).forEach((msg) => toast.error(msg));
+    return isValid;
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -99,19 +136,19 @@ const AddNews = () => {
         title: formData.title,
         content: formData.content,
         location: formData.location,
-        breaking: formData.breaking,
-        author_id: '4',
+        breaking: formData.isBreaking,
+        authorId: authorId,
         ...(formData.category === 'OTHERS'
           ? {
-              category_name: formData.othercategory,
-              imageName,
-              imagePath,
-            }
+            category_name: formData.othercategory,
+            imageName,
+            imagePath,
+          }
           : {
-              category: formData.category,
-              imageName,
-              imagePath,
-            }),
+            category: formData.category,
+            imageName,
+            imagePath,
+          }),
       };
 
       if (isEditing) {
@@ -162,6 +199,7 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
+          {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
         </div>
 
         <div className="mb-4">
@@ -172,6 +210,7 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="h-28 w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
+          {formErrors.content && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
         </div>
 
         <div className="mb-4">
@@ -183,6 +222,7 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
+          {formErrors.location && <p className="text-red-500 text-xs mt-1">{formErrors.location}</p>}
         </div>
 
         <div className="mb-4">
@@ -206,6 +246,7 @@ const AddNews = () => {
             <option value="PUBLIC_NOTICE">Public Notice / Lost & Found</option>
             <option value="OTHERS">Others</option>
           </select>
+          {formErrors.category && <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>}
 
           {formData.category === 'OTHERS' && (
             <input
@@ -268,6 +309,7 @@ const AddNews = () => {
           )}
         </div>
       </Card>
+
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );

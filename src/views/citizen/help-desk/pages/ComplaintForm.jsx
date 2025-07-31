@@ -2,25 +2,34 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import loading_gif from '../../../../assets/img/loading/loading_gif.gif'
 
 function ComplaintForm() {
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  
   const navigate = useNavigate();
+  const [loadingSubmit, setLoadingSubmit] = useState(false);  
   
   const [complaintType, setComplaintType] = useState('');
   const [others, setOthers] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [issue, setIssue] = useState('Drinking Water is contaminated for 2 days.');
+  const [description, setDescription] = useState('Drinking Water is contaminated for 2 days.');
   const [file, setFile] = useState(null);
 
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
   const [taluk, setTaluk] = useState("");
   const [pincode, setPincode] = useState("");
-  const [address, setAddress] = useState('');
+  const [street, setStreet] = useState('');
   const [wardNumber, setWardNumber] = useState('');
 
-  const setLocationDetails = (address) => {
-    const details = address.split(",");
+  const setLocationDetails = (street) => {
+    const details = street.split(",");
 
     if(details.length <= 5){
       toast.error("Received unexpected response", {
@@ -31,7 +40,6 @@ function ComplaintForm() {
       return;
     }
 
-    const response_country = details[details.length - 1].trim();
     const response_pincode = details[details.length - 2].trim();
     const response_state = details[details.length - 3].trim();
     const response_district = details[details.length - 4].trim();
@@ -39,7 +47,7 @@ function ComplaintForm() {
 
     const response_localAddress = details.slice(0, details.length - 5).join(",").trim();
 
-    setAddress(response_localAddress)
+    setStreet(response_localAddress)
     setTaluk(response_taluk)
     setDistrict(response_district)
     setState(response_state)
@@ -47,7 +55,7 @@ function ComplaintForm() {
   };
 
   const options = {method: 'GET', headers: {accept: 'application/json'}};
-  const BASE_URL = 'https://us1.locationiq.com/v1/reverse'
+  const LOCATION_BASE_URL = 'https://us1.locationiq.com/v1/reverse'
 
   const getLocation = async () => {
     const LOCATIONIQ_API_KEY = "pk.fa68c2e9928bf498051000f918028096";
@@ -58,7 +66,7 @@ function ComplaintForm() {
 
         try {
           
-          const response = await fetch(`${BASE_URL}?key=${LOCATIONIQ_API_KEY}&lat=${latitude}&lon=${longitude}&format=json`, options); // https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=8eb4c196fb814a5eb2a97f5ba78b9b21&format=json
+          const response = await fetch(`${LOCATION_BASE_URL}?key=${LOCATIONIQ_API_KEY}&lat=${latitude}&lon=${longitude}&format=json`, options); // https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=8eb4c196fb814a5eb2a97f5ba78b9b21&format=json
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
           const data = await response.json();
@@ -91,80 +99,135 @@ function ComplaintForm() {
   };
 
   const handleSubmit = (e) => {
+  
     e.preventDefault();
+    setLoadingSubmit(true);
 
-    if (!address.trim()) {
-      toast.error('Please enter an address');
+    if (!street.trim()) {
+      setLoadingSubmit(false)
+      toast.error('Please enter the street');
       return;
     }
     if (!taluk.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter taluk');
       return;
     }
     if (!district.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter district');
       return;
     }
     if (!state.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter state');
       return;
     }
     if(!pincode){
+      setLoadingSubmit(false)
       toast.error('Please enter pincode');
       return;
     }
     if (!/^[0-9]{6}$/.test(pincode)) {
+      setLoadingSubmit(false)
       toast.error('Please enter a valid 6-digit pincode');
       return;
     }
     if(!wardNumber){
+      setLoadingSubmit(false)
       toast.error('Please enter Ward Number');
       return;
     }
     if (!/^[0-9]+$/.test(wardNumber)) {
+      setLoadingSubmit(false)
       toast.error('Ward number must be numeric');
       return;
     }
     if (!complaintType.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please select a complaint type');
       return;
     }
     if (complaintType === 'Other' && !others.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please describe the issue under "Other"');
       return;
     }
+    if(!issue.trim()){
+      setLoadingSubmit(false)
+      toast.error('Please enter the issue');
+      return;
+    }
     if (!description.trim()) {
+      setLoadingSubmit(false)
       toast.error('Please enter a description');
       return;
     }
     if (file && file.type !== 'application/pdf') {
+      setLoadingSubmit(false)
       toast.error('Only PDF files are allowed.');
       return;
     }
 
-    // Clear form
-    // setAddress('');
-    // setTaluk('');
-    // setDistrict('');
-    // setState('');
-    // setPincode('');
-    // setWardNumber('');
-    // setComplaintType('');
-    // setOthers('');
-    // setTitle('');
-    // setDescription('');
-    // setFile(null);
+    const postData = {
+      citizenId: 1,
+      street,
+      taluk,
+      district,
+      state,
+      pincode,
+      wardNumber,
+      category: complaintType ? complaintType : others,
+      issue,
+      issueDescription: description,
+    };
 
-    toast.success('Complaint submitted successfully!', {
-      position: 'top-right',
-      autoClose: 1000,
-      theme: 'colored',
-      onClose: () => navigate('/citizen/help-desk/'),
+
+    axios.post(`${HELPDESK_API}/citizen/complaint-form`, postData,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
+    .then(res => {
+      console.log('Response:', res.data);
+      toast.success('Complaint submitted successfully!', {
+        position: 'top-right',
+        autoClose: 1000,
+        theme: 'colored',
+        onClose: () => navigate('/citizen/help-desk/')
+      });
+    })
+    .catch(err => {
+      console.error('Error:', err.response?.data || err.message);
+      toast.error('Server Error!Unable to Submit Complaint', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored'
+      });
+      return;
+    })
+    .finally(() => {
+      setLoadingSubmit(false);
     });
   };
 
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
+      
+      {loadingSubmit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
+
       <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
         <h1 className="font-bold text-center text-lg sm:text-xl lg:text-2xl mb-4 sm:mb-6">Complaint Form</h1>
         <form className="space-y-3 sm:space-y-4 lg:space-y-6" onSubmit={handleSubmit}>
@@ -172,11 +235,11 @@ function ComplaintForm() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
             <div>
-              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Address</label>
+              <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Street</label>
               <input
                 type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
                 className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               />
             </div>
@@ -234,7 +297,7 @@ function ComplaintForm() {
           <div className=' w-full flex align-middle justify-center items-center col-span-2'>
             <button 
               type="button" 
-              className="bg-blue-600 text-white font-bold px-9 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
+              className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
               onClick={() => getLocation()}
             >
               Get Location
@@ -285,8 +348,8 @@ function ComplaintForm() {
             <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Issue</label>
             <input
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={issue}
+              onChange={(e) => setIssue(e.target.value)}
               className="w-full border px-3 py-2 rounded-md bg-white text-gray-800 dark:text-white dark:border-gray-700 dark:bg-navy-700 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
             />
           </div>
@@ -307,7 +370,7 @@ function ComplaintForm() {
               type="file"
               accept="application/pdf"
               onChange={(e) => setFile(e.target.files[0])}
-              className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-navy-500"
+              className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-brand-500 file:text-white hover:file:bg-brand-600 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-brand-500"
             />
             {file && (
               <p className="text-xs text-green-600 mt-1">Selected: {file.name}</p>
@@ -317,7 +380,7 @@ function ComplaintForm() {
           <div className="text-center pt-2 sm:pt-4">
             <button
               type="submit"
-              className="bg-blue-600 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
+              className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
             >
               Submit Complaint
             </button>

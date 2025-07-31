@@ -53,7 +53,8 @@ const ViewNews = () => {
   useEffect(() => {
     const fetchNewsData = async () => {
       try {
-        const response = await axios.get('https://city-news-alert-backend-new.onrender.com/api/news/author/4');
+        const id=localStorage.getItem("id");
+        const response = await axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/author/${id}`);
         setNewsData(response.data.data);
       } catch (err) {
         console.error(err);

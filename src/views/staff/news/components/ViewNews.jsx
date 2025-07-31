@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from 'components/card';
-import { MdEdit, MdDelete, MdTrendingUp, MdNotifications, MdAdd, MdRemoveRedEye } from 'react-icons/md';
+import { MdEdit, MdDelete, MdNotifications, MdAdd, MdRemoveRedEye } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import Pagination from 'components/pagination';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import NewsHome from 'views/citizen/news/components/NewsHome';
 
-const ViewNews = ({ newsItems, setNewsItems }) => {
+const ViewNews = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -12,14 +15,26 @@ const ViewNews = ({ newsItems, setNewsItems }) => {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [previewImage, setPreviewImage] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [newsData, setNewsData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDeleteNews = (id) => {
-    const updatedItems = newsItems.filter(item => item.id !== id);
-    setNewsItems(updatedItems);
+  const handleDeleteNews = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this news item?');
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`https://city-news-alert-backend-new.onrender.com/api/news/delete/${id}`);
+      const updatedItems = newsData.filter(item => item.id !== id);
+      setNewsData(updatedItems);
+      toast.success('News Deleted successfully!');
+    } catch (err) {
+      console.log('Error deleting news item:', err);
+      toast.error('Failed to delete the news item. Please try again.');
+    }
   };
 
-  const filteredNews = (newsItems ?? []).filter(item => {
-    if (activeTab === 'breaking') return item.isBreaking;
+  const filteredNews = (newsData ?? []).filter(item => {
+    if (activeTab === 'breaking') return item.breaking;
     return true;
   });
 
@@ -34,6 +49,56 @@ const ViewNews = ({ newsItems, setNewsItems }) => {
   const paginatedNews = sortedNews.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    const fetchNewsData = async () => {
+      try {
+        const id = localStorage.getItem("id");
+        const response = await axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/author/${id}`);
+        setNewsData(response.data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNewsData();
+  }, []);
+
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleString('en-IN', options);
+  }
+
+  const SkeletonRow = () => (
+    <tr className="animate-pulse border-b border-gray-100 dark:border-white/5">
+      <td className="py-3 px-4">
+        <div className="h-4 w-3/4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+        <div className="h-3 w-1/2 bg-gray-300 dark:bg-gray-600 rounded"></div>
+      </td>
+      <td className="py-3 px-4">
+        <div className="h-4 w-20 bg-gray-300 dark:bg-gray-700 rounded"></div>
+      </td>
+      <td className="py-3 px-4">
+        <div className="h-4 w-24 bg-gray-300 dark:bg-gray-700 rounded"></div>
+      </td>
+      <td className="py-3 px-4">
+        <div className="flex gap-2">
+          <div className="h-6 w-6 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+          <div className="h-6 w-6 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+          <div className="h-6 w-6 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+        </div>
+      </td>
+    </tr>
   );
 
   return (
@@ -82,37 +147,44 @@ const ViewNews = ({ newsItems, setNewsItems }) => {
           <table className="w-full table-auto">
             <thead>
               <tr className="border-b border-gray-200 dark:border-white/10">
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Title</th>
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Date</th>
+                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 w-1/4">Title</th>
+                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 w-1/3">Date</th>
                 <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Status</th>
                 <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedNews.length === 0 ? (
+              {loading ? (
+                <>
+                  <SkeletonRow />
+                  <SkeletonRow />
+                  <SkeletonRow />
+                  <SkeletonRow />
+                  <SkeletonRow />
+                </>
+              ) : paginatedNews.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="py-4 px-4 text-center text-gray-500 dark:text-gray-400">No news items available</td>
+                  <td colSpan="4" className="py-4 px-4 text-center text-gray-500 dark:text-gray-400">
+                    No news items available
+                  </td>
                 </tr>
               ) : (
                 paginatedNews.map(item => (
                   <tr key={item.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-navy-700/30">
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 w-3/4">
                       <div>
-                        <h5 className="text-base font-semibold text-navy-700 dark:text-white">{item.title}</h5>
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{item.content}</p>
+                        <h5 className="text-sm font-semibold text-navy-700 dark:text-white">{item.title}</h5>
+                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1">{item.content}</p>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{item.date}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 w-1/3">
+                      {formatDate(item.created_date)}
+                    </td>
                     <td className="py-3 px-4">
                       <div className="flex gap-1">
-                        {item.isBreaking && (
+                        {item.breaking && (
                           <span className="flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
                             <MdNotifications className="mr-1 h-3 w-3" />Breaking
-                          </span>
-                        )}
-                        {item.isTrending && (
-                          <span className="flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                            <MdTrendingUp className="mr-1 h-3 w-3" />Trending
                           </span>
                         )}
                       </div>
@@ -167,6 +239,22 @@ const ViewNews = ({ newsItems, setNewsItems }) => {
           </div>
         </div>
       )}
+      <section className=" mx-auto p-6">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-navy-800 dark:text-white">
+             News
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm md:text-base">
+            Stay updated with the latest announcements and updates
+          </p>
+        </div>
+
+       
+          <NewsHome />
+       
+      </section>
+
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 };

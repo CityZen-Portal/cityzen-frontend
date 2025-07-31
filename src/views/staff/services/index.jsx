@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { FilterButtons, RequestDetails, CompletionForm, RequestsTable } from './component';
-import initialRequests from './variable/sample';
 
 const StaffService = () => {
-  const [requests, setRequests] = useState(initialRequests);
+  const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -15,6 +15,34 @@ const StaffService = () => {
   const [viewMode, setViewMode] = useState("all");
   const [viewingDetails, setViewingDetails] = useState(null);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
+  const formRef = useRef(null);
+
+  const scrollToForm = () => {
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+
+  const fetchRequests = async () => {
+    try {
+      const email = localStorage.getItem("email");
+      const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/email/${email}`);
+      setRequests(response.data.data);
+    } catch (err) {
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -46,8 +74,7 @@ const StaffService = () => {
     }
   };
 
-  const handleComplete = (id) => {
-    const request = requests.find(req => req.id === id);
+  const handleComplete = (request) => {
     setSelectedRequest(request);
     setFormData({
       staffName: "",
@@ -58,14 +85,16 @@ const StaffService = () => {
     setPhotoPreview(null);
     setViewingDetails(null);
     setErrors({});
+    scrollToForm(); 
   };
 
   const handleViewDetails = (request) => {
     setViewingDetails(request);
     setSelectedRequest(null);
+    scrollToForm(); 
   };
 
-  const handleSubmitCompletion = (e) => {
+  const handleSubmitCompletion = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -78,21 +107,24 @@ const StaffService = () => {
       return;
     }
 
-    const updatedRequests = requests.map(req => {
-      if (req.id === selectedRequest.id) {
-        return {
-          ...req,
-          status: "completed",
-          completedDate: formData.completionDate,
-          staffName: formData.staffName,
-          photo: photoPreview,
-          suggestion: formData.suggestion
-        };
-      }
-      return req;
-    });
+    try {
+      const updatePayload = {
+        ...selectedRequest,
+        status: "completed",
+        completedDate: formData.completionDate,
+        staffName: formData.staffName,
+        suggestion: formData.suggestion,
+        photo: photoPreview
+      };
 
-    setRequests(updatedRequests);
+      await axios.put(`https://utility-booking-backend.onrender.com/api/task/${selectedRequest.id}`, updatePayload);
+
+      fetchRequests(); // Refresh data from backend
+    } catch (err) {
+      console.error("Error updating request", err);
+      setError("Failed to update task");
+    }
+
     setSelectedRequest(null);
     setPhoto(null);
     setPhotoPreview(null);
@@ -104,34 +136,43 @@ const StaffService = () => {
     setErrors({});
   };
 
-  const filteredRequests = viewMode === "all" 
-    ? requests 
-    : viewMode === "pending" 
-      ? requests.filter(req => req.status === "pending")
-      : requests.filter(req => req.status === "completed");
+  const filteredRequests =
+    viewMode === "all"
+      ? requests
+      : viewMode === "pending"
+        ? requests.filter(req => req.status === "pending")
+        : requests.filter(req => req.status === "completed");
+
+  if (loading) return <p className="text-center mt-5">Loading...</p>;
+  if (error) return <p className="text-center text-red-500 mt-5">{error}</p>;
 
   return (
     <div className="mt-3">
       <FilterButtons viewMode={viewMode} setViewMode={setViewMode} />
-      <RequestsTable 
+      <RequestsTable
         viewMode={viewMode}
         filteredRequests={filteredRequests}
         handleViewDetails={handleViewDetails}
         handleComplete={handleComplete}
       />
-      <CompletionForm 
+   
+      <div ref={formRef}>
+        <CompletionForm
+          selectedRequest={selectedRequest}
+          setSelectedRequest={setSelectedRequest}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handlePhotoChange={handlePhotoChange}
+          photoPreview={photoPreview}
+          errors={errors}
+          handleSubmitCompletion={handleSubmitCompletion}
+          fetchRequests={fetchRequests}
+        />
+      </div>
+      <RequestDetails
         selectedRequest={selectedRequest}
-        setSelectedRequest={setSelectedRequest}
-        formData={formData}
-        handleInputChange={handleInputChange}
-        handlePhotoChange={handlePhotoChange}
-        photoPreview={photoPreview}
-        handleSubmitCompletion={handleSubmitCompletion}
-        errors={errors}
-      />
-      <RequestDetails 
-        viewingDetails={viewingDetails} 
-        setViewingDetails={setViewingDetails} 
+        viewingDetails={viewingDetails}
+        setViewingDetails={setViewingDetails}
       />
     </div>
   );

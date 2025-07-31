@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   FaTrashAlt,
   FaTint,
@@ -12,31 +13,20 @@ import {
   MdPerson,
   MdBadge,
   MdEmail,
-  MdPhone,
-  MdEvent,
   MdFingerprint,
   MdDescription,
-  MdLocationOn,
-  MdMale,
-  MdFemale,
-  MdTransgender,
 } from "react-icons/md";
-import avatar from "assets/img/avatars/avatar1.png";
+import avatar from "assets/img/avatars/avatar5.png";
 
 export default function ProfileCard() {
   const [editMode, setEditMode] = useState(false);
 
   const [user, setUser] = useState({
-    firstName: "Adela",
-    lastName: "Parkson",
-    citizenId: "CIT123456",
-    userType: "Citizen",
-    email: "smartcitizen.portal@gmail.com",
-    phone: "+91 98765 43210",
-    dob: "1990-05-22",
-    gender: "Female",
-    aadhar: "XXXX-XXXX-9012",
-    address: "123, Gandhi Street, Coimbatore, Tamil Nadu – 641001",
+    firstName: "",
+    citizenId: "",
+    userType: "",
+    email: "",
+    aadhar: "",
   });
 
   const handleProfilePicChange = (e) => {
@@ -51,16 +41,39 @@ export default function ProfileCard() {
     setUser((prev) => ({ ...prev, [field]: value }));
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(
+          "https://auth-backend-obcu.onrender.com/api/auth/getUser/siranjeevi0619@gmail.com"
+        );
+        const data = res.data.data;
+
+        setUser({
+          firstName: data.username || "",
+          citizenId: `CIT-${data.id}`,
+          
+          email: data.email || "",
+          aadhar: data.aadharNumber || "",
+        });
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   return (
-    <div className="p-6 space-y-6 font-sans text-base leading-relaxed tracking-wide">
+    <div className="p-6 space-y-3 font-sans text-base leading-relaxed tracking-wide">
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Card */}
        <div
-  className={`flex flex-col items-center bg-blue-600 rounded-2xl p-6 w-full lg:w-1/3 shadow-lg ${
+  className={`flex flex-col items-center bg-blue-600 rounded-2xl p-6 pt-6 pb-3 w-full lg:w-1/3 shadow-lg ${
     editMode ? "justify-center min-h-[500px]" : ""
   }`}
 >
-  <div className="relative flex justify-center items-center mb-4">
+  <div className="relative flex justify-center items-center mb-2">
     <img
       src={avatar}
       alt="User"
@@ -83,132 +96,91 @@ export default function ProfileCard() {
       </>
     )}
   </div>
-  <h2 className="text-2xl font-semibold text-white text-center tracking-wide">
-    {user.firstName} {user.lastName}
+  <h2 className="text-2xl font-semibold text-white text-center tracking-wide mb-1">
+    {user.firstName}
   </h2>
-  <p className="text-white text-sm mt-1 text-center font-medium tracking-wide">
+  <p className="text-white text-sm text-center font-medium tracking-wide">
     {user.userType}
   </p>
 </div>
 
+
         {/* Right Card */}
-        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-2xl p-6 pb-3 w-full lg:w-2/3 shadow-lg space-y-3">
-          <div className="flex justify-end gap-2">
-            {!editMode ? (
-              <button
-                className="flex items-center gap-1.5 bg-yellow-400 text-white px-3 py-1.5 rounded-full shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out font-semibold text-sm tracking-wide"
-                onClick={() => setEditMode(true)}
-                aria-label="Edit Profile"
-              >
-                <FaEdit className="w-4 h-4" />
-                Edit
-              </button>
-            ) : (
-              <>
-                <button
-                  className="flex items-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-full shadow-md hover:bg-green-700 transition duration-300 ease-in-out font-semibold text-sm tracking-wide"
-                  onClick={() => setEditMode(false)}
-                  aria-label="Save Profile"
-                >
-                  <FaSave className="w-4 h-4" />
-                  Save
-                </button>
-                <button
-                  className="flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-full shadow-md hover:bg-red-700 transition duration-300 ease-in-out font-semibold text-sm tracking-wide"
-                  onClick={() => setEditMode(false)}
-                  aria-label="Cancel Editing"
-                >
-                  <FaTimes className="w-4 h-4" />
-                  Cancel
-                </button>
-              </>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              ["firstName", "First Name"],
-              ["lastName", "Last Name"],
-              ["citizenId", "Citizen ID", true],
-              ["userType", "User Type", true],
-              ["email", "Email"],
-              ["phone", "Phone"],
-              ["dob", "Date of Birth", false, "date"],
-              ["gender", "Gender", false, "select"],
-              ["aadhar", "Aadhaar", true],
-              ["address", "Address"],
-            ].map(([key, label, isReadOnly = false, type = "text"]) => {
-              if (!editMode && key === "lastName") return null;
-
-              const value = user[key];
-
-              const iconMap = {
-  firstName: <MdPerson className="text-2xl text-blue-600" />,
-  lastName: <MdPerson className="text-2xl text-blue-600" />,
-  citizenId: <MdBadge className="text-2xl text-blue-600" />,
-  userType: <MdDescription className="text-2xl text-blue-600" />,
-  email: <MdEmail className="text-2xl text-blue-600" />,
-  phone: <MdPhone className="text-2xl text-blue-600" />,
-  dob: <MdEvent className="text-2xl text-blue-600" />,
-  gender:
-    user.gender === "Male" ? (
-      <MdMale className="text-2xl text-blue-600" />
-    ) : user.gender === "Female" ? (
-      <MdFemale className="text-2xl text-blue-600" />
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-2xl p-6 pb-1 w-full lg:w-2/3 shadow-lg">
+  <div className="flex justify-end gap-2 mb-2">
+    {!editMode ? (
+      <button
+        className="flex items-center gap-1.5 bg-yellow-400 text-white px-3 py-1.5 rounded-full shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out font-semibold text-sm tracking-wide"
+        onClick={() => setEditMode(true)}
+      >
+        <FaEdit className="w-4 h-4" />
+        Edit
+      </button>
     ) : (
-      <MdTransgender className="text-2xl text-blue-600" />
-    ),
-  aadhar: <MdFingerprint className="text-2xl text-blue-600" />,
-  address: <MdLocationOn className="text-2xl text-blue-600" />,
-};
+      <>
+        <button
+          className="flex items-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-full shadow-md hover:bg-green-700 transition duration-300 ease-in-out font-semibold text-sm tracking-wide"
+          onClick={() => setEditMode(false)}
+        >
+          <FaSave className="w-4 h-4" />
+          Save
+        </button>
+        <button
+          className="flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-full shadow-md hover:bg-red-700 transition duration-300 ease-in-out font-semibold text-sm tracking-wide"
+          onClick={() => setEditMode(false)}
+        >
+          <FaTimes className="w-4 h-4" />
+          Cancel
+        </button>
+      </>
+    )}
+  </div>
 
-              return (
-                <div key={key}>
-                  {editMode ? (
-                    <>
-                      <label className="block text-sm font-semibold mb-1 tracking-wide text-gray-700 dark:text-gray-300">
-                        {label}
-                      </label>
-                      {type === "select" ? (
-                        <select
-                          className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={user[key]}
-                          onChange={(e) => handleChange(key, e.target.value)}
-                          disabled={isReadOnly}
-                        >
-                          <option value="">Select Gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      ) : (
-                        <input
-                          type={type}
-                          className={`w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            isReadOnly ? "opacity-60 cursor-not-allowed" : ""
-                          }`}
-                          placeholder={`Enter ${label.toLowerCase()}`}
-                          value={user[key]}
-                          onChange={(e) => handleChange(key, e.target.value)}
-                          readOnly={isReadOnly}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <div className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
-                      <span className="text-blue-600">{iconMap[key]}</span>
-                      <p className="text-sm font-medium tracking-wide">
-                        {key === "firstName"
-                          ? `${user.firstName} ${user.lastName}`
-                          : value}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {[
+      ["firstName", "First Name"],
+      ["citizenId", "Citizen ID", true],
+      ["email", "Email"],
+      ["aadhar", "Aadhaar", true],
+    ].map(([key, label, isReadOnly = false]) => {
+      const value = user[key];
+      const iconMap = {
+        firstName: <MdPerson className="text-2xl text-blue-600" />,
+        citizenId: <MdBadge className="text-2xl text-blue-600" />,
+        userType: <MdDescription className="text-2xl text-blue-600" />,
+        email: <MdEmail className="text-2xl text-blue-600" />,
+        aadhar: <MdFingerprint className="text-2xl text-blue-600" />,
+      };
+
+      return (
+        <div key={key}>
+          {editMode ? (
+            <>
+              <label className="block text-sm font-semibold mb-1 tracking-wide text-gray-700 dark:text-gray-300">
+                {label}
+              </label>
+              <input
+                type="text"
+                className={`w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isReadOnly ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+                placeholder={`Enter ${label.toLowerCase()}`}
+                value={user[key]}
+                onChange={(e) => handleChange(key, e.target.value)}
+                readOnly={isReadOnly}
+              />
+            </>
+          ) : (
+            <div className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
+              <span className="text-blue-600">{iconMap[key]}</span>
+              <p className="text-sm font-medium tracking-wide">{value}</p>
+            </div>
+          )}
         </div>
+      );
+    })}
+  </div>
+</div>
       </div>
 
       {/* Bookings & Complaints */}

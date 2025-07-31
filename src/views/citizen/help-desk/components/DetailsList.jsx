@@ -5,7 +5,7 @@ const DetailsList = ({ Icon, title, complaintData, fields }) => {
   return (
     <div className="space-y-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-        <Icon className="mr-2 text-blue-600 h-6 w-6" />
+        <Icon className="mr-2 text-brand-500 h-6 w-6" />
         {title}
         </h2>
         {fields.map((field) => (
@@ -17,7 +17,7 @@ const DetailsList = ({ Icon, title, complaintData, fields }) => {
                     <AttachmentCard 
                         fileUrl={complaintData.fileUrl}
                     />
-                    : (<p className="mt-1 text-gray-900 dark:text-white">{complaintData[field]}</p>)
+                    : (<p className="mt-1 text-gray-900 dark:text-white">{complaintData[field] || "N/A"}</p>)
                 }
                 
             </div>

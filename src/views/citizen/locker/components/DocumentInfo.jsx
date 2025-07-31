@@ -1,88 +1,190 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
-function formatBytes(bytes) {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
 
 export default function DocumentInfo() {
-  const [docs, setDocs] = useState([
-    {
-      id: 1,
-      name: "OfferLetter.pdf",
-      size: 120_000,
-      uploadedAt: new Date().toISOString(),
-      url: "#",
-    },
-    {
-      id: 2,
-      name: "AadharCard.png",
-      size: 540_320,
-      uploadedAt: new Date().toISOString(),
-      url: "#",
-    },
-  ]);
+  const MEDIA_API = process.env.REACT_APP_API_MEDIA_URL;
+  const LOCKER_API = process.env.REACT_APP_API_LOCKER_URL;
+  const USER_API = process.env.REACT_APP_API_UMS_URL;
+  // const LOCKER_API = "http://localhost:4000";
+
+  const token = localStorage.getItem("token");
+
+  const [docs, setDocs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const [openUpload, setOpenUpload] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [successMsg, setSuccessMsg] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedName, setSelectedName] = useState("");
 
   const [openUpdate, setOpenUpdate] = useState(false);
   const [editingDoc, setEditingDoc] = useState(null);
   const [editName, setEditName] = useState("");
   const [editFile, setEditFile] = useState(null);
 
+  const [userInfo, setUserInfo] = useState({
+    email: localStorage.getItem("email") || "",
+    username: localStorage.getItem("username") || "",
+    aadharNumber: 0,
+  });
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        setLoading(true);
+        const userRes = await axios.get(
+          `${USER_API}/api/auth/getUser/${userInfo.email}`,
+          {
+            headers: {
+              token,
+            },
+          }
+        );
+        const aadharNumber = userRes.data.data.aadharNumber;
+
+        const newUser = { ...userInfo, aadharNumber };
+        setUserInfo(newUser);
+
+        const docsRes = await axios.get(
+          `${LOCKER_API}/api/lock/listDocument/${aadharNumber}`,
+          {
+            headers: {
+              token,
+            },
+          }
+        );
+        setDocs(docsRes.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setErrorMsg("Failed to fetch user or documents");
+        setLoading(false);
+      }
+    };
+
+    if (userInfo.email) {
+      fetchAll();
+    }
+  }, []);
+
+  const refreshDocuments = async () => {
+    try {
+      const res = await axios.get(
+        `${LOCKER_API}/api/lock/listDocument/${userInfo.aadharNumber}`,
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+      setDocs(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to refresh documents");
+    }
+  };
+
+  const uploadFiles = async () => {
+    if (!selectedFile) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("name", selectedName);
+      formData.append("imageFile", selectedFile);
+
+      const mediaRes = await axios.post(
+        `${MEDIA_API}/api/images/upload`,
+        formData,
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+      const { name: fileName, path: filePath } = mediaRes.data.data;
+
+      await axios.post(
+        `${LOCKER_API}/api/lock/add`,
+        {
+          aadharNumber: userInfo.aadharNumber,
+          fileName,
+          filePath,
+        },
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+
+      setSuccessMsg("Document uploaded successfully");
+      setTimeout(() => setSuccessMsg(""), 3000);
+      closeUploadModal();
+      refreshDocuments();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Upload failed");
+    }
+  };
+
+  const downloadDoc = async (doc) => {
+    try {
+      const response = await fetch(doc.filePath);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.fileName || "document";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  };
+
+  const deleteDoc = async (fileId) => {
+    try {
+      await axios.delete(
+        `${LOCKER_API}/api/lock/delete/${userInfo.aadharNumber}/${fileId}`,
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+      refreshDocuments();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to delete document");
+    }
+  };
+
   const openUploadModal = () => {
-    setSelectedFiles([]);
+    setSelectedFile(null);
+    setSelectedName("");
     setOpenUpload(true);
   };
 
   const closeUploadModal = () => {
     setOpenUpload(false);
-    setSelectedFiles([]);
-  };
-
-  const onFileChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    // <-- fixed missing parenthesis here -->
-    setSelectedFiles(files.map((f) => ({ file: f, name: f.name })));
-  };
-
-  const uploadFiles = async () => {
-    if (!selectedFiles.length) return;
-
-    const newDocs = selectedFiles.map((f, idx) => ({
-      id: Date.now() + idx,
-      name: f.name || f.file.name,
-      size: f.file.size,
-      uploadedAt: new Date().toISOString(),
-      url: "#",
-    }));
-
-    setDocs((d) => [...newDocs, ...d]);
-    closeUploadModal();
-    setSuccessMsg("Successfully uploaded");
-    setTimeout(() => setSuccessMsg(""), 3000);
-  };
-
-  const downloadDoc = (doc) => {
-    window.alert(`Downloading ${doc.name}`);
-  };
-
-  const deleteDoc = (id) => {
-    setDocs((d) => d.filter((x) => x.id !== id));
+    setSelectedFile(null);
+    setSelectedName("");
   };
 
   const openUpdateModal = (id) => {
-    const doc = docs.find((x) => x.id === id);
-    if (!doc) return;
-    setEditingDoc(doc);
-    setEditName(doc.name);
-    setEditFile(null);
-    setOpenUpdate(true);
+    const doc = docs.find((d) => d.fileId === id);
+    if (doc) {
+      setEditingDoc(doc);
+      setEditName(doc.fileName);
+      setEditFile(null);
+      setOpenUpdate(true);
+    }
   };
 
   const closeUpdateModal = () => {
@@ -92,31 +194,60 @@ export default function DocumentInfo() {
     setEditFile(null);
   };
 
-  const saveUpdate = () => {
+  const saveUpdate = async () => {
     if (!editingDoc) return;
-    setDocs((prev) =>
-      prev.map((d) =>
-        d.id === editingDoc.id
-          ? {
-              ...d,
-              name: editName || d.name,
-              size: editFile ? editFile.size : d.size,
-              uploadedAt: editFile ? new Date().toISOString() : d.uploadedAt,
-            }
-          : d
-      )
-    );
-    closeUpdateModal();
-    setSuccessMsg("Document updated");
-    setTimeout(() => setSuccessMsg(""), 3000);
+
+    try {
+      let fileName = editName;
+      let filePath = editingDoc.filePath;
+
+      if (editFile) {
+        const updateForm = new FormData();
+        updateForm.append("name", editFile.name);
+        updateForm.append("imageFile", editFile);
+
+        const uploadRes = await axios.post(
+          `${MEDIA_API}/api/images/upload`,
+          updateForm,
+          {
+            headers: {
+              token,
+            },
+          }
+        );
+        fileName = uploadRes.data.data.name;
+        filePath = uploadRes.data.data.path;
+      }
+
+      await axios.put(
+        `${LOCKER_API}/api/lock/update`,
+        {
+          aadharNumber: userInfo.aadharNumber,
+          fileId: editingDoc.fileId,
+          fileName,
+          filePath,
+        },
+        {
+          headers: {
+            token,
+          },
+        }
+      );
+
+      setSuccessMsg("Document updated");
+      setTimeout(() => setSuccessMsg(""), 3000);
+      closeUpdateModal();
+      refreshDocuments();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Update failed");
+    }
   };
 
-  const changeSelectedName = (index, value) => {
-    setSelectedFiles((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], name: value };
-      return copy;
-    });
+  const onFileChange = (e) => {
+    const f = e.target.files?.[0] || null;
+    setSelectedFile(f);
+    setSelectedName(f?.name || "");
   };
 
   return (
@@ -126,12 +257,11 @@ export default function DocumentInfo() {
           <h1 className="text-2xl font-bold text-navy-700 dark:text-white">
             Documents
           </h1>
-
           <button
             onClick={openUploadModal}
-            className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
+            className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600"
           >
-            Upload Documents
+            Upload Document
           </button>
         </div>
 
@@ -140,63 +270,73 @@ export default function DocumentInfo() {
             {successMsg}
           </div>
         )}
+        {errorMsg && (
+          <div className="mb-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
+            {errorMsg}
+          </div>
+        )}
 
         <div className="overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl dark:bg-navy-800">
           <table className="min-w-full table-auto text-left">
             <thead className="text-xs uppercase text-gray-500 dark:text-gray-400">
               <tr className="border-b border-white/10">
                 <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Size</th>
                 <th className="px-6 py-4">Uploaded</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm text-navy-700 dark:text-white">
-              {docs.length === 0 && (
+              {loading ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={3}
+                    className="px-6 py-10 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              ) : docs.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={3}
                     className="px-6 py-10 text-center text-gray-500 dark:text-gray-400"
                   >
                     No documents found
                   </td>
                 </tr>
-              )}
-
-              {docs.map((doc) => (
-                <tr
-                  key={doc.id}
-                  className="border-b border-white/5 last:border-none"
-                >
-                  <td className="break-all px-6 py-4">{doc.name}</td>
-                  <td className="px-6 py-4">{formatBytes(doc.size)}</td>
-                  <td className="px-6 py-4">
-                    {new Date(doc.uploadedAt).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
+              ) : (
+                docs.map((doc) => (
+                  <tr
+                    key={doc.fileId}
+                    className="border-b border-white/5 last:border-none"
+                  >
+                    <td className="break-all px-6 py-4">{doc.fileName}</td>
+                    <td className="px-6 py-4">
+                      {new Date(doc.creationDate).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => downloadDoc(doc)}
-                        className="rounded-lg px-3 py-1 text-xs font-medium text-brand-500 hover:underline"
+                        className="mr-2 text-xs text-brand-500 hover:underline"
                       >
                         Download
                       </button>
                       <button
-                        onClick={() => openUpdateModal(doc.id)}
-                        className="rounded-lg px-3 py-1 text-xs font-medium text-yellow-500 hover:underline"
+                        onClick={() => openUpdateModal(doc.fileId)}
+                        className="mr-2 text-xs text-yellow-500 hover:underline"
                       >
                         Update
                       </button>
                       <button
-                        onClick={() => deleteDoc(doc.id)}
-                        className="rounded-lg px-3 py-1 text-xs font-medium text-red-500 hover:underline"
+                        onClick={() => deleteDoc(doc.fileId)}
+                        className="text-xs text-red-500 hover:underline"
                       >
                         Delete
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -204,52 +344,37 @@ export default function DocumentInfo() {
 
       {openUpload && (
         <div className="bg-black/40 fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800">
+          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl dark:bg-navy-800">
             <h2 className="text-xl font-semibold text-navy-700 dark:text-white">
-              Upload Documents
+              Upload Document
             </h2>
-
-            <div className="mt-4">
+            <div className="mt-4 space-y-3">
               <input
                 type="file"
-                multiple
                 onChange={onFileChange}
                 className="w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
               />
+              {selectedFile && (
+                <input
+                  type="text"
+                  value={selectedName}
+                  onChange={(e) => setSelectedName(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
+                  placeholder="Document Name"
+                />
+              )}
             </div>
-
-            {selectedFiles.length > 0 && (
-              <div className="mt-4 max-h-52 space-y-3 overflow-auto rounded-xl border border-white/10 p-3 text-sm text-gray-700 dark:text-gray-200">
-                {selectedFiles.map((sf, i) => (
-                  <div key={i} className="flex flex-col">
-                    <label className="mb-1 text-xs text-gray-500 dark:text-gray-400">
-                      {`Document ${i + 1}`}
-                    </label>
-                    <input
-                      type="text"
-                      value={sf.name}
-                      onChange={(e) => changeSelectedName(i, e.target.value)}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
-                    />
-                    <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Size: {formatBytes(sf.file.size)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={closeUploadModal}
-                className="rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
+                className="text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
               >
                 Cancel
               </button>
               <button
                 onClick={uploadFiles}
-                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:opacity-60"
-                disabled={!selectedFiles.length}
+                disabled={!selectedFile}
+                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60"
               >
                 Upload
               </button>
@@ -260,48 +385,33 @@ export default function DocumentInfo() {
 
       {openUpdate && editingDoc && (
         <div className="bg-black/40 fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 shadow-md backdrop-blur-xl dark:bg-navy-800">
+          <div className="w-full max-w-lg rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl dark:bg-navy-800">
             <h2 className="text-xl font-semibold text-navy-700 dark:text-white">
               Update Document
             </h2>
-
-            <div className="mt-4">
-              <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                Current Name
-              </label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
-              />
-            </div>
-
-            <div className="mt-4">
-              <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                Replace File (optional)
-              </label>
-              <input
-                type="file"
-                onChange={(e) => setEditFile(e.target.files?.[0] || null)}
-                className="w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
-              />
-              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Old size: {formatBytes(editingDoc.size)}
-                {editFile && <> → New size: {formatBytes(editFile.size)}</>}
-              </div>
-            </div>
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 dark:border-white/20 dark:bg-navy-700 dark:text-white"
+              placeholder="Document Name"
+            />
+            <input
+              type="file"
+              onChange={(e) => setEditFile(e.target.files?.[0] || null)}
+              className="mt-4 w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-600 dark:text-gray-200"
+            />
 
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={closeUpdateModal}
-                className="rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
+                className="text-sm font-semibold text-gray-600 hover:underline dark:text-gray-300"
               >
                 Cancel
               </button>
               <button
                 onClick={saveUpdate}
-                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
+                className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600"
               >
                 Save
               </button>

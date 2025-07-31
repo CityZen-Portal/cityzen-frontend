@@ -11,10 +11,8 @@ import {
   MdSort,
 } from "react-icons/md";
 
-const CitizenServiceRequests = ({ id }) => {
+const CitizenServiceRequests = () => {
   const [viewingDetails, setViewingDetails] = useState(null);
-  const [viewMode, setViewMode] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,11 +22,9 @@ const CitizenServiceRequests = ({ id }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/task/citizen/1234"
-        );
-        console.log(response.data.data.data);
-        setData(response.data.data.data );
+        const id=localStorage.getItem("id");
+        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/dto/${id}`);
+        setData(response.data.data.data);
       } catch (err) {
         console.error("Error fetching requests:", err);
       }
@@ -36,26 +32,8 @@ const CitizenServiceRequests = ({ id }) => {
     fetchData();
   }, []);
 
-  const filteredRequests = useMemo(() => {
-    let filtered = data.filter((req) => req.citizenId === id);
-    if (viewMode !== "all") {
-      filtered = filtered.filter((req) => req.status === viewMode);
-    }
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (req) =>
-          req.service.toLowerCase().includes(term) ||
-          req.date.toLowerCase().includes(term) ||
-          req.status.toLowerCase().includes(term) ||
-          (req.description && req.description.toLowerCase().includes(term))
-      );
-    }
-    return filtered;
-  }, [data, searchTerm, viewMode, id]);
-
   const sortedRequests = useMemo(() => {
-    return [...filteredRequests].sort((a, b) => {
+    return [...data].sort((a, b) => {
       const aVal = a[sortField];
       const bVal = b[sortField];
       if (sortField === "date") {
@@ -70,7 +48,7 @@ const CitizenServiceRequests = ({ id }) => {
       }
       return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
     });
-  }, [filteredRequests, sortField, sortDirection]);
+  }, [data, sortField, sortDirection]);
 
   const paginatedRequest = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -91,39 +69,6 @@ const CitizenServiceRequests = ({ id }) => {
 
   return (
     <div className="text-slate-800 dark:text-slate-100 rounded-2xl bg-white p-6 dark:bg-navy-800">
-      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="flex flex-wrap gap-2">
-          {["all", "pending", "completed"].map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 
-                ${
-                  viewMode === mode
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-100 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:bg-navy-700 dark:hover:bg-navy-600"
-                }`}
-            >
-              {mode === "all" && <MdOutlineAssignment />}
-              {mode === "pending" && <MdPendingActions />}
-              {mode === "completed" && <MdCheckCircleOutline />}
-              {mode.charAt(0).toUpperCase() + mode.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        <input
-          type="text"
-          placeholder="Search service, status, date..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full rounded-lg border bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-navy-600 dark:bg-navy-700 sm:w-72"
-        />
-      </div>
-
       <div className="overflow-x-auto rounded-xl">
         <table className="min-w-full border-collapse text-left text-sm">
           <thead className="text-slate-800 dark:text-slate-100 dark:bg-navy-700">
@@ -153,15 +98,15 @@ const CitizenServiceRequests = ({ id }) => {
           </thead>
           <tbody>
             {paginatedRequest.length > 0 ? (
-              paginatedRequest.map((request) => (
+              paginatedRequest.map((request,idx) => (
                 <tr
-                  key={request.id}
+                  key={idx}
                   className="hover:bg-slate-50 border-b bg-white transition-colors dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
                 >
                   <td className="text-slate-900 px-6 py-4 font-medium dark:text-white">
-                    {request.service}
+                    {request.serviceName}
                   </td>
-                  <td className="px-6 py-4">{request.date}</td>
+                  <td className="px-6 py-4">{request.requestedDate}</td>
                   <td className="px-6 py-4">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold 
@@ -171,8 +116,7 @@ const CitizenServiceRequests = ({ id }) => {
                             : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
                         }`}
                     >
-                      {request.status.charAt(0).toUpperCase() +
-                        request.status.slice(1)}
+                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -208,7 +152,7 @@ const CitizenServiceRequests = ({ id }) => {
           />
         </div>
       )}
-
+        
       <RequestDetails
         viewingDetails={viewingDetails}
         setViewingDetails={setViewingDetails}
