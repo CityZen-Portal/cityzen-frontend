@@ -47,13 +47,10 @@ function ManageServices() {
     e.preventDefault();
     setError("");
 
-    if (!formData.description) {
-      setError("Description is required.");
-      return;
-    }
+    const { category, serviceName, description } = formData;
 
-    if (!formData.category || !formData.serviceName) {
-      setError("Category and Service Name are required.");
+    if (!category || !serviceName || !description) {
+      setError("All fields marked * are required.");
       return;
     }
 
@@ -78,9 +75,9 @@ function ManageServices() {
       }
 
       const servicePayload = {
-        category: formData.category,
-        serviceName: formData.serviceName,
-        description: formData.description,
+        category,
+        serviceName,
+        description,
         imageName: uploadedImage.imageName,
         imagePath: uploadedImage.imagePath,
       };
@@ -103,7 +100,6 @@ function ManageServices() {
       resetForm();
     } catch (err) {
       console.error("Error saving service:", err);
-      setError("An error occurred while saving the service.");
       toast.error("Failed to save service. Please try again.");
     }
   };
@@ -128,174 +124,165 @@ function ManageServices() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(
-        `https://utility-booking-backend.onrender.com/api/service/delete/${id}`
-      );
+      await axios.delete(`https://utility-booking-backend.onrender.com/api/service/delete/${id}`);
       loadServices();
       toast.success("Service deleted successfully!");
     } catch (err) {
       console.error("Error deleting service:", err);
-      toast.error("Failed to delete service. Please try again.");
+      toast.error("Failed to delete service.");
     }
   };
 
-  const selectedSubServices =
-    Object.entries(categories).find(([key]) => key === formData.category)?.[1] || [];
-
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <h2 className="text-3xl font-extrabold mb-8 text-white">
-        {editServiceId ? "Edit Service" : "Add New Service"}
-      </h2>
+    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 px-6 py-10">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <h2 className="text-3xl font-bold text-center mb-10 text-gray-800 dark:text-white">
+          {editServiceId ? "Edit Service" : "Add New Service"}
+        </h2>
 
-      {error && (
-        <p className="mb-6 px-4 py-3 bg-red-100 text-red-700 rounded-lg border border-red-300">
-          {error}
-        </p>
-      )}
-
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 bg-white p-8 rounded-xl shadow-lg max-w-2xl mx-auto dark:bg-navy-800"
-        noValidate
-      >
-        <div>
-          <label className="block mb-2 font-semibold text-gray-700 ">
-            Select Category <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.category}
-            onChange={(e) =>
-              setFormData({ ...formData, category: e.target.value, serviceName: "" })
-            }
-            className="w-full border border-gray-300 dark:border-navy-700 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-            required
-          >
-            <option value="" disabled>
-              Choose Category
-            </option>
-            {Object.keys(categories).map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-2 font-semibold text-gray-700">
-            Service Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Enter Service Name"
-            value={formData.serviceName}
-            onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
-            className="w-full border border-gray-300 dark:border-navy-700 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-2 font-semibold text-gray-700">
-            Description <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            placeholder="Provide a detailed description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none transition resize-y min-h-[100px]"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-2 font-semibold text-gray-700">Upload Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                setFormData({ ...formData, image: file });
-                const reader = new FileReader();
-                reader.onloadend = () => setPreviewImage(reader.result);
-                reader.readAsDataURL(file);
-              }
-            }}
-            className="w-full"
-          />
-        </div>
-
-        {previewImage && (
-          <div className="mt-4 flex justify-center">
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-40 h-40 object-cover rounded-xl border border-gray-300 shadow-md transition-transform hover:scale-105"
-            />
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 text-red-600 bg-red-100 border border-red-300 rounded p-3">
+            {error}
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={!formData.category || !formData.serviceName || !formData.description}
-          className={`w-full mt-6 py-3 rounded-lg font-semibold text-white transition 
-            ${
-              formData.category && formData.serviceName && formData.description
-                ? "bg-navy-700 hover:bg-navy-800 cursor-pointer"
-                : "bg-navy-300 cursor-not-allowed"
-            }
-          `}
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-navy-800 shadow-lg rounded-xl p-8 space-y-6"
         >
-          {editServiceId ? "Update Service" : "Add Service"}
-        </button>
-      </form>
-
-      <h3 className="text-2xl font-extrabold mt-14 mb-8 text-white">
-        All Services
-      </h3>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {services.map((service) => (
-          <div
-            key={service.id}
-            className="bg-white rounded-2xl dark:bg-navy-800 shadow-lg p-6 flex flex-col justify-between hover:shadow-xl transition"
-          >
-            <div>
-              <p className="text-sm text-gray-500 mb-1">
-                <span className="font-semibold">Category:</span> {service.category}
-              </p>
-              <h4 className="text-lg font-bold text-blue-700 mb-2">{service.serviceName}</h4>
-              <p className="text-gray-700 mb-4 line-clamp-4">{service.description}</p>
-            </div>
-
-            {service.imagePath && (
-              <img
-                src={service.imagePath}
-                alt={service.imageName}
-                className="w-full h-40 object-cover rounded-lg shadow-sm mb-4"
-              />
-            )}
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleEdit(service)}
-                className="flex-1 bg-navy-700 text-white font-semibold py-2 rounded-lg hover:bg-navy-300 transition"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(service.id)}
-                className="flex-1 bg-red-600 text-white font-semibold py-2 rounded-lg hover:bg-red-700 transition"
-              >
-                Delete
-              </button>
-            </div>
+          <div>
+            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value, serviceName: "" })}
+              className="w-full p-3 border border-gray-300 dark:border-navy-600 rounded-md dark:bg-navy-700 dark:text-white"
+              required
+            >
+              <option value="">Select a Category</option>
+              {Object.keys(categories).map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
-        ))}
-      </div>
 
+          <div>
+            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+              Service Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.serviceName}
+              onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
+              className="w-full p-3 border border-gray-300 dark:border-navy-600 rounded-md dark:bg-navy-700 dark:text-white"
+              placeholder="Enter service name"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+              Description <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full p-3 border border-gray-300 dark:border-navy-600 rounded-md dark:bg-navy-700 dark:text-white min-h-[100px]"
+              placeholder="Enter a brief description"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">Upload Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setFormData({ ...formData, image: file });
+                  const reader = new FileReader();
+                  reader.onloadend = () => setPreviewImage(reader.result);
+                  reader.readAsDataURL(file);
+                }
+              }}
+              className="w-full"
+            />
+          </div>
+
+          {previewImage && (
+            <div className="flex justify-center">
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="w-40 h-40 object-cover rounded-xl border mt-4 shadow-md"
+              />
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className={`w-full py-3 rounded-lg font-bold text-white ${
+              formData.category && formData.serviceName && formData.description
+                ? "bg-navy-700 hover:bg-navy-800"
+                : "bg-navy-300 cursor-not-allowed"
+            }`}
+            disabled={!formData.category || !formData.serviceName || !formData.description}
+          >
+            {editServiceId ? "Update Service" : "Add Service"}
+          </button>
+        </form>
+
+        {/* Services List */}
+        <h3 className="text-2xl font-bold mt-12 mb-6 text-gray-800 dark:text-white text-center">
+          All Services
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service) => (
+            <div
+              key={service.id}
+              className="bg-white dark:bg-navy-800 p-6 rounded-xl shadow-md hover:shadow-xl transition"
+            >
+              {service.imagePath && (
+                <img
+                  src={service.imagePath}
+                  alt={service.imageName}
+                  className="w-full h-40 object-cover rounded-md mb-4"
+                />
+              )}
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                <strong>Category:</strong> {service.category}
+              </p>
+              <h4 className="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-2">
+                {service.serviceName}
+              </h4>
+              <p className="text-gray-700 dark:text-gray-200 line-clamp-4 mb-4">{service.description}</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(service)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(service.id)}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-md"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
