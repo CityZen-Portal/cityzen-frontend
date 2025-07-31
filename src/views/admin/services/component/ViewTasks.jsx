@@ -268,14 +268,14 @@ function ViewTasks() {
                 onChange={handleInputChange}
                 className="border px-4 py-2.5 rounded-lg w-full bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700"
               />
-              <textarea
+              {/* <textarea
                 name="description"
                 placeholder="Task Description"
                 value={newTask.description}
                 onChange={handleInputChange}
                 className="border px-4 py-2.5 rounded-lg w-full bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700"
                 rows={3}
-              />
+              /> */}
             </div>
 
             <div className="flex justify-end gap-4 mt-8">
