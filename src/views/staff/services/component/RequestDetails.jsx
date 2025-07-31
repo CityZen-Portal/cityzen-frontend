@@ -5,20 +5,20 @@ import { MdOutlineAssignment, MdCheckCircleOutline, MdPendingActions, MdPhotoCam
 import { Link } from 'react-router-dom';
 const RequestDetails = ({ viewingDetails, setViewingDetails, selectedRequest }) => {
   const [task, setTask] = useState(null);
-useEffect(() => {
-  if (!viewingDetails) return;
-  const fetchTask = async () => {
-    try {
-      const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/${viewingDetails.taskId}`);
-      console.log("API response:", response.data); // See full structure
-      setTask(response.data.data); // Assign task
-      console.log("Task assigned:", response.data.data); // Log task object
-    } catch (err) {
-      console.error("Error fetching task:", err);
-    }
-  };
-  fetchTask();
-}, [viewingDetails?.taskId]);
+  useEffect(() => {
+    if (!viewingDetails) return;
+    const fetchTask = async () => {
+      try {
+        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/${viewingDetails.taskId}`);
+        console.log("API response:", response.data);
+        setTask(response.data.data);
+        console.log("Task assigned:", response.data.data);
+      } catch (err) {
+        console.error("Error fetching task:", err);
+      }
+    };
+    fetchTask();
+  }, [viewingDetails?.taskId]);
 
   if (!viewingDetails) return null;
 
@@ -77,11 +77,59 @@ useEffect(() => {
                   </span>
                   {viewingDetails.serviceName}
                 </p>
+                <p className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Address:
+                  </span>
+                  <span className="font-medium dark:text-white space-y-1 flex flex-col">
+                    {viewingDetails.address.split(',').map((line, index) => (
+                      <span key={index}>{line.trim()}</span>
+                    ))}
+                  </span>
+                </p>
+
+
                 <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                   <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
-                    Request Date:
+                    City:
                   </span>
-                   {task && task.completion_date ? formatDate(task.completion_date) : "Not Completed Yet"}
+                  {viewingDetails.city}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Requested Time:
+                  </span>
+                  {viewingDetails.time}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Postcode:
+                  </span>
+                  {viewingDetails.postcode}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Description:
+                  </span>
+                  {viewingDetails.description}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Phone Number:
+                  </span>
+                  {viewingDetails.phone}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Requested Date:
+                  </span>
+                  {viewingDetails.requested_Date}
+                </p>
+                <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
+                    Completion Date And Time:
+                  </span>
+                  {task && task.completion_date ? formatDate(task.completion_date) : "Not Completed Yet"}
 
                 </p>
 
@@ -89,42 +137,46 @@ useEffect(() => {
               </div>
 
               {viewingDetails.status === "completed" && (
-                <div className="mt-4 border-t border-gray-200 pt-2 dark:border-navy-700">
+                <div className="w-full sm:w-[600px] md:w-[700px] lg:w-[800px] mx-auto mt-4 border-t border-gray-200 pt-2 dark:border-navy-700">
                   <div className="mb-4 flex items-center gap-2">
                     <MdCheckCircleOutline className="h-5 w-5 text-green-500" />
-                    <p className="font-bold text-navy-700 dark:text-white">
-                      Completion Details
-                    </p>
+                    <p className="font-bold text-navy-700 dark:text-white">Completion Details</p>
                   </div>
-                  <div className="space-y-3">
-                    <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+
+                  <div className="space-y-3 text-sm sm:text-base">
+                    <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-gray-700 dark:text-gray-300">
                       <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                         Completed Date:
                       </span>
-                      {viewingDetails.completedDate}
+                      <span className="break-words">{viewingDetails.completedDate}</span>
                     </p>
-                    <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+
+                    <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-gray-700 dark:text-gray-300">
                       <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                         Staff Member:
                       </span>
-                      {viewingDetails.staffName}
+                      <span className="break-words">{viewingDetails.staffName}</span>
                     </p>
-                    <p className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+
+                    <p className="flex flex-col sm:flex-row gap-1 sm:gap-2 text-gray-700 dark:text-gray-300">
                       <span className="min-w-[120px] font-medium text-navy-700 dark:text-white">
                         Notes:
                       </span>
-                      {viewingDetails.suggestion || "None"}
+                      <span className="whitespace-pre-wrap break-words">{viewingDetails.suggestion || "None"}</span>
                     </p>
-                    <div className="flex justify-center">
+
+                    <div className="flex justify-center pt-2">
                       <Link
                         to="/Services/feedform"
-                        className=" rounded-xl bg-red-400 px-5 py-[6px] text-white shadow-md transition-all duration-200 hover:bg-red-600 dark:bg-red-400 dark:text-white dark:hover:bg-red-600"
+                        className="rounded-xl bg-red-500 px-6 py-2 text-white shadow-md transition duration-200 hover:bg-red-600 dark:bg-red-400 dark:text-white dark:hover:bg-red-600"
                       >
-                        Give FeedBack
+                        Give Feedback
                       </Link>
                     </div>
                   </div>
                 </div>
+
+
               )}
             </div>
 

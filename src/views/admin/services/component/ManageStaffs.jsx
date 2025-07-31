@@ -17,9 +17,9 @@ import "react-toastify/dist/ReactToastify.css";
 const initialNewStaffState = {
   fullName: "",
   department: "",
+  designation: "",
   contactNumber: "",
   emailAddress: "",
-  password: "",
   fullAddress: "",
   dob: "",
   aadharNumber: "",
@@ -42,6 +42,7 @@ function ManageStaffs() {
         const response = await axios.get(
           "https://utility-booking-backend.onrender.com/api/service/all"
         );
+       
         const serviceList = response.data.data;
         const extractedDepartments = serviceList.map((item) => item.serviceName);
         setDepartments(extractedDepartments);
@@ -74,9 +75,9 @@ function ManageStaffs() {
       setNewStaff({
         fullName: staff.fullName || "",
         department: staff.department || "",
+        designation: staff.designation || "",
         contactNumber: staff.contactNumber || "",
         emailAddress: staff.emailAddress || "",
-        password: staff.password || "",
         fullAddress: staff.fullAddress || "",
         dob: staff.dob || "",
         aadharNumber: staff.aadharNumber || "",
@@ -107,37 +108,62 @@ function ManageStaffs() {
   const isValidAadhar = (number) =>
     /^\d{12}$/.test(number);
 
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const hasBirthdayPassed =
+      today.getMonth() > birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() >= birthDate.getDate());
+    if (!hasBirthdayPassed) {
+      age--;
+    }
+    return age;
+  };
+
   const handleAddOrUpdateStaff = async () => {
     const requiredFields = [
       "fullName",
       "department",
+      "designation",
       "contactNumber",
       "emailAddress",
-      "password",
       "fullAddress",
       "dob",
       "aadharNumber",
     ];
     const missing = requiredFields.filter((field) => !newStaff[field]);
-    if (missing.length) {
-      toast.error(`Please fill all fields: ${missing.join(", ")}`);
-      return;
-    }
+    // if (missing.length) {
+    //   toast.error(`Please fill all fields: ${missing.join(", ")}`);
+    //   return;
+    // }
 
-    if (!isValidEmail(newStaff.emailAddress)) {
-      toast.error("Enter a valid email address.");
-      return;
-    }
+    // if (!isValidEmail(newStaff.emailAddress)) {
+    //   toast.error("Enter a valid email address.");
+    //   return;
+    // }
 
-    if (!isValidPhone(newStaff.contactNumber)) {
-      toast.error("Contact number must be 10 digits.");
-      return;
-    }
+    // if (!isValidPhone(newStaff.contactNumber)) {
+    //   toast.error("Contact number must be 10 digits.");
+    //   return;
+    // }
 
-    if (!isValidAadhar(newStaff.aadharNumber)) {
-      toast.error("Aadhar number must be 12 digits.");
-      return;
-    }
+    // if (!isValidAadhar(newStaff.aadharNumber)) {
+    //   toast.error("Aadhar number must be 12 digits.");
+    //   return;
+    // }
+
+    // const age = calculateAge(newStaff.dob);
+    // if (age < 18 || age > 60) {
+    //   toast.error("Staff age must be between 18 and 60 years.");
+    //   return;
+    // }
+
+    // if (new Date(newStaff.dob) > new Date()) {
+    //   toast.error("DOB cannot be a future date.");
+    //   return;
+    // }
 
     try {
       if (editId) {
@@ -156,6 +182,7 @@ function ManageStaffs() {
           "https://utility-booking-backend.onrender.com/api/staff/add",
           newStaff
         );
+         console.log(response);
         const createdStaff = response.data?.data;
         setStaffs((prev) => [...prev, createdStaff]);
         toast.success("Staff added successfully!");
@@ -185,19 +212,13 @@ function ManageStaffs() {
       setDeleteId(null);
     }
   };
-
-  const calculateAge = (dob) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const hasBirthdayPassed =
-      today.getMonth() > birthDate.getMonth() ||
-      (today.getMonth() === birthDate.getMonth() &&
-        today.getDate() >= birthDate.getDate());
-    if (!hasBirthdayPassed) {
-      age--;
+    const resetPasswordHandler = async (id) => {
+    try {
+      await axios.post(`https://utility-booking-backend.onrender.com/api/staff/${id}/reset-password`);
+      toast.success("Password reset link sent.");
+    } catch {
+      toast.error("Failed to reset password.");
     }
-    return age;
   };
 
   return (
@@ -264,6 +285,9 @@ function ManageStaffs() {
                           <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
                             {staff.department}
                           </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {staff.designation}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -276,16 +300,29 @@ function ManageStaffs() {
                         <PhoneIcon className="h-5 w-5 text-gray-400" />
                         <span>{staff.contactNumber}</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <MapPinIcon className="h-5 w-5 text-gray-400" />
-                        <span>{staff.fullAddress}</span>
-                      </div>
+                <div className="flex items-start gap-2 w-full">
+  <div className="pt-1">
+    <MapPinIcon className="h-5 w-5 text-gray-400" />
+  </div>
+  <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-words w-full overflow-hidden">
+    {staff.fullAddress}
+  </div>
+</div>
+
+
+
                       <div className="flex items-center gap-3">
                         <CalendarIcon className="h-5 w-5 text-gray-400" />
                         <span>Age: {calculateAge(staff.dob)}</span>
                       </div>
                     </div>
                   </div>
+                      <button
+                        onClick={() => resetPasswordHandler(staff.id)}
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        Reset Password
+                      </button>
                   <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
                     <button
                       onClick={() => handleOpen(staff)}
@@ -300,6 +337,18 @@ function ManageStaffs() {
                       <TrashIcon className="h-5 w-5" />
                     </button>
                   </div>
+                   <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                      Status:{" "}
+                      <span
+                        className={
+                          staff.status === "active"
+                            ? "text-green-600"
+                            : "text-red-500"
+                        }
+                      >
+                        {staff.status === "active" ? "Active" : "Inactive"}
+                      </span>
+                    </div>
                 </div>
               ))}
         </div>
@@ -319,12 +368,19 @@ function ManageStaffs() {
                   <option key={dep} value={dep}>{dep}</option>
                 ))}
               </select>
+              <input name="designation" placeholder="Designation" value={newStaff.designation} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="contactNumber" placeholder="Contact Number" value={newStaff.contactNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="aadharNumber" placeholder="Aadhaar Number" value={newStaff.aadharNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="dob" type="date" value={newStaff.dob} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="emailAddress" placeholder="Email Address" value={newStaff.emailAddress} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
-              <input name="password" type="password" placeholder="Password" value={newStaff.password} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
-              <input name="fullAddress" placeholder="Full Address" value={newStaff.fullAddress} onChange={handleInputChange} className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              <textarea
+  name="fullAddress"
+  placeholder="Full Address"
+  value={newStaff.fullAddress}
+  onChange={handleInputChange}
+  rows={3}
+  className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white resize-none"
+/>
             </div>
             <div className="mt-8 flex justify-end gap-4">
               <button onClick={handleClose} className="rounded-lg border px-5 py-2.5 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700">Cancel</button>

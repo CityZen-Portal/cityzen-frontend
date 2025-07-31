@@ -36,12 +36,14 @@ const AssignStaff = () => {
   const citizenId = localStorage.getItem("id")
 
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  const UTILITY_URL = process.env.REACT_APP_API_UTILITY_URL;
   
   const { id } = useParams();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(false);
   const [complaint, setComplaint] = useState({});
+  const [staff, setStaff] = useState([]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -109,7 +111,28 @@ const AssignStaff = () => {
           console.log(complaint.id);
           setLoading(false);
         });
-  }, [id, complaint.id, token, email, citizenId])
+      
+    setLoading(true)
+
+    axios.get(`${UTILITY_URL}/api/staff/all`)
+    .then(res => {
+        console.log('Response:', res.data.data.data);
+        const data = res.data.data.data
+        setStaff(data)
+      })
+      .catch(err => {
+        toast.error('Server Error!Unable to Fetch Staff Data', {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored'
+        });
+        console.error('Error:', err.response?.data || err.message);
+      })
+      .finally(() => {
+        console.log(complaint.id);
+        setLoading(false);
+      });
+  }, [id, complaint.id, token, email, citizenId, assignedDepartment])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -247,8 +270,8 @@ const AssignStaff = () => {
                             className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white"
                           >
                             <option value="" disabled>-- Select staff --</option>
-                            {staffList.map((staff) => (
-                              <option key={staff.id} value={staff.id}>{staff.name}</option>
+                            {staff.map((staff) => (
+                              <option key={staff.emailAddress} value={staff.emailAddress}>{staff.fullName}</option>
                             ))}
                           </select>
                         </div>

@@ -23,6 +23,8 @@ function ViewTasks() {
   const [newTask, setNewTask] = useState(initialNewTaskState);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [selectedBookingData, setSelectedBookingData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchRequest = async () => {
@@ -38,6 +40,15 @@ function ViewTasks() {
     };
     fetchRequest();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [bookingRequests]);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentRequests = bookingRequests.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(bookingRequests.length / itemsPerPage);
 
   const handleOpen = (task = null) => {
     setSelectedBooking("");
@@ -159,40 +170,68 @@ function ViewTasks() {
           {bookingRequests.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-300">No booking requests found.</p>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-10 px-4">
-              {bookingRequests.map((req) => (
-                <div
-                  key={req.id}
-                  className="bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-2xl rounded-3xl
-                    p-6 md:p-8 border-2 border-blue-200 dark:border-gray-700 hover:shadow-2xl hover:border-pink-300
+            <>
+              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
+                {currentRequests.map((req) => (
+                  <div
+                    key={req.id}
+                    className="bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-2xl rounded-3xl
+                    md:p-8 border-2 border-blue-200 dark:border-gray-700 hover:shadow-2xl hover:border-pink-300
                     transition duration-300 min-h-[260px] w-full md:max-w-[420px] flex flex-col justify-between"
-                >
-                  <h4 className="text-base md:text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">
-                    Requested by: <span className="font-semibold">{req.name}</span>
-                  </h4>
-
-                  <div className="flex items-center text-sm md:text-base text-gray-800 dark:text-gray-200 mb-2">
-                    <span className="mr-2 text-blue-400 text-lg md:text-xl">📅</span>
-                    <span>{req.date}</span>
-                    <span className="mx-2 text-pink-400 text-lg md:text-xl">⏰</span>
-                    <span>{req.time}</span>
-                  </div>
-
-                  <div className="flex items-start text-sm md:text-base text-gray-700 dark:text-gray-300 mb-2">
-                    <span className="mr-2 pt-1 text-red-400 text-lg md:text-xl">📍</span>
-                    <div className="whitespace-pre-line break-words font-medium max-h-[96px] overflow-auto custom-scrollbar">
-                      {req.address}
+                  >
+                    <h4 className="text-base md:text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">
+                      Requested by: <span className="font-semibold">{req.name}</span>
+                    </h4>
+                    <div className="flex items-center text-sm md:text-base text-gray-800 dark:text-gray-200 mb-2">
+                      <span className="mr-2 text-blue-400 text-lg md:text-xl">📅</span>
+                      <span>{req.date}</span>
+                      <span className="mx-2 text-pink-400 text-lg md:text-xl">⏰</span>
+                      <span>{req.time}</span>
                     </div>
+                    <div className="flex items-start text-sm md:text-base text-gray-700 dark:text-gray-300 mb-2">
+                      <span className="mr-2 pt-1 text-red-400 text-lg md:text-xl">📍</span>
+                      <div className="whitespace-pre-line break-words font-medium max-h-[96px] overflow-auto custom-scrollbar">
+                        {req.address}
+                      </div>
+                    </div>
+                    {req.note && (
+                      <p className="mt-2 text-xs md:text-sm italic text-gray-500 dark:text-gray-400">
+                        {req.note}
+                      </p>
+                    )}
                   </div>
-
-                  {req.note && (
-                    <p className="mt-2 text-xs md:text-sm italic text-gray-500 dark:text-gray-400">
-                      {req.note}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <div className="flex justify-center items-center gap-2 mt-4">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-sm rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPage(index + 1)}
+                    className={`px-3 py-1 rounded text-sm ${
+                      currentPage === index + 1
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-600"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-sm rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -203,7 +242,6 @@ function ViewTasks() {
             <h3 className="text-2xl font-semibold mb-6 text-center text-blue-600 dark:text-blue-300">
               {currentTask ? "Edit Task" : "Assign a New Task"}
             </h3>
-
             {!currentTask && bookingRequests.length > 0 && (
               <div className="mb-4">
                 <label className="block mb-1 font-medium dark:text-gray-300">Select Booking Request:</label>
@@ -221,7 +259,6 @@ function ViewTasks() {
                 </select>
               </div>
             )}
-
             <div className="grid gap-5">
               <input
                 type="text"
@@ -268,16 +305,7 @@ function ViewTasks() {
                 onChange={handleInputChange}
                 className="border px-4 py-2.5 rounded-lg w-full bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700"
               />
-              <textarea
-                name="description"
-                placeholder="Task Description"
-                value={newTask.description}
-                onChange={handleInputChange}
-                className="border px-4 py-2.5 rounded-lg w-full bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700"
-                rows={3}
-              />
             </div>
-
             <div className="flex justify-end gap-4 mt-8">
               <button
                 onClick={handleClose}
