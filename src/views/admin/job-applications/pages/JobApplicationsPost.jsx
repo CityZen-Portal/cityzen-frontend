@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  Plus, FilePen, Briefcase, MapPin, Calendar,
-  Building2, ToggleLeft, ToggleRight, Trash2, Filter
+  Plus, FilePen, Briefcase, MapPin, Calendar, Users,
+  Building2, ToggleLeft, ToggleRight, Trash2, Filter,
+  Heart, Award, Clock, Search
 } from 'lucide-react';
+import JobFormPages from './JobFormPages'; // Import the JobFormPages component
 
-const AdminJobManager = () => {
-  const navigate = useNavigate();
+const JobApplicationsPost = () => {
   const [jobs, setJobs] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jobToDelete, setJobToDelete] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'active', 'inactive'
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [selectedJobType, setSelectedJobType] = useState('municipal');
 
-  // Load jobs from localStorage
+  // Load jobs from localStorage or initialize with sample data
   const loadJobs = useCallback(() => {
     const savedJobs = localStorage.getItem('jobs');
     if (savedJobs) {
@@ -24,36 +27,53 @@ const AdminJobManager = () => {
         setJobs([]);
       }
     } else {
-      // Initialize with sample data if no jobs exist
       const sampleJobs = [
         {
           id: "1",
-          title: "Junior Engineer - Public Works",
-          description: "The Municipal Corporation invites applications for the position of Junior Engineer...",
-          department: "Public Works",
-          location: "Coimbatore Municipal Corporation",
+          title: "Senior Civil Engineer",
+          description: "Lead infrastructure development projects and oversee construction activities across the municipal corporation. Responsible for planning, designing, and supervising major public works projects.",
+          department: "Public Works Department",
+          location: "Coimbatore Municipal Corporation HQ",
           lastDate: "2025-08-15",
-          requirements: "Bachelor's degree in Civil Engineering...",
+          requirements: "Bachelor's degree in Civil Engineering with 5+ years experience",
+          salary: "₹45,000 - ₹65,000 per month",
+          jobType: "municipal",
           isActive: true
         },
         {
           id: "2",
-          title: "Health Inspector",
-          description: "The Municipal Corporation seeks a qualified Health Inspector...",
-          department: "Health Department",
-          location: "Coimbatore Municipal Corporation",
+          title: "Ward Health Volunteer",
+          description: "Support community health initiatives in Ward 15. Assist in health awareness campaigns, vaccination drives, and basic health screening programs for residents.",
+          department: "Health & Welfare",
+          location: "Ward 15, R.S. Puram",
           lastDate: "2025-08-20",
-          requirements: "Bachelor's degree in Public Health...",
+          requirements: "12th pass with basic health knowledge, willingness to serve community",
+          compensation: "₹5,000 monthly allowance + certificates",
+          jobType: "volunteer",
           isActive: true
         },
         {
           id: "3",
           title: "Assistant Town Planner",
-          description: "The Municipal Corporation invites applications for Assistant Town Planner...",
+          description: "Assist in urban planning activities, prepare development plans, and coordinate with various departments for municipal development projects.",
           department: "Urban Planning",
           location: "Coimbatore Municipal Corporation",
+          lastDate: "2025-08-25",
+          requirements: "Master's degree in Urban Planning or related field",
+          salary: "₹35,000 - ₹50,000 per month",
+          jobType: "municipal",
+          isActive: true
+        },
+        {
+          id: "4",
+          title: "Community Garden Volunteer",
+          description: "Help maintain community gardens in Ward 8, organize gardening workshops, and promote sustainable urban farming among residents.",
+          department: "Environment & Parks",
+          location: "Ward 8, Gandhipuram",
           lastDate: "2025-07-30",
-          requirements: "Master's degree in Urban Planning...",
+          requirements: "Interest in gardening, basic knowledge of plants, community service mindset",
+          compensation: "Certificate of appreciation + skill development",
+          jobType: "volunteer",
           isActive: false
         }
       ];
@@ -63,45 +83,58 @@ const AdminJobManager = () => {
     }
   }, []);
 
-  // Load jobs on component mount and when returning from form
   useEffect(() => {
     loadJobs();
   }, [loadJobs]);
 
-  // Also reload jobs when the component becomes visible (e.g., when returning from form)
-  useEffect(() => {
-    const handleFocus = () => {
-      loadJobs();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [loadJobs]);
-
-  // Sort jobs: Active jobs first, then inactive jobs
+  // Sort jobs: Active first, then by job type, then alphabetically
   const sortJobs = (jobsArray) => {
     return [...jobsArray].sort((a, b) => {
-      // First sort by active status (active first)
       if (a.isActive !== b.isActive) {
         return a.isActive ? -1 : 1;
       }
-      // Then sort by title alphabetically for jobs with same status
+      if (a.jobType !== b.jobType) {
+        return a.jobType === 'municipal' ? -1 : 1;
+      }
       return a.title.localeCompare(b.title);
     });
   };
 
-  // Filter jobs based on active filter
+  // Filter jobs based on active filter and search term
   const getFilteredJobs = useCallback(() => {
+    let filtered = jobs;
+
+    // Apply type filter
     switch (activeFilter) {
       case 'active':
-        return jobs.filter(job => job.isActive);
+        filtered = jobs.filter(job => job.isActive);
+        break;
       case 'inactive':
-        return jobs.filter(job => !job.isActive);
+        filtered = jobs.filter(job => !job.isActive);
+        break;
+      case 'municipal':
+        filtered = jobs.filter(job => job.jobType === 'municipal');
+        break;
+      case 'volunteer':
+        filtered = jobs.filter(job => job.jobType === 'volunteer');
+        break;
       case 'all':
       default:
-        return jobs;
+        filtered = jobs;
+        break;
     }
-  }, [jobs, activeFilter]);
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(job =>
+        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.location.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [jobs, activeFilter, searchTerm]);
 
   const toggleJobStatus = useCallback((id) => {
     const updatedJobs = jobs.map(job => 
@@ -113,19 +146,15 @@ const AdminJobManager = () => {
   }, [jobs]);
 
   const handleEdit = useCallback((id) => {
-    console.log('Editing job with id:', id);
-    navigate(`/admin/job-applications/edit/${id}`);
-  }, [navigate]);
+    // Edit functionality can be implemented here
+    console.log('Edit job:', id);
+  }, []);
 
-  const handleAddJob = useCallback(() => {
-    navigate('/admin/job-applications/add');
-  }, [navigate]);
+  const handleAddJob = useCallback((jobType) => {
+    setSelectedJobType(jobType);
+    setShowJobForm(true);
+  }, []);
 
-  const handleViewApplicants = useCallback((id) => {
-    navigate(`/admin/job-applications/applicants/${id}`);
-  }, [navigate]);
-
-  // Delete job functionality
   const handleDeleteClick = useCallback((job) => {
     setJobToDelete(job);
     setShowDeleteModal(true);
@@ -147,44 +176,68 @@ const AdminJobManager = () => {
     setJobToDelete(null);
   }, []);
 
-  // Filter change handler
-  const handleFilterChange = useCallback((filter) => {
-    setActiveFilter(filter);
-  }, []);
+  // Handle job form submission
+  const handleJobFormSubmit = useCallback((jobData) => {
+    const newJob = {
+      id: Date.now().toString(),
+      ...jobData,
+      isActive: true
+    };
+    
+    const updatedJobs = [...jobs, newJob];
+    const sortedJobs = sortJobs(updatedJobs);
+    setJobs(sortedJobs);
+    localStorage.setItem('jobs', JSON.stringify(sortedJobs));
+    setShowJobForm(false);
+  }, [jobs]);
 
   // Get job counts
-  const activeJobs = jobs.filter(job => job.isActive);
-  const inactiveJobs = jobs.filter(job => !job.isActive);
+  const allJobs = jobs.length;
+  const activeJobs = jobs.filter(job => job.isActive).length;
+  const inactiveJobs = jobs.filter(job => !job.isActive).length;
+  const municipalJobs = jobs.filter(job => job.jobType === 'municipal').length;
+  const volunteerJobs = jobs.filter(job => job.jobType === 'volunteer').length;
   const filteredJobs = getFilteredJobs();
 
+  if (showJobForm) {
+    return (
+      <JobFormPages 
+        jobType={selectedJobType}
+        onSubmit={handleJobFormSubmit}
+        onCancel={() => setShowJobForm(false)}
+      />
+    );
+  }
+
   return (
-    <div className="bg-gray-50 dark:bg-navy-900 p-4 rounded-xl mb-6 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-[#334155] rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                 <Trash2 className="text-red-600 dark:text-red-400" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">Delete Job</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Job Posting</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone</p>
               </div>
             </div>
             <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Are you sure you want to delete "<strong>{jobToDelete?.title}</strong>"? This will permanently remove the job posting and all associated data.
+              Are you sure you want to delete "<strong>{jobToDelete?.title}</strong>"? 
+              This will permanently remove the job posting.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={confirmDelete}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors font-medium"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl transition-colors font-medium"
               >
                 Delete Job
               </button>
               <button
                 onClick={cancelDelete}
-                className="flex-1 bg-gray-200 dark:bg-[#475569] hover:bg-gray-300 dark:hover:bg-[#64748b] text-gray-900 dark:text-gray-200 py-2 px-4 rounded-lg transition-colors font-medium"
+                className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-3 px-4 rounded-xl transition-colors font-medium"
               >
                 Cancel
               </button>
@@ -193,20 +246,30 @@ const AdminJobManager = () => {
         </div>
       )}
 
-      <div className="bg-white dark:bg-[#334155] border-b border-gray-200 dark:border-[#475569]">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Job Applications</h1>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your job postings</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Job Management</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">Manage municipal and volunteer job postings</p>
             </div>
-            <button
-              onClick={handleAddJob}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium shadow-lg"
-            >
-              <Plus size={20} />
-              Add Job
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => handleAddJob('municipal')}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
+              >
+                <Building2 size={20} />
+                Add Municipal Job
+              </button>
+              <button
+                onClick={() => handleAddJob('volunteer')}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
+              >
+                <Heart size={20} />
+                Add Volunteer Job
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -214,208 +277,244 @@ const AdminJobManager = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {jobs.length === 0 ? (
           <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center bg-white dark:bg-[#334155] rounded-2xl border border-gray-200 dark:border-[#475569] p-12 max-w-md">
-              <div className="w-20 h-20 bg-gray-100 dark:bg-[#475569] rounded-full flex items-center justify-center mx-auto mb-6">
-                <Briefcase className="text-gray-500 dark:text-gray-400" size={32} />
+            <div className="text-center bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-12 max-w-lg shadow-lg">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Briefcase className="text-white" size={40} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-3">No jobs posted yet</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">Start by creating your first job posting.</p>
-              <button
-                onClick={handleAddJob}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-all duration-200 font-medium inline-flex items-center gap-2"
-              >
-                <Plus size={20} />
-                Create First Job
-              </button>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">No Job Postings Yet</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                Start by creating your first municipal or volunteer job posting to connect with qualified candidates.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => handleAddJob('municipal')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium inline-flex items-center gap-2"
+                >
+                  <Building2 size={20} />
+                  Create Municipal Job
+                </button>
+                <button
+                  onClick={() => handleAddJob('volunteer')}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium inline-flex items-center gap-2"
+                >
+                  <Heart size={20} />
+                  Create Volunteer Job
+                </button>
+              </div>
             </div>
           </div>
         ) : (
           <div>
-            {/* Filter Tabs and Job Statistics */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-              {/* Filter Tabs */}
-              <div className="flex items-center gap-2 bg-white dark:bg-[#334155] p-1 rounded-lg border border-gray-200 dark:border-[#475569]">
-                <button
-                  onClick={() => handleFilterChange('all')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeFilter === 'all'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#475569]'
-                  }`}
-                >
-                  All Jobs ({jobs.length})
-                </button>
-                <button
-                  onClick={() => handleFilterChange('active')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeFilter === 'active'
-                      ? 'bg-green-600 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#475569]'
-                  }`}
-                >
-                  Active ({activeJobs.length})
-                </button>
-                <button
-                  onClick={() => handleFilterChange('inactive')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeFilter === 'inactive'
-                      ? 'bg-gray-600 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#475569]'
-                  }`}
-                >
-                  Inactive ({inactiveJobs.length})
-                </button>
+            {/* Search and Filter Controls */}
+            <div className="flex flex-col lg:flex-row gap-6 mb-8">
+              {/* Search Bar */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search jobs, departments, locations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                />
               </div>
 
-              {/* Current Filter Info */}
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <Filter size={16} />
-                <span className="text-sm">
-                  Showing {filteredJobs.length} {activeFilter === 'all' ? 'job' : activeFilter} 
-                  {filteredJobs.length !== 1 ? 's' : ''}
-                </span>
+              {/* Filter Tabs */}
+              <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <button
+                  onClick={() => setActiveFilter('all')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    activeFilter === 'all'
+                      ? 'bg-gray-900 text-white shadow-md'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  All ({allJobs})
+                </button>
+                <button
+                  onClick={() => setActiveFilter('active')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    activeFilter === 'active'
+                      ? 'bg-green-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Active ({activeJobs})
+                </button>
+                <button
+                  onClick={() => setActiveFilter('inactive')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    activeFilter === 'inactive'
+                      ? 'bg-gray-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Inactive ({inactiveJobs})
+                </button>
+                <button
+                  onClick={() => setActiveFilter('municipal')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    activeFilter === 'municipal'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Municipal ({municipalJobs})
+                </button>
+                <button
+                  onClick={() => setActiveFilter('volunteer')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    activeFilter === 'volunteer'
+                      ? 'bg-orange-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Volunteer ({volunteerJobs})
+                </button>
               </div>
+            </div>
+
+            {/* Results Info */}
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-6">
+              <Filter size={16} />
+              <span className="text-sm">
+                Showing {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''}
+                {searchTerm && ` matching "${searchTerm}"`}
+              </span>
             </div>
 
             {/* Jobs Grid */}
             {filteredJobs.length === 0 ? (
               <div className="flex items-center justify-center min-h-[40vh]">
-                <div className="text-center bg-white dark:bg-[#334155] rounded-2xl border border-gray-200 dark:border-[#475569] p-12 max-w-md">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-[#475569] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Filter className="text-gray-500 dark:text-gray-400" size={24} />
+                <div className="text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 max-w-md">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="text-gray-500 dark:text-gray-400" size={24} />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-2">
-                    No {activeFilter} jobs found
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
-                    {activeFilter === 'active' && 'There are no active jobs at the moment.'}
-                    {activeFilter === 'inactive' && 'There are no inactive jobs at the moment.'}
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Results Found</h3>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Try adjusting your search or filter criteria
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredJobs.map((job) => (
                   <div
                     key={job.id}
-                    className={`bg-white dark:bg-[#334155] rounded-xl border ${
+                    className={`bg-white dark:bg-gray-800 rounded-2xl border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${
                       job.isActive 
-                        ? 'border-[#3b82f6]' 
-                        : 'border-gray-300 dark:border-gray-600'
-                    } overflow-hidden transition-all duration-300 group shadow-sm hover:shadow-md`}
+                        ? 'border-gray-200 dark:border-gray-700' 
+                        : 'border-gray-300 dark:border-gray-600 opacity-75'
+                    }`}
                   >
-                    <div className={`relative h-48 ${
-                      job.isActive 
-                        ? 'bg-gradient-to-br from-[#3b82f6] to-[#60a5fa]' 
-                        : 'bg-gradient-to-br from-gray-400 to-gray-500'
-                    } overflow-hidden`}>
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Briefcase className="text-white/90" size={48} />
-                      </div>
-                      <div className="absolute top-4 right-4 flex items-center gap-2">
+                    {/* Job Type Badge */}
+                    <div className="p-6 pb-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                          job.jobType === 'municipal'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                            : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                        }`}>
+                          {job.jobType === 'municipal' ? (
+                            <>
+                              <Building2 size={16} />
+                              Municipal
+                            </>
+                          ) : (
+                            <>
+                              <Heart size={16} />
+                              Volunteer
+                            </>
+                          )}
+                        </div>
+                        
+                        {/* Status Toggle */}
                         <button
                           onClick={() => toggleJobStatus(job.id)}
-                          className="flex items-center gap-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full px-2 py-1 transition-all"
+                          className="flex items-center gap-2 text-sm transition-colors"
                         >
                           {job.isActive ? (
-                            <ToggleRight className="text-white" size={18} />
+                            <>
+                              <ToggleRight className="text-green-500" size={20} />
+                              <span className="text-green-600 dark:text-green-400 font-medium">Active</span>
+                            </>
                           ) : (
-                            <ToggleLeft className="text-white" size={18} />
+                            <>
+                              <ToggleLeft className="text-gray-400" size={20} />
+                              <span className="text-gray-500 dark:text-gray-400 font-medium">Inactive</span>
+                            </>
                           )}
-                          <span className="text-xs font-medium text-white">
-                            {job.isActive ? 'Active' : 'Inactive'}
-                          </span>
                         </button>
                       </div>
-                    </div>
 
-                    <div className="p-6">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className={`text-xl font-bold group-hover:text-[#3b82f6] transition-colors ${
-                          job.isActive 
-                            ? 'text-gray-900 dark:text-gray-200' 
-                            : 'text-gray-500 dark:text-gray-400'
-                        }`}>
-                          {job.title}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleEdit(job.id)}
-                            className={`${
-                              job.isActive 
-                                ? 'text-gray-500 hover:text-blue-600' 
-                                : 'text-gray-400 hover:text-blue-600'
-                            } transition-colors p-1`}
-                            aria-label="Edit job"
-                          >
-                            <FilePen size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(job)}
-                            className={`${
-                              job.isActive 
-                                ? 'text-gray-500 hover:text-red-600' 
-                                : 'text-gray-400 hover:text-red-600'
-                            } transition-colors p-1`}
-                            aria-label="Delete job"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                      {/* Job Title */}
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2">
+                        {job.title}
+                      </h3>
+
+                      {/* Job Details */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                          <Building2 size={16} />
+                          <span className="text-sm">{job.department}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                          <MapPin size={16} />
+                          <span className="text-sm line-clamp-1">{job.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                          <Calendar size={16} />
+                          <span className="text-sm">Apply by: {job.lastDate}</span>
                         </div>
                       </div>
 
-                      <p className={`text-sm leading-relaxed mb-4 line-clamp-3 ${
-                        job.isActive 
-                          ? 'text-gray-500 dark:text-gray-400' 
-                          : 'text-gray-400 dark:text-gray-500'
-                      }`}>
+                      {/* Description */}
+                      <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4">
                         {job.description}
                       </p>
 
-                      <div className="space-y-3 mb-6">
-                        <div className={`flex items-center gap-3 ${
-                          job.isActive 
-                            ? 'text-gray-500 dark:text-gray-400' 
-                            : 'text-gray-400 dark:text-gray-500'
-                        }`}>
-                          <Building2 size={18} className={`flex-shrink-0 ${
-                            job.isActive ? 'text-[#3b82f6]' : 'text-gray-400'
-                          }`} />
-                          <span className="text-sm font-medium">{job.department}</span>
+                      {/* Salary/Compensation */}
+                      {job.salary && (
+                        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2">
+                            <Award className="text-green-600 dark:text-green-400" size={16} />
+                            <span className="text-green-700 dark:text-green-300 font-medium text-sm">
+                              {job.salary}
+                            </span>
+                          </div>
                         </div>
-                        <div className={`flex items-center gap-3 ${
-                          job.isActive 
-                            ? 'text-gray-500 dark:text-gray-400' 
-                            : 'text-gray-400 dark:text-gray-500'
-                        }`}>
-                          <MapPin size={18} className={`flex-shrink-0 ${
-                            job.isActive ? 'text-[#22c55e]' : 'text-gray-400'
-                          }`} />
-                          <span className="text-sm font-medium">{job.location}</span>
+                      )}
+
+                      {job.compensation && (
+                        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2">
+                            <Award className="text-orange-600 dark:text-orange-400" size={16} />
+                            <span className="text-orange-700 dark:text-orange-300 font-medium text-sm">
+                              {job.compensation}
+                            </span>
+                          </div>
                         </div>
-                        <div className={`flex items-center gap-3 ${
-                          job.isActive 
-                            ? 'text-gray-500 dark:text-gray-400' 
-                            : 'text-gray-400 dark:text-gray-500'
-                        }`}>
-                          <Calendar size={18} className={`flex-shrink-0 ${
-                            job.isActive ? 'text-[#f59e0b]' : 'text-gray-400'
-                          }`} />
-                          <span className="text-sm font-medium">Apply by {job.lastDate}</span>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                    <div className="p-4 border-t border-gray-200 dark:border-[#475569]">
-                      <button
-                        onClick={() => handleViewApplicants(job.id)}
-                        className={`w-full py-2 rounded transition-colors ${
-                          job.isActive 
-                            ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                            : 'bg-gray-400 hover:bg-gray-500 text-white'
-                        }`}
-                      >
-                        View Applicants
-                      </button>
+
+                    {/* Action Buttons */}
+                    <div className="px-6 pb-6">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(job.id)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 justify-center"
+                        >
+                          <FilePen size={16} />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(job)}
+                          className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -428,52 +527,5 @@ const AdminJobManager = () => {
   );
 };
 
-export default AdminJobManager;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export default JobApplicationsPost;
 

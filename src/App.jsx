@@ -28,15 +28,15 @@ const App = () => {
           element={
               <ProtectedRoute requiredRole="ROLE_ADMIN" role={role}>
               <AdminLayout />
-            </ProtectedRoute>
+             </ProtectedRoute>
           }
         ></Route>
         <Route
           path="staff/*"
           element={
-             <ProtectedRoute requiredRole="ROLE_STAFF" role={role}>
+              <ProtectedRoute requiredRole="ROLE_STAFF" role={role}>
               <StaffLayout />
-              </ProtectedRoute>
+               </ProtectedRoute>
           }
         />
         <Route path="/*" element={<CitizenLayout />} />
