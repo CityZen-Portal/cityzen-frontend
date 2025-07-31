@@ -20,6 +20,27 @@ export default function ResetPassword() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
+  // Add useEffect to set favicon
+  useEffect(() => {
+    // Set favicon
+    const favicon = document.querySelector("link[rel='icon']");
+    if (favicon) {
+      favicon.href = "/brand-logo.png";
+    } else {
+      const newFavicon = document.createElement("link");
+      newFavicon.rel = "icon";
+      newFavicon.href = "/brand-logo.png";
+      document.head.appendChild(newFavicon);
+    }
+    
+    // Cleanup function to reset favicon when component unmounts
+    return () => {
+      if (favicon) {
+        favicon.href = "/favicon.ico"; // Reset to default
+      }
+    };
+  }, []);
+  
   const validatePassword = (password) => {
     if (!password) return 'New password is required';
     if (password.length < 8) return 'Password must be at least 8 characters';

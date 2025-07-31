@@ -1,3 +1,4 @@
+import { useEffect } from "react"; // Add this import
 import InputField from "../components/InputField";
 import PasswordField from "../components/PasswordField";
 import { Form, useNavigate } from "react-router-dom";
@@ -17,6 +18,29 @@ export default function SignIn() {
   const [passwordState, setPasswordState] = useState("");
   const apiurl = process.env.REACT_APP_API_UMS_URL;
   console.log(apiurl);
+
+  // Add useEffect to set favicon
+  useEffect(() => {
+    // Set favicon
+    const favicon = document.querySelector("link[rel='icon']");
+    if (favicon) {
+      favicon.href = "/brand-logo.png";
+    } else {
+      const newFavicon = document.createElement("link");
+      newFavicon.rel = "icon";
+      newFavicon.href = "/brand-logo.png";
+      document.head.appendChild(newFavicon);
+    }
+    
+    // Cleanup function to reset favicon when component unmounts
+    return () => {
+      if (favicon) {
+        favicon.href = "/favicon.ico"; // Reset to default
+      }
+    };
+  }, []);
+
+  // Rest of the component remains the same
   const handleForgotPassword = () => {
     if (!email.trim()) {
       toast.error("Email is required to reset password", {
@@ -42,10 +66,12 @@ export default function SignIn() {
       theme: "colored",
     });
   };
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted");
@@ -114,6 +140,7 @@ export default function SignIn() {
       });
     }
   };
+
   return (
     <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-100 via-blue-200 to-purple-100 
                     dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 

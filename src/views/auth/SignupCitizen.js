@@ -1,3 +1,4 @@
+import { useEffect } from "react"; // Add this import
 import InputField from "components/fields/InputField";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "components/checkbox";
@@ -6,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Footer from "components/footer/FooterAuthDefault";
 import { ChevronDown, User, Mail, Lock, Phone, Shield, CheckCircle } from "lucide-react";
+
 export default function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -23,6 +25,28 @@ export default function SignUp() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [aadhaarSending, setAadhaarSending] = useState(false);
+
+  // Add useEffect to set favicon
+  useEffect(() => {
+    // Set favicon
+    const favicon = document.querySelector("link[rel='icon']");
+    if (favicon) {
+      favicon.href = "/brand-logo.png";
+    } else {
+      const newFavicon = document.createElement("link");
+      newFavicon.rel = "icon";
+      newFavicon.href = "/brand-logo.png";
+      document.head.appendChild(newFavicon);
+    }
+    
+    // Cleanup function to reset favicon when component unmounts
+    return () => {
+      if (favicon) {
+        favicon.href = "/favicon.ico"; // Reset to default
+      }
+    };
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -33,6 +57,7 @@ export default function SignUp() {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
+
   const validateEmail = (email) => {
     if (!email.trim()) {
       setErrors(prev => ({ ...prev, email: 'Email is required' }));
@@ -45,9 +70,11 @@ export default function SignUp() {
       return true;
     }
   };
+
   const handleEmailBlur = () => {
     validateEmail(formData.email);
   };
+
   const validateForm = () => {
     const newErrors = {};
     // Name validation
@@ -97,6 +124,7 @@ export default function SignUp() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -156,10 +184,12 @@ export default function SignUp() {
       });
     }
   };
+
   const formatAadharNumber = (value) => {
     const digits = value.replace(/\D/g, '');
     return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
   };
+
   const handleAadharChange = (e) => {
     const formatted = formatAadharNumber(e.target.value);
     if (formatted.replace(/\s/g, '').length <= 12) {
@@ -170,6 +200,7 @@ export default function SignUp() {
       }
     }
   };
+
   const handleAadhaarVerify = async () => {
     const cleanAadhaar = formData.aadharNumber.replace(/\s/g, '');
     if (!/^\d{12}$/.test(cleanAadhaar)) {
@@ -221,6 +252,7 @@ export default function SignUp() {
       setAadhaarSending(false);
     }
   };
+
   return (
     <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-100 via-blue-200 to-purple-100 
                     dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
