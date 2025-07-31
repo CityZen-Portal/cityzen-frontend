@@ -26,7 +26,7 @@ const ComplaintDetails = () => {
   useEffect(() => {
     setLoading(true);
   
-    axios.get(`http://localhost:10101/api/helpdesk/citizen/complaints/${id}`,
+    axios.get(`${HELPDESK_API}/citizen/complaints/${id}`,
       {
         headers:{
           token,

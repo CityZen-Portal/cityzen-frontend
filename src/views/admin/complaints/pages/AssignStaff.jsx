@@ -12,9 +12,9 @@ import loading_gif from '../../../../assets/img/loading/loading_gif.gif';
 
 
 const staffList = [
-  { id: 1, name: 'Alice Johnson' },
-  { id: 2, name: 'Bob Smith' },
-  { id: 3, name: 'Charlie Lee' },
+  { id: "nithish@gmail.com", name: 'Alice Johnson' },
+  { id: "imran@gmail.com", name: 'Imran' },
+  { id: "ram@gmail.com", name: 'Ram' },
 ];
 
 const deptList = [
@@ -83,7 +83,7 @@ const AssignStaff = () => {
   useEffect(() => {
     setLoading(true);
   
-    axios.get(`http://localhost:10101/api/helpdesk/admin/complaints/${id}`,
+    axios.get(`${HELPDESK_API}/admin/complaints/${id}`,
       {
         headers:{
           token,
@@ -133,7 +133,7 @@ const AssignStaff = () => {
     }
 
     const putData = {
-      staffId: "staff@staff.com",
+      staffId: assignedStaff,
       department: assignedDepartment
     }
 
