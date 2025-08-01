@@ -1,16 +1,11 @@
-// src/views/citizen/job-application/index.jsx
-
-import React, { useState } from 'react';
-import JobApplicationForm from './pages/JobApplicationForm';
-import JobApplicationResponseView from './pages/JobApplicationResponseView';
-import JobApplicationEdit from './pages/JobApplicationEdit';
-import JobApplicationList from './pages/JobApplicationList'
-
+// import CitizenJobBoard from './pages/CitizenJobBoard';
+import JobApplicationSystem from './pages/JobApplicationSystem';
+// import JobDetailsPage from './pages/JobDetailsPage';
 const JobApplicationPage = () => {
 
   return (
-    <div>]
-      <JobApplicationList />]
+    <div>
+      <JobApplicationSystem />
     </div>
   );
 };
