@@ -80,6 +80,9 @@ const categories = {
 function ManageServices() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [serviceToDelete, setServiceToDelete] = useState(null);
+
 
   const [formData, setFormData] = useState({
     category: "",
@@ -538,12 +541,16 @@ const isValid = validateForm(formData);
                 >
                   Edit
                 </button>
-                <button
-                  onClick={() => handleDelete(service.id)}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-md"
-                >
-                  Delete
-                </button>
+<button
+  onClick={() => {
+    setServiceToDelete(service);
+    setShowDeleteModal(true);
+  }}
+  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-md"
+>
+  Delete
+</button>
+
               </div>
             </div>
           ))}
@@ -567,6 +574,45 @@ const isValid = validateForm(formData);
             ))}
           </div>
         )}
+        {showDeleteModal && (
+  <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white dark:bg-navy-800 p-6 rounded-xl shadow-xl max-w-sm w-full">
+      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Confirm Deletion</h2>
+      <p className="text-gray-700 dark:text-gray-300 mb-6">
+        Are you sure you want to delete <strong>{serviceToDelete?.serviceName}</strong>?
+      </p>
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowDeleteModal(false)}
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              await axios.delete(
+                `https://utility-booking-backend.onrender.com/api/service/delete/${serviceToDelete.id}`
+              );
+              await loadServices();
+              toast.success("Service deleted successfully!");
+            } catch (err) {
+              console.error("Error deleting service:", err);
+              toast.error("Failed to delete service.");
+            } finally {
+              setShowDeleteModal(false);
+              setServiceToDelete(null);
+            }
+          }}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

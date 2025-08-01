@@ -73,34 +73,40 @@ function ViewTasks() {
   };
 
   const handleBookingSelect = async (bookingId) => {
-    setSelectedBooking(bookingId);
-    const selected = bookingRequests.find((b) => b.id === bookingId);
-    if (!selected) return;
+  setSelectedBooking(bookingId);
+  const selected = bookingRequests.find((b) => b.id === bookingId);
+  if (!selected) return;
 
-    setSelectedBookingData(selected);
-    setNewTask((prev) => ({
-      ...prev,
-      title: selected.serviceName || selected.services,
-      date: selected.date,
-      time: selected.time,
-      address: selected.address,
-      description: `Booking by ${selected.name}: ${selected.note}`,
-    }));
+  setSelectedBookingData(selected);
+  setNewTask((prev) => ({
+    ...prev,
+    title: selected.serviceName || selected.services,
+    date: selected.date,
+    time: selected.time,
+    address: selected.address,
+    description: `Booking by ${selected.name}: ${selected.note}`,
+  }));
 
-    try {
-      const res = await axios.get(
-        `https://utility-booking-backend.onrender.com/api/staff/department/${encodeURIComponent(selected.services)}`
-      );
-      const fetchedStaff = res.data?.data?.data || [];
-      setStaffList(fetchedStaff.map((staff) => ({
-        name: staff.fullName,
-        id: staff.id
-      })));
-    } catch (error) {
-      console.error("Error fetching staff list:", error);
-      setStaffList([]);
-    }
-  };
+  try {
+    const res = await axios.get(
+      `https://utility-booking-backend.onrender.com/api/staff/department/${encodeURIComponent(selected.services)}`
+    );
+    
+    const fetchedStaff = res.data?.data?.data || [];
+
+    const filteredStaff = fetchedStaff.filter((staff) => staff.delete === false);
+
+    setStaffList(filteredStaff.map((staff) => ({
+      name: staff.fullName,
+      id: staff.id
+    })));
+    
+  } catch (error) {
+    console.error("Error fetching staff list:", error);
+    setStaffList([]);
+  }
+};
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
