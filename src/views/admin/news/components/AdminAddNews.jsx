@@ -4,26 +4,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { MdAdd, MdSave, MdCancel } from 'react-icons/md';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-
-import { EditorState, convertToRaw, ContentState } from 'draft-js';
-import { Editor } from 'react-draft-wysiwyg';
-import draftToHtml from 'draftjs-to-html';
-import htmlToDraft from 'html-to-draftjs';
-
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 const AddNews = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams(); // Get id from URL params
 
-  const authorId = localStorage.getItem('id') || '';
-
-  // Store editor state instead of raw HTML for the content
-  const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+  // Assuming authorId should be retrieved from authenticated user or localStorage if needed
+  const authorId = localStorage.getItem('id') || ''; // Or however you get the logged in user
 
   const [formData, setFormData] = useState({
     title: '',
+    content: '',
     location: '',
     category: '',
     othercategory: '',
@@ -35,21 +27,15 @@ const AddNews = () => {
   const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
 
-  // When editing, initialize formData and editorState from existing data
   useEffect(() => {
     if (id && id !== 'new') {
+      // Fetch the news post only if editing (id is valid and not 'new')
       axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
         .then(res => {
           const item = res.data.data;
-
-          // Parse stored HTML content into draft-js ContentState
-          const blocksFromHtml = htmlToDraft(item.content || '');
-          const { contentBlocks, entityMap } = blocksFromHtml;
-          const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
-          setEditorState(EditorState.createWithContent(contentState));
-
           setFormData({
             title: item.title,
+            content: item.content,
             location: item.location || '',
             category: item.category || '',
             othercategory: item.category_name || '',
@@ -75,9 +61,7 @@ const AddNews = () => {
       isValid = false;
     }
 
-    // Convert editorState to HTML and check empty content
-    const currentContentHtml = draftToHtml(convertToRaw(editorState.getCurrentContent()));
-    if (!currentContentHtml || currentContentHtml === '<p></p>\n') {
+    if (!formData.content.trim()) {
       errors.content = 'Content is required';
       isValid = false;
     }
@@ -103,29 +87,25 @@ const AddNews = () => {
     }
 
     setFormErrors(errors);
-    Object.values(errors).forEach(msg => toast.error(msg));
+    Object.values(errors).forEach((msg) => toast.error(msg));
     return isValid;
   };
 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setFormErrors(prev => ({ ...prev, [name]: '' }));
-  };
-
-  const onEditorStateChange = (state) => {
-    setEditorState(state);
-    setFormErrors(prev => ({ ...prev, content: '' }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
+    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setFormData(prev => ({ ...prev, image: file }));
+    setFormData((prev) => ({ ...prev, image: file }));
   };
 
   const uploadImage = async () => {
@@ -136,7 +116,9 @@ const AddNews = () => {
     imageForm.append('imageFile', formData.image);
 
     const res = await axios.post('https://media-api-service-hzx2.onrender.com/api/images/upload', imageForm, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
     return {
@@ -151,26 +133,23 @@ const AddNews = () => {
     try {
       const { imageName, imagePath } = await uploadImage();
 
-      // Convert editorState to HTML to send to backend
-      const contentHtml = draftToHtml(convertToRaw(editorState.getCurrentContent()));
-
       const payload = {
         title: formData.title,
-        content: contentHtml,
+        content: formData.content,
         location: formData.location,
         breaking: formData.isBreaking,
         authorId: authorId,
         ...(formData.category === 'OTHERS'
           ? {
-              category_name: formData.othercategory,
-              imageName,
-              imagePath,
-            }
+            category_name: formData.othercategory,
+            imageName,
+            imagePath,
+          }
           : {
-              category: formData.category,
-              imageName,
-              imagePath,
-            }),
+            category: formData.category,
+            imageName,
+            imagePath,
+          }),
       };
 
       if (isEditing) {
@@ -207,7 +186,9 @@ const AddNews = () => {
           <h2 className="mb-1 text-2xl font-bold text-navy-700 dark:text-white">
             {isEditing ? 'Edit News Post' : 'Create News Post'}
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Share important updates with the community</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Share important updates with the community
+          </p>
         </div>
 
         <div className="mb-4">
@@ -219,24 +200,18 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
-          {formErrors.title && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>
-          )}
+          {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
         </div>
 
         <div className="mb-4">
-          <label className="text-sm font-medium mb-2 block">Content</label>
-          <Editor
-            editorState={editorState}
-            toolbarClassName="toolbar-class"
-            wrapperClassName="wrapper-class"
-            editorClassName="editor-class bg-white dark:bg-navy-700 dark:text-white rounded-xl"
-            onEditorStateChange={onEditorStateChange}
-            editorStyle={{ minHeight: '200px', padding: '10px', border: '1px solid #ddd', borderRadius: '0.75rem' }}
+          <label className="text-sm font-medium">Content</label>
+          <textarea
+            name="content"
+            value={formData.content}
+            onChange={handleInputChange}
+            className="h-28 w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
-          {formErrors.content && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>
-          )}
+          {formErrors.content && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
         </div>
 
         <div className="mb-4">
@@ -248,9 +223,7 @@ const AddNews = () => {
             onChange={handleInputChange}
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
-          {formErrors.location && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.location}</p>
-          )}
+          {formErrors.location && <p className="text-red-500 text-xs mt-1">{formErrors.location}</p>}
         </div>
 
         <div className="mb-4">
@@ -274,9 +247,7 @@ const AddNews = () => {
             <option value="PUBLIC_NOTICE">Public Notice / Lost & Found</option>
             <option value="OTHERS">Others</option>
           </select>
-          {formErrors.category && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>
-          )}
+          {formErrors.category && <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>}
 
           {formData.category === 'OTHERS' && (
             <input
@@ -298,9 +269,6 @@ const AddNews = () => {
             onChange={handleImageChange}
             className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
           />
-          {formErrors.image && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.image}</p>
-          )}
         </div>
 
         <div className="mb-4">
