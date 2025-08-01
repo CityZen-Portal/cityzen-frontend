@@ -3,43 +3,27 @@ import {
   Building2, Heart, Calendar, Users, 
   AlertTriangle, Search, Filter, Briefcase, TrendingUp
 } from 'lucide-react';
-import JobCard from '../components/JobCard';
+import JobCard from './JobCard';
+import VolunteerCard from './VolunteerCard';
 import JobDetailsPage from './JobDetailsPage';
-import { useNavigate } from 'react-router-dom';
+import VolunteerDetailsPage from './VolunteerDetailsPage';
+import { useNavigate, Routes, Route } from 'react-router-dom';
 
-// Sample job data - in a real app, this would come from an API
+// Sample job data
 const sampleJobs = [
   {
     id: 1,
     title: "Civil Engineer",
     department: "Public Works Department",
     location: "Coimbatore Municipal Corporation",
-    description: "We are seeking an experienced Civil Engineer to join our Public Works Department. The successful candidate will be responsible for planning, designing, and overseeing construction projects including roads, bridges, and municipal infrastructure. This role requires strong technical expertise, project management skills, and the ability to work collaboratively with various stakeholders.",
-    requirements: "Bachelor's degree in Civil Engineering, 3+ years of experience in municipal projects, knowledge of local building codes and regulations, proficiency in AutoCAD and project management software.",
-    jobType: "municipal",
-    lastDate: "2025-08-15",
-    contactName: "Dr. Rajesh Kumar",
-    contactPhone: "+91 98765 43210",
+    description: "We are seeking an experienced Civil Engineer to join our Public Works Department. The successful candidate will be responsible for planning, designing, and overseeing construction projects including roads, bridges, and municipal infrastructure.",
+    requirements: ["Bachelor's degree in Civil Engineering", "3+ years of experience in municipal projects", "Knowledge of local building codes and regulations", "Proficiency in AutoCAD and project management software"],
+    contactPersonName: "Dr. Rajesh Kumar",
+    contactPhoneNumber: "+91 98765 43210",
     contactEmail: "rajesh.kumar@coimbatore.gov.in",
     contactAddress: "Public Works Department, Coimbatore Municipal Corporation, Town Hall, Coimbatore - 641001",
-    isActive: true
-  },
-  {
-    id: 2,
-    title: "Community Health Volunteer",
-    department: "Health & Family Welfare",
-    location: "Various locations in Coimbatore",
-    description: "Join our community health initiative to promote healthcare awareness and support health programs in various neighborhoods. Volunteers will conduct health surveys, assist in vaccination drives, and educate communities about preventive healthcare measures.",
-    requirements: "Basic understanding of health and hygiene, good communication skills, willingness to work in community settings, flexible schedule availability.",
-    jobType: "volunteer",
-    workDate: "2025-08-10",
-    workTime: "9:00 AM - 5:00 PM",
-    duration: "6 months program",
-    contactName: "Ms. Priya Sharma",
-    contactPhone: "+91 87654 32109",
-    contactEmail: "priya.sharma@coimbatore.gov.in",
-    contactAddress: "Health Department, Municipal Corporation Office, Coimbatore",
-    isActive: true
+    isActive: true,
+    deadline: "2025-08-15T23:59:59"
   },
   {
     id: 3,
@@ -47,31 +31,13 @@ const sampleJobs = [
     department: "Urban Planning",
     location: "Coimbatore Municipal Corporation",
     description: "Assist in urban planning activities including land use planning, development control, and building plan approvals. The role involves reviewing development proposals, conducting site inspections, and ensuring compliance with planning regulations.",
-    requirements: "Degree in Urban Planning or Architecture, knowledge of planning laws and regulations, GIS software experience preferred, strong analytical and communication skills.",
-    jobType: "municipal",
-    lastDate: "2025-08-20",
-    contactName: "Mr. Suresh Babu",
-    contactPhone: "+91 63694 74451",
+    requirements: ["Degree in Urban Planning or Architecture", "Knowledge of planning laws and regulations", "GIS software experience preferred", "Strong analytical and communication skills"],
+    contactPersonName: "Mr. Suresh Babu",
+    contactPhoneNumber: "+91 63694 74451",
     contactEmail: "suresh.babu@coimbatore.gov.in",
     contactAddress: "Urban Planning Department, Coimbatore Municipal Corporation",
-    isActive: true
-  },
-  {
-    id: 4,
-    title: "Tree Plantation Drive",
-    department: "Environment & Parks",
-    location: "Coimbatore City Parks",
-    description: "Participate in our city-wide tree plantation initiative to increase green cover and promote environmental sustainability. Volunteers will help plant saplings, maintain plant records, and support ongoing tree care activities.",
-    requirements: "Environmental awareness, physical fitness for outdoor work, commitment to environmental conservation, weekend availability preferred.",
-    jobType: "volunteer",
-    workDate: "2025-08-12",
-    workTime: "6:00 AM - 10:00 AM",
-    duration: "One-time event with follow-up care",
-    contactName: "Dr. Meera Nair",
-    contactPhone: "+91 76543 21098",
-    contactEmail: "meera.nair@coimbatore.gov.in",
-    contactAddress: "Environment Department, Municipal Corporation, Coimbatore",
-    isActive: true
+    isActive: true,
+    deadline: "2025-08-20T23:59:59"
   },
   {
     id: 5,
@@ -79,13 +45,44 @@ const sampleJobs = [
     department: "Finance Department",
     location: "Municipal Corporation Head Office",
     description: "Handle financial transactions, maintain accounting records, prepare financial reports, and assist in budget preparation. The role requires attention to detail and strong analytical skills in financial management.",
-    requirements: "BCom/MCom with accounting background, 2+ years experience in government accounting, knowledge of financial software, understanding of municipal finance procedures.",
-    jobType: "municipal",
-    lastDate: "2025-07-25", // This job is expired
-    contactName: "Mrs. Lakshmi Devi",
-    contactPhone: "+91 63827 58637",
+    requirements: ["BCom/MCom with accounting background", "2+ years experience in government accounting", "Knowledge of financial software", "Understanding of municipal finance procedures"],
+    contactPersonName: "Mrs. Lakshmi Devi",
+    contactPhoneNumber: "+91 63827 58637",
     contactEmail: "lakshmi.devi@coimbatore.gov.in",
     contactAddress: "Finance Department, Municipal Corporation, Coimbatore",
+    isActive: true,
+    deadline: "2025-07-25T23:59:59"
+  }
+];
+
+// Sample volunteer data
+const sampleVolunteers = [
+  {
+    id: 2,
+    programTitle: "Community Health Volunteer",
+    location: "Various locations in Coimbatore",
+    programDescription: "Join our community health initiative to promote healthcare awareness and support health programs in various neighborhoods. Volunteers will conduct health surveys, assist in vaccination drives, and educate communities about preventive healthcare measures.",
+    programDate: "2025-08-10",
+    programTime: "9:00 AM - 5:00 PM",
+    duration: "6 months program",
+    coordinatorName: "Ms. Priya Sharma",
+    coordinatorPhone: "+91 87654 32109",
+    coordinatorEmail: "priya.sharma@coimbatore.gov.in",
+    coordinatorAddress: "Health Department, Municipal Corporation Office, Coimbatore",
+    isActive: true
+  },
+  {
+    id: 4,
+    programTitle: "Tree Plantation Drive",
+    location: "Coimbatore City Parks",
+    programDescription: "Participate in our city-wide tree plantation initiative to increase green cover and promote environmental sustainability. Volunteers will help plant saplings, maintain plant records, and support ongoing tree care activities.",
+    programDate: "2025-08-12",
+    programTime: "6:00 AM - 10:00 AM",
+    duration: "One-time event with follow-up care",
+    coordinatorName: "Dr. Meera Nair",
+    coordinatorPhone: "+91 76543 21098",
+    coordinatorEmail: "meera.nair@coimbatore.gov.in",
+    coordinatorAddress: "Environment Department, Municipal Corporation, Coimbatore",
     isActive: true
   }
 ];
@@ -93,42 +90,50 @@ const sampleJobs = [
 const JobApplicationSystem = () => {
   const navigate = useNavigate();
 
-  const [currentView, setCurrentView] = useState('list'); // 'list' or 'details'
-  const [selectedJobId, setSelectedJobId] = useState(null);
   const [jobs, setJobs] = useState(sampleJobs);
+  const [volunteers, setVolunteers] = useState(sampleVolunteers);
   const [filteredJobs, setFilteredJobs] = useState(sampleJobs);
+  const [filteredVolunteers, setFilteredVolunteers] = useState(sampleVolunteers);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
 
-  // Filter jobs based on search and filter criteria
+  // Filter jobs and volunteers based on search and filter criteria
   useEffect(() => {
-    let filtered = jobs.filter(job => job.isActive);
+    let filteredJobs = jobs.filter(job => job.isActive);
+    let filteredVolunteers = volunteers.filter(volunteer => volunteer.isActive);
 
     // Apply type filter
     if (activeFilter === 'municipal') {
-      filtered = filtered.filter(job => job.jobType === 'municipal');
+      filteredVolunteers = [];
     } else if (activeFilter === 'volunteer') {
-      filtered = filtered.filter(job => job.jobType === 'volunteer');
+      filteredJobs = [];
     }
 
     // Apply search filter
     if (searchTerm.trim()) {
-      filtered = filtered.filter(job =>
+      filteredJobs = filteredJobs.filter(job =>
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      
+      filteredVolunteers = filteredVolunteers.filter(volunteer =>
+        volunteer.programTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        volunteer.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        volunteer.programDescription.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
-    setFilteredJobs(filtered);
-  }, [jobs, searchTerm, activeFilter]);
+    setFilteredJobs(filteredJobs);
+    setFilteredVolunteers(filteredVolunteers);
+  }, [jobs, volunteers, searchTerm, activeFilter]);
 
   // Check if job deadline has passed
   const isJobExpired = useCallback((job) => {
-    if (job.jobType === 'municipal' && job.lastDate) {
-      const deadline = new Date(job.lastDate);
+    if (job.deadline) {
+      const deadline = new Date(job.deadline);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       return deadline < today;
@@ -148,16 +153,13 @@ const JobApplicationSystem = () => {
   }, []);
 
   // Handle view details
-  const handleViewDetails = useCallback((jobId) => {
-    setSelectedJobId(jobId);
-    navigate(`/citizen/job-application/details/${jobId}`);
-  }, []);
-
-  // Handle back to list
-  const handleBack = useCallback(() => {
-    setCurrentView('list');
-    setSelectedJobId(null);
-  }, []);
+  const handleViewDetails = useCallback((type, id) => {
+    if (type === 'municipal') {
+      navigate(`/citizen/job-application/job/${id}`);
+    } else {
+      navigate(`/citizen/job-application/volunteer/${id}`);
+    }
+  }, [navigate]);
 
   // Handle bookmark toggle
   const handleBookmark = useCallback((jobId) => {
@@ -170,22 +172,11 @@ const JobApplicationSystem = () => {
     setBookmarkedJobs(newBookmarks);
   }, [bookmarkedJobs]);
 
-  // Get job counts
+  // Get counts
   const activeJobs = jobs.filter(job => job.isActive);
-  const municipalCount = activeJobs.filter(job => job.jobType === 'municipal').length;
-  const volunteerCount = activeJobs.filter(job => job.jobType === 'volunteer').length;
-
-  if (currentView === 'details' && selectedJobId) {
-    return <JobDetailsPage 
-      jobId={selectedJobId} 
-      jobs={jobs}
-      onBack={handleBack}
-      bookmarkedJobs={bookmarkedJobs}
-      onBookmark={handleBookmark}
-      isJobExpired={isJobExpired}
-      formatDate={formatDate}
-    />;
-  }
+  const activeVolunteers = volunteers.filter(volunteer => volunteer.isActive);
+  const municipalCount = activeJobs.length;
+  const volunteerCount = activeVolunteers.length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -207,8 +198,8 @@ const JobApplicationSystem = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Jobs</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{activeJobs.length}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Opportunities</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{municipalCount + volunteerCount}</p>
                 <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                   <TrendingUp size={16} className="inline mr-1" />
                   Active Opportunities
@@ -261,7 +252,7 @@ const JobApplicationSystem = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Search jobs, departments, locations..."
+                placeholder="Search jobs, programs, departments, locations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
@@ -278,7 +269,7 @@ const JobApplicationSystem = () => {
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                All Jobs ({activeJobs.length})
+                All ({municipalCount + volunteerCount})
               </button>
               <button
                 onClick={() => setActiveFilter('municipal')}
@@ -307,74 +298,69 @@ const JobApplicationSystem = () => {
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mt-4">
             <Filter size={16} />
             <span className="text-sm">
-              Showing {filteredJobs.length} of {activeJobs.length} job{activeJobs.length !== 1 ? 's' : ''}
+              Showing {filteredJobs.length + filteredVolunteers.length} of {municipalCount + volunteerCount} opportunity{municipalCount + volunteerCount !== 1 ? 's' : ''}
               {searchTerm && ` matching "${searchTerm}"`}
             </span>
           </div>
         </div>
 
         {/* Jobs Section */}
-        {filteredJobs.length === 0 ? (
+        {filteredJobs.length === 0 && filteredVolunteers.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
               <Briefcase className="text-gray-400" size={40} />
             </div>
             <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-              {activeJobs.length === 0 ? 'No Jobs Available' : 'No Jobs Found'}
+              {activeJobs.length === 0 && activeVolunteers.length === 0 ? 'No Opportunities Available' : 'No Opportunities Found'}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-              {activeJobs.length === 0 
-                ? 'There are currently no job openings available. Please check back later for new opportunities.'
+              {activeJobs.length === 0 && activeVolunteers.length === 0 
+                ? 'There are currently no opportunities available. Please check back later.'
                 : searchTerm 
-                  ? `No jobs match your search for "${searchTerm}". Try adjusting your search terms.`
-                  : 'No jobs match the selected filter. Try selecting a different category.'
+                  ? `No opportunities match your search for "${searchTerm}". Try adjusting your search terms.`
+                  : 'No opportunities match the selected filter. Try selecting a different category.'
               }
             </p>
           </div>
         ) : (
           <div>
             {/* Municipal Jobs Section */}
-            {filteredJobs.some(job => job.jobType === 'municipal') && (
+            {filteredJobs.length > 0 && (
               <div className="mb-12">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                   <Building2 className="text-blue-600" size={28} />
                   Available Municipal Corporation Jobs
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredJobs
-                    .filter(job => job.jobType === 'municipal')
-                    .map((job) => (
-                      <JobCard 
-                        key={job.id} 
-                        job={job} 
-                        onViewDetails={handleViewDetails} 
-                        isJobExpired={isJobExpired} 
-                        formatDate={formatDate} 
-                      />
-                    ))}
+                  {filteredJobs.map((job) => (
+                    <JobCard 
+                      key={job.id} 
+                      job={job} 
+                      onViewDetails={(id) => handleViewDetails('municipal', id)}
+                      isJobExpired={isJobExpired} 
+                      formatDate={formatDate} 
+                    />
+                  ))}
                 </div>
               </div>
             )}
 
             {/* Volunteer Jobs Section */}
-            {filteredJobs.some(job => job.jobType === 'volunteer') && (
+            {filteredVolunteers.length > 0 && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                   <Heart className="text-green-600" size={28} />
                   Available Volunteer Opportunities
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredJobs
-                    .filter(job => job.jobType === 'volunteer')
-                    .map((job) => (
-                      <JobCard 
-                        key={job.id} 
-                        job={job} 
-                        onViewDetails={handleViewDetails} 
-                        isJobExpired={isJobExpired} 
-                        formatDate={formatDate} 
-                      />
-                    ))}
+                  {filteredVolunteers.map((volunteer) => (
+                    <VolunteerCard 
+                      key={volunteer.id} 
+                      volunteer={volunteer} 
+                      onViewDetails={(id) => handleViewDetails('volunteer', id)}
+                      formatDate={formatDate} 
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -385,4 +371,14 @@ const JobApplicationSystem = () => {
   );
 };
 
-export default JobApplicationSystem;
+const JobApplicationPage = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<JobApplicationSystem />} />
+      <Route path="/job/:id" element={<JobDetailsPage />} />
+      <Route path="/volunteer/:id" element={<VolunteerDetailsPage />} />
+    </Routes>
+  );
+};
+
+export default JobApplicationPage;
