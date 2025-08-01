@@ -9,38 +9,38 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
       {/* Complaint ID */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">
+      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
         <div className="font-medium">{complaint.id}</div>
       </td>
 
       {/* Issue */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">
+      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
         <div className="max-w-32 sm:max-w-48 lg:max-w-none truncate" title={complaint.issue}>
           {complaint.issue?.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}
         </div>
       </td>
 
       {/* Department */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">
+      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
         <div className="max-w-24 sm:max-w-32 lg:max-w-none truncate" title={complaint.department}>
           {complaint.department || <p>N/A</p>}
         </div>
       </td>
 
       {/* Location */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">
+      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
         <div className="max-w-24 sm:max-w-32 lg:max-w-none truncate" title={complaint.street}>
           {complaint.street?.length > 25 ?`${complaint.street.slice(0, 25)}...` : complaint.street}
         </div>
       </td>
 
       {/* Date Logged */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">
+      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
         <div className="whitespace-nowrap">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</div>
       </td>
 
       {/* Status + Edit Button */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">
+      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
           <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium border flex-shrink-0 ${getStatusColor(complaint.status)}`}>
             <span className="hidden sm:inline">{getStatusText(complaint.status)}</span>

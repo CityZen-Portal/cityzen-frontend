@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MdError, MdLocationOn } from 'react-icons/md';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import TitleCard from '../components/TitleCard';
 import DetailsList from '../components/DetailsList';
 import StatusHistory from '../components/StatusHistory';
@@ -13,6 +13,8 @@ import loading_gif from '../../../../assets/img/loading/loading_gif.gif';
 
 
 const ComplaintDetails = () => {
+  const navigate = useNavigate();
+  
   const token = localStorage.getItem("token")
   const email = localStorage.getItem("email")
   const citizenId = localStorage.getItem("id")
@@ -44,7 +46,8 @@ const ComplaintDetails = () => {
           toast.error('Server Error!Unable to Fetch Data', {
             position: 'top-right',
             autoClose: 3000,
-            theme: 'colored'
+            theme: 'colored',
+            onClose: () => navigate("/admin/complaints/"),
           });
           console.error('Error:', err.response?.data || err.message);
         })
