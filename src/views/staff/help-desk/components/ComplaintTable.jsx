@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PageNavigator from './PageNavigator';
 import Rows from './Rows';
-import { MdArrowUpward, MdArrowDownward, MdUnfoldMore } from 'react-icons/md';
+import { MdArrowUpward, MdArrowDownward, MdUnfoldMore, MdSearch } from 'react-icons/md';
 import {
   getStatusColor,
   getStatusText,
@@ -132,7 +132,7 @@ const ComplaintTable = ({ extra, complaints }) => {
                       onClick={() => key && handleSort(key)}
                       className={`px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-left text-xs sm:text-sm font-medium text-gray-700 dark:text-white ${
                         key ? 'cursor-pointer select-none hover:bg-gray-200 dark:hover:bg-navy-800' : ''
-                      } ${idx < 6 ? 'border-r border-gray-200 dark:border-gray-600' : ''}`}
+                      }`}
                     >
                       <span className="flex items-center gap-1">
                         <span className="truncate">{label}</span>
@@ -163,8 +163,11 @@ const ComplaintTable = ({ extra, complaints }) => {
                 />
                 {paginatedComplaints.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="text-center py-8 sm:py-12 text-gray-500 dark:text-gray-300 text-sm sm:text-base">
-                      No complaints match this filter or search.
+                    <td colSpan="7" className="text-center py-8 px-4 text-gray-500 dark:text-gray-300">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="text-4xl"><MdSearch /></div>
+                        <div className="text-sm font-medium">No complaints found</div>
+                      </div>
                     </td>
                   </tr>
                 )}

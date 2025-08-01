@@ -133,7 +133,7 @@ const ComplaintTable = ({ complaints }) => {
                       onClick={() => key && handleSort(key)}
                       className={`px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-left text-xs sm:text-sm font-medium text-gray-700 dark:text-white ${
                         key ? 'cursor-pointer select-none hover:bg-gray-200 dark:hover:bg-navy-800' : ''
-                      } ${idx < 6 ? 'border-r border-gray-200 dark:border-gray-600' : ''}`}
+                      } `} // ${idx < 6 ? 'border-r border-gray-200 dark:border-gray-600' : ''}
                     >
                       <span className="flex items-center gap-1">
                         <span className="truncate">{label}</span>
