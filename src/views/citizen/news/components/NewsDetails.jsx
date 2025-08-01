@@ -7,7 +7,7 @@ export default function NewsDetails() {
   const navigate = useNavigate();
   const [newsItem, setNewsItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchNewsData = async () => {
       try {
@@ -104,10 +104,10 @@ export default function NewsDetails() {
           <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-6">
             {newsItem.description}
           </p>
-
-          <div className="prose prose-gray dark:prose-invert max-w-none text-base leading-relaxed">
-            <p>{newsItem.content}</p>
-          </div>
+          <div
+            className="prose prose-gray dark:prose-invert max-w-none text-base leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: newsItem.content }}
+          />
 
           {newsItem.location && (
             <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">
