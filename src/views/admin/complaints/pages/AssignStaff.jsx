@@ -9,6 +9,12 @@ import StatusHistory from 'views/citizen/help-desk/components/StatusHistory';
 import TitleCard from 'views/citizen/help-desk/components/TitleCard';
 import axios from 'axios';
 import loading_gif from '../../../../assets/img/loading/loading_gif.gif';
+import {
+  getStatusText,
+  getStatusColor
+}
+from '../../../citizen/help-desk/utils/helpers';
+import { use } from 'react';
 
 
 const staffList = [
@@ -44,6 +50,7 @@ const AssignStaff = () => {
   const [loading, setLoading] = useState(false);
   const [complaint, setComplaint] = useState({});
   const [staff, setStaff] = useState([]);
+  const [department, setDepartment] = useState([]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -95,33 +102,38 @@ const AssignStaff = () => {
       }
     )
       .then(res => {
-          console.log('Response:', res.data.data);
+          console.log('Complaint:', res.data.data);
           const data = res.data.data
-          setComplaint(data)
+          setComplaint(data ? data : {})
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error('Server Error!Unable to Fetch Complaint Data', {
             position: 'top-right',
             autoClose: 3000,
-            theme: 'colored'
+            theme: 'colored',
+            onClose: () => navigate("/admin/complaints/"),
           });
           console.error('Error:', err.response?.data || err.message);
+          navigate("")
         })
         .finally(() => {
-          console.log(complaint.id);
           setLoading(false);
         });
       
-    setLoading(true)
 
-    axios.get(`${UTILITY_URL}/api/staff/all`)
+  }, [id, complaint.id, token, email, citizenId])
+
+  useEffect( () => {
+    setLoading(true)
+    
+    axios.get(`${UTILITY_URL}/api/service/all`)
     .then(res => {
-        console.log('Response:', res.data.data.data);
-        const data = res.data.data.data
-        setStaff(data)
+        console.log('Department:', res.data.data);
+        const data = res.data.data
+        setDepartment(data ? data : [])
       })
       .catch(err => {
-        toast.error('Server Error!Unable to Fetch Staff Data', {
+        toast.error('Server Error!Unable to Fetch Department Data', {
           position: 'top-right',
           autoClose: 3000,
           theme: 'colored'
@@ -129,10 +141,33 @@ const AssignStaff = () => {
         console.error('Error:', err.response?.data || err.message);
       })
       .finally(() => {
-        console.log(complaint.id);
         setLoading(false);
       });
-  }, [id, complaint.id, token, email, citizenId, assignedDepartment])
+  }, [])
+
+  useEffect( () => {
+    if(assignedDepartment){
+      setLoading(true)
+      
+      axios.get(`${UTILITY_URL}/api/staff/department/${assignedDepartment}`)
+      .then(res => {
+          console.log('Staff:', res.data.data.data);
+          const data = res.data.data.data
+          setStaff(data ? data : [])
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Staff Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+      }
+  }, [assignedDepartment])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -144,6 +179,7 @@ const AssignStaff = () => {
         autoClose: 1000,
         theme: 'colored',
       });
+      setLoading(false)
       return;
     }
     if (!assignedStaff) {
@@ -152,6 +188,7 @@ const AssignStaff = () => {
         autoClose: 1000,
         theme: 'colored',
       });
+      setLoading(false)
       return;
     }
 
@@ -159,6 +196,8 @@ const AssignStaff = () => {
       staffId: assignedStaff,
       department: assignedDepartment
     }
+
+    setLoading(true)
 
     axios.put(
       `${HELPDESK_API}/admin/complaints/${id}`,
@@ -255,8 +294,8 @@ const AssignStaff = () => {
                           className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white"
                         >
                           <option value="" disabled>-- Select department --</option>
-                          {deptList.map((dept) => (
-                            <option key={dept.id} value={dept.name}>{dept.name}</option>
+                          {department.map((dept) => (
+                            <option key={dept.id} value={dept.serviceName}>{dept.serviceName}</option>
                           ))}
                         </select>
                       </div>

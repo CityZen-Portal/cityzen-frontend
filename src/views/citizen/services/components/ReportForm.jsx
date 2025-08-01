@@ -14,14 +14,16 @@ function ReportForm() {
 
   const [reporterName, setReporterName] = useState("");
   const [reportDetails, setReportDetails] = useState("");
-
+const [date,setDate]=useState("");
  
 
   const handleSubmit =async (e) => {
     e.preventDefault();
     const data={
       name:reporterName,
-      description:reportDetails
+      description:reportDetails,
+      date
+
     }
     try{
     await axios.post(
@@ -29,7 +31,9 @@ function ReportForm() {
       data
     );
     toast.success("Report submitted!");
-    navigate("/citizen/Services");
+    setTimeout(() => {
+      navigate("/citizen/Services");
+    }, 2000);
     }
     catch(error)
     {
@@ -66,6 +70,22 @@ function ReportForm() {
             id="reporterName"
             value={reporterName}
             onChange={(e) => setReporterName(e.target.value)}
+            placeholder="Full Name"
+            className="bg-whiten w-full rounded-md border border-[#e0e0e0] px-6 py-3 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md dark:border-navy-800 dark:bg-navy-900 dark:text-white"
+            required
+          />
+          <label
+            htmlFor="feedbackName"
+            className="m-3 block text-base font-semibold text-[#07074D] dark:text-white sm:text-xl"
+          >
+            Date
+          </label>
+          <input
+            type="date"
+            name="date"
+            id="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
             placeholder="Full Name"
             className="bg-whiten w-full rounded-md border border-[#e0e0e0] px-6 py-3 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md dark:border-navy-800 dark:bg-navy-900 dark:text-white"
             required

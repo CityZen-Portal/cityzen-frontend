@@ -8,10 +8,10 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
     <>
       {/* Desktop Table Row - Hidden on mobile */}
       <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors hidden md:table-row">
-        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white border-r">{complaint.id}</td>
-        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white border-r">{complaint.issue.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}</td>
-        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white border-r">{complaint.department ? complaint.department : complaint.category}</td>
-        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white border-r">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.id}</td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.issue.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}</td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.department ? complaint.department : complaint.category}</td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</td>
         <td className="px-6 py-4 border-r">
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(complaint.status)}`}>
             {getStatusText(complaint.status)}
@@ -40,7 +40,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
                 : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
             }`}
           >
-            Give Feedback
+            {!complaint.feedback_isSubmitted ? "Give Feedback" : "Feedback Submitted"}
           </button>
         </td>
       </tr>

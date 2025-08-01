@@ -1,181 +1,440 @@
-import React from "react";
-import {useEffect, useState} from "react";
+//analytics
+
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+import { Doughnut } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip as ChartTooltip,
+  Legend,
+} from "chart.js";
+
 import {
   BarChart,
-  Bar,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
+  ComposedChart,
+  ResponsiveContainer,
+  CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
-  ComposedChart
+  Label,
+  Bar,
 } from "recharts";
-import {
-  FaCheckCircle,
-  FaIdCard,
-  FaStar,
-  FaClock,
-} from "react-icons/fa";
+
+ChartJS.register(ArcElement, ChartTooltip, Legend);
+dayjs.extend(isoWeek);
+
 
 const Dashboard = () => {
-  const metricCards = [
-    { icon: <FaCheckCircle />, title: "Resolved Complaints", value: 1846 },
-    { icon: <FaIdCard />, title: "Pending Verifications", value: 112 },
-    { icon: <FaStar />, title: "Most Used Service", value: "Water Supply" },
-    { icon: <FaClock />, title: "Avg Resolution Time", value: "2.3 Days" },
-  ];
+  
+const chartData = {
+  labels: ["Male", "Female", "Other"],
+  datasets: [
+    {
+      label: "Gender",
+      data: [50, 40, 5],
+      backgroundColor: ["#3b82f6", "#ec4899", "#10b981"], 
+      borderColor: "#ffffff",
+      borderWidth: 1,
+    },
+  ],
+};
 
-  const monthlyData = [
-    { month: "Jan", serviceRequests: 1000, complaints: 400 },
-    { month: "Feb", serviceRequests: 1200, complaints: 460 },
-    { month: "Mar", serviceRequests: 1800, complaints: 320 },
-    { month: "Apr", serviceRequests: 1500, complaints: 300 },
-    { month: "May", serviceRequests: 2000, complaints: 500 },
-  ];
+const options = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+      labels: {
+        boxWidth: 15,
+        boxHeight: 15,
+        usePointStyle: true,
+        pointStyle: "circle",
+        color: "#374151", 
+      },
+    },
+  },
+};
 
-  const categoryData = [
-    { category: "Water", value: 400 },
-    { category: "Sanitation", value: 300 },
-    { category: "Roads", value: 300 },
-    { category: "Lights", value: 200 },
-  ];
 
-  const genderData = [
-    { gender: "Male", value: 1800 },
-    { gender: "Female", value: 1456 },
-  ];
+ const districtRequestData = [
+  { division: "Coimbatore North", count: 80 },
+  { division: "Coimbatore South", count: 95 },
+  { division: "Pollachi", count: 40 },
+  { division: "Mettupalayam", count: 25 },
+  { division: "Sulur", count: 30 },
+];
 
-  const dailyRequestData = [
-    { day: "Mon", requests: 90 },
-    { day: "Tue", requests: 120 },
-    { day: "Wed", requests: 140 },
-    { day: "Thu", requests: 100 },
-    { day: "Fri", requests: 160 },
-    { day: "Sat", requests: 130 },
-  ];
 
-  const divisionStats = [
-    { division: "Division A", count: 124 },
-    { division: "Division B", count: 96 },
-    { division: "Division C", count: 87 },
-    { division: "Division D", count: 104 },
-  ];
+  const [monthlyData, setMonthlyData] = useState(
+    Array.from({ length: 12 }, (_, i) => ({
+      month: new Date(0, i).toLocaleString("default", { month: "short" }),
+      serviceRequests: 0,
+    }))
+  );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_UTILITY_URL}/api/services/request/all`
+        );
+        const serviceRequests = res.data?.data || [];
+
+        const monthlyCounts = Array(12).fill(0);
+        serviceRequests.forEach((item) => {
+          if (item.date) {
+            const monthIndex = new Date(item.date).getMonth();
+            if (!isNaN(monthIndex)) {
+              monthlyCounts[monthIndex]++;
+            }
+          }
+        });
+
+        const finalData = monthlyCounts.map((count, i) => ({
+          month: new Date(0, i).toLocaleString("default", { month: "short" }),
+          serviceRequests: count,
+        }));
+
+        setMonthlyData(finalData);
+      } catch (err) {
+        console.error("Error loading service data", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+const [weeklyRequestData, setWeeklyRequestData] = useState([]);
+
+useEffect(() => {
+  const fetchWeeklyRequests = async () => {
+    try {
+      const res = await axios.get("https://utility-booking-backend.onrender.com/api/services/request/all");
+      const requests = res.data.data;
+
+      const startOfWeek = dayjs().startOf("isoWeek");
+      const endOfWeek = dayjs().endOf("isoWeek");
+
+      const weekDays = Array.from({ length: 7 }, (_, i) => {
+        const day = startOfWeek.add(i, "day");
+        return {
+          dayName: day.format("ddd"),      
+          date: day.format("YYYY-MM-DD"), 
+          count: 0
+        };
+      });
+
+      requests.forEach((req) => {
+        const requestDate = dayjs(req.date).format("YYYY-MM-DD");
+        const match = weekDays.find(day => day.date === requestDate);
+        if (match) match.count += 1;
+      });
+
+      const formattedData = weekDays.map((day) => ({
+        day: day.dayName,
+        date: day.date,
+        requests: day.count,
+      }));
+
+      setWeeklyRequestData(formattedData);
+    } catch (err) {
+      console.error("Error fetching requests:", err);
+    }
+  };
+
+  fetchWeeklyRequests();
+}, []);
+
+
+  const [requestCount, setRequestCount] = useState(0);
+
+  useEffect(() => {
+    const fetchRequestCount = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_UTILITY_URL}/api/services/request/all`
+        );
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const requests = response.data.data;
+
+        const thisMonthRequests = requests.filter((item) => {
+          if (!item.date) return false;
+          const requestDate = new Date(item.date);
+          return (
+            requestDate.getMonth() === currentMonth &&
+            requestDate.getFullYear() === currentYear
+          );
+        });
+
+        setRequestCount(thisMonthRequests.length);
+      } catch (error) {
+        console.error("Failed to fetch requests:", error);
+      }
+    };
+
+    fetchRequestCount();
+  }, []);
+
+const [repeatComplaints, setRepeatComplaints] = useState([]);
+
+useEffect(() => {
+  const fetchRepeatComplaints = async () => {
+    try {
+      const res = await axios.get(
+        "https://utility-booking-backend.onrender.com/api/services/request/all"
+      );
+      const requests = res.data.data;
+
+      const complaintMap = {};
+
+      requests.forEach((item) => {
+        if (item.name && item.services) {
+          const username = item.name.trim();
+          const service = item.services.trim();
+
+          if (!complaintMap[username]) {
+            complaintMap[username] = {
+              count: 0,
+              services: new Set()
+            };
+          }
+
+          complaintMap[username].count += 1;
+          complaintMap[username].services.add(service);
+        }
+      });
+
+      const filtered = Object.entries(complaintMap)
+        .filter(([_, val]) => val.count > 1)
+        .map(([username, val]) => ({
+          username,
+          repeats: val.count,
+          services: Array.from(val.services).join(", ") 
+        }));
+
+      setRepeatComplaints(filtered);
+    } catch (error) {
+      console.error("Error fetching repeat complaints:", error);
+    }
+  };
+
+  fetchRepeatComplaints();
+}, []);
+
 
   return (
     <div className="p-6 space-y-6 dark:bg-navy-700 dark:text-white">
-      {/* Metric Cards */}
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {metricCards.map((card, idx) => (
-          <div key={idx} className="p-4 bg-white dark:bg-navy-900 shadow rounded-xl flex items-center gap-4">
-            <div className="text-xl text-purple-600 ">{card.icon}</div>
-            <div>
-              <p className="text-sm text-gray-500">{card.title}</p>
-              <h2 className="text-2xl font-bold">{card.value}</h2>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Chart Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  
+      {/* Monthly Service Trend */}
+      <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
         <div className="bg-white dark:bg-navy-900 dark:text-white p-4 rounded-xl shadow">
-          <h3 className="mb-2 font-semibold text-lg ">Service vs Complaint Trend</h3>
-          <ResponsiveContainer width="100%" height={250}>
+          <h3 className="mb-2 font-semibold text-lg">
+            Service Trend
+          </h3>
+          <ResponsiveContainer width="100%" height={420}>
             <ComposedChart data={monthlyData}>
-              <XAxis dataKey="month" />
-              <YAxis />
+             <XAxis dataKey="month">
+          <Label value="Month" offset={0} position="insideBottom" />
+        </XAxis>
+               <YAxis>
+          <Label
+            value="Number of Requests"
+            angle={-90}
+            position="insideLeft"
+            style={{ textAnchor: "middle" }}
+          />
+        </YAxis>
               <Tooltip />
               <Bar dataKey="serviceRequests" fill="#6a5acd" />
               <Line type="monotone" dataKey="complaints" stroke="#f97316" />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
-
-        <div className="bg-white p-4 dark:bg-navy-900 dark:text-white rounded-xl shadow">
-          <h3 className="mb-2 font-semibold text-lg">Requests by Category</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={categoryData}
-                dataKey="value"
-                nameKey="category"
-                outerRadius={80}
-                label
-              >
-                {categoryData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={["#8884d8", "#82ca9d", "#ffc658", "#ff7f7f"][index % 4]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white dark:bg-navy-900 dark:text-white  p-4 rounded-xl shadow">
-          <h3 className="mb-2 font-semibold text-lg">Gender Distribution</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={genderData}
-                dataKey="value"
-                nameKey="gender"
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                label
-              >
-                {genderData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={["#8e44ad", "#3498db"][index % 2]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white dark:bg-navy-900 dark:text-white  p-4 rounded-xl shadow">
-          <h3 className="mb-2 font-semibold text-lg">Daily Request Traffic</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={dailyRequestData}>
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="requests" stroke="#6366f1" />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
       </div>
 
-      {/* Division & Monthly Highlight */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-navy-900 dark:text-white  p-4 rounded-xl shadow">
-          <h3 className="mb-2 font-semibold text-lg">Requests by Division</h3>
-          {divisionStats.map((item, idx) => (
-            <div key={idx} className="flex justify-between border-b py-2">
-              <span>{item.division}</span>
-              <span className="font-semibold">{item.count}</span>
-            </div>
-          ))}
-        </div>
+<div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+      {/* Requests by heatmaps & Repeated complaints */}
+        <div className="bg-white dark:bg-navy-900 dark:text-white p-4 rounded-xl shadow">
+      <h3 className="mb-2 font-semibold text-lg">Requests Heatmap by Coimbatore Divisions</h3>
+      <ResponsiveContainer width="100%" height={districtRequestData.length * 45}>
+        <BarChart
+          data={districtRequestData}
+          layout="vertical"
+          margin={{ top: 20, right: 30, left: 100, bottom: 20 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis type="number">
+            <Label value="Requests" offset={-2} position="insideBottom" />
+          </XAxis>
+          <YAxis
+            dataKey="division"
+            type="category"
+            width={100}
+            interval={0}
+            tick={{ fontSize: 14 }}
+          >
+            <Label
+              value="Divisions"
+              offset={-88}
+              angle={-90}
+              position="insideLeft"
+            />
+          </YAxis>
+          <Tooltip formatter={(value) => [`${value} requests`, "Requests"]} />
+          <Bar dataKey="count" fill="#6366f1" barSize={25} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
 
-        <div className="p-6 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow">
-          <h3 className="text-sm">Requests this Month</h3>
-         
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div className="bg-white dark:bg-navy-900 dark:text-white p-4 rounded-xl shadow">
+  <h3 className="mb-4 font-semibold text-lg">Repeat Complaints by User</h3>
+  {repeatComplaints.length === 0 ? (
+    <p className="text-gray-500">No repeated complaints found.</p>
+  ) : (
+    <div
+      style={{
+        height: `${Math.max(repeatComplaints.length * 80, 300)}px`, 
+      }}
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          layout="vertical"
+          data={repeatComplaints}
+          margin={{ top: 10, right: 30, left: 30, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+
+ <XAxis
+  type="number"
+  domain={[0, 50]}
+  tickCount={11}
+  tick={{ fontSize: 12, fill: '#fff' }}
+  axisLine={{ stroke: "#ccc" }}
+  tickLine={false}
+>
+  <Label
+    value="Number of Repeats"
+    position="insideBottom"
+    offset={-2}
+     style={{ fontSize: 14 }}
+  />
+</XAxis>
+
+<YAxis
+  dataKey="username"
+  type="category"
+  tickFormatter={() => "👤"}
+  width={30}
+  tick={{ fontSize: 18, fill: '#fff' }} 
+  tickLine={false}
+>
+
+</YAxis>
+
+
+          <Tooltip
+  formatter={(value, name) => [`${value}`, name === "repeats" ? "Repeated Complaints" : name]}
+  labelFormatter={(label) => {
+    const item = repeatComplaints.find((d) => d.username === label);
+    return (
+      <div style={{
+        maxWidth: "250px",
+        whiteSpace: "normal",
+        wordWrap: "break-word",
+        overflowWrap: "break-word",
+        lineHeight: "1.4"
+      }}>
+        <strong>👤 {item?.username}</strong><br />
+        🛠️ <span>{item?.services}</span>
+      </div>
+    );
+  }}
+/>
+
+          <Bar
+            dataKey="repeats"
+            fill="#8b5cf6"
+            name="Repeats"
+            barSize={30}
+            radius={[5, 5, 5, 5]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )}
+</div>
+
+  <div className="bg-white dark:bg-navy-900 dark:text-white p-4 rounded-xl shadow">
+      <h3 className="mb-4 font-semibold text-lg">Gender Distribution</h3>
+            <div className="flex justify-center items-center">
+        <div className="w-[220px] h-[270px]">
+          <Doughnut data={chartData} options={options} />
         </div>
       </div>
+    </div>
+</div>
+</div>
+
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {/* Daily Request Traffic Card */}
+ <div className="bg-white dark:bg-navy-900 dark:text-white p-4 rounded-xl shadow h-full">
+  <h3 className="mb-2 font-semibold text-lg">Weekly Request Traffic</h3>
+  <div className="h-[280px]">
+    <ResponsiveContainer width="100%" height="89%">
+      <LineChart data={weeklyRequestData}>
+       <XAxis dataKey="day" >
+            <Label
+              value="Day of Week"
+              position="bottom"
+              offset={-5}
+              style={{ fontSize: 12 }}
+            />
+          </XAxis>
+
+          <YAxis>
+            <Label
+              value="Number of Requests"
+              angle={-90}
+              position="insideLeft"
+              offset={2}
+              style={{ fontSize: 12 }}
+            />
+          </YAxis>
+        <Tooltip
+          formatter={(value) => [`${value} requests`]}
+          labelFormatter={(label, payload) => {
+            const date = payload?.[0]?.payload?.date;
+            return `${label} (${date})`;
+          }}
+        />
+        <Line type="monotone" dataKey="requests" stroke="#6366f1" />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
+  {/* Requests this Month Card */}
+  <div className="bg-white dark:bg-navy-900 dark:text-white p-4 rounded-xl shadow h-full flex flex-col ">
+    <h3 className="mb-2 font-semibold text-lg">Requests this Month</h3>
+    <h1 className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+      {requestCount}
+    </h1>
+    <p className="mt-2">
+      Includes all utility service requests submitted by citizens through the SmartCitizen Portal during{" "}
+      {new Date().toLocaleString("default", { month: "long" })}.
+    </p>
+  </div>
+</div>
     </div>
   );
 };

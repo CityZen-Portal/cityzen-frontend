@@ -51,7 +51,6 @@ const JobApplicationsPost = () => {
           location: "Coimbatore Municipal Corporation HQ",
           lastDate: "2025-08-15",
           requirements: "Bachelor's degree in Civil Engineering with 5+ years experience",
-          salary: "₹45,000 - ₹65,000 per month",
           jobType: "municipal",
           isActive: true,
           contactName: "John Smith",

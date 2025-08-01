@@ -8,7 +8,6 @@ import {
   TrashIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
-  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/solid";
 
 import dayjs from "dayjs";
@@ -41,12 +40,8 @@ export default function AdminDashboard() {
   return (
     <div className="bg-slate-100 flex min-h-screen font-sans text-gray-900 transition-colors duration-300 dark:bg-gray-900 dark:text-white">
       <div className="flex-1 p-6">
-        {showComplaints ? (
-          <ComplaintsTable onBack={() => setShowComplaints(false)} />
-        ) : showRequests ? (
+        {showRequests ? (
           <RequestsTable onBack={() => setShowRequests(false)} />
-        ) : showFeedback ? (
-          <FeedbackTable onBack={() => setShowFeedback(false)} />
         ) : (
           <>
             {/* Stats */}
@@ -61,10 +56,11 @@ export default function AdminDashboard() {
 
             {/* Actions */}
             <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+
               <ActionCard
                 title="View Complaints"
                 description="Monitor all citizen grievances raised across departments."
-                onClick={() => setShowComplaints(true)}
+                onClick={() => navigate("/admin/complaints")}
               />
               <ActionCard
                 title="View Requests"
@@ -74,7 +70,7 @@ export default function AdminDashboard() {
               <ActionCard
                 title="View Messages"
                 description="Review citizen feedback to improve service quality."
-                onClick={() => setShowFeedback(true)}
+                onClick={() => navigate("/admin/services/feedback")}
               />
             </div>
 
@@ -157,6 +153,7 @@ export default function AdminDashboard() {
           </>
         )}
       </div>
+
     </div>
   );
 }
@@ -180,94 +177,6 @@ function ActionCard({ title, description, onClick }) {
   );
 }
 
-// Complaints Table
-function ComplaintsTable({ onBack }) {
-  const complaints = [
-    {
-      id: 1,
-      name: "Priya Sharma",
-      department: "Water",
-      complaint: "No supply in Sector 12",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Amit Verma",
-      department: "Sanitation",
-      complaint: "Garbage not collected for 3 days",
-      status: "In Progress",
-    },
-    {
-      id: 3,
-      name: "Neha Joshi",
-      department: "Electricity",
-      complaint: "Streetlights not working on 5th Avenue",
-      status: "Resolved",
-    },
-    {
-      id: 4,
-      name: "Rahul Mehta",
-      department: "Roads",
-      complaint: "Potholes in front of Block C",
-      status: "Pending",
-    },
-  ];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "text-red-600";
-      case "In Progress":
-        return "text-yellow-600";
-      case "Resolved":
-        return "text-green-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
-      <button
-        className="mb-4 text-lg font-bold text-indigo-600 underline"
-        onClick={onBack}
-      >
-        ← Back
-      </button>
-      <h2 className="mb-4 text-xl font-semibold">Manage Complaints</h2>
-      <table className="w-full border text-left text-sm">
-        <thead className="bg-indigo-50 text-xs uppercase text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200">
-          <tr>
-            <th className="px-4 py-2">#</th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Department</th>
-            <th className="px-4 py-2">Complaint</th>
-            <th className="px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {complaints.map((c) => (
-            <tr key={c.id} className="border-b">
-              <td className="px-4 py-2">{c.id}</td>
-              <td className="px-4 py-2">{c.name}</td>
-              <td className="px-4 py-2">{c.department}</td>
-              <td className="px-4 py-2">{c.complaint}</td>
-              <td
-                className={`px-4 py-2 font-semibold ${getStatusColor(
-                  c.status
-                )}`}
-              >
-                {c.status}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// Requests Table with Hide and Remove
 function RequestsTable({ onBack }) {
   const [requests, setRequests] = useState([
     {
@@ -475,68 +384,6 @@ function RequestsTable({ onBack }) {
   );
 }
 
-// Feedback Table
-function FeedbackTable({ onBack }) {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      name: "Amit Kumar",
-      department: "Electricity",
-      message: "Has my electricity complaint been resolved yet?",
-    },
-    {
-      id: 2,
-      name: "Sunita Mehta",
-      department: "Water",
-      message: "I want to know how to apply for a new water connection.",
-    },
-  ]);
-
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
-      <button
-        className="mb-4 text-lg font-bold text-indigo-600 underline"
-        onClick={onBack}
-      >
-        ← Back
-      </button>
-
-      {/* User Messages Section */}
-      <h2 className="mb-4 text-2xl font-semibold text-gray-800 dark:text-white">
-        User Messages
-      </h2>
-
-      {messages.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-300">No messages yet.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border border-gray-200 text-left text-sm dark:border-gray-600">
-            <thead className="bg-blue-50 text-xs uppercase text-blue-600 dark:bg-blue-900 dark:text-blue-200">
-              <tr>
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">Citizen</th>
-                <th className="px-4 py-2">Department</th>
-                <th className="px-4 py-2">Message</th>
-              </tr>
-            </thead>
-            <tbody>
-              {messages.map((msg, index) => (
-                <tr key={msg.id} className="border-b dark:border-gray-700">
-                  <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2">{msg.name}</td>
-                  <td className="px-4 py-2">{msg.department}</td>
-                  <td className="px-4 py-2">{msg.message}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Calendar component
 function CustomCalendar() {
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [selectedDate, setSelectedDate] = useState(dayjs());

@@ -8,6 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import Footer from "components/footer/FooterAuthDefault";
 import axios from "axios";
 import { Mail, Lock } from "lucide-react";
+import { useUser } from "../../../contexts/UserContext";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function SignIn() {
   const [passwordState, setPasswordState] = useState("");
   const apiurl = process.env.REACT_APP_API_UMS_URL;
   console.log(apiurl);
+  const { login } = useUser();
 
   // Add useEffect to set favicon
   useEffect(() => {
@@ -108,12 +110,15 @@ export default function SignIn() {
       );
       const token = response.data.data.token;
       const roles = response.data.data.roles[0];
-      localStorage.setItem("token", token);
-      localStorage.setItem("username", response.data.data.username);
-      localStorage.setItem("email", response.data.data.email);
-      localStorage.setItem("role", JSON.stringify(roles));
-      localStorage.setItem("id", response.data.data.id);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+login({
+  token: token,
+  username: response.data.data.username,
+  email: response.data.data.email,
+  role: response.data.data.roles, // full array
+  id: response.data.data.id,
+});
+
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 1000,
