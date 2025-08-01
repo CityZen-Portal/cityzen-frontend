@@ -262,7 +262,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-white dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+            className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
               error ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
             }`}
           />
@@ -289,7 +289,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
           onChange={onChange}
           placeholder={placeholder}
           rows={4}
-          className={`w-full px-4 py-3 bg-white dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
+          className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
             error ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
           }`}
         />
@@ -304,7 +304,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gray dark:bg-navy">
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -337,7 +337,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
       )}
 
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-navy-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -369,7 +369,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
                 disabled={isEditMode}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                   currentForm === 'municipal'
-                    ? 'bg-blue-600 text-white shadow-md'
+                    ? 'bg-brand-600 text-white shadow-md'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 } ${isEditMode ? 'cursor-not-allowed opacity-50' : ''}`}
               >
@@ -399,7 +399,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
             /* Municipal Job Form */
             <div className="space-y-8">
               {/* Basic Information Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+              <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
                     <FileText className="text-blue-600 dark:text-blue-400" size={20} />
@@ -464,7 +464,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
               </div>
 
               {/* Requirements Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+              <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
                     <CheckCircle className="text-green-600 dark:text-green-400" size={20} />
@@ -473,20 +473,20 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 dark:text-white">
                     <input
                       type="text"
                       value={newRequirement}
                       onChange={handleRequirementChange}
                       placeholder="Enter a job requirement..."
-                      className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      className="flex-1 px-4 py-3 bg-white dark:bg-navy-800 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                       onKeyPress={handleRequirementKeyPress}
                     />
                     <button
                       type="button"
                       onClick={addRequirement}
                       disabled={!newRequirement.trim()}
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl transition-colors flex items-center gap-2 font-medium"
+                      className="px-6 py-3 bg-brand-500 hover:bg-brand-600 disabled:bg-gray-400 text-white rounded-xl transition-colors flex items-center gap-2 font-medium"
                     >
                       <Plus size={18} />
                       Add
@@ -505,12 +505,12 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
                       <h3 className="font-medium text-gray-700 dark:text-gray-300">Requirements Added:</h3>
                       <div className="space-y-2">
                         {municipalForm.requirements.map((req, index) => (
-                          <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                            <span className="text-gray-700 dark:text-gray-300">{req}</span>
+                          <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-navy-800 rounded-lg p-3">
+                            <span className="text-gray-700 dark:text-gray-300 dark:bg-navy-800">{req}</span>
                             <button
                               type="button"
                               onClick={() => removeRequirement(index)}
-                              className="text-red-500 hover:text-red-700 p-1"
+                              className="dark:text-white dark:hover:text-white p-1"
                             >
                               <X size={16} />
                             </button>
@@ -523,7 +523,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
               </div>
 
               {/* Contact Information Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+              <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
                     <User className="text-purple-600 dark:text-purple-400" size={20} />
@@ -712,14 +712,14 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = nu
           <div className="flex justify-end gap-4">
             <button
               onClick={onCancel}
-              className="px-8 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 rounded-xl transition-colors font-medium flex items-center gap-2"
+              className="px-8 py-3 bg-gray-300 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 rounded-xl transition-colors font-medium flex items-center gap-2"
             >
               <X size={18} />
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2 shadow-lg"
+              className="px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2 shadow-lg"
             >
               <Save size={18} />
               {isEditMode ? 'Update' : 'Post'} {currentForm === 'municipal' ? 'Job' : 'Program'}
