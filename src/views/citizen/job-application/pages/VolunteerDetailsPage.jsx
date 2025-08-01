@@ -35,7 +35,7 @@ const sampleVolunteers = [
   }
 ];
 
-const VolunteerDetailsPage = ({ onBack }) => {
+const VolunteerDetailsPage = () => {
   const {id} = useParams();
   const volunteerId = parseInt(id, 10);
   const [copySuccess, setCopySuccess] = useState(false);

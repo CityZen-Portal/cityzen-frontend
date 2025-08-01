@@ -49,7 +49,7 @@ const sampleJobs = [
   }
 ];
 
-const JobDetailsPage = ({ onBack, bookmarkedJobs, onBookmark }) => {
+const JobDetailsPage = () => {
   const {id} = useParams();
   const jobId = parseInt(id, 10);
   const [copySuccess, setCopySuccess] = useState(false);

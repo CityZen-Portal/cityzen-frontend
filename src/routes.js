@@ -86,6 +86,7 @@ import JobFormPages from "views/admin/job-applications/pages/JobFormPages";
 // import JobDetailsPage from "views/citizen/job-application/pages/JobDetailsPage";
 import JobApplicationSystem from "views/citizen/job-application/pages/JobApplicationSystem";
 import JobDetailsPage from "views/citizen/job-application/pages/JobDetailsPage";
+import VolunteerDetailsPage from "views/citizen/job-application/pages/VolunteerDetailsPage";
 
 
 const routes = [
@@ -212,17 +213,17 @@ const routes = [
     component: <JobApplicationSystem/>,
     children: [
       {
-        name: "Complaint Form",
+        name: "Job Details",
         layout: "/citizen",
-        path: "job-application/details/:id",
+        path: "job-application/job/:id",
         component: <JobDetailsPage />,
       },
-      // {
-      //   name: "Complaint Log",
-      //   layout: "/citizen",
-      //   path: "help-desk/complaint/log",
-      //   component: <ComplaintLog />,
-      // },
+      {
+        name: "Volunteer Details",
+        layout: "/citizen",
+        path: "job-application/volunteer/:id",
+        component: <VolunteerDetailsPage />,
+      },
       // {
       //   name: "Feedback",
       //   layout: "/citizen",

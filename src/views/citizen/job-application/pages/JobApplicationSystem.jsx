@@ -3,8 +3,8 @@ import {
   Building2, Heart, Calendar, Users, 
   AlertTriangle, Search, Filter, Briefcase, TrendingUp
 } from 'lucide-react';
-import JobCard from './JobCard';
-import VolunteerCard from './VolunteerCard';
+import JobCard from '../components/JobCard';
+import VolunteerCard from '../components/VolunteerCard';
 import JobDetailsPage from './JobDetailsPage';
 import VolunteerDetailsPage from './VolunteerDetailsPage';
 import { useNavigate, Routes, Route } from 'react-router-dom';
@@ -153,7 +153,7 @@ const JobApplicationSystem = () => {
   }, []);
 
   // Handle view details
-  const handleViewDetails = useCallback((type, id) => {
+  const handleViewDetails = useCallback((id, type) => {
     if (type === 'municipal') {
       navigate(`/citizen/job-application/job/${id}`);
     } else {
@@ -336,7 +336,7 @@ const JobApplicationSystem = () => {
                     <JobCard 
                       key={job.id} 
                       job={job} 
-                      onViewDetails={(id) => handleViewDetails('municipal', id)}
+                      onViewDetails={(id) => handleViewDetails(id, 'municipal')}
                       isJobExpired={isJobExpired} 
                       formatDate={formatDate} 
                     />
@@ -357,7 +357,7 @@ const JobApplicationSystem = () => {
                     <VolunteerCard 
                       key={volunteer.id} 
                       volunteer={volunteer} 
-                      onViewDetails={(id) => handleViewDetails('volunteer', id)}
+                      onViewDetails={(id) => handleViewDetails(id, 'volunteer')}
                       formatDate={formatDate} 
                     />
                   ))}
@@ -371,14 +371,14 @@ const JobApplicationSystem = () => {
   );
 };
 
-const JobApplicationPage = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<JobApplicationSystem />} />
-      <Route path="/job/:id" element={<JobDetailsPage />} />
-      <Route path="/volunteer/:id" element={<VolunteerDetailsPage />} />
-    </Routes>
-  );
-};
+// const JobApplicationPage = () => {
+//   return (
+//     <Routes>
+//       <Route path="/" element={<JobApplicationSystem />} />
+//       <Route path="/job/:id" element={<JobDetailsPage />} />
+//       <Route path="/volunteer/:id" element={<VolunteerDetailsPage />} />
+//     </Routes>
+//   );
+// };
 
-export default JobApplicationPage;
+export default JobApplicationSystem;
