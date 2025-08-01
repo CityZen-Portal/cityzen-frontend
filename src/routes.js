@@ -75,19 +75,17 @@ import JobApplicationPage from "views/citizen/job-application";
 import ReportForm from "views/citizen/services/components/ReportForm";
 import { layout } from "@chakra-ui/system";
 import Locker from "views/citizen/locker";
-import DocumentInfo from "views/citizen/locker/components/DocumentInfo";import AppliedJobs from "views/citizen/job-application/pages/AppliedJobs";
+import DocumentInfo from "views/citizen/locker/components/DocumentInfo";
 import AdminCityNews from "views/admin/news";
 import AdminAddNews from "views/admin/news/components/AdminAddNews";
-import AdminJobManager from "views/admin/job-applications/pages/JobApplicationsPost";
-// import JobForm from "views/admin/job-applications/pages/JobForm";
-import JobApplicationForm from "views/citizen/job-application/pages/JobApplicationForm";
-// import AdminJobApplicants from "views/admin/job-applications/pages/AdminJobApplicants";
-// import ApplicantDetails from "views/admin/job-applications/pages/ApplicantDetails";
-import JobApplicationResponseView from "views/citizen/job-application/pages/JobApplicationResponseView";
-import JobApplicationEdit from "views/citizen/job-application/pages/JobApplicationEdit";
+// import JobApplicationsPost from "views/admin/job-applications/pages/JobApplicationsPost";
 import NewsHomeDetails from "views/citizen/news/components/NewsHomeDetails";
 import JobApplicationsPost from "views/admin/job-applications/pages/JobApplicationsPost";
 import JobFormPages from "views/admin/job-applications/pages/JobFormPages";
+// import CitizenJobBoard from "views/citizen/job-application/pages/CitizenJobBoard";
+// import JobDetailsPage from "views/citizen/job-application/pages/JobDetailsPage";
+import JobApplicationSystem from "views/citizen/job-application/pages/JobApplicationSystem";
+import JobDetailsPage from "views/citizen/job-application/pages/JobDetailsPage";
 
 
 const routes = [
@@ -211,35 +209,36 @@ const routes = [
     layout: "/citizen",
     path: "job-application",
     icon: <MdWork className="h-6 w-6" />,
-    component: <JobApplicationPage />,
-    
+    component: <JobApplicationSystem/>,
     children: [
-       {
-        name: "Job Application List",
-        layout: "/citizen",
-        path: "job-application/form",
-        component: <JobApplicationForm />,
-      },
       {
-        name: "Job Application List",
+        name: "Complaint Form",
         layout: "/citizen",
-        path: "job-application/applications",
-        component: <AppliedJobs />,
+        path: "job-application/details/:id",
+        component: <JobDetailsPage />,
       },
-      {
-        name: "Job Application List",
-        layout: "/citizen",
-        path: "job-application/response/:jobId",
-        component: <JobApplicationResponseView />,
-      },
-      {
-        name: "Job Application List",
-        layout: "/citizen",
-        path: "job-application/edit/:jobId",
-        component: <JobApplicationEdit />,
-      }
-
-    ]
+      // {
+      //   name: "Complaint Log",
+      //   layout: "/citizen",
+      //   path: "help-desk/complaint/log",
+      //   component: <ComplaintLog />,
+      // },
+      // {
+      //   name: "Feedback",
+      //   layout: "/citizen",
+      //   path: "help-desk/complaint/feedback/:id",
+      //   component: <ComplaintFeedback />,
+      // },
+      // {
+      //   name: "View Complaint",
+      //   layout: "/citizen",
+      //   path: "help-desk/complaint/view/:id",
+      //   component: <ComplaintDetails />,
+      // },
+    ],
+    
+    
+    
   },
 
   // Admin Routes
