@@ -1,11 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import axios from "axios";
 import Pagination from "components/pagination";
-import RequestDetails from "../../../staff/services/component/RequestDetails";
 import {
-  MdOutlineAssignment,
-  MdPendingActions,
-  MdCheckCircleOutline,
   MdArrowUpward,
   MdArrowDownward,
   MdSort,
@@ -13,16 +9,17 @@ import {
 
 const CitizenServiceRequests = () => {
   const [viewingDetails, setViewingDetails] = useState(null);
-  const [sortField, setSortField] = useState("date");
+  const [sortField, setSortField] = useState("requestedDate");
   const [sortDirection, setSortDirection] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const itemsPerPage = 5;
   const [data, setData] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const id=localStorage.getItem("id");
+        const id = localStorage.getItem("id");
         const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/dto/${id}`);
         setData(response.data.data.data);
       } catch (err) {
@@ -32,30 +29,40 @@ const CitizenServiceRequests = () => {
     fetchData();
   }, []);
 
+  const filteredData = useMemo(() => {
+    if (statusFilter === "ALL") return data;
+    return data.filter(
+      (request) => request.status.toUpperCase() === statusFilter.toUpperCase()
+    );
+  }, [data, statusFilter]);
+
   const sortedRequests = useMemo(() => {
-    return [...data].sort((a, b) => {
-      const aVal = a[sortField];
-      const bVal = b[sortField];
-      if (sortField === "date") {
-        return sortDirection === "asc"
-          ? new Date(aVal) - new Date(bVal)
-          : new Date(bVal) - new Date(aVal);
+    return [...filteredData].sort((a, b) => {
+      let aVal = a[sortField];
+      let bVal = b[sortField];
+
+      if (sortField.toLowerCase().includes("date")) {
+        aVal = aVal ? new Date(aVal) : new Date(0);
+        bVal = bVal ? new Date(bVal) : new Date(0);
+        return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
       }
-      if (typeof aVal === "string") {
+
+      if (typeof aVal === "string" && typeof bVal === "string") {
         return sortDirection === "asc"
           ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
+
       return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
     });
-  }, [data, sortField, sortDirection]);
+  }, [filteredData, sortField, sortDirection]);
+
+  const totalPages = Math.ceil(sortedRequests.length / itemsPerPage);
 
   const paginatedRequest = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return sortedRequests.slice(start, start + itemsPerPage);
   }, [sortedRequests, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(sortedRequests.length / itemsPerPage);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -69,38 +76,89 @@ const CitizenServiceRequests = () => {
 
   return (
     <div className="text-slate-800 dark:text-slate-100 rounded-2xl bg-white p-6 dark:bg-navy-800">
+      <div className="flex gap-4 mb-4">
+        {["ALL", "PENDING", "COMPLETED"].map((status) => (
+          <button
+            key={status}
+            onClick={() => {
+              setStatusFilter(status);
+              setCurrentPage(1);
+              setViewingDetails(null);
+            }}
+            className={`px-4 py-2 rounded ${
+              statusFilter === status
+                ? "bg-indigo-600 text-white"
+                : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+            }`}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto rounded-xl">
         <table className="min-w-full border-collapse text-left text-sm">
           <thead className="text-slate-800 dark:text-slate-100 dark:bg-navy-700">
             <tr className="text-xs uppercase tracking-wider">
-              {["service", "date", "status"].map((field) => (
-                <th
-                  key={field}
-                  onClick={() => handleSort(field)}
-                  className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
-                >
-                  <div className="flex items-center gap-1">
-                    {field.charAt(0).toUpperCase() + field.slice(1)}
-                    {sortField === field ? (
-                      sortDirection === "asc" ? (
-                        <MdArrowUpward />
-                      ) : (
-                        <MdArrowDownward />
-                      )
+              <th
+                onClick={() => handleSort("serviceName")}
+                className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
+              >
+                <div className="flex items-center gap-1">
+                  Service
+                  {sortField === "serviceName" ? (
+                    sortDirection === "asc" ? (
+                      <MdArrowUpward />
                     ) : (
-                      <MdSort className="dark:text-slate-500 text-gray-400" />
-                    )}
-                  </div>
-                </th>
-              ))}
+                      <MdArrowDownward />
+                    )
+                  ) : (
+                    <MdSort className="dark:text-slate-500 text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort("requestedDate")}
+                className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
+              >
+                <div className="flex items-center gap-1">
+                  Date
+                  {sortField === "requestedDate" ? (
+                    sortDirection === "asc" ? (
+                      <MdArrowUpward />
+                    ) : (
+                      <MdArrowDownward />
+                    )
+                  ) : (
+                    <MdSort className="dark:text-slate-500 text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort("status")}
+                className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  {sortField === "status" ? (
+                    sortDirection === "asc" ? (
+                      <MdArrowUpward />
+                    ) : (
+                      <MdArrowDownward />
+                    )
+                  ) : (
+                    <MdSort className="dark:text-slate-500 text-gray-400" />
+                  )}
+                </div>
+              </th>
               <th className="px-6 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
             {paginatedRequest.length > 0 ? (
-              paginatedRequest.map((request,idx) => (
+              paginatedRequest.map((request, idx) => (
                 <tr
-                  key={idx}
+                  key={request.serviceId || idx}
                   className="hover:bg-slate-50 border-b bg-white transition-colors dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
                 >
                   <td className="text-slate-900 px-6 py-4 font-medium dark:text-white">
@@ -109,14 +167,14 @@ const CitizenServiceRequests = () => {
                   <td className="px-6 py-4">{request.requestedDate}</td>
                   <td className="px-6 py-4">
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold 
-                        ${
-                          request.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
-                            : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
-                        }`}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        request.status.toUpperCase() === "PENDING"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
+                          : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
+                      }`}
                     >
-                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                      {request.status.charAt(0).toUpperCase() +
+                        request.status.slice(1).toLowerCase()}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -152,11 +210,32 @@ const CitizenServiceRequests = () => {
           />
         </div>
       )}
-        
-      <RequestDetails
-        viewingDetails={viewingDetails}
-        setViewingDetails={setViewingDetails}
-      />
+
+      {viewingDetails && (
+        <div className="mt-8 rounded-xl border border-gray-200 p-6 dark:border-navy-600 dark:bg-navy-900">
+          <h2 className="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">
+            Service Request Details
+          </h2>
+          <p><strong>Service Name:</strong> {viewingDetails.serviceName}</p>
+          <p><strong>Requested Date:</strong> {viewingDetails.requestedDate}</p>
+          <p>
+            <strong>Status:</strong>{" "}
+            {viewingDetails.status.charAt(0).toUpperCase() +
+              viewingDetails.status.slice(1).toLowerCase()}
+          </p>
+          <p><strong>Citizen Name:</strong> {viewingDetails.citizenName}</p>
+          <p><strong>Staff Name:</strong> {viewingDetails.staffName}</p>
+          <p><strong>Completed Date:</strong> {viewingDetails.completedDate || "N/A"}</p>
+          <p><strong>Description:</strong> {viewingDetails.description || "N/A"}</p>
+
+          <button
+            onClick={() => setViewingDetails(null)}
+            className="mt-4 rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          >
+            Close Details
+          </button>
+        </div>
+      )}
     </div>
   );
 };
