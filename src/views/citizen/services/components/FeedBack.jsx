@@ -22,7 +22,9 @@ function FeedBack() {
         data
       );
       toast.success("Feedback submitted!");
-      navigate("/citizen/Services");
+      setTimeout(() => {
+        navigate("/citizen/Services");
+      }, 2000);
     } catch (error) {
       console.error("Error submitting feedback:", error);
       toast.error("Something went wrong. Please try again.");
@@ -49,7 +51,7 @@ function FeedBack() {
             htmlFor="feedbackName"
             className="m-3 block text-base font-semibold text-[#07074D] dark:text-white sm:text-xl"
           >
-            Your Full Name
+            Your FullName
           </label>
           <input
             type="text"
@@ -65,7 +67,7 @@ function FeedBack() {
             htmlFor="feedbackName"
             className="m-3 block text-base font-semibold text-[#07074D] dark:text-white sm:text-xl"
           >
-            Your Full Name
+          Date
           </label>
           <input
             type="date"
