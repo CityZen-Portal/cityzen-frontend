@@ -40,7 +40,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
                 : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
             }`}
           >
-            Give Feedback
+            {!complaint.feedback_isSubmitted ? "Give Feedback" : "Feedback Submitted"}
           </button>
         </td>
       </tr>
