@@ -5,6 +5,7 @@ import { MdAdd, MdSave, MdCancel } from 'react-icons/md';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import MyTextEditor from './MyTextEditor';
 
 const AddNews = () => {
   const navigate = useNavigate();
@@ -205,12 +206,13 @@ const AddNews = () => {
 
         <div className="mb-4">
           <label className="text-sm font-medium">Content</label>
-          <textarea
+             <MyTextEditor/>
+          {/* <textarea
             name="content"
             value={formData.content}
             onChange={handleInputChange}
             className="h-28 w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
-          />
+          /> */}
           {formErrors.content && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
         </div>
 
@@ -225,6 +227,7 @@ const AddNews = () => {
           />
           {formErrors.location && <p className="text-red-500 text-xs mt-1">{formErrors.location}</p>}
         </div>
+     
 
         <div className="mb-4">
           <label className="text-sm font-medium">Category</label>
