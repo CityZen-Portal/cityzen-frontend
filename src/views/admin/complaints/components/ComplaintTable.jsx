@@ -19,7 +19,7 @@ const ComplaintTable = ({ complaints }) => {
     
     const filteredComplaints = filterComplaints(complaints, statusFilter, searchTerm);
   
-    const sortedComplaints = sortComplaints(complaints, sortConfig);
+    const sortedComplaints = sortComplaints(filteredComplaints, sortConfig);
   
     const totalPages = Math.ceil(filteredComplaints.length / rowsPerPage);
     const paginatedComplaints = sortedComplaints.slice(

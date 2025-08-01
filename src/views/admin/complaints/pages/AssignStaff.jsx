@@ -22,7 +22,7 @@ const deptList = [
   { id: 2, name: 'Water Supply' },
   { id: 3, name: 'Electricity' },
   { id: 4, name: 'Roads & Infrastructure' },
-  { id: 5, name: 'Sewerage' },
+  { id: 5, name: 'Seweage' },
   { id: 6, name: 'Urban Planning' },
   { id: 7, name: 'Parks & Horticulture' },
   { id: 8, name: 'Pollution Control' },
