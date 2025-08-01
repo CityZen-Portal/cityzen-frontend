@@ -56,10 +56,10 @@ const ComplaintDetails = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900';
-      case 'under review': return 'bg-amber-100 text-amber-800 dark:bg-amber-200 dark:text-amber-900';
+      case 'under-review': return 'bg-amber-100 text-amber-800 dark:bg-amber-200 dark:text-amber-900';
       case 'assigned': return 'bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900';
-      case 'in progress': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-200 dark:text-indigo-900';
-      case 'on hold': return 'bg-gray-200 text-gray-700 dark:bg-gray-400 dark:text-gray-900';
+      case 'in-progress': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-200 dark:text-indigo-900';
+      case 'on-hold': return 'bg-gray-200 text-gray-700 dark:bg-gray-400 dark:text-gray-900';
       case 'resolved': return 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900';
       case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-200 dark:text-red-900';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-200 dark:text-gray-900';
@@ -69,10 +69,10 @@ const ComplaintDetails = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'pending': return 'Pending';
-      case 'under review': return 'Under Review';
+      case 'under-review': return 'Under Review';
       case 'assigned': return 'Assigned';
-      case 'in progress': return 'In Progress';
-      case 'on hold': return 'On Hold';
+      case 'in-progress': return 'In Progress';
+      case 'on-hold': return 'On Hold';
       case 'resolved': return 'Resolved';
       case 'rejected': return 'Rejected';
       default: return status ?status.charAt(0).toUpperCase() + status.slice(1) : "Pending";
