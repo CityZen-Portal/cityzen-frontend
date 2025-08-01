@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-  Building2, MapPin, Calendar, Clock, AlertTriangle, Eye
-} from 'lucide-react';
+import { Building2, MapPin, Calendar, AlertTriangle, Eye } from 'lucide-react';
 
 const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
   const expired = isJobExpired(job);
@@ -13,9 +11,7 @@ const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
     >
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <h3 className={`text-xl font-bold line-clamp-2 flex-1 ${
-            job.jobType === 'municipal' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
-          }`}>
+          <h3 className={`text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400`}>
             {job.title}
           </h3>
           {expired && (
@@ -30,13 +26,12 @@ const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
           {job.description}
         </p>
 
-        {/* Job Details */}
         <div className="space-y-4">
-          <div className={`${job.jobType === 'municipal' ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-green-50 dark:bg-green-900/20'} rounded-lg p-3`}>
-            <div className={`flex items-center gap-2 ${job.jobType === 'municipal' ? 'text-blue-700 dark:text-blue-300' : 'text-green-700 dark:text-green-300'}`}>
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <Building2 size={16} />
               <div>
-                <p className={`text-xs ${job.jobType === 'municipal' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'}`}>Department</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">Department</p>
                 <p className="font-medium">{job.department}</p>
               </div>
             </div>
@@ -52,47 +47,21 @@ const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
             </div>
           </div>
 
-          {job.lastDate && (
-            <div className={`${expired ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'} rounded-lg p-3`}>
-              <div className={`flex items-center gap-2 ${expired ? 'text-red-700 dark:text-red-300' : 'text-orange-700 dark:text-orange-300'}`}>
-                <Calendar size={16} />
-                <div>
-                  <p className={`text-xs ${expired ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                    Application Deadline
-                  </p>
-                  <p className="font-medium">
-                    {formatDate(job.lastDate)} {expired && (
-                      <span className="text-red-600 dark:text-red-400 text-xs ml-1">EXPIRED</span>
-                    )}
-                  </p>
-                </div>
+          <div className={`${expired ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'} rounded-lg p-3`}>
+            <div className={`flex items-center gap-2 ${expired ? 'text-red-700 dark:text-red-300' : 'text-orange-700 dark:text-orange-300'}`}>
+              <Calendar size={16} />
+              <div>
+                <p className={`text-xs ${expired ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                  Application Deadline
+                </p>
+                <p className="font-medium">
+                  {formatDate(job.deadline)} {expired && (
+                    <span className="text-red-600 dark:text-red-400 text-xs ml-1">EXPIRED</span>
+                  )}
+                </p>
               </div>
             </div>
-          )}
-
-          {job.workDate && (
-            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
-                <Calendar size={16} />
-                <div>
-                  <p className="text-xs text-orange-600 dark:text-orange-400">Program Date</p>
-                  <p className="font-medium">{formatDate(job.workDate)}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {job.workTime && (
-            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
-                <Clock size={16} />
-                <div>
-                  <p className="text-xs text-indigo-600 dark:text-indigo-400">Time</p>
-                  <p className="font-medium">{job.workTime}</p>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
 
         <button
@@ -100,11 +69,7 @@ const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
             e.stopPropagation();
             onViewDetails(job.id);
           }}
-          className={`w-full mt-6 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center ${
-            job.jobType === 'municipal'
-              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-              : 'bg-green-600 hover:bg-green-700 text-white'
-          }`}
+          className="w-full mt-6 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Eye size={16} />
           View Details

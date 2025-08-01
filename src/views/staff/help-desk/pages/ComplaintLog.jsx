@@ -45,7 +45,7 @@ const ComplaintLog = () => {
         .finally(() => {
           setLoading(false);
         });
-  }, []);
+  }, [citizenId, email, token, HELPDESK_API]);
 
   const iconMap = {
     pending: MdPendingActions,

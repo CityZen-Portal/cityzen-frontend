@@ -54,7 +54,7 @@ const ComplaintDetails = () => {
         .finally(() => {
           setLoading(false);
         });
-  }, [id, complaint.id, token, email, citizenId])
+  }, [id, complaint.id, token, email, citizenId, HELPDESK_API, navigate])
 
   const getStatusColor = (status) => {
     switch (status) {
