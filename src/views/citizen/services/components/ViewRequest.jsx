@@ -3,6 +3,8 @@ import axios from "axios";
 
 export default function ViewRequest() {
   const [userData, setUserData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
 
   useEffect(() => {
     const id = localStorage.getItem("id");
@@ -14,12 +16,12 @@ export default function ViewRequest() {
         );
         console.log("API Response:", response.data);
 
-       if (response.data?.data?.length > 0) {
-         const shownRequests = response.data.data.filter(
-           (req) => req.show === false
-         );
-         setUserData(shownRequests); // store only show === true
-       }
+        if (response.data?.data?.length > 0) {
+          const shownRequests = response.data.data.filter(
+            (req) => req.show === false
+          );
+          setUserData(shownRequests);
+        }
       } catch (err) {
         console.error(err);
       }
@@ -30,14 +32,21 @@ export default function ViewRequest() {
     }
   }, []);
 
+  // Pagination logic
+  const totalPages = Math.ceil(userData.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentItems = userData.slice(indexOfFirst, indexOfLast);
+
   return (
     <div className="p-6">
       <h2 className="mb-8 text-center text-3xl font-bold text-blue-600">
         Your Service Requests
       </h2>
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {userData.length > 0 ? (
-          userData.map((item, index) => (
+        {currentItems.length > 0 ? (
+          currentItems.map((item, index) => (
             <div
               key={index}
               className="rounded-lg border border-gray-200 bg-white p-6 shadow-lg dark:border-navy-900 dark:bg-navy-700 dark:text-white"
@@ -70,6 +79,43 @@ export default function ViewRequest() {
           </p>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-center space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`rounded px-3 py-1 ${
+                currentPage === i + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
