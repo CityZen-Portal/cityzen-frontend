@@ -35,12 +35,12 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
             }}
             disabled={complaint.status !== 'resolved'}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-              complaint.status === 'resolved'
+              complaint.status === 'resolved' && !complaint?.feedback?.isSubmitted
                 ? 'bg-brand-500 text-white hover:bg-brand-600'
                 : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
             }`}
           >
-            {!complaint.feedback_isSubmitted ? "Give Feedback" : "Feedback Submitted"}
+            {!complaint?.feedback?.isSubmitted ? "Give Feedback" : "Feedback Submitted"}
           </button>
         </td>
       </tr>
