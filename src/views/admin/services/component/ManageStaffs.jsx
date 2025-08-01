@@ -32,6 +32,7 @@ const PAGE_SIZE = 6;
 
 function ManageStaffs() {
   const navigate = useNavigate();
+
   const [departments, setDepartments] = useState([]);
   const [staffs, setStaffs] = useState(null);
   const [filteredStaffs, setFilteredStaffs] = useState([]);
@@ -45,6 +46,8 @@ function ManageStaffs() {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [resetRequestStaffIds, setResetRequestStaffIds] = useState([]);
+
 
   useEffect(() => {
     const fetchDepartment = async () => {
@@ -198,17 +201,40 @@ function ManageStaffs() {
     }
   };
 
-  const resetPasswordHandler = async (id) => {
+const resetPasswordHandler = async (email) => {
+  try {
+    await axios.put(
+      `https://utility-booking-backend.onrender.com/api/staff/resend-password/${encodeURIComponent(email)}`
+    );
+    toast.success("Password reset link sent.");
+
+    setStaffs((prev) =>
+      prev.map((staff) =>
+        staff.emailAddress === email
+          ? { ...staff, requestToResetPassword: false }
+          : staff
+      )
+    );
+  } catch (error) {
+    console.error("Password reset error:", error);
+    toast.error("Failed to send reset link.");
+  }
+};
+
+useEffect(() => {
+  const fetchResetPasswordRequests = async () => {
     try {
-      await axios.post(
-        `https://utility-booking-backend.onrender.com/api/staff/${id}/reset-password`
+      const response = await axios.get(
+        "https://utility-booking-backend.onrender.com/api/staff/reset-password-request/688b49083f074e456ee154c9?isRequestToResetPassword=true"
       );
-      toast.success("Password reset link sent.");
-    } catch {
-      toast.error("Failed to reset password.");
+      const idsWithResetRequests = response.data?.data ?? [];
+      setResetRequestStaffIds(idsWithResetRequests);
+    } catch (error) {
+      setResetRequestStaffIds([]);
     }
   };
-
+  fetchResetPasswordRequests();
+}, []);
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -230,25 +256,32 @@ function ManageStaffs() {
     fetchStaff();
   }, [refreshTrigger]);
 
-  useEffect(() => {
-    let filtered = staffs || [];
-    if (selectedDepartment) {
-      filtered = filtered.filter(
-        (staff) => staff.department === selectedDepartment
-      );
-    }
-    if (searchText.trim()) {
-      const query = searchText.toLowerCase();
-      filtered = filtered.filter(
-        (staff) =>
-          (staff.fullName && staff.fullName.toLowerCase().includes(query)) ||
-          (staff.contactNumber && staff.contactNumber.includes(query)) ||
-          (staff.emailAddress && staff.emailAddress.toLowerCase().includes(query))
-      );
-    }
-    setFilteredStaffs(filtered);
-    setCurrentPage(1);
-  }, [searchText, staffs, selectedDepartment]);
+useEffect(() => {
+  let filtered = staffs || [];
+  if (selectedDepartment) {
+    filtered = filtered.filter(
+      (staff) => staff.department === selectedDepartment
+    );
+  }
+  if (searchText.trim()) {
+    const query = searchText.toLowerCase();
+    filtered = filtered.filter(
+      (staff) =>
+        (staff.fullName && staff.fullName.toLowerCase().includes(query)) ||
+        (staff.contactNumber && staff.contactNumber.includes(query)) ||
+        (staff.emailAddress && staff.emailAddress.toLowerCase().includes(query))
+    );
+  }
+  filtered.sort((a, b) => {
+    const aPriority = a.requestToResetPassword ? 0 : 1;
+    const bPriority = b.requestToResetPassword ? 0 : 1;
+    return aPriority - bPriority;
+  });
+
+
+  setFilteredStaffs(filtered);
+  setCurrentPage(1);
+}, [searchText, staffs, selectedDepartment, resetRequestStaffIds]);
 
   const totalStaffs = filteredStaffs.length;
   const totalPages = Math.ceil(totalStaffs / PAGE_SIZE);
@@ -352,6 +385,11 @@ function ManageStaffs() {
                         <div>
                           <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                             {staff.fullName}
+                          {staff.requestToResetPassword && (
+  <span className="text-xs font-semibold text-red-600 ml-2">
+    Reset Requested
+  </span>
+)}
                           </h3>
                           <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
                             {staff.department}
@@ -386,11 +424,11 @@ function ManageStaffs() {
                     </div>
                   </div>
                   <button
-                    onClick={() => resetPasswordHandler(staff.id)}
-                    className="text-sm text-blue-600 hover:underline"
-                  >
+                   onClick={() => resetPasswordHandler(staff.emailAddress)}
+                    className="flex-1 text-white py-2 rounded-md"
+                                       >
                     Reset Password
-                  </button>
+                     </button>
                   <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
                     <button
                       onClick={() => handleOpen(staff)}
