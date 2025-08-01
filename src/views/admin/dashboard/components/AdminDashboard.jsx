@@ -19,6 +19,66 @@ import ServiceRequestsCard from "./cards/ServiceRequestsCard";
 import FeedbackReceivedCard from "./cards/FeedbackReceivedCard";
 import StaffTasksCard from "./cards/StaffTasksCard";
 import CitizenRegisteredCard from "./cards/CitizenRegisteredCard";
+import axios from "axios";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
+
+const PageNavigator = ({ filteredComplaints, rowsPerPage, currentPage, totalPages, handlePageChange, pageNumbers }) => {
+  if (filteredComplaints.length <= rowsPerPage) return null;
+
+  return (
+    <div className="mt-6 flex flex-col items-center space-y-3">
+      <p className="text-sm text-gray-600 dark:text-gray-300">
+        Page {currentPage} of {totalPages}
+      </p>
+      <div className="flex items-center justify-center gap-1">
+        <button
+          onClick={() => handlePageChange(1)}
+          disabled={currentPage === 1}
+          className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+        >
+          First
+        </button>
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+        >
+          <MdChevronLeft />
+        </button>
+        {pageNumbers.map((num) => (
+          <button
+            key={num}
+            onClick={() => handlePageChange(num)}
+            className={`flex h-8 w-8 items-center justify-center rounded px-2 py-1 ${
+              currentPage === num
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white'
+            }`}
+          >
+            {num}
+          </button>
+        ))}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+        >
+          <MdChevronRight />
+        </button>
+        <button
+          onClick={() => handlePageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+        >
+          Last
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -26,6 +86,57 @@ export default function AdminDashboard() {
   const [showRequests, setShowRequests] = useState(false);
   const [showComplaints, setShowComplaints] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+
+  const [complaints, setComplaints] = useState([]);
+const [currentPage, setCurrentPage] = useState(1);
+const [rowsPerPage] = useState(5);
+
+// Calculate pagination values
+const totalPages = Math.ceil(complaints.length / rowsPerPage);
+const currentComplaints = complaints.slice(
+  (currentPage - 1) * rowsPerPage,
+  currentPage * rowsPerPage
+);
+
+// Generate page numbers (e.g., [1, 2, 3])
+const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+// Handle page change
+const handlePageChange = (page) => {
+  setCurrentPage(page);
+};
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+
+  useEffect( () => {
+    axios.get(`${HELPDESK_API}/admin/complaints`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setComplaints(data);
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+        });
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -82,68 +193,50 @@ export default function AdminDashboard() {
             <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
               {/* Civic Issue Summary */}
               <div className="col-span-2 rounded-2xl bg-white p-6 shadow-lg transition-colors dark:bg-gray-800">
-                <div className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-white">
-                  📋 <span>Civic Issue Summary</span>
-                </div>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-black dark:text-gray-300">
-                      <th className="pb-2">Name</th>
-                      <th className="pb-2">Status</th>
-                      <th className="pb-2">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      {
-                        name: "Road Maintenance",
-                        status: "Approved",
-                        icon: (
-                          <CheckCircleIcon className="h-5 w-5 text-gray-500" />
-                        ),
-                        date: "24Jan'25"
-                      },
-                      {
-                        name: "Garbage Collection",
-                        status: "Disable",
-                        icon: <XCircleIcon className="h-5 w-5 text-gray-500" />,
-                        date: "15Feb'25"
-                      },
-                      {
-                        name: "Street Light Repair",
-                        status: "Error",
-                        icon: (
-                          <ExclamationTriangleIcon className="h-5 w-5 text-gray-500" />
-                        ),
-                        date: "20Mar'25"
-                      },
-                      {
-                        name: "Water Leakage",
-                        status: "Approved",
-                        icon: (
-                          <CheckCircleIcon className="h-5 w-5 text-gray-500" />
-                        ),
-                        date: "12Apr'25"
-                      },
-                    ].map((item, i) => (
-                      <tr
-                        key={i}
-                        className="border-t border-gray-200 dark:border-gray-700"
-                      >
-                        <td className="py-3 font-medium text-black dark:text-white">
-                          {item.name}
-                        </td>
-                        <td className="flex items-center gap-2 py-3 text-black dark:text-white">
-                          {item.icon} {item.status}
-                        </td>
-                        <td className="py-3 text-black dark:text-white">
-                          {item.date}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+  <div className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-white">
+    📋 <span>Civic Issue Summary</span>
+  </div>
+  <table className="w-full text-sm">
+  <colgroup>
+    <col className="w-[40%]" />  {/* Name column - 40% width */}
+    <col className="w-[35%]" />  {/* Status column - 35% width */}
+    <col className="w-[25%]" />  {/* Date column - 25% width (reduced) */}
+  </colgroup>
+  <thead>
+    <tr className="text-left text-black dark:text-gray-300">
+      <th className="pb-2 pr-2">Name</th>  {/* Added pr-2 for right padding */}
+      <th className="pb-2 pr-2">Status</th> {/* Added pr-2 for right padding */}
+      <th className="pb-2">Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {currentComplaints.map((item, i) => (
+      <tr key={i} className="border-t border-gray-200 dark:border-gray-700">
+        <td className="py-3 font-medium text-black dark:text-white pr-2 truncate">
+          {item.category}
+        </td>
+        <td className="flex items-center gap-2 py-3 text-black dark:text-white pr-2 truncate">
+          {item.icon}{" "}
+          {item.status
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())}
+        </td>
+        <td className="py-3 text-black dark:text-white truncate">
+          {item.complaintDate.split("T")[0]}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+  <PageNavigator
+  filteredComplaints={complaints}
+  rowsPerPage={rowsPerPage}
+  currentPage={currentPage}
+  totalPages={totalPages}
+  handlePageChange={handlePageChange}
+  pageNumbers={pageNumbers}
+/>
+</div>
 
 
               {/* Calendar */}
@@ -597,6 +690,7 @@ function CustomCalendar() {
           </div>
         ))}
       </div>
+      <ToastContainer />
     </div>
   );
 }
