@@ -1,9 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Plus, FilePen, Briefcase, MapPin, Calendar, Users,
-  Building2, ToggleLeft, ToggleRight, Trash2, Filter,
-  Heart, Award, Clock, Search
-} from 'lucide-react';
+  MdAddCircleOutline,
+  MdEdit,
+  MdWork,
+  MdLocationOn,
+  MdCalendarToday,
+  MdPeople,
+  MdBusiness,
+  MdToggleOff,
+  MdToggleOn,
+  MdDelete,
+  MdFilterList,
+  MdFavorite,
+  MdEmojiEvents,
+  MdAccessTime,
+  MdSearch
+} from 'react-icons/md';
+
 import JobFormPages from './JobFormPages'; // Import the JobFormPages component
 
 const JobApplicationsPost = () => {
@@ -245,7 +258,7 @@ const JobApplicationsPost = () => {
   if (showJobForm) {
     return (
       <JobFormPages 
-        jobType={selectedJobType}
+        jobType={selectedJobType} 
         onSubmit={handleJobFormSubmit}
         onCancel={handleJobFormCancel}
         editData={editingJob}
@@ -255,14 +268,14 @@ const JobApplicationsPost = () => {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 dark:bg-navy-900 min-h-screen">
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                <Trash2 className="text-red-600 dark:text-red-400" size={24} />
+                <MdDelete className="text-red-600 dark:text-red-400" size={24} />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Job Posting</h3>
@@ -292,7 +305,7 @@ const JobApplicationsPost = () => {
       )}
 
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div>
@@ -302,16 +315,16 @@ const JobApplicationsPost = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => handleAddJob('municipal')}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
+                className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
               >
-                <Building2 size={20} />
+                <MdBusiness size={16} />
                 Add Municipal Job
               </button>
               <button
                 onClick={() => handleAddJob('volunteer')}
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
               >
-                <Heart size={20} />
+                <MdFavorite size={20} />
                 Add Volunteer Job
               </button>
             </div>
@@ -322,9 +335,9 @@ const JobApplicationsPost = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {jobs.length === 0 ? (
           <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-12 max-w-lg shadow-lg">
+            <div className="text-center bg-white dark:bg-navy-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-12 max-w-lg shadow-lg">
               <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Briefcase className="text-white" size={40} />
+                <MdWork className="text-white" size={40} />
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">No Job Postings Yet</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
@@ -336,14 +349,14 @@ const JobApplicationsPost = () => {
                   onClick={() => handleAddJob('municipal')}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium inline-flex items-center gap-2"
                 >
-                  <Building2 size={20} />
+                  <MdBusiness size={16} />
                   Create Municipal Job
                 </button>
                 <button
                   onClick={() => handleAddJob('volunteer')}
                   className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium inline-flex items-center gap-2"
                 >
-                  <Heart size={20} />
+                  <MdFavorite size={20} />
                   Create Volunteer Job
                 </button>
               </div>
@@ -355,23 +368,23 @@ const JobApplicationsPost = () => {
             <div className="flex flex-col lg:flex-row gap-6 mb-8">
               {/* Search Bar */}
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
                   placeholder="Search jobs, departments, locations..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                 />
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="flex items-center gap-2 bg-white dark:bg-navy-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                 <button
                   onClick={() => setActiveFilter('all')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     activeFilter === 'all'
-                      ? 'bg-gray-900 text-white shadow-md'
+                      ? 'bg-brand-500 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -381,7 +394,7 @@ const JobApplicationsPost = () => {
                   onClick={() => setActiveFilter('active')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     activeFilter === 'active'
-                      ? 'bg-green-600 text-white shadow-md'
+                      ? 'bg-brand-500 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -391,7 +404,7 @@ const JobApplicationsPost = () => {
                   onClick={() => setActiveFilter('inactive')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     activeFilter === 'inactive'
-                      ? 'bg-gray-600 text-white shadow-md'
+                      ? 'bg-brand-500 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -401,7 +414,7 @@ const JobApplicationsPost = () => {
                   onClick={() => setActiveFilter('municipal')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     activeFilter === 'municipal'
-                      ? 'bg-blue-600 text-white shadow-md'
+                      ? 'bg-brand-500 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -411,7 +424,7 @@ const JobApplicationsPost = () => {
                   onClick={() => setActiveFilter('volunteer')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     activeFilter === 'volunteer'
-                      ? 'bg-orange-600 text-white shadow-md'
+                      ? 'bg-brand-500 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -422,7 +435,7 @@ const JobApplicationsPost = () => {
 
             {/* Results Info */}
             <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-6">
-              <Filter size={16} />
+              <MdFilterList size={16} />
               <span className="text-sm">
                 Showing {filteredJobs.length} of {allJobs} job{allJobs !== 1 ? 's' : ''}
                 {searchTerm && ` matching "${searchTerm}"`}
@@ -433,7 +446,7 @@ const JobApplicationsPost = () => {
             {filteredJobs.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="text-gray-400" size={24} />
+                  <MdSearch className="text-gray-400" size={24} />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No jobs found</h3>
                 <p className="text-gray-500 dark:text-gray-400">
@@ -448,10 +461,10 @@ const JobApplicationsPost = () => {
                 {filteredJobs.map((job) => (
                   <div
                     key={job.id}
-                    className={`bg-white dark:bg-gray-800 rounded-2xl border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${
+                    className={`bg-white dark:bg-navy-800 rounded-2xl border border-slate-700 flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${
                       job.isActive 
                         ? 'border-gray-200 dark:border-gray-700' 
-                        : 'border-gray-300 dark:border-gray-600 opacity-75'
+                        : 'border-gray-300 dark:border-gray-600 opacity-50'
                     }`}
                   >
                     {/* Job Type Badge */}
@@ -464,12 +477,12 @@ const JobApplicationsPost = () => {
                         }`}>
                           {job.jobType === 'municipal' ? (
                             <>
-                              <Building2 size={16} />
+                              <MdBusiness size={16} />
                               Municipal
                             </>
                           ) : (
                             <>
-                              <Heart size={16} />
+                              <MdFavorite size={16} />
                               Volunteer
                             </>
                           )}
@@ -482,12 +495,12 @@ const JobApplicationsPost = () => {
                         >
                           {job.isActive ? (
                             <>
-                              <ToggleRight className="text-green-500" size={20} />
+                              <MdToggleOn className="text-green-500" size={20} />
                               <span className="text-green-600 dark:text-green-400 font-medium">Active</span>
                             </>
                           ) : (
                             <>
-                              <ToggleLeft className="text-gray-400" size={20} />
+                              <MdToggleOff className="text-gray-400" size={20} />
                               <span className="text-gray-500 dark:text-gray-400 font-medium">Inactive</span>
                             </>
                           )}
@@ -502,24 +515,24 @@ const JobApplicationsPost = () => {
                       {/* Job Details */}
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <Building2 size={16} />
+                          <MdBusiness size={16} />
                           <span className="text-sm">{job.department}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <MapPin size={16} />
+                          <MdLocationOn size={16} />
                           <span className="text-sm line-clamp-1">{job.location}</span>
                         </div>
                         {/* Only show application deadline for municipal jobs */}
                         {job.jobType === 'municipal' && job.lastDate && (
                           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <Calendar size={16} />
+                            <MdCalendarToday size={16} />
                             <span className="text-sm">Apply by: {job.lastDate}</span>
                           </div>
                         )}
                         {/* Show program date for volunteer jobs */}
                         {job.jobType === 'volunteer' && job.workDate && (
                           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <Calendar size={16} />
+                            <MdCalendarToday size={16} />
                             <span className="text-sm">Date: {job.workDate}</span>
                           </div>
                         )}
@@ -534,7 +547,7 @@ const JobApplicationsPost = () => {
                       {job.jobType === 'municipal' && job.salary && (
                         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 mb-4">
                           <div className="flex items-center gap-2">
-                            <Award className="text-green-600 dark:text-green-400" size={16} />
+                            <MdEmojiEvents className="text-green-600 dark:text-green-400" size={16} />
                             <span className="text-green-700 dark:text-green-300 font-medium text-sm">
                               {job.salary}
                             </span>
@@ -544,20 +557,18 @@ const JobApplicationsPost = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="px-6 pb-6">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(job)}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 justify-center"
-                        >
-                          <FilePen size={16} />
+                    <div className="mt-auto pt-4">
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={()=>handleEdit(job)}
+                          className="w-1/2 flex mb-3 ml-2 items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg">
+                          <MdEdit size={18} />
                           Edit
                         </button>
-                        <button
-                          onClick={() => handleDeleteClick(job)}
-                          className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
-                        >
-                          <Trash2 size={16} />
+                        <button 
+                          onClick={()=>handleDeleteClick(job)}
+                          className="w-1/2 flex mb-3 mr-2 items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg">
+                          <MdDelete size={18} />
                           Delete
                         </button>
                       </div>
