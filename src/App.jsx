@@ -54,7 +54,7 @@ const App = () => {
         <Route
           path="admin/*"
           element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
+             <ProtectedRoute requiredRole="ROLE_ADMIN">
               <AdminLayout />
              </ProtectedRoute>
           }
@@ -62,9 +62,9 @@ const App = () => {
         <Route
           path="staff/*"
           element={
-            <ProtectedRoute requiredRole="ROLE_STAFF">
+             <ProtectedRoute requiredRole="ROLE_STAFF">
               <StaffLayout />
-            </ProtectedRoute>
+             </ProtectedRoute>
           }
         />
         <Route path="/*" element={<CitizenLayout />} />

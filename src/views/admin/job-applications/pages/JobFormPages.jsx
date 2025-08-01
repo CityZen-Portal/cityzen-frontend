@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   Building2, Heart, Save, X, Plus, Trash2, MapPin, Calendar,
   User, Phone, Mail, FileText, AlertCircle, CheckCircle,
   ArrowLeft, Clock, Users, Award
 } from 'lucide-react';
 
-const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
-  const [currentForm, setCurrentForm] = useState(jobType);
+const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel, editData = null, isEditMode = false }) => {
+  const [currentForm, setCurrentForm] = useState(editData ? editData.jobType : jobType);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Municipal Job Form State
+  // Municipal Job Form State (removed salary field)
   const [municipalForm, setMunicipalForm] = useState({
     title: '',
     department: '',
     description: '',
     location: '',
     requirements: [],
-    salary: '',
     lastDate: '',
     contactName: '',
     contactPhone: '',
@@ -25,7 +26,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
   });
   const [newRequirement, setNewRequirement] = useState('');
 
-  // Volunteer Job Form State
+  // Volunteer Job Form State (removed compensation and lastDate fields)
   const [volunteerForm, setVolunteerForm] = useState({
     title: '',
     description: '',
@@ -33,8 +34,6 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
     workDate: '',
     workTime: '',
     duration: '',
-    compensation: '',
-    lastDate: '',
     contactName: '',
     contactPhone: '',
     contactEmail: '',
@@ -43,27 +42,104 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
 
   const [errors, setErrors] = useState({});
 
+  // Initialize form data when in edit mode
+  useEffect(() => {
+    if (isEditMode && editData) {
+      if (editData.jobType === 'municipal') {
+        setMunicipalForm({
+          title: editData.title || '',
+          department: editData.department || '',
+          description: editData.description || '',
+          location: editData.location || '',
+          requirements: editData.requirements ? editData.requirements.split('; ').filter(req => req.trim()) : [],
+          lastDate: editData.lastDate || '',
+          contactName: editData.contactName || '',
+          contactPhone: editData.contactPhone || '',
+          contactEmail: editData.contactEmail || '',
+          contactAddress: editData.contactAddress || ''
+        });
+      } else {
+        setVolunteerForm({
+          title: editData.title || '',
+          description: editData.description || '',
+          location: editData.location || '',
+          workDate: editData.workDate || '',
+          workTime: editData.workTime || '',
+          duration: editData.duration || '',
+          contactName: editData.contactName || '',
+          contactPhone: editData.contactPhone || '',
+          contactEmail: editData.contactEmail || '',
+          contactAddress: editData.contactAddress || ''
+        });
+      }
+    }
+  }, [isEditMode, editData]);
+
+  // Stable handlers to prevent re-rendering issues
+  const handleMunicipalFormChange = useCallback((field) => {
+    return (e) => {
+      const value = e.target.value;
+      setMunicipalForm(prev => ({ ...prev, [field]: value }));
+      // Clear error when user starts typing
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: '' }));
+      }
+    };
+  }, [errors]);
+
+  const handleVolunteerFormChange = useCallback((field) => {
+    return (e) => {
+      const value = e.target.value;
+      setVolunteerForm(prev => ({ ...prev, [field]: value }));
+      // Clear error when user starts typing
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: '' }));
+      }
+    };
+  }, [errors]);
+
   // Add requirement for municipal job
-  const addRequirement = () => {
+  const addRequirement = useCallback(() => {
     if (newRequirement.trim() && !municipalForm.requirements.includes(newRequirement.trim())) {
       setMunicipalForm(prev => ({
         ...prev,
         requirements: [...prev.requirements, newRequirement.trim()]
       }));
       setNewRequirement('');
+      // Clear requirements error
+      if (errors.requirements) {
+        setErrors(prev => ({ ...prev, requirements: '' }));
+      }
+      toast.success('Requirement added successfully!');
+    } else if (municipalForm.requirements.includes(newRequirement.trim())) {
+      toast.warning('This requirement already exists!');
     }
-  };
+  }, [newRequirement, municipalForm.requirements, errors.requirements]);
 
   // Remove requirement
-  const removeRequirement = (index) => {
+  const removeRequirement = useCallback((index) => {
     setMunicipalForm(prev => ({
       ...prev,
       requirements: prev.requirements.filter((_, i) => i !== index)
     }));
-  };
+    toast.info('Requirement removed');
+  }, []);
+
+  // Handle requirement input change
+  const handleRequirementChange = useCallback((e) => {
+    setNewRequirement(e.target.value);
+  }, []);
+
+  // Handle requirement key press
+  const handleRequirementKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addRequirement();
+    }
+  }, [addRequirement]);
 
   // Validate forms
-  const validateMunicipalForm = () => {
+  const validateMunicipalForm = useCallback(() => {
     const newErrors = {};
     if (!municipalForm.title.trim()) newErrors.title = 'Job title is required';
     if (!municipalForm.department.trim()) newErrors.department = 'Department is required';
@@ -75,25 +151,50 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
     if (!municipalForm.contactPhone.trim()) newErrors.contactPhone = 'Contact phone is required';
     if (!municipalForm.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
     if (!municipalForm.contactAddress.trim()) newErrors.contactAddress = 'Contact address is required';
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (municipalForm.contactEmail.trim() && !emailRegex.test(municipalForm.contactEmail.trim())) {
+      newErrors.contactEmail = 'Please enter a valid email address';
+    }
+    
+    // Phone validation
+    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+    if (municipalForm.contactPhone.trim() && !phoneRegex.test(municipalForm.contactPhone.trim())) {
+      newErrors.contactPhone = 'Please enter a valid phone number';
+    }
+    
     return newErrors;
-  };
+  }, [municipalForm]);
 
-  const validateVolunteerForm = () => {
+  const validateVolunteerForm = useCallback(() => {
     const newErrors = {};
     if (!volunteerForm.title.trim()) newErrors.title = 'Program title is required';
     if (!volunteerForm.description.trim()) newErrors.description = 'Program description is required';
     if (!volunteerForm.location.trim()) newErrors.location = 'Location is required';
     if (!volunteerForm.workDate) newErrors.workDate = 'Program date is required';
-    if (!volunteerForm.lastDate) newErrors.lastDate = 'Application deadline is required';
     if (!volunteerForm.contactName.trim()) newErrors.contactName = 'Contact name is required';
     if (!volunteerForm.contactPhone.trim()) newErrors.contactPhone = 'Contact phone is required';
     if (!volunteerForm.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
     if (!volunteerForm.contactAddress.trim()) newErrors.contactAddress = 'Contact address is required';
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (volunteerForm.contactEmail.trim() && !emailRegex.test(volunteerForm.contactEmail.trim())) {
+      newErrors.contactEmail = 'Please enter a valid email address';
+    }
+    
+    // Phone validation
+    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+    if (volunteerForm.contactPhone.trim() && !phoneRegex.test(volunteerForm.contactPhone.trim())) {
+      newErrors.contactPhone = 'Please enter a valid phone number';
+    }
+    
     return newErrors;
-  };
+  }, [volunteerForm]);
 
   // Handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     const newErrors = currentForm === 'municipal' ? validateMunicipalForm() : validateVolunteerForm();
     
     if (Object.keys(newErrors).length === 0) {
@@ -102,93 +203,122 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
         ...municipalForm,
         jobType: 'municipal',
         requirements: municipalForm.requirements.join('; '),
-        department: municipalForm.department || 'General'
+        department: municipalForm.department || 'General',
+        ...(isEditMode && editData ? { id: editData.id, isActive: editData.isActive } : {})
       } : {
         ...volunteerForm,
         jobType: 'volunteer',
         department: 'Community Service',
-        requirements: 'Community service mindset and willingness to help'
+        requirements: 'Community service mindset and willingness to help',
+        ...(isEditMode && editData ? { id: editData.id, isActive: editData.isActive } : {})
       };
 
       // Show success message
       setShowSuccess(true);
+      toast.success(`${currentForm === 'municipal' ? 'Municipal job' : 'Volunteer opportunity'} ${isEditMode ? 'updated' : 'posted'} successfully!`);
       
       // Call onSubmit after a delay
       setTimeout(() => {
         setShowSuccess(false);
-        onSubmit(jobData);
+        onSubmit(jobData, isEditMode);
         
-        // Reset form
-        if (currentForm === 'municipal') {
-          setMunicipalForm({
-            title: '', department: '', description: '', location: '', requirements: [], 
-            salary: '', lastDate: '', contactName: '', contactPhone: '', contactEmail: '', contactAddress: ''
-          });
-        } else {
-          setVolunteerForm({
-            title: '', description: '', location: '', workDate: '', workTime: '',
-            duration: '', compensation: '', lastDate: '', contactName: '', contactPhone: '', contactEmail: '', contactAddress: ''
-          });
+        // Reset form only if not in edit mode
+        if (!isEditMode) {
+          if (currentForm === 'municipal') {
+            setMunicipalForm({
+              title: '', department: '', description: '', location: '', requirements: [], 
+              lastDate: '', contactName: '', contactPhone: '', contactEmail: '', contactAddress: ''
+            });
+          } else {
+            setVolunteerForm({
+              title: '', description: '', location: '', workDate: '', workTime: '',
+              duration: '', contactName: '', contactPhone: '', contactEmail: '', contactAddress: ''
+            });
+          }
         }
+        setErrors({});
       }, 2000);
     } else {
       setErrors(newErrors);
+      // Show validation errors with toastify
+      const errorCount = Object.keys(newErrors).length;
+      toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
     }
-  };
+  }, [currentForm, validateMunicipalForm, validateVolunteerForm, municipalForm, volunteerForm, onSubmit, isEditMode, editData]);
 
-  const InputField = ({ label, type = 'text', value, onChange, error, placeholder, icon: Icon, required = false }) => (
-    <div className="space-y-2">
-      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <div className="relative">
-        {Icon && (
-          <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+  // Stable InputField component using useMemo
+  const InputField = useMemo(() => {
+    return React.memo(({ label, type = 'text', value, onChange, error, placeholder, icon: Icon, required = false }) => (
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        <div className="relative">
+          {Icon && (
+            <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          )}
+          <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-white dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+              error ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+            }`}
+          />
+        </div>
+        {error && (
+          <div className="flex items-center gap-2 text-red-600 text-sm">
+            <AlertCircle size={16} />
+            {error}
+          </div>
         )}
-        <input
-          type={type}
+      </div>
+    ));
+  }, []);
+
+  // Stable TextAreaField component using useMemo
+  const TextAreaField = useMemo(() => {
+    return React.memo(({ label, value, onChange, error, placeholder, required = false }) => (
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        <textarea
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-white dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+          rows={4}
+          className={`w-full px-4 py-3 bg-white dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
             error ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
           }`}
         />
+        {error && (
+          <div className="flex items-center gap-2 text-red-600 text-sm">
+            <AlertCircle size={16} />
+            {error}
+          </div>
+        )}
       </div>
-      {error && (
-        <div className="flex items-center gap-2 text-red-600 text-sm">
-          <AlertCircle size={16} />
-          {error}
-        </div>
-      )}
-    </div>
-  );
-
-  const TextAreaField = ({ label, value, onChange, error, placeholder, required = false }) => (
-    <div className="space-y-2">
-      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <textarea
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        rows={4}
-        className={`w-full px-4 py-3 bg-white dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-          error ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-        }`}
-      />
-      {error && (
-        <div className="flex items-center gap-2 text-red-600 text-sm">
-          <AlertCircle size={16} />
-          {error}
-        </div>
-      )}
-    </div>
-  );
+    ));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+
       {/* Success Modal */}
       {showSuccess && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -199,7 +329,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Success!</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                {currentForm === 'municipal' ? 'Municipal job' : 'Volunteer opportunity'} has been posted successfully.
+                {currentForm === 'municipal' ? 'Municipal job' : 'Volunteer opportunity'} has been {isEditMode ? 'updated' : 'posted'} successfully.
               </p>
             </div>
           </div>
@@ -219,37 +349,41 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Create {currentForm === 'municipal' ? 'Municipal Job' : 'Volunteer Program'}
+                  {isEditMode ? 'Edit' : 'Create'} {currentForm === 'municipal' ? 'Municipal Job' : 'Volunteer Program'}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {currentForm === 'municipal' 
-                    ? 'Post a new government position' 
-                    : 'Create a community service opportunity'
+                  {isEditMode 
+                    ? `Update the ${currentForm === 'municipal' ? 'government position' : 'community service opportunity'}`
+                    : currentForm === 'municipal' 
+                      ? 'Post a new government position' 
+                      : 'Create a community service opportunity'
                   }
                 </p>
               </div>
             </div>
             
-            {/* Form Type Toggle */}
+            {/* Form Type Toggle - Disabled in edit mode */}
             <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
               <button
-                onClick={() => setCurrentForm('municipal')}
+                onClick={() => !isEditMode && setCurrentForm('municipal')}
+                disabled={isEditMode}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                   currentForm === 'municipal'
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
+                } ${isEditMode ? 'cursor-not-allowed opacity-50' : ''}`}
               >
                 <Building2 size={18} />
                 <span className="font-medium">Municipal</span>
               </button>
               <button
-                onClick={() => setCurrentForm('volunteer')}
+                onClick={() => !isEditMode && setCurrentForm('volunteer')}
+                disabled={isEditMode}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                   currentForm === 'volunteer'
                     ? 'bg-green-600 text-white shadow-md'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
+                } ${isEditMode ? 'cursor-not-allowed opacity-50' : ''}`}
               >
                 <Heart size={18} />
                 <span className="font-medium">Volunteer</span>
@@ -278,7 +412,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     <InputField
                       label="Job Title"
                       value={municipalForm.title}
-                      onChange={(e) => setMunicipalForm(prev => ({ ...prev, title: e.target.value }))}
+                      onChange={handleMunicipalFormChange('title')}
                       error={errors.title}
                       placeholder="e.g., Senior Civil Engineer"
                       icon={Building2}
@@ -289,39 +423,10 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                   <InputField
                     label="Department"
                     value={municipalForm.department}
-                    onChange={(e) => setMunicipalForm(prev => ({ ...prev, department: e.target.value }))}
+                    onChange={handleMunicipalFormChange('department')}
                     error={errors.department}
                     placeholder="e.g., Public Works Department"
                     icon={Building2}
-                    required
-                  />
-                  
-                  <InputField
-                    label="Location"
-                    value={municipalForm.location}
-                    onChange={(e) => setMunicipalForm(prev => ({ ...prev, location: e.target.value }))}
-                    error={errors.location}
-                    placeholder="e.g., Coimbatore Municipal Corporation"
-                    icon={MapPin}
-                    required
-                  />
-
-                  <InputField
-                    label="Salary Range"
-                    value={municipalForm.salary}
-                    onChange={(e) => setMunicipalForm(prev => ({ ...prev, salary: e.target.value }))}
-                    error={errors.salary}
-                    placeholder="e.g., ₹45,000 - ₹65,000 per month"
-                    icon={Award}
-                  />
-
-                  <InputField
-                    label="Application Deadline"
-                    type="date"
-                    value={municipalForm.lastDate}
-                    onChange={(e) => setMunicipalForm(prev => ({ ...prev, lastDate: e.target.value }))}
-                    error={errors.lastDate}
-                    icon={Calendar}
                     required
                   />
                   
@@ -329,12 +434,32 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     <TextAreaField
                       label="Job Description"
                       value={municipalForm.description}
-                      onChange={(e) => setMunicipalForm(prev => ({ ...prev, description: e.target.value }))}
+                      onChange={handleMunicipalFormChange('description')}
                       error={errors.description}
                       placeholder="Describe the job responsibilities, duties, and expectations..."
                       required
                     />
                   </div>
+                  
+                  <InputField
+                    label="Location"
+                    value={municipalForm.location}
+                    onChange={handleMunicipalFormChange('location')}
+                    error={errors.location}
+                    placeholder="e.g., Coimbatore Municipal Corporation"
+                    icon={MapPin}
+                    required
+                  />
+
+                  <InputField
+                    label="Application Deadline"
+                    type="date"
+                    value={municipalForm.lastDate}
+                    onChange={handleMunicipalFormChange('lastDate')}
+                    error={errors.lastDate}
+                    icon={Calendar}
+                    required
+                  />
                 </div>
               </div>
 
@@ -352,10 +477,10 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     <input
                       type="text"
                       value={newRequirement}
-                      onChange={(e) => setNewRequirement(e.target.value)}
+                      onChange={handleRequirementChange}
                       placeholder="Enter a job requirement..."
                       className="flex-1 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRequirement())}
+                      onKeyPress={handleRequirementKeyPress}
                     />
                     <button
                       type="button"
@@ -410,7 +535,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                   <InputField
                     label="Contact Person Name"
                     value={municipalForm.contactName}
-                    onChange={(e) => setMunicipalForm(prev => ({ ...prev, contactName: e.target.value }))}
+                    onChange={handleMunicipalFormChange('contactName')}
                     error={errors.contactName}
                     placeholder="e.g., John Smith"
                     icon={User}
@@ -420,7 +545,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                   <InputField
                     label="Contact Phone"
                     value={municipalForm.contactPhone}
-                    onChange={(e) => setMunicipalForm(prev => ({ ...prev, contactPhone: e.target.value }))}
+                    onChange={handleMunicipalFormChange('contactPhone')}
                     error={errors.contactPhone}
                     placeholder="e.g., +91 98765 43210"
                     icon={Phone}
@@ -431,7 +556,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     label="Contact Email"
                     type="email"
                     value={municipalForm.contactEmail}
-                    onChange={(e) => setMunicipalForm(prev => ({ ...prev, contactEmail: e.target.value }))}
+                    onChange={handleMunicipalFormChange('contactEmail')}
                     error={errors.contactEmail}
                     placeholder="e.g., hr@municipality.gov.in"
                     icon={Mail}
@@ -442,7 +567,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     <TextAreaField
                       label="Contact Address"
                       value={municipalForm.contactAddress}
-                      onChange={(e) => setMunicipalForm(prev => ({ ...prev, contactAddress: e.target.value }))}
+                      onChange={handleMunicipalFormChange('contactAddress')}
                       error={errors.contactAddress}
                       placeholder="Complete address for applications and inquiries..."
                       required
@@ -468,7 +593,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     <InputField
                       label="Program Title"
                       value={volunteerForm.title}
-                      onChange={(e) => setVolunteerForm(prev => ({ ...prev, title: e.target.value }))}
+                      onChange={handleVolunteerFormChange('title')}
                       error={errors.title}
                       placeholder="e.g., Community Health Awareness Drive"
                       icon={Heart}
@@ -476,10 +601,21 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     />
                   </div>
                   
+                  <div className="lg:col-span-2">
+                    <TextAreaField
+                      label="Program Description"
+                      value={volunteerForm.description}
+                      onChange={handleVolunteerFormChange('description')}
+                      error={errors.description}
+                      placeholder="Describe the volunteer program, activities, and goals..."
+                      required
+                    />
+                  </div>
+                  
                   <InputField
                     label="Location"
                     value={volunteerForm.location}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, location: e.target.value }))}
+                    onChange={handleVolunteerFormChange('location')}
                     error={errors.location}
                     placeholder="e.g., Ward 15, R.S. Puram"
                     icon={MapPin}
@@ -490,7 +626,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     label="Program Date"
                     type="date"
                     value={volunteerForm.workDate}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, workDate: e.target.value }))}
+                    onChange={handleVolunteerFormChange('workDate')}
                     error={errors.workDate}
                     icon={Calendar}
                     required
@@ -499,7 +635,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                   <InputField
                     label="Program Time"
                     value={volunteerForm.workTime}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, workTime: e.target.value }))}
+                    onChange={handleVolunteerFormChange('workTime')}
                     error={errors.workTime}
                     placeholder="e.g., 9:00 AM - 5:00 PM"
                     icon={Clock}
@@ -508,41 +644,11 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                   <InputField
                     label="Duration"
                     value={volunteerForm.duration}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, duration: e.target.value }))}
+                    onChange={handleVolunteerFormChange('duration')}
                     error={errors.duration}
-                    placeholder="e.g., 1 day / 1 week / 1 month"
-                    icon={Clock}
+                    placeholder="e.g., 1 day, 2 weeks, ongoing"
+                    icon={Users}
                   />
-
-                  <InputField
-                    label="Compensation/Benefits"
-                    value={volunteerForm.compensation}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, compensation: e.target.value }))}
-                    error={errors.compensation}
-                    placeholder="e.g., Certificate + ₹5,000 allowance"
-                    icon={Award}
-                  />
-
-                  <InputField
-                    label="Application Deadline"
-                    type="date"
-                    value={volunteerForm.lastDate}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, lastDate: e.target.value }))}
-                    error={errors.lastDate}
-                    icon={Calendar}
-                    required
-                  />
-                  
-                  <div className="lg:col-span-2">
-                    <TextAreaField
-                      label="Program Description"
-                      value={volunteerForm.description}
-                      onChange={(e) => setVolunteerForm(prev => ({ ...prev, description: e.target.value }))}
-                      error={errors.description}
-                      placeholder="Describe the volunteer program, activities, and expectations..."
-                      required
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -559,7 +665,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                   <InputField
                     label="Contact Person Name"
                     value={volunteerForm.contactName}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, contactName: e.target.value }))}
+                    onChange={handleVolunteerFormChange('contactName')}
                     error={errors.contactName}
                     placeholder="e.g., Sarah Johnson"
                     icon={User}
@@ -569,7 +675,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                   <InputField
                     label="Contact Phone"
                     value={volunteerForm.contactPhone}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, contactPhone: e.target.value }))}
+                    onChange={handleVolunteerFormChange('contactPhone')}
                     error={errors.contactPhone}
                     placeholder="e.g., +91 98765 43210"
                     icon={Phone}
@@ -580,7 +686,7 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     label="Contact Email"
                     type="email"
                     value={volunteerForm.contactEmail}
-                    onChange={(e) => setVolunteerForm(prev => ({ ...prev, contactEmail: e.target.value }))}
+                    onChange={handleVolunteerFormChange('contactEmail')}
                     error={errors.contactEmail}
                     placeholder="e.g., volunteer@municipality.gov.in"
                     icon={Mail}
@@ -591,9 +697,9 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
                     <TextAreaField
                       label="Contact Address"
                       value={volunteerForm.contactAddress}
-                      onChange={(e) => setVolunteerForm(prev => ({ ...prev, contactAddress: e.target.value }))}
+                      onChange={handleVolunteerFormChange('contactAddress')}
                       error={errors.contactAddress}
-                      placeholder="Complete address for applications and inquiries..."
+                      placeholder="Complete address for volunteer coordination..."
                       required
                     />
                   </div>
@@ -608,19 +714,15 @@ const JobFormPages = ({ jobType = 'municipal', onSubmit, onCancel }) => {
               onClick={onCancel}
               className="px-8 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 rounded-xl transition-colors font-medium flex items-center gap-2"
             >
-              <X size={20} />
+              <X size={18} />
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              className={`px-8 py-3 rounded-xl transition-colors font-medium flex items-center gap-2 ${
-                currentForm === 'municipal'
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white rounded-xl transition-all duration-200 font-medium flex items-center gap-2 shadow-lg"
             >
-              <Save size={20} />
-              Post {currentForm === 'municipal' ? 'Job' : 'Program'}
+              <Save size={18} />
+              {isEditMode ? 'Update' : 'Post'} {currentForm === 'municipal' ? 'Job' : 'Program'}
             </button>
           </div>
         </div>

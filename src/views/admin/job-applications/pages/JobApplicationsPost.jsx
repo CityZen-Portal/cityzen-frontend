@@ -14,6 +14,8 @@ const JobApplicationsPost = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showJobForm, setShowJobForm] = useState(false);
   const [selectedJobType, setSelectedJobType] = useState('municipal');
+  const [editingJob, setEditingJob] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Load jobs from localStorage or initialize with sample data
   const loadJobs = useCallback(() => {
@@ -38,7 +40,11 @@ const JobApplicationsPost = () => {
           requirements: "Bachelor's degree in Civil Engineering with 5+ years experience",
           salary: "₹45,000 - ₹65,000 per month",
           jobType: "municipal",
-          isActive: true
+          isActive: true,
+          contactName: "John Smith",
+          contactPhone: "+91 98765 43210",
+          contactEmail: "hr@municipality.gov.in",
+          contactAddress: "Coimbatore Municipal Corporation, Town Hall Road, Coimbatore - 641001"
         },
         {
           id: "2",
@@ -46,11 +52,16 @@ const JobApplicationsPost = () => {
           description: "Support community health initiatives in Ward 15. Assist in health awareness campaigns, vaccination drives, and basic health screening programs for residents.",
           department: "Health & Welfare",
           location: "Ward 15, R.S. Puram",
-          lastDate: "2025-08-20",
           requirements: "12th pass with basic health knowledge, willingness to serve community",
-          compensation: "₹5,000 monthly allowance + certificates",
           jobType: "volunteer",
-          isActive: true
+          isActive: true,
+          workDate: "2025-08-20",
+          workTime: "9:00 AM - 5:00 PM",
+          duration: "1 week",
+          contactName: "Sarah Johnson",
+          contactPhone: "+91 98765 43211",
+          contactEmail: "volunteer@municipality.gov.in",
+          contactAddress: "Ward Office, R.S. Puram, Coimbatore - 641002"
         },
         {
           id: "3",
@@ -62,7 +73,11 @@ const JobApplicationsPost = () => {
           requirements: "Master's degree in Urban Planning or related field",
           salary: "₹35,000 - ₹50,000 per month",
           jobType: "municipal",
-          isActive: true
+          isActive: true,
+          contactName: "Michael Brown",
+          contactPhone: "+91 98765 43212",
+          contactEmail: "planning@municipality.gov.in",
+          contactAddress: "Urban Planning Department, Coimbatore Municipal Corporation"
         },
         {
           id: "4",
@@ -70,11 +85,16 @@ const JobApplicationsPost = () => {
           description: "Help maintain community gardens in Ward 8, organize gardening workshops, and promote sustainable urban farming among residents.",
           department: "Environment & Parks",
           location: "Ward 8, Gandhipuram",
-          lastDate: "2025-07-30",
           requirements: "Interest in gardening, basic knowledge of plants, community service mindset",
-          compensation: "Certificate of appreciation + skill development",
           jobType: "volunteer",
-          isActive: false
+          isActive: false,
+          workDate: "2025-08-30",
+          workTime: "6:00 AM - 10:00 AM",
+          duration: "ongoing",
+          contactName: "Emily Davis",
+          contactPhone: "+91 98765 43213",
+          contactEmail: "parks@municipality.gov.in",
+          contactAddress: "Parks Department, Ward 8, Gandhipuram, Coimbatore"
         }
       ];
       const sortedJobs = sortJobs(sampleJobs);
@@ -145,12 +165,16 @@ const JobApplicationsPost = () => {
     localStorage.setItem('jobs', JSON.stringify(sortedJobs));
   }, [jobs]);
 
-  const handleEdit = useCallback((id) => {
-    // Edit functionality can be implemented here
-    console.log('Edit job:', id);
+  const handleEdit = useCallback((job) => {
+    setEditingJob(job);
+    setIsEditMode(true);
+    setSelectedJobType(job.jobType);
+    setShowJobForm(true);
   }, []);
 
   const handleAddJob = useCallback((jobType) => {
+    setEditingJob(null);
+    setIsEditMode(false);
     setSelectedJobType(jobType);
     setShowJobForm(true);
   }, []);
@@ -177,19 +201,39 @@ const JobApplicationsPost = () => {
   }, []);
 
   // Handle job form submission
-  const handleJobFormSubmit = useCallback((jobData) => {
-    const newJob = {
-      id: Date.now().toString(),
-      ...jobData,
-      isActive: true
-    };
+  const handleJobFormSubmit = useCallback((jobData, isEdit = false) => {
+    if (isEdit && editingJob) {
+      // Update existing job
+      const updatedJobs = jobs.map(job => 
+        job.id.toString() === editingJob.id.toString() ? { ...jobData, id: editingJob.id } : job
+      );
+      const sortedJobs = sortJobs(updatedJobs);
+      setJobs(sortedJobs);
+      localStorage.setItem('jobs', JSON.stringify(sortedJobs));
+    } else {
+      // Add new job
+      const newJob = {
+        id: Date.now().toString(),
+        ...jobData,
+        isActive: true
+      };
+      
+      const updatedJobs = [...jobs, newJob];
+      const sortedJobs = sortJobs(updatedJobs);
+      setJobs(sortedJobs);
+      localStorage.setItem('jobs', JSON.stringify(sortedJobs));
+    }
     
-    const updatedJobs = [...jobs, newJob];
-    const sortedJobs = sortJobs(updatedJobs);
-    setJobs(sortedJobs);
-    localStorage.setItem('jobs', JSON.stringify(sortedJobs));
     setShowJobForm(false);
-  }, [jobs]);
+    setEditingJob(null);
+    setIsEditMode(false);
+  }, [jobs, editingJob]);
+
+  const handleJobFormCancel = useCallback(() => {
+    setShowJobForm(false);
+    setEditingJob(null);
+    setIsEditMode(false);
+  }, []);
 
   // Get job counts
   const allJobs = jobs.length;
@@ -204,7 +248,9 @@ const JobApplicationsPost = () => {
       <JobFormPages 
         jobType={selectedJobType}
         onSubmit={handleJobFormSubmit}
-        onCancel={() => setShowJobForm(false)}
+        onCancel={handleJobFormCancel}
+        editData={editingJob}
+        isEditMode={isEditMode}
       />
     );
   }
@@ -285,7 +331,8 @@ const JobApplicationsPost = () => {
               <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
                 Start by creating your first municipal or volunteer job posting to connect with qualified candidates.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {/* Fixed button alignment - single row */}
+              <div className="flex flex-row gap-3 justify-center">
                 <button
                   onClick={() => handleAddJob('municipal')}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium inline-flex items-center gap-2"
@@ -378,26 +425,27 @@ const JobApplicationsPost = () => {
             <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-6">
               <Filter size={16} />
               <span className="text-sm">
-                Showing {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''}
+                Showing {filteredJobs.length} of {allJobs} job{allJobs !== 1 ? 's' : ''}
                 {searchTerm && ` matching "${searchTerm}"`}
               </span>
             </div>
 
             {/* Jobs Grid */}
             {filteredJobs.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[40vh]">
-                <div className="text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 max-w-md">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search className="text-gray-500 dark:text-gray-400" size={24} />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Results Found</h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Try adjusting your search or filter criteria
-                  </p>
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="text-gray-400" size={24} />
                 </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No jobs found</h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {searchTerm 
+                    ? `No jobs match your search for "${searchTerm}"`
+                    : 'No jobs match the selected filter'
+                  }
+                </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredJobs.map((job) => (
                   <div
                     key={job.id}
@@ -462,10 +510,20 @@ const JobApplicationsPost = () => {
                           <MapPin size={16} />
                           <span className="text-sm line-clamp-1">{job.location}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <Calendar size={16} />
-                          <span className="text-sm">Apply by: {job.lastDate}</span>
-                        </div>
+                        {/* Only show application deadline for municipal jobs */}
+                        {job.jobType === 'municipal' && job.lastDate && (
+                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                            <Calendar size={16} />
+                            <span className="text-sm">Apply by: {job.lastDate}</span>
+                          </div>
+                        )}
+                        {/* Show program date for volunteer jobs */}
+                        {job.jobType === 'volunteer' && job.workDate && (
+                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                            <Calendar size={16} />
+                            <span className="text-sm">Date: {job.workDate}</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Description */}
@@ -473,24 +531,13 @@ const JobApplicationsPost = () => {
                         {job.description}
                       </p>
 
-                      {/* Salary/Compensation */}
-                      {job.salary && (
+                      {/* Salary (only for municipal jobs) */}
+                      {job.jobType === 'municipal' && job.salary && (
                         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 mb-4">
                           <div className="flex items-center gap-2">
                             <Award className="text-green-600 dark:text-green-400" size={16} />
                             <span className="text-green-700 dark:text-green-300 font-medium text-sm">
                               {job.salary}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {job.compensation && (
-                        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 mb-4">
-                          <div className="flex items-center gap-2">
-                            <Award className="text-orange-600 dark:text-orange-400" size={16} />
-                            <span className="text-orange-700 dark:text-orange-300 font-medium text-sm">
-                              {job.compensation}
                             </span>
                           </div>
                         </div>
@@ -501,7 +548,7 @@ const JobApplicationsPost = () => {
                     <div className="px-6 pb-6">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleEdit(job.id)}
+                          onClick={() => handleEdit(job)}
                           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors font-medium text-sm flex items-center gap-2 justify-center"
                         >
                           <FilePen size={16} />
