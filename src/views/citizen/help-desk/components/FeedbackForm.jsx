@@ -190,12 +190,14 @@ const FeedbackForm = () => {
         </div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          className="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-full font-bold text-base shadow-md transition"
-        >
-          Submit
-        </button>
+        <div className="text-center pt-2 sm:pt-4">
+            <button
+              type="submit"
+              className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-md transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              Submit
+            </button>
+          </div>
       </form>
 
       <ToastContainer />
