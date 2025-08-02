@@ -14,7 +14,7 @@ export default function ViewRequest() {
         const response = await axios.get(
           `https://utility-booking-backend.onrender.com/api/services/request/citizen/${id}`
         );
-        console.log("API Response:", response.data);
+        // console.log("API Response:", response.data);
 
         if (response.data?.data?.length > 0) {
           const shownRequests = response.data.data.filter(
