@@ -58,13 +58,29 @@ export const UserProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setUser({ token: null, username: null, email: null, role: null, id: null });
+    // Reset state
+    setUser({
+      token: null,
+      username: null,
+      email: null,
+      role: null,
+      id: null,
+    });
+
+    // Clear only auth-related items
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("email");
     localStorage.removeItem("role");
     localStorage.removeItem("id");
+
+    // If you want to wipe all localStorage (uncomment next line)
+    // localStorage.clear();
+
+    // Remove default Authorization header
     delete axios.defaults.headers.common["Authorization"];
+
+    // UI can react instantly
     setReady(true);
   };
 
