@@ -1,34 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  MdAddCircleOutline,
-  MdEdit,
-  MdWork,
-  MdLocationOn,
-  MdCalendarToday,
-  MdPeople,
-  MdBusiness,
-  MdToggleOff,
-  MdToggleOn,
-  MdDelete,
-  MdFilterList,
-  MdFavorite,
-  MdEmojiEvents,
-  MdAccessTime,
-  MdSearch
+ MdWork,
+ MdBusiness,
+ MdDelete,
+ MdFavorite,
+ MdSearch
 } from 'react-icons/md';
 
-import JobFormPages from './JobFormPages'; // Import the JobFormPages component
+import JobCard from '../components/JobCard';
 
 const JobApplicationsPost = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jobToDelete, setJobToDelete] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showJobForm, setShowJobForm] = useState(false);
-  const [selectedJobType, setSelectedJobType] = useState('municipal');
-  const [editingJob, setEditingJob] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
 
   // Load jobs from localStorage or initialize with sample data
   const loadJobs = useCallback(() => {
@@ -178,18 +166,12 @@ const JobApplicationsPost = () => {
   }, [jobs]);
 
   const handleEdit = useCallback((job) => {
-    setEditingJob(job);
-    setIsEditMode(true);
-    setSelectedJobType(job.jobType);
-    setShowJobForm(true);
-  }, []);
+    navigate(`/admin/job-applications/edit/${job.jobType}/${job.id}`);
+  }, [navigate]);
 
   const handleAddJob = useCallback((jobType) => {
-    setEditingJob(null);
-    setIsEditMode(false);
-    setSelectedJobType(jobType);
-    setShowJobForm(true);
-  }, []);
+    navigate(`/admin/job-applications/add/${jobType}`);
+  }, [navigate]);
 
   const handleDeleteClick = useCallback((job) => {
     setJobToDelete(job);
@@ -212,41 +194,6 @@ const JobApplicationsPost = () => {
     setJobToDelete(null);
   }, []);
 
-  // Handle job form submission
-  const handleJobFormSubmit = useCallback((jobData, isEdit = false) => {
-    if (isEdit && editingJob) {
-      // Update existing job
-      const updatedJobs = jobs.map(job => 
-        job.id.toString() === editingJob.id.toString() ? { ...jobData, id: editingJob.id } : job
-      );
-      const sortedJobs = sortJobs(updatedJobs);
-      setJobs(sortedJobs);
-      localStorage.setItem('jobs', JSON.stringify(sortedJobs));
-    } else {
-      // Add new job
-      const newJob = {
-        id: Date.now().toString(),
-        ...jobData,
-        isActive: true
-      };
-      
-      const updatedJobs = [...jobs, newJob];
-      const sortedJobs = sortJobs(updatedJobs);
-      setJobs(sortedJobs);
-      localStorage.setItem('jobs', JSON.stringify(sortedJobs));
-    }
-    
-    setShowJobForm(false);
-    setEditingJob(null);
-    setIsEditMode(false);
-  }, [jobs, editingJob]);
-
-  const handleJobFormCancel = useCallback(() => {
-    setShowJobForm(false);
-    setEditingJob(null);
-    setIsEditMode(false);
-  }, []);
-
   // Get job counts
   const allJobs = jobs.length;
   const activeJobs = jobs.filter(job => job.isActive).length;
@@ -254,18 +201,6 @@ const JobApplicationsPost = () => {
   const municipalJobs = jobs.filter(job => job.jobType === 'municipal').length;
   const volunteerJobs = jobs.filter(job => job.jobType === 'volunteer').length;
   const filteredJobs = getFilteredJobs();
-
-  if (showJobForm) {
-    return (
-      <JobFormPages 
-        jobType={selectedJobType} 
-        onSubmit={handleJobFormSubmit}
-        onCancel={handleJobFormCancel}
-        editData={editingJob}
-        isEditMode={isEditMode}
-      />
-    );
-  }
 
   return (
     <div className="bg-gray-50 dark:bg-navy-900 min-h-screen">
@@ -343,7 +278,6 @@ const JobApplicationsPost = () => {
               <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
                 Start by creating your first municipal or volunteer job posting to connect with qualified candidates.
               </p>
-              {/* Fixed button alignment - single row */}
               <div className="flex flex-row gap-3 justify-center">
                 <button
                   onClick={() => handleAddJob('municipal')}
@@ -433,147 +367,23 @@ const JobApplicationsPost = () => {
               </div>
             </div>
 
-            {/* Results Info */}
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-6">
-              <MdFilterList size={16} />
-              <span className="text-sm">
-                Showing {filteredJobs.length} of {allJobs} job{allJobs !== 1 ? 's' : ''}
-                {searchTerm && ` matching "${searchTerm}"`}
-              </span>
-            </div>
-
             {/* Jobs Grid */}
             {filteredJobs.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MdSearch className="text-gray-400" size={24} />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No jobs found</h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  {searchTerm 
-                    ? `No jobs match your search for "${searchTerm}"`
-                    : 'No jobs match the selected filter'
-                  }
+                <p className="text-gray-500 dark:text-gray-400 text-lg">
+                  No jobs found matching your criteria.
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredJobs.map((job) => (
-                  <div
+                  <JobCard
                     key={job.id}
-                    className={`bg-white dark:bg-navy-800 rounded-2xl border border-slate-700 flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${
-                      job.isActive 
-                        ? 'border-gray-200 dark:border-gray-700' 
-                        : 'border-gray-300 dark:border-gray-600 opacity-50'
-                    }`}
-                  >
-                    {/* Job Type Badge */}
-                    <div className="p-6 pb-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                          job.jobType === 'municipal'
-                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                            : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                        }`}>
-                          {job.jobType === 'municipal' ? (
-                            <>
-                              <MdBusiness size={16} />
-                              Municipal
-                            </>
-                          ) : (
-                            <>
-                              <MdFavorite size={16} />
-                              Volunteer
-                            </>
-                          )}
-                        </div>
-                        
-                        {/* Status Toggle */}
-                        <button
-                          onClick={() => toggleJobStatus(job.id)}
-                          className="flex items-center gap-2 text-sm transition-colors"
-                        >
-                          {job.isActive ? (
-                            <>
-                              <MdToggleOn className="text-green-500" size={20} />
-                              <span className="text-green-600 dark:text-green-400 font-medium">Active</span>
-                            </>
-                          ) : (
-                            <>
-                              <MdToggleOff className="text-gray-400" size={20} />
-                              <span className="text-gray-500 dark:text-gray-400 font-medium">Inactive</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Job Title */}
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2">
-                        {job.title}
-                      </h3>
-
-                      {/* Job Details */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <MdBusiness size={16} />
-                          <span className="text-sm">{job.department}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <MdLocationOn size={16} />
-                          <span className="text-sm line-clamp-1">{job.location}</span>
-                        </div>
-                        {/* Only show application deadline for municipal jobs */}
-                        {job.jobType === 'municipal' && job.lastDate && (
-                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <MdCalendarToday size={16} />
-                            <span className="text-sm">Apply by: {job.lastDate}</span>
-                          </div>
-                        )}
-                        {/* Show program date for volunteer jobs */}
-                        {job.jobType === 'volunteer' && job.workDate && (
-                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <MdCalendarToday size={16} />
-                            <span className="text-sm">Date: {job.workDate}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4">
-                        {job.description}
-                      </p>
-
-                      {/* Salary (only for municipal jobs) */}
-                      {job.jobType === 'municipal' && job.salary && (
-                        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 mb-4">
-                          <div className="flex items-center gap-2">
-                            <MdEmojiEvents className="text-green-600 dark:text-green-400" size={16} />
-                            <span className="text-green-700 dark:text-green-300 font-medium text-sm">
-                              {job.salary}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="mt-auto pt-4">
-                      <div className="flex gap-3">
-                        <button 
-                          onClick={()=>handleEdit(job)}
-                          className="w-1/2 flex mb-3 ml-2 items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white py-2 rounded-lg">
-                          <MdEdit size={18} />
-                          Edit
-                        </button>
-                        <button 
-                          onClick={()=>handleDeleteClick(job)}
-                          className="w-1/2 flex mb-3 mr-2 items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg">
-                          <MdDelete size={18} />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                    job={job}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                    onToggleStatus={toggleJobStatus}
+                  />
                 ))}
               </div>
             )}
@@ -585,4 +395,3 @@ const JobApplicationsPost = () => {
 };
 
 export default JobApplicationsPost;
-
