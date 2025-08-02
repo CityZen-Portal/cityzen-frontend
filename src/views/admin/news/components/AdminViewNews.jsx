@@ -173,7 +173,7 @@ const ViewNews = () => {
                     <td className="py-3 px-4 w-3/4">
                       <div>
                         <h5 className="text-sm font-semibold text-navy-700 dark:text-white">{item.title}</h5>
-                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1">{item.content}</p>
+                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1" dangerouslySetInnerHTML={{ __html: item.content }}></p>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 w-1/3">
