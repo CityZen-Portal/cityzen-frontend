@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from 'components/pagination';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-import NewsHome from 'views/citizen/news/components/NewsHome';
 
 const ViewNews = () => {
   const navigate = useNavigate();
@@ -54,7 +53,7 @@ const ViewNews = () => {
   useEffect(() => {
     const fetchNewsData = async () => {
       try {
-        const id = localStorage.getItem("id");
+        const id=localStorage.getItem("id");
         const response = await axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/author/${id}`);
         setNewsData(response.data.data);
       } catch (err) {
@@ -174,7 +173,7 @@ const ViewNews = () => {
                     <td className="py-3 px-4 w-3/4">
                       <div>
                         <h5 className="text-sm font-semibold text-navy-700 dark:text-white">{item.title}</h5>
-                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1">{item.content}</p>
+                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1" dangerouslySetInnerHTML={{ __html: item.content }}></p>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 w-1/3">
@@ -239,20 +238,6 @@ const ViewNews = () => {
           </div>
         </div>
       )}
-      <section className=" mx-auto p-6">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-navy-800 dark:text-white">
-             News
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm md:text-base">
-            Stay updated with the latest announcements and updates
-          </p>
-        </div>
-
-       
-          <NewsHome />
-       
-      </section>
 
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
