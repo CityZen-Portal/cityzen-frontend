@@ -5,7 +5,7 @@ import { MdAdd, MdSave, MdCancel, MdVisibility, MdVisibilityOff } from 'react-ic
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import MyTextEditor from './MyTextEditor';
+import MyTextEditor from '../../../../components/textEditor/MyTextEditor'
 
 const AddNews = () => {
   const navigate = useNavigate();
