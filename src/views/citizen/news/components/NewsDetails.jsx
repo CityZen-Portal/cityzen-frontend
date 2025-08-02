@@ -106,7 +106,7 @@ export default function NewsDetails() {
           </p>
 
           <div className="prose prose-gray dark:prose-invert max-w-none text-base leading-relaxed">
-            <p>{newsItem.content}</p>
+            <p  dangerouslySetInnerHTML={{ __html: newsItem.content }}></p>
           </div>
 
           {newsItem.location && (
