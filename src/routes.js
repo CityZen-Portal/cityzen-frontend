@@ -226,22 +226,7 @@ const routes = [
         path: "job-application/volunteer/:id",
         component: <VolunteerDetailsPage />,
       },
-      // {
-      //   name: "Feedback",
-      //   layout: "/citizen",
-      //   path: "help-desk/complaint/feedback/:id",
-      //   component: <ComplaintFeedback />,
-      // },
-      // {
-      //   name: "View Complaint",
-      //   layout: "/citizen",
-      //   path: "help-desk/complaint/view/:id",
-      //   component: <ComplaintDetails />,
-      // },
     ],
-    
-    
-    
   },
 
   // Admin Routes
@@ -410,6 +395,27 @@ const routes = [
       },
     ],
   },
+  // {
+  //   name: "Job Application",
+  //   layout: "/staff",
+  //   path: "job-application",
+  //   icon: <MdWork className="h-6 w-6" />,
+  //   component: <JobApplicationSystem/>,
+  //   children: [
+  //     {
+  //       name: "Job Details",
+  //       layout: "/staff",
+  //       path: "job-application/job/:id",
+  //       component: <JobDetailsPage />,
+  //     },
+  //     {
+  //       name: "Volunteer Details",
+  //       layout: "/staff",
+  //       path: "job-application/volunteer/:id",
+  //       component: <VolunteerDetailsPage />,
+  //     },
+  //   ],
+  // },
   {
     name: "City News & Alerts",
     layout: "/staff",

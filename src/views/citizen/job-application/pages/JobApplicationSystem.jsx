@@ -110,7 +110,7 @@ const JobApplicationSystem = () => {
   useEffect(() => {
     // setLoading(true);
   
-    axios.get(`http://localhost:10001/api/work/jobs`)
+    axios.get(`${JOB_APPLICATION_API}/jobs`)
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
@@ -130,7 +130,7 @@ const JobApplicationSystem = () => {
         
     // setLoading(true);
 
-    axios.get(`http://localhost:10001/api/work/service`, null, null)
+    axios.get(`${JOB_APPLICATION_API}/service`, null, null)
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data

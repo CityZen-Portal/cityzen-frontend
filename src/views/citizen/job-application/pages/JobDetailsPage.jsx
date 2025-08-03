@@ -70,7 +70,7 @@ const JobDetailsPage = () => {
   useEffect(() => {
     // setLoading(true);
   
-    axios.get(`http://localhost:10001/api/work/jobs/${id}`)
+    axios.get(`${JOB_APPLICATION_API}/jobs/${id}`)
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data

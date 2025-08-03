@@ -56,7 +56,7 @@ const VolunteerDetailsPage = () => {
   useEffect(() => {
     // setLoading(true);
   
-    axios.get(`http://localhost:10001/api/work/service/${id}`)
+    axios.get(`${JOB_APPLICATION_API}/service/${id}`)
       .then(res => {
         console.log('Response:', res.data);
         const response = res.data;
