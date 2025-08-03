@@ -1,8 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Heart, MapPin, Calendar, Clock, Users, User, Phone, Mail, FileText, CheckCircle, Share2, Check, AlertTriangle
 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const sampleVolunteers = [
   {
@@ -36,11 +39,56 @@ const sampleVolunteers = [
 ];
 
 const VolunteerDetailsPage = () => {
+  const navigate = useNavigate();
   const {id} = useParams();
+  
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
   const volunteerId = parseInt(id, 10);
   const [copySuccess, setCopySuccess] = useState(false);
   
-  const volunteer = sampleVolunteers.find(v => v.id.toString() === volunteerId.toString());
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+  
+  const [volunteer, setVolunteer] = useState({})
+
+  useEffect(() => {
+    // setLoading(true);
+  
+    axios.get(`http://localhost:10001/api/work/service/${id}`)
+      .then(res => {
+        console.log('Response:', res.data);
+        const response = res.data;
+
+        if (!response.success) {
+          throw new Error(response.message || 'Unknown error');
+        }
+
+        setVolunteer(response.data || {});
+      })
+      .catch(err => {
+        const backendError = err.response?.data;
+        const errorMessage =
+          backendError?.message ||          // ApiResponse.message
+          backendError?.data?.message ||    // ErrorDetails.message
+          err.message ||                    // JS Error message
+          'Something went wrong';
+
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored',
+            onClose: () => navigate("/citizen/job-application")
+          });
+
+          console.error('Error:', backendError || err);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+        
+  }, [id, token, email, citizenId, JOB_APPLICATION_API, navigate])
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -68,19 +116,20 @@ const VolunteerDetailsPage = () => {
     }
   }, [volunteer, volunteerId]);
 
-  if (!volunteer) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="text-gray-400" size={32} />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Program Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">The volunteer program you're looking for doesn't exist or has been removed.</p>
-        </div>
-      </div>
-    );
-  }
+  // if (!Object.keys(volunteer).length) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+  //           <AlertTriangle className="text-gray-400" size={32} />
+  //         </div>
+  //         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Program Not Found</h2>
+  //         <p className="text-gray-600 dark:text-gray-400 mb-6">The volunteer program you're looking for doesn't exist or has been removed.</p>
+  //       </div>
+  //       <ToastContainer />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -295,6 +344,7 @@ const VolunteerDetailsPage = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

@@ -1,8 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Building2, MapPin, Calendar, User, Phone, Mail, FileText, CheckCircle, Share2, Check, AlertTriangle
 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const sampleJobs = [
   {
@@ -50,11 +53,43 @@ const sampleJobs = [
 ];
 
 const JobDetailsPage = () => {
+  const navigate = useNavigate();
+  
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
   const {id} = useParams();
   const jobId = parseInt(id, 10);
   const [copySuccess, setCopySuccess] = useState(false);
   
-  const job = sampleJobs.find(j => j.id.toString() === jobId.toString());
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+  
+  const [job, setJob] = useState({})
+
+  useEffect(() => {
+    // setLoading(true);
+  
+    axios.get(`http://localhost:10001/api/work/jobs/${id}`)
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setJob(data ? data : {})
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored',
+            onClose: () => navigate("/citizen/job-application")
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+        
+  }, [id, token, email, citizenId, JOB_APPLICATION_API, navigate])
 
   const isJobExpired = (job) => {
     if (job.deadline) {
@@ -91,19 +126,19 @@ const JobDetailsPage = () => {
     }
   }, [job, jobId]);
 
-  if (!job) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="text-gray-400" size={32} />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Job Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">The job you're looking for doesn't exist or has been removed.</p>
-        </div>
-      </div>
-    );
-  }
+  // if (!job) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+  //           <AlertTriangle className="text-gray-400" size={32} />
+  //         </div>
+  //         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Job Not Found</h2>
+  //         <p className="text-gray-600 dark:text-gray-400 mb-6">The job you're looking for doesn't exist or has been removed.</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const expired = isJobExpired(job);
 
@@ -323,6 +358,7 @@ const JobDetailsPage = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

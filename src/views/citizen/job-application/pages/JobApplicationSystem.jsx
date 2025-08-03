@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Building2, Heart, Calendar, Users, 
-  AlertTriangle, Search, Filter, Briefcase, TrendingUp
+  Building2, Heart, AlertTriangle, Search, Filter, Briefcase, TrendingUp
 } from 'lucide-react';
 import JobCard from '../components/JobCard';
 import VolunteerCard from '../components/VolunteerCard';
-import JobDetailsPage from './JobDetailsPage';
-import VolunteerDetailsPage from './VolunteerDetailsPage';
-import { useNavigate, Routes, Route } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Sample job data
 const sampleJobs = [
@@ -63,7 +63,7 @@ const sampleVolunteers = [
     location: "Various locations in Coimbatore",
     programDescription: "Join our community health initiative to promote healthcare awareness and support health programs in various neighborhoods. Volunteers will conduct health surveys, assist in vaccination drives, and educate communities about preventive healthcare measures.",
     programDate: "2025-08-10",
-    programTime: "9:00 AM - 5:00 PM",
+    programTime: "09:00:00",
     duration: "6 months program",
     coordinatorName: "Ms. Priya Sharma",
     coordinatorPhone: "+91 87654 32109",
@@ -89,14 +89,65 @@ const sampleVolunteers = [
 
 const JobApplicationSystem = () => {
   const navigate = useNavigate();
+  
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
 
-  const [jobs, setJobs] = useState(sampleJobs);
-  const [volunteers, setVolunteers] = useState(sampleVolunteers);
+  const [jobs, setJobs] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState(sampleJobs);
   const [filteredVolunteers, setFilteredVolunteers] = useState(sampleVolunteers);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
+
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+
+  const [jobPosts, setJobPosts] = useState([])
+  const [volunteerPosts, setVolunteerPosts] = useState([])
+
+  useEffect(() => {
+    // setLoading(true);
+  
+    axios.get(`http://localhost:10001/api/work/jobs`)
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setJobs(data ? data : [])
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+        
+    // setLoading(true);
+
+    axios.get(`http://localhost:10001/api/work/service`, null, null)
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setVolunteers(data ? data : [])
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+  }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
 
   // Filter jobs and volunteers based on search and filter criteria
   useEffect(() => {
@@ -367,18 +418,9 @@ const JobApplicationSystem = () => {
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   );
 };
-
-// const JobApplicationPage = () => {
-//   return (
-//     <Routes>
-//       <Route path="/" element={<JobApplicationSystem />} />
-//       <Route path="/job/:id" element={<JobDetailsPage />} />
-//       <Route path="/volunteer/:id" element={<VolunteerDetailsPage />} />
-//     </Routes>
-//   );
-// };
 
 export default JobApplicationSystem;
