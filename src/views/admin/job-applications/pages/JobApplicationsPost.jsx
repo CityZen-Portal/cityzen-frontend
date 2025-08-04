@@ -256,17 +256,7 @@ const JobApplicationsPost = () => {
   const volunteerJobs = jobs.filter(job => job.jobType === 'volunteer').length;
   const filteredJobs = getFilteredJobs();
 
-  if (showJobForm) {
-    return (
-      <JobFormPages 
-        jobType={selectedJobType} 
-        onSubmit={handleJobFormSubmit}
-        onCancel={handleJobFormCancel}
-        editData={editingJob}
-        isEditMode={isEditMode}
-      />
-    );
-  }
+
 
   return (
     <div className="bg-gray-50 dark:bg-navy-900 min-h-screen">

@@ -88,6 +88,8 @@ import JobApplicationEdit from "views/citizen/job-application/pages/JobApplicati
 import NewsHomeDetails from "views/citizen/news/components/NewsHomeDetails";
 import JobApplicationsPost from "views/admin/job-applications/pages/JobApplicationsPost";
 import JobFormPages from "views/admin/job-applications/pages/JobFormPages";
+import JobMunicipalForm from "views/admin/job-applications/pages/JobMunicipalForm";
+import JobVolunteerForm from "views/admin/job-applications/pages/JobVolunteerForm";
 
 
 const routes = [
@@ -330,6 +332,18 @@ const routes = [
         path: "job-applications/edit/:id",
         component: <JobFormPages />,
       },
+      {
+        name: "Add Municipal Job",
+        layout: "/admin",
+        path: "job-applications/job/add/municipal",
+        component: <JobMunicipalForm />,
+      },
+      {
+        name: "Add Volunteer Job",
+        layout: "/admin",
+        path: "job-applications/job/add/volunteer",
+        component: <JobVolunteerForm />,
+      }
       // Uncomment and adjust paths if these components exist
       // {
       //   name: "View Applicants",
