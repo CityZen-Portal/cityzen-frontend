@@ -3,83 +3,23 @@ import avatarPlaceholder from "assets/img/avatars/avatar1.png";
 import React, { useState, useEffect } from "react";
 
 import {
-  FaPen,
   FaEnvelope,
   FaMapMarkerAlt,
   FaUser,
   FaIdCard,
-  FaCity,
-  FaFlag,
   FaKey,
-  FaSignal,
-  FaCheckCircle,
   FaCalendarAlt,
-  FaMars,
-  FaVenus,
-  FaGenderless,
   FaPhone,
+  FaCheckCircle,
 } from "react-icons/fa";
 
-// Gender Icon Selector
-const getGenderIcon = (gender) => {
-  switch (gender) {
-    case "Male":
-      return <FaMars className="text-gray-700 text-2xl" />;
-    case "Female":
-      return <FaVenus className="text-gray-700 text-2xl" />;
-    case "Other":
-      return <FaGenderless className="text-gray-700 text-2xl" />;
-    default:
-      return <FaGenderless className="text-gray-700 text-2xl" />;
-  }
-};
-
-// Reusable Field Component
-const Field = ({
-  label,
-  name,
-  value,
-  onChange,
-  editable = false,
-  disabled = false,
-  type = "text",
-  icon,
-  isSelect = false,
-  options = [],
-  loading = false,
-}) => (
+// Reusable Field Component (Read-Only)
+const Field = ({ label, value, icon, loading = false }) => (
   <div className="flex items-start gap-3 mb-4">
     <div className="text-gray-700 mt-1">{icon}</div>
     <div className="w-full">
-      {editable ? (
-        <>
-          <label className="text-sm text-gray-600 dark:text-gray-300">{label}</label>
-          {isSelect ? (
-            <select
-              name={name}
-              value={value}
-              onChange={onChange}
-              disabled={disabled}
-              className="w-full border rounded px-3 py-2 bg-white dark:bg-navy-800 dark:text-white disabled:cursor-not-allowed"
-            >
-              {options.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type={type}
-              name={name}
-              value={value}
-              onChange={onChange}
-              disabled={disabled}
-              className="w-full border rounded px-3 py-2 bg-white dark:bg-navy-800 dark:text-white disabled:cursor-not-allowed"
-            />
-          )}
-        </>
-      ) : loading ? (
+      <label className="text-sm text-gray-600 dark:text-gray-300">{label}</label>
+      {loading ? (
         <div className="h-5 w-3/4 bg-gray-200 dark:bg-navy-700 rounded animate-pulse mt-1"></div>
       ) : (
         <p className="mt-1 text-base text-gray-800 dark:text-gray-100">{value}</p>
@@ -89,9 +29,7 @@ const Field = ({
 );
 
 const AdminProfile = () => {
-  const [isEditing, setIsEditing] = useState(false);
   const [profilePic, setProfilePic] = useState(avatarPlaceholder);
-  const [originalData, setOriginalData] = useState({});
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -100,17 +38,22 @@ const AdminProfile = () => {
     department: "",
     contactNumber: "",
     emailAddress: "",
-    password: "",
     fullAddress: "",
     dob: "",
     aadharNumber: "",
-    created_date: ""
+    created_date: "",
+    designation: "",
+    requestToResetPassword: false,
+    active: false,
+    delete: false,
   });
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("https://utility-booking-backend.onrender.com/api/staff/6884f01fc660d8c3d55ddf5e");
+        const response = await axios.get(
+          "https://utility-booking-backend.onrender.com/api/staff/6884f01fc660d8c3d55ddf5e"
+        );
 
         const staff = response.data.data;
         console.log("Fetched Staff Data:", staff);
@@ -121,13 +64,15 @@ const AdminProfile = () => {
           department: staff.department || "",
           contactNumber: staff.contactNumber || "",
           emailAddress: staff.emailAddress || "",
-          password: staff.password || "",
           fullAddress: staff.fullAddress || "",
           dob: staff.dob || "",
-          aadharNumber: staff.aadharNumber || "",
-          created_date: staff.created_date || ""
+          aadharNumber: staff.aadharNumber || "N/A",
+         
+          designation: staff.designation || "",
+          requestToResetPassword: staff.requestToResetPassword || false,
+          active: staff.active || false,
+          delete: staff.delete || false,
         });
-        setOriginalData(staff);
       } catch (error) {
         console.error("Failed to fetch profile:", error);
       } finally {
@@ -138,53 +83,17 @@ const AdminProfile = () => {
     fetchProfile();
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleProfilePicChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProfilePic(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      await axios.put("https://utility-booking-backend.onrender.com/api/staff/6884917f8b53ed2ef33c6818", formData);
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Failed to save profile:", error);
-    }
-  };
-
   return (
     <div className="p-4 dark:bg-navy-700 dark:text-white max-w-screen-lg mx-auto">
       {/* Top Section */}
       <div className="flex justify-between items-start mb-4 bg-blue-500 rounded-2xl p-6 shadow-md text-white">
         <div className="flex items-center gap-4">
-          <div className="relative">
+          <div>
             <img
               src={profilePic}
               alt="Profile"
               className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
             />
-            {isEditing && (
-              <>
-                <label htmlFor="profilePicUpload">
-                  <div className="absolute bottom-2 right-2 bg-white rounded-full p-2 cursor-pointer shadow-md hover:bg-gray-100 transition">
-                    <FaPen className="text-blue-600 w-4 h-4" />
-                  </div>
-                </label>
-                <input
-                  type="file"
-                  id="profilePicUpload"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleProfilePicChange}
-                />
-              </>
-            )}
           </div>
           <div>
             {loading ? (
@@ -195,28 +104,13 @@ const AdminProfile = () => {
               </div>
             ) : (
               <>
-                <h2 className="text-2xl font-semibold">
-                  {formData.firstName} {formData.lastName}
-                </h2>
-                <p>{formData.userType}</p>
-                <p>{formData.country}</p>
+                <h2 className="text-2xl font-semibold">{formData.fullName}</h2>
+                <p>{formData.designation}</p>
+                <p>{formData.department}</p>
               </>
             )}
           </div>
         </div>
-
-        <button
-          onClick={() => {
-            if (isEditing) {
-              setFormData(originalData);
-            }
-            setIsEditing((prev) => !prev);
-          }}
-          className={`px-4 py-2 rounded flex items-center gap-2 text-white ${isEditing ? "bg-red-600 hover:bg-red-700" : "bg-teal-600 hover:bg-teal-700"}`}
-        >
-          <FaPen />
-          {isEditing ? "Cancel" : "Edit Profile"}
-        </button>
       </div>
 
       {/* Personal Information */}
@@ -226,12 +120,19 @@ const AdminProfile = () => {
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="ID" name="id" value={formData.id} onChange={handleChange} editable={isEditing} disabled={!isEditing} icon={<FaIdCard />} loading={loading} />
-          <Field label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} editable={isEditing} icon={<FaUser />} loading={loading} />
-          <Field label="Department" name="department" value={formData.department} onChange={handleChange} editable={isEditing} icon={<FaKey />} loading={loading} />
-          <Field label="Date of Birth" name="dob" value={formData.dob} onChange={handleChange} editable={isEditing} icon={<FaCalendarAlt />} loading={loading} />
-          <Field label="Aadhaar Number" name="aadharNumber" value={formData.aadharNumber || "N/A"} onChange={handleChange} editable={isEditing} icon={<FaIdCard />} loading={loading} />
-          <Field label="Created Date" name="created_date" value={formData.created_date} onChange={handleChange} editable={isEditing} icon={<FaCalendarAlt />} loading={loading} />
+          <Field label="ID" value={formData.id} icon={<FaIdCard />} loading={loading} />
+          <Field label="Full Name" value={formData.fullName} icon={<FaUser />} loading={loading} />
+          <Field label="Designation" value={formData.designation} icon={<FaKey />} loading={loading} />
+          <Field label="Department" value={formData.department} icon={<FaKey />} loading={loading} />
+          <Field label="Date of Birth" value={formData.dob} icon={<FaCalendarAlt />} loading={loading} />
+          <Field label="Aadhaar Number" value={formData.aadharNumber} icon={<FaIdCard />} loading={loading} />
+         
+          <Field
+            label="Active Status"
+            value={formData.active ? "Active" : "Inactive"}
+            icon={<FaCheckCircle className={formData.active ? "text-green-600" : "text-red-500"} />}
+            loading={loading}
+          />
         </div>
       </div>
 
@@ -242,21 +143,12 @@ const AdminProfile = () => {
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Contact Number" name="contactNumber" value={formData.contactNumber} onChange={handleChange} editable={isEditing} icon={<FaPhone />} loading={loading} />
-          <Field label="Email Address" name="emailAddress" value={formData.emailAddress} onChange={handleChange} editable={isEditing} icon={<FaEnvelope />} loading={loading} />
-          <Field label="Password" name="password" value={formData.password} onChange={handleChange} editable={isEditing} icon={<FaKey />} loading={loading} />
-          <Field label="Full Address" name="fullAddress" value={formData.fullAddress} onChange={handleChange} editable={isEditing} icon={<FaMapMarkerAlt />} loading={loading} />
+          <Field label="Contact Number" value={formData.contactNumber} icon={<FaPhone />} loading={loading} />
+          <Field label="Email Address" value={formData.emailAddress} icon={<FaEnvelope />} loading={loading} />
+          
+          <Field label="Full Address" value={formData.fullAddress} icon={<FaMapMarkerAlt />} loading={loading} />
         </div>
       </div>
-
-      {/* Save Button */}
-      {isEditing && (
-        <div className="text-right mt-6">
-          <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow">
-            Save Changes
-          </button>
-        </div>
-      )}
     </div>
   );
 };
