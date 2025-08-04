@@ -125,7 +125,7 @@ const JobApplicationSystem = () => {
           setJobs(data ? data : [])
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error('Server Error!Unable to Fetch Job Posts Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -153,7 +153,7 @@ const JobApplicationSystem = () => {
           setVolunteers(data ? data : [])
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error('Server Error!Unable to Fetch Volunteer Post Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'

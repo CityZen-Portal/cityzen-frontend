@@ -12,14 +12,14 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.issue.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}</td>
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.department ? complaint.department : complaint.category}</td>
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</td>
-        <td className="px-6 py-4 border-r">
+        <td className="px-6 py-4">
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(complaint.status)}`}>
             {getStatusText(complaint.status)}
           </span>
         </td>
 
         {/* View Button */}
-        <td className="px-6 py-4 border-r whitespace-nowrap text-sm text-gray-900 dark:text-white">
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
           <button 
             onClick={() => navigate(`/citizen/help-desk/complaint/view/${complaint.id}`)}
             className="text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300 flex items-center text-sm transition-colors duration-200">
@@ -48,7 +48,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
       {/* Mobile Card Layout - Hidden on desktop */}
       <tr className="md:hidden">
         <td colSpan="100%" className="p-0">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg m-2 p-4 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white dark:bg-gray-800 rounded-lg m-2 p-4 shadow-sm hover:shadow-md transition-shadow">
             {/* Header with ID and Status */}
             <div className="flex justify-between items-start mb-3">
               <div className="flex flex-col">
@@ -81,7 +81,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row gap-2 pt-3">
               <button 
                 onClick={() => navigate(`/citizen/help-desk/complaint/view/${complaint.id}`)}
                 className="flex items-center justify-center px-4 py-2 text-brand-600 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 border border-brand-600 dark:border-brand-400 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20">
