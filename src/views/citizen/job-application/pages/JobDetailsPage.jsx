@@ -70,7 +70,15 @@ const JobDetailsPage = () => {
   useEffect(() => {
     // setLoading(true);
   
-    axios.get(`${JOB_APPLICATION_API}/jobs/${id}`)
+    axios.get(`${JOB_APPLICATION_API}/jobs/${id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data

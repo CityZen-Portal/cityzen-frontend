@@ -110,7 +110,15 @@ const JobApplicationSystem = () => {
   useEffect(() => {
     // setLoading(true);
   
-    axios.get(`${JOB_APPLICATION_API}/jobs`)
+    axios.get(`${JOB_APPLICATION_API}/jobs`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
@@ -130,7 +138,15 @@ const JobApplicationSystem = () => {
         
     // setLoading(true);
 
-    axios.get(`${JOB_APPLICATION_API}/service`, null, null)
+    axios.get(`${JOB_APPLICATION_API}/service`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
