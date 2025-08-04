@@ -78,9 +78,9 @@ const NewsHomeDetails = () => {
             {newsItem.description}
           </p>
 
-          <div className="prose prose-gray dark:prose-invert max-w-none text-base leading-relaxed">
+          {/* <div className="prose prose-gray dark:prose-invert max-w-none text-base leading-relaxed">
             <p>{newsItem.content}</p>
-          </div>
+          </div> */}
 
           <div className="mt-8 border-t pt-6 text-base text-gray-600 dark:text-gray-300">
             <h2 className="text-xl font-semibold mb-2">More Detailed Content</h2>

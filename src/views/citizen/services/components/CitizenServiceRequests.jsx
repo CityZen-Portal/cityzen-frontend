@@ -32,6 +32,19 @@ const CitizenServiceRequests = () => {
     fetchData();
   }, []);
 
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return date.toLocaleString("en-IN", options);
+  }
+
   const filteredData = useMemo(() => {
     if (statusFilter === "ALL") return data;
     return data.filter(
@@ -238,7 +251,7 @@ const CitizenServiceRequests = () => {
           </p>
           <p>
             <strong>Completed Date:</strong>{" "}
-            {viewingDetails.completedDate || "N/A"}
+            {formatDate(viewingDetails.completedDate) || "N/A"}
           </p>
           <p>
             <strong>Description:</strong> {viewingDetails.description || "N/A"}

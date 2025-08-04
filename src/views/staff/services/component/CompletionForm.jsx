@@ -153,7 +153,7 @@ const CompletionForm = ({
                 <label className="block text-sm font-bold text-navy-700 dark:text-white mb-2">
                   <div className="flex items-center gap-2">
                     <MdComment className="h-4 w-4" />
-                    <span>Suggestion or Notes</span>
+                    <span>Work Summary</span>
                   </div>
                 </label>
                 <textarea
