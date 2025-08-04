@@ -1,14 +1,11 @@
-import { useEffect } from "react"; // Add this import
-import InputField from "../components/InputField";
-import PasswordField from "../components/PasswordField";
-import { Form, useNavigate } from "react-router-dom";
-import Checkbox from "components/checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import Footer from "components/footer/FooterAuthDefault";
 import axios from "axios";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sun, Moon } from "lucide-react";
 import { useUser } from "../../../contexts/UserContext";
+import Checkbox from "components/checkbox";
+import images from "../assets/Mobile login-rafiki.svg"
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -17,11 +14,23 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const apiurl = process.env.REACT_APP_API_UMS_URL;
-  console.log(apiurl);
   const { login } = useUser();
-
-  // Add useEffect to set favicon
+  
+  // Theme state
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme) {
+        return storedTheme === 'dark';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+  
+  // Favicon setup and theme effect
   useEffect(() => {
     // Set favicon
     const favicon = document.querySelector("link[rel='icon']");
@@ -34,15 +43,22 @@ export default function SignIn() {
       document.head.appendChild(newFavicon);
     }
     
-    // Cleanup function to reset favicon when component unmounts
+    // Apply theme
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+    
     return () => {
       if (favicon) {
-        favicon.href = "/favicon.ico"; // Reset to default
+        favicon.href = "/favicon.ico";
       }
     };
-  }, []);
-
-  // Rest of the component remains the same
+  }, [isDark]);
+  
   const handleForgotPassword = () => {
     if (!email.trim()) {
       toast.error("Email is required to reset password", {
@@ -68,15 +84,14 @@ export default function SignIn() {
       theme: "colored",
     });
   };
-
+  
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted");
     const passwordRegex = /^.{4,}$/;
     if (!validateEmail(email)) {
       toast.error("Enter a valid email", {
@@ -103,22 +118,17 @@ export default function SignIn() {
     try {
       const response = await axios.post(
         `https://auth-backend-obcu.onrender.com/api/auth/login`,
-        {
-          email,
-          password,
-        }
+        { email, password }
       );
       const token = response.data.data.token;
       const roles = response.data.data.roles[0];
-
-login({
-  token: token,
-  username: response.data.data.username,
-  email: response.data.data.email,
-  role: response.data.data.roles, // full array
-  id: response.data.data.id,
-});
-
+      login({
+        token: token,
+        username: response.data.data.username,
+        email: response.data.data.email,
+        role: response.data.data.roles,
+        id: response.data.data.id,
+      });
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 1000,
@@ -130,8 +140,7 @@ login({
             navigate("/citizen/dashboard");
           } else if (roles.includes("ROLE_ADMIN")) {
             navigate("/admin/dashboard");
-          }
-          else{
+          } else {
             navigate("/");
           }
         },
@@ -145,11 +154,21 @@ login({
       });
     }
   };
-
+  
   return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-100 via-blue-200 to-purple-100 
-                    dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
-                    transition-all duration-300 overflow-y-auto">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 relative">
+      {/* Theme Toggle - Top Right Corner */}
+      <button
+        onClick={() => setIsDark(!isDark)}
+        className="fixed top-6 right-6 z-50 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 transition-all duration-300"
+      >
+        {isDark ? (
+          <Sun className="w-5 h-5 text-yellow-500" />
+        ) : (
+          <Moon className="w-5 h-5 text-gray-600" />
+        )}
+      </button>
+
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -164,103 +183,119 @@ login({
         theme="colored"
       />
       
-      {/* Decorative Gradient Blobs */}
-      <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-500 rounded-full filter blur-3xl opacity-40"></div>
-      <div className="absolute top-10 right-10 w-64 h-64 bg-purple-600 rounded-full filter blur-2xl opacity-30"></div>
-      <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-indigo-400 rounded-full filter blur-2xl opacity-25"></div>
-      
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4 w-full">
-        <div className="relative z-10 w-full max-w-2xl p-10 rounded-2xl shadow-2xl 
-                        border border-blue-200 dark:border-gray-700 
-                        bg-white/95 dark:bg-gray-700/95 backdrop-blur-md 
-                        transition-all duration-300 my-8">
-          <div className="text-center mb-10">
-            <div className="flex justify-center mb-4">
-              {/* Logo with black outline */}
-              <div className="w-16 h-16 flex items-center justify-center">
-                <img
-                  src="/brand-logo.png"
-                  alt="CityZen Logo"
-                  className="w-14 h-14 rounded-lg border-2 border-black shadow-md"
-                />
-              </div>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              Sign In to Your Account
+      {/* Left Side - Sign In Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:max-w-md">
+          {/* Header */}
+          <div className="text-left mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Welcome Back to CityZen
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
-              Welcome back! Please enter your credentials
+              Sign in to access your citizen portal and manage civic services
             </p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email*
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full px-4 py-3 border ${
+                    emailState === 'error' 
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  } rounded-lg focus:outline-none focus:ring-2 bg-white dark:bg-gray-800 dark:text-white`}
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                />
+                {emailState === 'error' && (
+                  <p className="mt-2 text-sm text-red-600">Enter a valid email</p>
+                )}
               </div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 border ${emailState === 'error' ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
-                placeholder="Email Address"
-                autoComplete="email"
-              />
-              {emailState === 'error' && <p className="mt-1 text-sm text-red-600">Enter a valid email</p>}
             </div>
             
             {/* Password Field */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Password*
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`w-full px-4 py-3 pr-12 border ${
+                    passwordState === 'error' 
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  } rounded-lg focus:outline-none focus:ring-2 bg-white dark:bg-gray-800 dark:text-white`}
+                  placeholder="Min. 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+                {passwordState === 'error' && (
+                  <p className="mt-2 text-sm text-red-600">Enter a strong password</p>
+                )}
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 border ${passwordState === 'error' ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
-                placeholder="Password"
-              />
-              {passwordState === 'error' && <p className="mt-1 text-sm text-red-600">Enter a strong password</p>}
             </div>
             
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Checkbox color="blue" />
-                <label htmlFor="remember" className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-                  Remember me
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  I agree to the Terms of Service and Privacy Policy
                 </label>
               </div>
+            </div>
+            
+            <div className="text-right">
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(true)}
                 className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
               >
-                Forgot Password?
+                Forgot password?
               </button>
             </div>
             
             {/* Sign In Button */}
             <button
               type="submit"
-              className="w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r
-                       from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-                       transition-all duration-300 shadow-lg mt-6 flex items-center justify-center hover:scale-[1.01] hover:shadow-xl"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300"
             >
-              Sign In
+              Sign In to Your Account
             </button>
             
             {/* Sign Up Link */}
-            <div className="mt-8 text-center">
-              <p className="text-gray-600 dark:text-gray-300">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Don't have an account?{' '}
                 <button
                   type="button"
                   onClick={() => navigate("/auth/signup")}
-                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
                 >
                   Create Account
                 </button>
@@ -270,17 +305,59 @@ login({
         </div>
       </div>
       
-      {/* Footer */}
-      <div className="w-full py-4">
-        <Footer />
+      {/* Right Side - Illustration */}
+      <div className="hidden lg:flex w-1/2 bg-blue-50 dark:bg-gray-800 relative overflow-hidden items-center justify-center">
+        <div className="text-center max-w-lg px-8">
+          {/* Illustration Image */}
+          <div className="mb-8">
+            <img
+              src={images}
+              alt="Citizen Portal Illustration"
+              className="w-full max-w-md mx-auto"
+            />
+          </div>
+          
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <span className="text-blue-600">Citizen Portal</span>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            Access municipal services, report civic issues, and stay connected with your community through our comprehensive citizen portal.
+          </p>
+          
+          {/* Feature Checkmarks */}
+          <div className="space-y-4 text-left">
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Report and track civic issues</span>
+            </div>
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Access municipal services online</span>
+            </div>
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Stay updated with city notifications</span>
+            </div>
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Secure digital identity verification</span>
+            </div>
+          </div>
+        </div>
       </div>
       
-      {/* Forgot Password Popup */}
+      {/* Forgot Password Modal */}
       {showForgotPassword && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="relative mx-4 w-full max-w-md rounded-2xl border border-blue-200 
-                          bg-white/95 p-6 shadow-2xl backdrop-blur-md 
-                          transition-all duration-300 dark:border-gray-700 dark:bg-gray-700/95">
+          <div className="relative mx-4 w-full max-w-md rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-2xl">
             <button
               type="button"
               onClick={() => setShowForgotPassword(false)}
@@ -311,16 +388,16 @@ login({
               </p>
             </div>
             
-            <div className="relative">
+            <div className="relative mb-6">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-blue-500" />
+                <Mail className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm"
-                placeholder="Email Address"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                placeholder="Enter your email"
                 autoComplete="email"
               />
             </div>
@@ -328,14 +405,12 @@ login({
             <button
               type="button"
               onClick={handleForgotPassword}
-              className="w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r
-                       from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-                       transition-all duration-300 shadow-lg mt-6 flex items-center justify-center hover:scale-[1.01] hover:shadow-xl"
+              className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 mb-4 transition-colors duration-300"
             >
               Send Reset Link
             </button>
             
-            <div className="mt-4 text-center">
+            <div className="text-center">
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(false)}
