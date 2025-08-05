@@ -172,7 +172,7 @@ export default function SignUp() {
       role: ["user"] // Default role
     };
     try {
-      const response = await fetch("https://auth-backend-obcu.onrender.com/api/auth/register", {
+      const response = await fetch("https://auth-backend-2-k3ph.onrender.com/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -231,7 +231,7 @@ export default function SignUp() {
     setAadhaarSending(true);
     setErrors(prev => ({ ...prev, aadharNumber: '' }));
     try {
-      const response = await fetch(`https://auth-backend-obcu.onrender.com/api/auth/userInfo/${cleanAadhaar}`, {
+      const response = await fetch(`https://auth-backend-2-k3ph.onrender.com/auth/verify-aadhaar/${cleanAadhaar}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
