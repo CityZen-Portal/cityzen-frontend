@@ -16,18 +16,14 @@ const ViewNews = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [newsData, setNewsData] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [newsToDelete, setNewsToDelete] = useState(null);
 
-  // Open modal and set which news item is to be deleted
   const promptDeleteNews = (id) => {
     setNewsToDelete(id);
     setShowDeleteModal(true);
   };
 
-  // Confirm delete action inside modal
   const confirmDeleteNews = async () => {
     setShowDeleteModal(false);
     try {
@@ -49,7 +45,10 @@ const ViewNews = () => {
 
   const sortedNews = [...filteredNews].sort((a, b) => {
     if (sortBy === 'newest') {
-      return new Date(b.date) - new Date(a.date);
+      return new Date(b.created_date) - new Date(a.created_date);
+    }
+    if (sortBy === 'oldest') {
+      return new Date(a.created_date) - new Date(b.created_date);
     }
     return 0;
   });
@@ -135,6 +134,7 @@ const ViewNews = () => {
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-navy-700 dark:text-white"
             >
               <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
             </select>
             <select
               value={itemsPerPage}
@@ -234,12 +234,11 @@ const ViewNews = () => {
             </tbody>
           </table>
         </div>
-        {totalPages>10 &&
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        {totalPages > 10 &&
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         }
       </Card>
 
-      {/* Preview Image Modal */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl">
@@ -255,7 +254,6 @@ const ViewNews = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full text-center shadow-lg">
