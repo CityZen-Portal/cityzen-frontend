@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Building2, Heart, AlertTriangle, Search, Filter, Briefcase, TrendingUp
+  Building2, Heart, AlertTriangle, Search, Filter, Briefcase, TrendingUp, Plus
 } from 'lucide-react';
 import JobCard from '../components/JobCard';
 import VolunteerCard from '../components/VolunteerCard';
@@ -92,73 +92,69 @@ const JobApplicationsPost = () => {
   
   const token = localStorage.getItem("token")
   const email = localStorage.getItem("email")
-  const citizenId = localStorage.getItem("id")
+  const adminId = localStorage.getItem("id")
 
-  const [jobs, setJobs] = useState([]);
-  const [volunteers, setVolunteers] = useState([]);
-  const [filteredJobs, setFilteredJobs] = useState(sampleJobs);
-  const [filteredVolunteers, setFilteredVolunteers] = useState(sampleVolunteers);
+  const [jobs, setJobs] = useState(sampleJobs);
+  const [volunteers, setVolunteers] = useState(sampleVolunteers);
+  const [filteredJobs, setFilteredJobs] = useState(jobs);
+  const [filteredVolunteers, setFilteredVolunteers] = useState(volunteers);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
 
-  const [jobPosts, setJobPosts] = useState([])
-  const [volunteerPosts, setVolunteerPosts] = useState([])
-
-  useEffect(() => {
-    // setLoading(true);
-  
-    axios.get(`${JOB_APPLICATION_API}/jobs`)
-      .then(res => {
-          console.log('Response:', res.data.data);
-          const data = res.data.data
-          setJobs(data ? data : [])
-        })
-        .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored'
-          });
-          console.error('Error:', err.response?.data || err.message);
-        })
-        .finally(() => {
-          // setLoading(false);
-        });
+  // useEffect(() => {
+  //   // Fetch jobs
+  //   axios.get(`${JOB_APPLICATION_API}/jobs`)
+  //     .then(res => {
+  //         console.log('Jobs Response:', res.data.data);
+  //         const data = res.data.data
+  //         setJobs(data ? data : [])
+  //       })
+  //       .catch(err => {
+  //         toast.error('Server Error! Unable to Fetch Jobs Data', {
+  //           position: 'top-right',
+  //           autoClose: 3000,
+  //           theme: 'colored'
+  //         });
+  //         console.error('Error:', err.response?.data || err.message);
+  //       });
         
-    // setLoading(true);
-
-    axios.get(`${JOB_APPLICATION_API}/service`, null, null)
-      .then(res => {
-          console.log('Response:', res.data.data);
-          const data = res.data.data
-          setVolunteers(data ? data : [])
-        })
-        .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored'
-          });
-          console.error('Error:', err.response?.data || err.message);
-        })
-        .finally(() => {
-          // setLoading(false);
-        });
-  }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
+  //   // Fetch volunteers
+  //   axios.get(`${JOB_APPLICATION_API}/service`)
+  //     .then(res => {
+  //         console.log('Volunteers Response:', res.data.data);
+  //         const data = res.data.data
+  //         setVolunteers(data ? data : [])
+  //       })
+  //       .catch(err => {
+  //         toast.error('Server Error! Unable to Fetch Volunteers Data', {
+  //           position: 'top-right',
+  //           autoClose: 3000,
+  //           theme: 'colored'
+  //         });
+  //         console.error('Error:', err.response?.data || err.message);
+  //       });
+  // }, [token, email, adminId, JOB_APPLICATION_API, navigate])
 
   // Filter jobs and volunteers based on search and filter criteria
   useEffect(() => {
-    let filteredJobs = jobs.filter(job => job.isActive);
-    let filteredVolunteers = volunteers.filter(volunteer => volunteer.isActive);
+    let filteredJobs = jobs;
+    let filteredVolunteers = volunteers;
 
     // Apply type filter
     if (activeFilter === 'municipal') {
       filteredVolunteers = [];
     } else if (activeFilter === 'volunteer') {
       filteredJobs = [];
+    } else if (activeFilter === 'active') {
+      filteredJobs = jobs.filter(job => job.isActive);
+      filteredVolunteers = volunteers.filter(volunteer => volunteer.isActive);
+    } else if (activeFilter === 'inactive') {
+      filteredJobs = jobs.filter(job => !job.isActive);
+      filteredVolunteers = volunteers.filter(volunteer => !volunteer.isActive);
     }
 
     // Apply search filter
@@ -203,42 +199,166 @@ const JobApplicationsPost = () => {
     });
   }, []);
 
-  // Handle view details
-  const handleViewDetails = useCallback((id, type) => {
-    if (type === 'municipal') {
-      navigate(`/citizen/job-application/job/${id}`);
-    } else {
-      navigate(`/citizen/job-application/volunteer/${id}`);
-    }
+  // Handle add new job/volunteer
+  const handleAddMunicipalJob = useCallback(() => {
+    navigate('/admin/job-applications/add/municipal');
   }, [navigate]);
 
-  // Handle bookmark toggle
-  const handleBookmark = useCallback((jobId) => {
-    const newBookmarks = new Set(bookmarkedJobs);
-    if (newBookmarks.has(jobId)) {
-      newBookmarks.delete(jobId);
-    } else {
-      newBookmarks.add(jobId);
+  const handleAddVolunteerJob = useCallback(() => {
+    navigate('/admin/job-applications/add/volunteer');
+  }, [navigate]);
+
+  // Handle edit
+  const handleEdit = useCallback((item) => {
+    const type = item.programTitle ? 'volunteer' : 'municipal';
+    navigate(`/admin/job-applications/edit/${type}/${item.id}`);
+  }, [navigate]);
+
+  // Handle delete
+  const handleDeleteClick = useCallback((item) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (itemToDelete) {
+      const isVolunteer = itemToDelete.programTitle ? true : false;
+      const endpoint = isVolunteer ? 'service' : 'jobs';
+      
+      axios.delete(`${JOB_APPLICATION_API}/${endpoint}/${itemToDelete.id}`)
+        .then(res => {
+          toast.success(`${isVolunteer ? 'Volunteer program' : 'Job'} deleted successfully!`, {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          
+          // Refresh data
+          if (isVolunteer) {
+            setVolunteers(volunteers.filter(v => v.id !== itemToDelete.id));
+          } else {
+            setJobs(jobs.filter(j => j.id !== itemToDelete.id));
+          }
+        })
+        .catch(err => {
+          toast.error('Error deleting item!', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Delete error:', err.response?.data || err.message);
+        });
+      
+      setShowDeleteModal(false);
+      setItemToDelete(null);
     }
-    setBookmarkedJobs(newBookmarks);
-  }, [bookmarkedJobs]);
+  }, [itemToDelete, JOB_APPLICATION_API, jobs, volunteers]);
+
+  const cancelDelete = useCallback(() => {
+    setShowDeleteModal(false);
+    setItemToDelete(null);
+  }, []);
+
+  const handleToggleStatus = useCallback((item) => {
+    const isVolunteer = !!item.programTitle;
+
+    if (isVolunteer) {
+      const updatedVolunteers = volunteers.map(v =>
+        v.id === item.id ? { ...v, isActive: !v.isActive } : v
+      );
+      setVolunteers(updatedVolunteers);
+      // Here you can also add an API call to update the status on the server
+      // For example: axios.put(`${JOB_APPLICATION_API}/service/${item.id}`, { ...item, isActive: !item.isActive });
+      toast.success(`'${item.programTitle}' status updated!`);
+    } else {
+      const updatedJobs = jobs.map(j =>
+        j.id === item.id ? { ...j, isActive: !j.isActive } : j
+      );
+      setJobs(updatedJobs);
+      // API call to update job status
+      // For example: axios.put(`${JOB_APPLICATION_API}/jobs/${item.id}`, { ...item, isActive: !item.isActive });
+      toast.success(`'${item.title}' status updated!`);
+    }
+  }, [jobs, volunteers]);
 
   // Get counts
-  const activeJobs = jobs.filter(job => job.isActive);
-  const activeVolunteers = volunteers.filter(volunteer => volunteer.isActive);
-  const municipalCount = activeJobs.length;
-  const volunteerCount = activeVolunteers.length;
+  const allJobs = jobs.length;
+  const allVolunteers = volunteers.length;
+  const activeJobs = jobs.filter(job => job.isActive).length;
+  const activeVolunteers = volunteers.filter(volunteer => volunteer.isActive).length;
+  const inactiveJobs = jobs.filter(job => !job.isActive).length;
+  const inactiveVolunteers = volunteers.filter(volunteer => !volunteer.isActive).length;
+  const municipalCount = allJobs;
+  const volunteerCount = allVolunteers;
+  const totalOpportunities = municipalCount + volunteerCount;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Job Application</h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              Discover exciting career opportunities and volunteer programs with the Municipal Corporation
+      <ToastContainer />
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <AlertTriangle className="text-red-600 dark:text-red-400" size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Item</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
+              Are you sure you want to delete "<strong>{itemToDelete?.title || itemToDelete?.programTitle}</strong>"? 
+              This will permanently remove the {itemToDelete?.programTitle ? 'volunteer program' : 'job posting'}.
             </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmDelete}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl transition-colors font-medium"
+              >
+                Delete
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-3 px-4 rounded-xl transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Admin - Job Management</h1>
+              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl">
+                Manage municipal job postings and volunteer programs for the Municipal Corporation
+              </p>
+            </div>
+            
+            {/* Add Job Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleAddMunicipalJob}
+                className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
+              >
+                <Plus size={20} />
+                Add Municipal Job
+              </button>
+              <button
+                onClick={handleAddVolunteerJob}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
+              >
+                <Plus size={20} />
+                Add Volunteer Job
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -246,14 +366,14 @@ const JobApplicationsPost = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Opportunities</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{municipalCount + volunteerCount}</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalOpportunities}</p>
                 <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                   <TrendingUp size={16} className="inline mr-1" />
-                  Active Opportunities
+                  Active: {activeJobs + activeVolunteers}
                 </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -262,14 +382,14 @@ const JobApplicationsPost = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Municipal Jobs</p>
                 <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{municipalCount}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   <Building2 size={16} className="inline mr-1" />
-                  Government Positions
+                  Active: {activeJobs}
                 </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -278,14 +398,14 @@ const JobApplicationsPost = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Volunteer Programs</p>
                 <p className="text-3xl font-bold text-green-600 dark:text-green-400">{volunteerCount}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   <Heart size={16} className="inline mr-1" />
-                  Community Service
+                  Active: {activeVolunteers}
                 </p>
               </div>
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
@@ -295,132 +415,115 @@ const JobApplicationsPost = () => {
           </div>
         </div>
 
-        {/* Search and Filter Section */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row gap-6 items-center">
-            {/* Search Bar */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search jobs, programs, departments, locations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-              />
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-              <button
-                onClick={() => setActiveFilter('all')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  activeFilter === 'all'
-                    ? 'bg-gray-900 text-white shadow-md'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                All ({municipalCount + volunteerCount})
-              </button>
-              <button
-                onClick={() => setActiveFilter('municipal')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  activeFilter === 'municipal'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                Municipal ({municipalCount})
-              </button>
-              <button
-                onClick={() => setActiveFilter('volunteer')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  activeFilter === 'volunteer'
-                    ? 'bg-green-600 text-white shadow-md'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                Volunteer ({volunteerCount})
-              </button>
-            </div>
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+          {/* Search Bar */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search jobs, departments, locations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            />
           </div>
 
-          {/* Results Info */}
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mt-4">
-            <Filter size={16} />
-            <span className="text-sm">
-              Showing {filteredJobs.length + filteredVolunteers.length} of {municipalCount + volunteerCount} opportunity{municipalCount + volunteerCount !== 1 ? 's' : ''}
-              {searchTerm && ` matching "${searchTerm}"`}
-            </span>
+          {/* Filter Tabs */}
+          <div className="flex items-center gap-2 bg-white dark:bg-navy-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <button
+              onClick={() => setActiveFilter('all')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                activeFilter === 'all'
+                  ? 'bg-brand-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              All ({totalOpportunities})
+            </button>
+            <button
+              onClick={() => setActiveFilter('active')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                activeFilter === 'active'
+                  ? 'bg-brand-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              Active ({activeJobs + activeVolunteers})
+            </button>
+            <button
+              onClick={() => setActiveFilter('inactive')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                activeFilter === 'inactive'
+                  ? 'bg-brand-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              Inactive ({inactiveJobs + inactiveVolunteers})
+            </button>
+            <button
+              onClick={() => setActiveFilter('municipal')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                activeFilter === 'municipal'
+                  ? 'bg-brand-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              Municipal ({municipalCount})
+            </button>
+            <button
+              onClick={() => setActiveFilter('volunteer')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                activeFilter === 'volunteer'
+                  ? 'bg-brand-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              Volunteer ({volunteerCount})
+            </button>
           </div>
         </div>
 
-        {/* Jobs Section */}
-        {filteredJobs.length === 0 && filteredVolunteers.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Briefcase className="text-gray-400" size={40} />
+        {/* Jobs Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredJobs.length === 0 && filteredVolunteers.length === 0 ? (
+            <div className="col-span-full text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg">
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                No opportunities found matching your criteria.
+              </p>
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-              {activeJobs.length === 0 && activeVolunteers.length === 0 ? 'No Opportunities Available' : 'No Opportunities Found'}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-              {activeJobs.length === 0 && activeVolunteers.length === 0 
-                ? 'There are currently no opportunities available. Please check back later.'
-                : searchTerm 
-                  ? `No opportunities match your search for "${searchTerm}". Try adjusting your search terms.`
-                  : 'No opportunities match the selected filter. Try selecting a different category.'
-              }
-            </p>
-          </div>
-        ) : (
-          <div>
-            {/* Municipal Jobs Section */}
-            {filteredJobs.length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                  <Building2 className="text-blue-600" size={28} />
-                  Available Municipal Corporation Jobs
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredJobs.map((job) => (
-                    <JobCard 
-                      key={job.id} 
-                      job={job} 
-                      onViewDetails={(id) => handleViewDetails(id, 'municipal')}
-                      isJobExpired={isJobExpired} 
-                      formatDate={formatDate} 
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Volunteer Jobs Section */}
-            {filteredVolunteers.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                  <Heart className="text-green-600" size={28} />
-                  Available Volunteer Opportunities
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredVolunteers.map((volunteer) => (
-                    <VolunteerCard 
-                      key={volunteer.id} 
-                      volunteer={volunteer} 
-                      onViewDetails={(id) => handleViewDetails(id, 'volunteer')}
-                      formatDate={formatDate} 
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          ) : (
+            <>
+              {filteredJobs.map(job => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  isJobExpired={isJobExpired}
+                  formatDate={formatDate}
+                  isAdminView={true}
+                  onEdit={handleEdit}
+                  onDelete={handleDeleteClick}
+                  onToggleStatus={handleToggleStatus}
+                />
+              ))}
+              {filteredVolunteers.map(volunteer => (
+                <VolunteerCard
+                  key={volunteer.id}
+                  volunteer={volunteer}
+                  formatDate={formatDate}
+                  isAdminView={true}
+                  onEdit={handleEdit}
+                  onDelete={handleDeleteClick}
+                  onToggleStatus={handleToggleStatus}
+                />
+              ))}
+            </>
+          )}
+        </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };
 
 export default JobApplicationsPost;
+
