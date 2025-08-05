@@ -5,7 +5,7 @@ import { useUser } from "../contexts/UserContext";
 const ProtectedRoute = ({ requiredRole, children }) => {
   const { role, ready } = useUser();
 
-  if (!ready) return null; // or a loader
+  if (!ready) return null; // could show loader here
 
   const hasRole = Array.isArray(role)
     ? role.includes(requiredRole)

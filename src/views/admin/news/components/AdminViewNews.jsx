@@ -234,8 +234,9 @@ const ViewNews = () => {
             </tbody>
           </table>
         </div>
-
+        {totalPages>10 &&
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        }
       </Card>
 
       {/* Preview Image Modal */}

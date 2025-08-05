@@ -385,8 +385,22 @@ function RequestsTable({ onBack }) {
 }
 
 function CustomCalendar() {
+  const [fromHour, setFromHour] = useState("");
+const [fromMinute, setFromMinute] = useState("");
+const [fromPeriod, setFromPeriod] = useState("AM");
+
+const [toHour, setToHour] = useState("");
+const [toMinute, setToMinute] = useState("");
+const [toPeriod, setToPeriod] = useState("AM");
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [showModal, setShowModal] = useState(false);
+  const [eventText, setEventText] = useState("");
+  const [eventTime, setEventTime] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [events, setEvents] = useState({});
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const startOfMonth = currentDate.startOf("month");
   const startDay = startOfMonth.day() === 0 ? 6 : startOfMonth.day() - 1;
@@ -398,8 +412,36 @@ function CustomCalendar() {
 
   const weekdays = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
+  const handleAddEvent = () => {
+    const dateKey = selectedDate.format("YYYY-MM-DD");
+    const newEvent = {
+      name: eventText,
+      time: eventTime,
+      location: eventLocation,
+    };
+    setEvents((prev) => ({
+      ...prev,
+      [dateKey]: [...(prev[dateKey] || []), newEvent],
+    }));
+    setEventText("");
+    setEventTime("");
+    setEventLocation("");
+    setShowModal(false);
+  };
+
+  const handleDeleteEvent = () => {
+    const updated = { ...events };
+    updated[selectedEvent.date] = updated[selectedEvent.date].filter(
+      (e) => e.name !== selectedEvent.name
+    );
+    setEvents(updated);
+    setShowEventModal(false);
+    setSelectedEvent(null);
+  };
+
   return (
     <div className="mx-auto w-full max-w-sm">
+      {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <button
           onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
@@ -418,32 +460,256 @@ function CustomCalendar() {
         </button>
       </div>
 
+      {/* Weekdays */}
       <div className="grid grid-cols-7 gap-1 text-center text-sm font-semibold text-gray-600 dark:text-gray-300">
         {weekdays.map((day) => (
           <div key={day}>{day}</div>
         ))}
       </div>
 
+      {/* Days */}
       <div className="mt-2 grid grid-cols-7 gap-1">
-        {days.map((date, idx) => (
-          <div key={idx} className="flex h-10 w-10 items-center justify-center">
-            {date ? (
-              <button
-                onClick={() => setSelectedDate(date)}
-                className={`h-10 w-10 rounded-full transition-all duration-200 ${
-                  date.isSame(selectedDate, "day")
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-800 hover:bg-gray-200 dark:text-gray-100 dark:hover:bg-gray-700"
-                }`}
-              >
-                {date.date()}
-              </button>
-            ) : (
-              <div />
-            )}
-          </div>
-        ))}
+        {days.map((date, idx) => {
+          const dateKey = date?.format("YYYY-MM-DD");
+          return (
+            <div
+              key={idx}
+              className="relative flex h-10 w-10 items-center justify-center"
+            >
+              {date ? (
+                <button
+                  onClick={() => setSelectedDate(date)}
+                  className={`h-10 w-10 rounded-full transition-all duration-200 ${
+                    date.isSame(selectedDate, "day")
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-800 hover:bg-gray-200 dark:text-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {date.date()}
+                </button>
+              ) : (
+                <div />
+              )}
+
+              {/* Event dot */}
+              {events[dateKey]?.length > 0 &&
+                events[dateKey].map((event, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setSelectedEvent({ date: dateKey, ...event });
+                      setShowEventModal(true);
+                    }}
+                    className="absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 rounded-full border border-white"
+                    title="View Event"
+                  ></button>
+                ))}
+            </div>
+          );
+        })}
       </div>
+
+      {/* Add Event Button */}
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={() => setShowModal(true)}
+          className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 transition"
+        >
+          + Add Event
+        </button>
+      </div>
+
+      {/* Add/Edit Event Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="rounded-lg bg-white p-6 shadow-md w-96">
+            <h3 className="text-lg font-semibold mb-4">
+              Add Event on {selectedDate.format("DD MMM YYYY")}
+            </h3>
+
+            <input
+              type="text"
+              value={eventText}
+              onChange={(e) => setEventText(e.target.value)}
+              placeholder="Enter event name"
+              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300"
+            />
+
+            {/* From and To Time */}
+            <div className="flex gap-2 mb-3">
+  {/* From Time */}
+  <div className="w-1/2">
+    <label className="block text-sm text-gray-600 mb-1">From</label>
+    <div className="flex">
+      <input
+        type="number"
+        min="1"
+        max="12"
+        placeholder="HH"
+        value={fromHour}
+        onChange={(e) => setFromHour(e.target.value)}
+        className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+      />
+      <span className="px-1 py-2">:</span>
+      <input
+        type="number"
+        min="0"
+        max="59"
+        placeholder="MM"
+        value={fromMinute}
+        onChange={(e) => setFromMinute(e.target.value)}
+        className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+      />
+      <select
+        value={fromPeriod}
+        onChange={(e) => setFromPeriod(e.target.value)}
+        className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+      >
+        <option>AM</option>
+        <option>PM</option>
+      </select>
+    </div>
+  </div>
+
+  {/* To Time */}
+  <div className="w-1/2">
+    <label className="block text-sm text-gray-600 mb-1">To</label>
+    <div className="flex">
+      <input
+        type="number"
+        min="1"
+        max="12"
+        placeholder="HH"
+        value={toHour}
+        onChange={(e) => setToHour(e.target.value)}
+        className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+      />
+      <span className="px-1 py-2">:</span>
+      <input
+        type="number"
+        min="0"
+        max="59"
+        placeholder="MM"
+        value={toMinute}
+        onChange={(e) => setToMinute(e.target.value)}
+        className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+      />
+      <select
+        value={toPeriod}
+        onChange={(e) => setToPeriod(e.target.value)}
+        className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+      >
+        <option>AM</option>
+        <option>PM</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+            {/* Repeat */}
+            <select
+              defaultValue=""
+              className="w-full rounded border px-3 py-2 mb-3 text-gray-500 focus:outline-none focus:ring focus:ring-indigo-300"
+            >
+              <option value="" disabled hidden>
+                Select repeat frequency
+              </option>
+              <option value="none">None</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+
+            {/* Reminder */}
+            <select
+              defaultValue=""
+              className="w-full rounded border px-3 py-2 mb-3 text-gray-500 focus:outline-none focus:ring focus:ring-indigo-300"
+            >
+              <option value="" disabled hidden>
+                Select reminder time
+              </option>
+              <option value="none">None</option>
+              <option value="5min">5 minutes before</option>
+              <option value="10min">10 minutes before</option>
+              <option value="30min">30 minutes before</option>
+            </select>
+
+            {/* Location */}
+            <input
+  type="text"
+  value={eventLocation}
+  onChange={(e) => setEventLocation(e.target.value)}
+  placeholder="Enter location"
+  className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300"
+/>
+
+
+            {/* Description */}
+            <textarea
+              rows="2"
+              placeholder="Add a short description"
+              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300 resize-none"
+            />
+
+            {/* Buttons */}
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddEvent}
+                className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Show Event Details Modal */}
+      {showEventModal && selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="rounded-lg bg-white p-6 shadow-md w-96">
+            <h3 className="text-lg font-semibold mb-4">Event Details</h3>
+           
+            <p><strong>Name:</strong> {selectedEvent.name}</p>
+            {selectedEvent.time && <p><strong>Time:</strong> {selectedEvent.time}</p>}
+            {selectedEvent.location && <p><strong>Location:</strong> {selectedEvent.location}</p>}
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => {
+                  showModal(true);
+                  setEventText(selectedEvent.name);
+                  setEventTime(selectedEvent.time || "");
+                  setEventLocation(selectedEvent.location || "");
+                  setSelectedDate(dayjs(selectedEvent.date));
+                  setShowEventModal(false);
+                }}
+                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              >
+                Edit
+              </button>
+              <button
+                onClick={handleDeleteEvent}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setShowEventModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

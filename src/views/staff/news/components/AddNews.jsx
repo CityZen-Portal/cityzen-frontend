@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Card from 'components/card';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MdAdd, MdSave, MdCancel, MdVisibility, MdVisibilityOff } from 'react-icons/md';
+import { MdSave, MdCancel, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import MyTextEditor from '../../../../components/textEditor/MyTextEditor'
+import MyTextEditor from '../../../../components/textEditor/MyTextEditor';
 
 const AddNews = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-
   const authorId = localStorage.getItem('id') || '';
 
   const [formData, setFormData] = useState({
@@ -21,10 +20,10 @@ const AddNews = () => {
     othercategory: '',
     authorId: authorId,
     isBreaking: false,
-    image: null,
+    image: [],
   });
 
-  const [existingImagePath, setExistingImagePath] = useState(''); 
+  const [existingImagePath, setExistingImagePath] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [isInEditMode, setIsInEditMode] = useState(id === 'new');
@@ -43,9 +42,9 @@ const AddNews = () => {
             othercategory: item.category_name || '',
             authorId: authorId,
             isBreaking: item.breaking || false,
-            image: null,
+            image: [],
           });
-          setExistingImagePath(item.imagePath || ''); 
+          setExistingImagePath(item.imagePath || []);
           setIsEditing(true);
           setIsInEditMode(false);
           setShowImage(false);
@@ -88,9 +87,17 @@ const AddNews = () => {
       isValid = false;
     }
 
-    if (!isEditing && !formData.image) {
-      errors.image = 'Image is required';
+    if (!isEditing && formData.image.length === 0 && existingImagePath.length === 0) {
+      errors.image = 'At least one image is required';
       isValid = false;
+    }
+
+    for (const file of formData.image) {
+      if (file.size > 5 * 1024 * 1024) {
+        errors.image = 'Each image must be less than 5MB';
+        isValid = false;
+        break;
+      }
     }
 
     setFormErrors(errors);
@@ -110,8 +117,15 @@ const AddNews = () => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setFormData((prev) => ({ ...prev, image: file }));
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter((file) => file.size <= 5 * 1024 * 1024);
+
+    if (validFiles.length !== files.length) {
+      toast.error('One or more images exceed 5MB and were skipped');
+    }
+
+    setFormData((prev) => ({ ...prev, image: [...prev.image, ...validFiles] }));
+    setFormErrors((prev) => ({ ...prev, image: '' }));
   };
 
   const handleEditorChange = (content) => {
@@ -119,22 +133,40 @@ const AddNews = () => {
     setFormErrors((prev) => ({ ...prev, content: '' }));
   };
 
+  const handleRemoveExistingImage = (img) => {
+    setExistingImagePath(prev => prev.filter(path => path !== img));
+  };
+
+  const handleRemoveNewImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      image: prev.image.filter((_, i) => i !== index),
+    }));
+  };
+
   const uploadImage = async () => {
-    if (!formData.image) return { imageName: '', imagePath: existingImagePath || '' };
+    if (formData.image.length === 0) {
+      return { imageName: '', imagePaths: existingImagePath };
+    }
 
     const imageForm = new FormData();
     imageForm.append('name', formData.title);
-    imageForm.append('imageFile', formData.image);
-
-    const res = await axios.post('https://media-api-service-hzx2.onrender.com/api/images/upload', imageForm, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    formData.image.forEach((file) => {
+      imageForm.append('imageFiles', file);
     });
+
+    const res = await axios.post(
+      'https://media-api-service-hzx2.onrender.com/api/images/upload/multiple',
+      imageForm,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+
+    const newImagePaths = res.data.data.map((img) => img.path);
+    const allImagePaths = [...existingImagePath, ...newImagePaths];
 
     return {
       imageName: formData.title,
-      imagePath: res.data.data.path,
+      imagePaths: allImagePaths,
     };
   };
 
@@ -142,7 +174,7 @@ const AddNews = () => {
     if (!validateForm()) return;
 
     try {
-      const { imageName, imagePath } = await uploadImage();
+      const { imageName, imagePaths } = await uploadImage();
 
       const payload = {
         title: formData.title,
@@ -150,19 +182,12 @@ const AddNews = () => {
         location: formData.location,
         breaking: formData.isBreaking,
         authorId: authorId,
+        imagePath: imagePaths,
         ...(formData.category === 'OTHERS'
-          ? {
-              category_name: formData.othercategory,
-              imageName,
-              imagePath,
-            }
-          : {
-              category: formData.category,
-              imageName,
-              imagePath,
-            }),
+          ? { category_name: formData.othercategory, imageName }
+          : { category: formData.category, imageName }),
       };
-
+       console.log(payload);
       if (isEditing) {
         await axios.put(`https://city-news-alert-backend-new.onrender.com/api/news/update/${id}`, payload);
         toast.success('News updated successfully!');
@@ -171,9 +196,7 @@ const AddNews = () => {
         toast.success('News posted successfully!');
       }
 
-      setTimeout(() => {
-        navigate('/staff/news');
-      }, 2000);
+      setTimeout(() => navigate('/staff/news'), 2000);
     } catch (error) {
       toast.error('Something went wrong. Please try again.');
     }
@@ -193,9 +216,9 @@ const AddNews = () => {
             othercategory: item.category_name || '',
             authorId: authorId,
             isBreaking: item.breaking || false,
-            image: null,
+            image: [],
           });
-          setExistingImagePath(item.imagePath || '');
+          setExistingImagePath(item.imagePath || []);
           setFormErrors({});
           setShowImage(false);
         })
@@ -217,7 +240,6 @@ const AddNews = () => {
         >
           ← Back
         </button>
-
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="mb-1 text-2xl font-bold text-navy-700 dark:text-white">
@@ -236,7 +258,6 @@ const AddNews = () => {
             </button>
           )}
         </div>
-
         <div className="mb-4">
           <label className="text-sm font-medium">Title</label>
           {isInEditMode ? (
@@ -252,22 +273,17 @@ const AddNews = () => {
           )}
           {formErrors.title && isInEditMode && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
         </div>
-
         <div className="mb-4 pb-5">
           <label className="text-sm font-medium">Content</label>
           {isInEditMode ? (
-            <div className='pb-4'>
-            <MyTextEditor value={formData.content} onChange={handleEditorChange} />
+            <div className="pb-4">
+              <MyTextEditor value={formData.content} onChange={handleEditorChange} />
             </div>
           ) : (
-            <div
-              className="prose max-w-full dark:prose-dark"
-              dangerouslySetInnerHTML={{ __html: formData.content }}
-            />
+            <div className="prose max-w-full dark:prose-dark" dangerouslySetInnerHTML={{ __html: formData.content }} />
           )}
           {formErrors.content && isInEditMode && <p className="text-red-500 text-xs mt-1">{formErrors.content}</p>}
         </div>
-
         <div className="mb-4">
           <label className="text-sm font-medium">Location</label>
           {isInEditMode ? (
@@ -283,7 +299,6 @@ const AddNews = () => {
           )}
           {formErrors.location && isInEditMode && <p className="text-red-500 text-xs mt-1">{formErrors.location}</p>}
         </div>
-
         <div className="mb-4">
           <label className="text-sm font-medium">Category</label>
           {isInEditMode ? (
@@ -326,40 +341,60 @@ const AddNews = () => {
             </p>
           )}
         </div>
-
-        {!isInEditMode && existingImagePath && (
-          <div className="mb-4 flex items-center space-x-2">
-            <label className="text-sm font-medium">Image</label>
+        {!isInEditMode && existingImagePath?.length > 0 && (
+          <div className="mb-4">
+            <label className="text-sm font-medium">Images</label>
             <button
               type="button"
               onClick={() => setShowImage(!showImage)}
-              className="rounded bg-gray-200 p-1 text-gray-600 hover:bg-gray-300 dark:bg-navy-600 dark:text-gray-300 dark:hover:bg-navy-500"
-              aria-label={showImage ? 'Hide Image' : 'Show Image'}
+              className="ml-2 rounded bg-gray-200 p-1 text-gray-600 hover:bg-gray-300 dark:bg-navy-600 dark:text-gray-300 dark:hover:bg-navy-500"
             >
               {showImage ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
             </button>
           </div>
         )}
-
-        {!isInEditMode && showImage && existingImagePath && (
-          <div className="mb-6">
-            <img src={existingImagePath} alt="News" className="max-w-full rounded-lg shadow-md" />
+        {!isInEditMode && showImage && existingImagePath?.length > 0 && (
+          <div className="mb-6 grid grid-cols-2 gap-3">
+            {existingImagePath.map((img, index) => (
+              <img key={index} src={img} alt="Uploaded" className="rounded-lg shadow-md" />
+            ))}
           </div>
         )}
-
         {isInEditMode && (
           <div className="mb-4">
-            <label className="text-sm font-medium">Upload Image</label>
+            <label className="text-sm font-medium">Upload Images</label>
             <input
               type="file"
               accept="image/*"
+              multiple
               onChange={handleImageChange}
               className="w-full rounded-xl border px-4 py-2 text-sm dark:bg-navy-700 dark:text-white"
             />
             {formErrors.image && <p className="text-red-500 text-xs mt-1">{formErrors.image}</p>}
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {existingImagePath.map((img, i) => (
+                <div key={i} className="relative">
+                  <img src={img} alt="Existing" className="h-24 w-full object-cover rounded" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveExistingImage(img)}
+                    className="absolute top-1 right-1 bg-red-500 hover:bg-red-700 text-white rounded-full px-2 py-1 text-xs"
+                  >×</button>
+                </div>
+              ))}
+              {formData.image.map((img, i) => (
+                <div key={i + existingImagePath.length} className="relative">
+                  <img src={URL.createObjectURL(img)} alt="Preview" className="h-24 w-full object-cover rounded" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveNewImage(i)}
+                    className="absolute top-1 right-1 bg-red-500 hover:bg-red-700 text-white rounded-full px-2 py-1 text-xs"
+                  >×</button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
-
         <div className="mb-4">
           {isInEditMode ? (
             <label className="flex items-center space-x-2 text-sm">
@@ -378,9 +413,8 @@ const AddNews = () => {
             )
           )}
         </div>
-
         <div className="mt-4 flex justify-end gap-3">
-          {isInEditMode &&(
+          {isInEditMode && (
             <>
               <button
                 onClick={handleSubmit}
@@ -394,7 +428,6 @@ const AddNews = () => {
               >
                 <MdCancel /> Cancel
               </button>
-             
             </>
           )}
         </div>
