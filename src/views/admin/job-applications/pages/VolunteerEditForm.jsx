@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
@@ -26,34 +26,65 @@ import {
   MdPerson,
   MdPhone,
   MdEmail,
-  MdSave,
-  MdBusiness,
-  MdDescription,
-  MdAdd,
-  MdClass,
-  MdClose,
-  MdDelete
+  MdSave
 } from 'react-icons/md';
 
-const MunicipalJobForm = () => {
-  const navigate = useNavigate();
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Municipal Job Form State
+const VolunteerEditForm = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Volunteer Job Form State
   const [formData, setFormData] = useState({
-    title: '',
-    department: '',
-    description: '',
+    programTitle: '',
+    programDescription: '',
     location: '',
-    requirements: [],
-    deadline: '',
-    contactPersonName: '',
-    contactPhoneNumber: '',
-    contactEmail: '',
-    contactAddress: ''
+    programDate: '',
+    programTime: '',
+    duration: '',
+    coordinatorName: '',
+    coordinatorPhone: '',
+    coordinatorEmail: '',
+    coordinatorAddress: ''
   });
-  const [newRequirement, setNewRequirement] = useState('');
   const [errors, setErrors] = useState({});
+
+  // Load job data for editing
+  useEffect(() => {
+    if (id) {
+      const savedJobs = localStorage.getItem('jobs');
+      if (savedJobs) {
+        try {
+          const jobs = JSON.parse(savedJobs);
+          const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'volunteer');
+          if (jobToEdit) {
+            setFormData({
+              programTitle: jobToEdit.programTitle || '',
+              programDescription: jobToEdit.programDescription || '',
+              location: jobToEdit.location || '',
+              programDate: jobToEdit.programDate || '',
+              programTime: jobToEdit.programTime || '',
+              duration: jobToEdit.duration || '',
+              coordinatorName: jobToEdit.coordinatorName || '',
+              coordinatorPhone: jobToEdit.coordinatorPhone || '',
+              coordinatorEmail: jobToEdit.coordinatorEmail || '',
+              coordinatorAddress: jobToEdit.coordinatorAddress || ''
+            });
+          } else {
+            toast.error('Volunteer opportunity not found');
+            navigate('/admin/job-applications');
+          }
+        } catch (error) {
+          console.error('Failed to load job data', error);
+          toast.error('Failed to load volunteer opportunity data');
+          navigate('/admin/job-applications');
+        }
+      }
+      setLoading(false);
+    }
+  }, [id, navigate]);
 
   // Handle form field changes
   const handleInputChange = (field, value) => {
@@ -64,74 +95,28 @@ const MunicipalJobForm = () => {
     }
   };
 
-  // Add requirement
-  const addRequirement = useCallback(() => {
-    if (newRequirement.trim() && !formData.requirements.includes(newRequirement.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        requirements: [...prev.requirements, newRequirement.trim()]
-      }));
-      setNewRequirement('');
-      if (errors.requirements) {
-        setErrors(prev => ({ ...prev, requirements: '' }));
-      }
-      toast.success('Requirement added successfully!');
-    } else if (formData.requirements.includes(newRequirement.trim())) {
-      toast.warning('This requirement already exists!');
-    }
-  }, [newRequirement, formData.requirements, errors.requirements]);
-
-  // Remove requirement
-  const removeRequirement = useCallback((index) => {
-    setFormData(prev => ({
-      ...prev,
-      requirements: prev.requirements.filter((_, i) => i !== index)
-    }));
-    toast.info('Requirement removed');
-  }, []);
-
-  // Handle requirement key press
-  const handleRequirementKeyPress = useCallback((e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addRequirement();
-    }
-  }, [addRequirement]);
-
   // Validate form
   const validateForm = useCallback(() => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Job title is required';
-    if (!formData.department.trim()) newErrors.department = 'Department is required';
-    if (!formData.description.trim()) newErrors.description = 'Job description is required';
+    if (!formData.programTitle.trim()) newErrors.programTitle = 'Program programTitle is required';
+    if (!formData.programDescription.trim()) newErrors.programDescription = 'Program programDescription is required';
     if (!formData.location.trim()) newErrors.location = 'Location is required';
-    if (formData.requirements.length === 0) newErrors.requirements = 'At least one requirement is needed';
-    if (!formData.deadline) newErrors.deadline = 'Application deadline is required';
-    if (!formData.contactPersonName.trim()) newErrors.contactPersonName = 'Contact name is required';
-    if (!formData.contactPhoneNumber.trim()) newErrors.contactPhoneNumber = 'Contact phone is required';
-    if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
-    if (!formData.contactAddress.trim()) newErrors.contactAddress = 'Contact address is required';
+    if (!formData.programDate) newErrors.programDate = 'Program date is required';
+    if (!formData.coordinatorName.trim()) newErrors.coordinatorName = 'Contact name is required';
+    if (!formData.coordinatorPhone.trim()) newErrors.coordinatorPhone = 'Contact phone is required';
+    if (!formData.coordinatorEmail.trim()) newErrors.coordinatorEmail = 'Contact email is required';
+    if (!formData.coordinatorAddress.trim()) newErrors.coordinatorAddress = 'Contact address is required';
     
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.contactEmail.trim() && !emailRegex.test(formData.contactEmail.trim())) {
-      newErrors.contactEmail = 'Please enter a valid email address';
+    if (formData.coordinatorEmail.trim() && !emailRegex.test(formData.coordinatorEmail.trim())) {
+      newErrors.coordinatorEmail = 'Please enter a valid email address';
     }
     
     // Phone validation
     const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-    if (formData.contactPhoneNumber.trim() && !phoneRegex.test(formData.contactPhoneNumber.trim())) {
-      newErrors.contactPhoneNumber = 'Please enter a valid phone number';
-    }
-    
-    // Date validation - ensure date is in the future
-    if (formData.deadline) {
-      const selectedDate = new Date(formData.deadline);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) {
-        newErrors.deadline = 'Application deadline must be in the future';
-      }
+    if (formData.coordinatorPhone.trim() && !phoneRegex.test(formData.coordinatorPhone.trim())) {
+      newErrors.coordinatorPhone = 'Please enter a valid phone number';
     }
     
     return newErrors;
@@ -145,9 +130,9 @@ const MunicipalJobForm = () => {
       // Prepare job data
       const jobData = {
         ...formData,
-        jobType: 'municipal',
-        requirements: formData.requirements.join('; '),
-        department: formData.department || 'General'
+        jobType: 'volunteer',
+        department: 'Community Service',
+        requirements: 'Community service mindset and willingness to help'
       };
 
       // Get existing jobs
@@ -161,18 +146,15 @@ const MunicipalJobForm = () => {
         }
       }
 
-      // Add new job
-      const newJob = {
-        id: Date.now().toString(),
-        ...jobData,
-        isActive: true
-      };
-      jobs.push(newJob);
-      localStorage.setItem('jobs', JSON.stringify(jobs));
+      // Update existing job
+      const updatedJobs = jobs.map(job => 
+        job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
+      );
+      localStorage.setItem('jobs', JSON.stringify(updatedJobs));
 
       // Show success message
       setShowSuccess(true);
-      toast.success('Municipal job posted successfully!');
+      toast.success('Volunteer opportunity updated successfully!');
       
       // Navigate back after delay
       setTimeout(() => {
@@ -184,12 +166,23 @@ const MunicipalJobForm = () => {
       const errorCount = Object.keys(newErrors).length;
       toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
     }
-  }, [validateForm, formData, navigate]);
+  }, [validateForm, formData, id, navigate]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
     navigate('/admin/job-applications');
   }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading volunteer opportunity data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
@@ -217,7 +210,7 @@ const MunicipalJobForm = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Success!</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Municipal job has been posted successfully.
+                Volunteer opportunity has been updated successfully.
               </p>
             </div>
           </div>
@@ -236,10 +229,10 @@ const MunicipalJobForm = () => {
             </button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Create Municipal Job
+                Edit Volunteer Program
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Post a new government position
+                Update the community service opportunity details
               </p>
             </div>
           </div>
@@ -252,101 +245,76 @@ const MunicipalJobForm = () => {
           {/* Basic Information */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <MdBusiness className="text-blue-600 dark:text-blue-400" size={20} />
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                <MdFavorite className="text-green-600 dark:text-green-400" size={20} />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Basic Information</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Program Information</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Job Title */}
+            <div className="space-y-6">
+              {/* Program programTitle */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Job Title <span className="text-red-500">*</span>
+                  Program programTitle <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdBusiness className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdFavorite className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
-                    placeholder="e.g., Senior Civil Engineer"
+                    value={formData.programTitle}
+                    onChange={(e) => handleInputChange('programTitle', e.target.value)}
+                    placeholder="e.g., Community Garden Volunteer"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.title ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.programTitle ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.title && (
+                {errors.programTitle && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
                     <MdErrorOutline size={16} />
-                    {errors.title}
+                    {errors.programTitle}
                   </div>
                 )}
               </div>
               
-              {/* Department */}
+              {/* Program programDescription */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Department <span className="text-red-500">*</span>
+                  Program programDescription <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <MdBusiness className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    value={formData.department}
-                    onChange={(e) => handleInputChange('department', e.target.value)}
-                    placeholder="e.g., Public Works Department"
-                    className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.department ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                    }`}
-                  />
-                </div>
-                {errors.department && (
+                <textarea
+                  value={formData.programDescription}
+                  onChange={(e) => handleInputChange('programDescription', e.target.value)}
+                  placeholder="Describe the volunteer opportunity and what participants will be doing..."
+                  rows={4}
+                  className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
+                    errors.programDescription ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                  }`}
+                />
+                {errors.programDescription && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
                     <MdErrorOutline size={16} />
-                    {errors.department}
+                    {errors.programDescription}
                   </div>
                 )}
               </div>
             </div>
-            
-            {/* Job Description */}
-            <div className="mt-6 space-y-2">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Job Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Provide a detailed description of the job responsibilities and duties..."
-                rows={4}
-                className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                  errors.description ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                }`}
-              />
-              {errors.description && (
-                <div className="flex items-center gap-2 text-red-600 text-sm">
-                  <MdErrorOutline size={16} />
-                  {errors.description}
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Location & Timeline */}
+          {/* Schedule & Location */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <MdLocationOn className="text-green-600 dark:text-green-400" size={20} />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <MdCalendarToday className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Location & Timeline</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Schedule & Location</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Work Location */}
+              {/* Location */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Work Location <span className="text-red-500">*</span>
+                  Location <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MdLocationOn className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -354,7 +322,7 @@ const MunicipalJobForm = () => {
                     type="text"
                     value={formData.location}
                     onChange={(e) => handleInputChange('location', e.target.value)}
-                    placeholder="e.g., Coimbatore Municipal Corporation HQ"
+                    placeholder="e.g., Ward 8, Gandhipuram"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.location ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -368,90 +336,79 @@ const MunicipalJobForm = () => {
                 )}
               </div>
               
-              {/* Application Deadline */}
+              {/* Program Date */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Application Deadline <span className="text-red-500">*</span>
+                  Program Date <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MdCalendarToday className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="date"
-                    value={formData.deadline}
-                    onChange={(e) => handleInputChange('deadline', e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
+                    value={formData.programDate}
+                    onChange={(e) => handleInputChange('programDate', e.target.value)}
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.deadline ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.programDate ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.deadline && (
+                {errors.programDate && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
                     <MdErrorOutline size={16} />
-                    {errors.deadline}
+                    {errors.programDate}
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Requirements */}
-          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                <MdDescription className="text-purple-600 dark:text-purple-400" size={20} />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Job Requirements</h2>
-            </div>
-            
-            {/* Add Requirement */}
-            <div className="space-y-4">
-              <div className="flex gap-3">
-                <div className="flex-1">
+              
+              {/* Time Schedule */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Time Schedule
+                </label>
+                <div className="relative">
+                  <MdAccessTime className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    value={newRequirement}
-                    onChange={(e) => setNewRequirement(e.target.value)}
-                    onKeyPress={handleRequirementKeyPress}
-                    placeholder="Enter a job requirement..."
-                    className="w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    value={formData.programTime}
+                    onChange={(e) => handleInputChange('programTime', e.target.value)}
+                    placeholder="e.g., 9:00 AM - 5:00 PM"
+                    className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                      errors.programTime ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                    }`}
                   />
                 </div>
-                <button
-                  onClick={addRequirement}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
-                >
-                  <MdAdd size={16} />
-                  Add
-                </button>
+                {errors.programTime && (
+                  <div className="flex items-center gap-2 text-red-600 text-sm">
+                    <MdErrorOutline size={16} />
+                    {errors.programTime}
+                  </div>
+                )}
               </div>
               
-              {/* Requirements List */}
-              {formData.requirements.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Requirements:</h3>
-                  <div className="space-y-2">
-                    {formData.requirements.map((requirement, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <span className="flex-1 text-gray-900 dark:text-gray-100">{requirement}</span>
-                        <button
-                          onClick={() => removeRequirement(index)}
-                          className="p-1 text-red-600 hover:text-red-700 transition-colors"
-                        >
-                          <MdDelete size={16} />
-                        </button>
-                      </div>
-                    ))}
+              {/* Duration */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Duration
+                </label>
+                <div className="relative">
+                  <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    value={formData.duration}
+                    onChange={(e) => handleInputChange('duration', e.target.value)}
+                    placeholder="e.g., 1 week, ongoing"
+                    className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                      errors.duration ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                  />
+                </div>
+                {errors.duration && (
+                  <div className="flex items-center gap-2 text-red-600 text-sm">
+                    <MdErrorOutline size={16} />
+                    {errors.duration}
                   </div>
-                </div>
-              )}
-              
-              {errors.requirements && (
-                <div className="flex items-center gap-2 text-red-600 text-sm">
-                  <MdErrorOutline size={16} />
-                  {errors.requirements}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
@@ -459,7 +416,7 @@ const MunicipalJobForm = () => {
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <MdPerson className="text-orange-600 dark:text-orange-400" size={20} />
+                <MdPerson  className="text-orange-600 dark:text-orange-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
             </div>
@@ -474,18 +431,18 @@ const MunicipalJobForm = () => {
                   <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    value={formData.contactPersonName}
-                    onChange={(e) => handleInputChange('contactPersonName', e.target.value)}
-                    placeholder="e.g., John Smith"
+                    value={formData.coordinatorName}
+                    onChange={(e) => handleInputChange('coordinatorName', e.target.value)}
+                    placeholder="e.g., Sarah Johnson"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.contactPersonName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.coordinatorName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.contactPersonName && (
+                {errors.coordinatorName && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
                     <MdErrorOutline size={16} />
-                    {errors.contactPersonName}
+                    {errors.coordinatorName}
                   </div>
                 )}
               </div>
@@ -499,18 +456,18 @@ const MunicipalJobForm = () => {
                   <MdPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="tel"
-                    value={formData.contactPhoneNumber}
-                    onChange={(e) => handleInputChange('contactPhoneNumber', e.target.value)}
-                    placeholder="e.g., +91 98765 43210"
+                    value={formData.coordinatorPhone}
+                    onChange={(e) => handleInputChange('coordinatorPhone', e.target.value)}
+                    placeholder="e.g., +91 98765 43211"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.contactPhoneNumber ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.coordinatorPhone ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.contactPhoneNumber && (
+                {errors.coordinatorPhone && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
                     <MdErrorOutline size={16} />
-                    {errors.contactPhoneNumber}
+                    {errors.coordinatorPhone}
                   </div>
                 )}
               </div>
@@ -524,18 +481,18 @@ const MunicipalJobForm = () => {
                   <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="email"
-                    value={formData.contactEmail}
-                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                    placeholder="e.g., hr@municipality.gov.in"
+                    value={formData.coordinatorEmail}
+                    onChange={(e) => handleInputChange('coordinatorEmail', e.target.value)}
+                    placeholder="e.g., volunteer@municipality.gov.in"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.contactEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.coordinatorEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.contactEmail && (
+                {errors.coordinatorEmail && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
                     <MdErrorOutline size={16} />
-                    {errors.contactEmail}
+                    {errors.coordinatorEmail}
                   </div>
                 )}
               </div>
@@ -546,18 +503,18 @@ const MunicipalJobForm = () => {
                   Office Address <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  value={formData.contactAddress}
-                  onChange={(e) => handleInputChange('contactAddress', e.target.value)}
-                  placeholder="e.g., Coimbatore Municipal Corporation, Town Hall Road, Coimbatore - 641001"
+                  value={formData.coordinatorAddress}
+                  onChange={(e) => handleInputChange('coordinatorAddress', e.target.value)}
+                  placeholder="e.g., Ward Office, R.S. Puram, Coimbatore - 641002"
                   rows={3}
                   className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                    errors.contactAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                    errors.coordinatorAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                   }`}
                 />
-                {errors.contactAddress && (
+                {errors.coordinatorAddress && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
                     <MdErrorOutline size={16} />
-                    {errors.contactAddress}
+                    {errors.coordinatorAddress}
                   </div>
                 )}
               </div>
@@ -568,16 +525,16 @@ const MunicipalJobForm = () => {
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
             <button
               onClick={handleSubmit}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
             >
               <MdSave size={20} />
-              Post Municipal Job
+              Update Volunteer Opportunity
             </button>
             <button
               onClick={handleCancel}
               className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2"
             >
-              <MdClose size={20} />
+              <X size={20} />
               Cancel
             </button>
           </div>
@@ -587,5 +544,5 @@ const MunicipalJobForm = () => {
   );
 };
 
-export default MunicipalJobForm;
+export default VolunteerEditForm;
 

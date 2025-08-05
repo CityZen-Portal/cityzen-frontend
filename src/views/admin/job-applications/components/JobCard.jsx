@@ -1,93 +1,79 @@
 import React from 'react';
-import {
-  MdEdit,
-  MdLocationOn,
-  MdBusiness,
-  MdDelete,
-  MdFavorite,
-  MdToggleOn,
-  MdToggleOff
-} from 'react-icons/md';
+import { Building2, MapPin, Calendar, AlertTriangle, Eye } from 'lucide-react';
 
-const JobCard = ({ job, onEdit, onDelete, onToggleStatus }) => {
+const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
+  const expired = isJobExpired(job);
+  
   return (
-    <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
+    <div
+      className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+      onClick={() => onViewDetails(job.id)}
+    >
       <div className="p-6">
-        {/* Header with Status Badge */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            {/* Job Type Badge */}
-            <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-              job.jobType === 'municipal'
-                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-            }`}>
-              {job.jobType === 'municipal' ? (
-                <MdBusiness size={16} />
-              ) : (
-                <MdFavorite size={16} />
-              )}
-              {job.jobType === 'municipal' ? 'Municipal' : 'Volunteer'}
+          <h3 className={`text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400`}>
+            {job.title}
+          </h3>
+          {expired && (
+            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium ml-2 flex items-center gap-1">
+              <AlertTriangle size={12} />
+              EXPIRED
             </div>
-          </div>
-          
-          {/* Status Badge - Now Clickable Toggle */}
-          <button
-            onClick={() => onToggleStatus(job.id)}
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all hover:scale-105 ${
-              job.isActive
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            {job.isActive ? (
-              <MdToggleOn size={16} />
-            ) : (
-              <MdToggleOff size={16} />
-            )}
-            {job.isActive ? 'Active' : 'Inactive'}
-          </button>
+          )}
         </div>
 
-        {/* Job Title */}
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
-          {job.title}
-        </h3>
-
-        {/* Department */}
-        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-3">
-          <MdBusiness size={16} />
-          <span className="text-sm">{job.department}</span>
-        </div>
-
-        {/* Location */}
-        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-4">
-          <MdLocationOn size={16} />
-          <span className="text-sm line-clamp-1">{job.location}</span>
-        </div>
-
-        {/* Description */}
-        <p className="text-gray-700 dark:text-gray-300 text-sm mb-6 line-clamp-3">
+        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-6">
           {job.description}
         </p>
 
-        {/* Action Buttons - Equal Sizes */}
-        <div className="flex gap-3">
-          <button
-            onClick={() => onEdit(job)}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 text-sm"
-          >
-            <MdEdit size={16} />
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(job)}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 text-sm"
-          >
-            <MdDelete size={16} />
-            Delete
-          </button>
+        <div className="space-y-4">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+              <Building2 size={16} />
+              <div>
+                <p className="text-xs text-blue-600 dark:text-blue-400">Department</p>
+                <p className="font-medium">{job.department}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+              <MapPin size={16} />
+              <div>
+                <p className="text-xs text-purple-600 dark:text-purple-400">Location</p>
+                <p className="font-medium line-clamp-1">{job.location}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`${expired ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'} rounded-lg p-3`}>
+            <div className={`flex items-center gap-2 ${expired ? 'text-red-700 dark:text-red-300' : 'text-orange-700 dark:text-orange-300'}`}>
+              <Calendar size={16} />
+              <div>
+                <p className={`text-xs ${expired ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                  Application Deadline
+                </p>
+                <p className="font-medium">
+                  {formatDate(job.deadline)} {expired && (
+                    <span className="text-red-600 dark:text-red-400 text-xs ml-1">EXPIRED</span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewDetails(job.id);
+          }}
+          className="w-full mt-6 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Eye size={16} />
+          View Details
+        </button>
       </div>
     </div>
   );

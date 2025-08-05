@@ -1,64 +1,57 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  Heart, Save, X, MapPin, Calendar,
-  User, Phone, Mail, AlertCircle, CheckCircle,
-  ArrowLeft, Clock, Users
-} from 'lucide-react';
+  MdFavorite as Heart,
+  MdSave as Save,
+  MdClose as X,
+  MdLocationOn as MapPin,
+  MdCalendarToday as Calendar,
+  MdPerson as User,
+  MdPhone as Phone,
+  MdEmail as Mail,
+  MdErrorOutline as AlertCircle,
+  MdCheckCircle as CheckCircle,
+  MdArrowBack as ArrowLeft,
+  MdAccessTime as Clock,
+  MdGroup as Users,
+  MdCheckCircle,
+  MdArrowBack,
+  MdFavorite,
+  MdErrorOutline,
+  MdCalendarToday,
+  MdLocationOn,
+  MdAccessTime,
+  MdPerson,
+  MdPhone,
+  MdEmail,
+  MdSave,
+  MdError,
+  MdClass,
+  MdClose
+} from 'react-icons/md';
 
 const VolunteerJobForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const isEditMode = Boolean(id);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Volunteer Job Form State
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
+    programTitle: '',
+    programDescription: '',
     location: '',
-    workDate: '',
-    workTime: '',
+    programDate: '',
+    programTime: '',
     duration: '',
-    contactName: '',
-    contactPhone: '',
-    contactEmail: '',
-    contactAddress: ''
+    coordinatorName: '',
+    coordinatorPhone: '',
+    coordinatorEmail: '',
+    coordinatorAddress: ''
   });
   const [errors, setErrors] = useState({});
 
-  // Load job data for editing
-  useEffect(() => {
-    if (isEditMode && id) {
-      const savedJobs = localStorage.getItem('jobs');
-      if (savedJobs) {
-        try {
-          const jobs = JSON.parse(savedJobs);
-          const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'volunteer');
-          if (jobToEdit) {
-            setFormData({
-              title: jobToEdit.title || '',
-              description: jobToEdit.description || '',
-              location: jobToEdit.location || '',
-              workDate: jobToEdit.workDate || '',
-              workTime: jobToEdit.workTime || '',
-              duration: jobToEdit.duration || '',
-              contactName: jobToEdit.contactName || '',
-              contactPhone: jobToEdit.contactPhone || '',
-              contactEmail: jobToEdit.contactEmail || '',
-              contactAddress: jobToEdit.contactAddress || ''
-            });
-          }
-        } catch (error) {
-          console.error('Failed to load job data', error);
-        }
-      }
-    }
-  }, [isEditMode, id]);
-
-  // Handle form field changes - Fixed to prevent cursor jumping
+  // Handle form field changes
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -70,25 +63,35 @@ const VolunteerJobForm = () => {
   // Validate form
   const validateForm = useCallback(() => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Program title is required';
-    if (!formData.description.trim()) newErrors.description = 'Program description is required';
+    if (!formData.programTitle.trim()) newErrors.programTitle = 'Program programTitle is required';
+    if (!formData.programDescription.trim()) newErrors.programDescription = 'Program programDescription is required';
     if (!formData.location.trim()) newErrors.location = 'Location is required';
-    if (!formData.workDate) newErrors.workDate = 'Program date is required';
-    if (!formData.contactName.trim()) newErrors.contactName = 'Contact name is required';
-    if (!formData.contactPhone.trim()) newErrors.contactPhone = 'Contact phone is required';
-    if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
-    if (!formData.contactAddress.trim()) newErrors.contactAddress = 'Contact address is required';
+    if (!formData.programDate) newErrors.programDate = 'Program date is required';
+    if (!formData.coordinatorName.trim()) newErrors.coordinatorName = 'Contact name is required';
+    if (!formData.coordinatorPhone.trim()) newErrors.coordinatorPhone = 'Contact phone is required';
+    if (!formData.coordinatorEmail.trim()) newErrors.coordinatorEmail = 'Contact email is required';
+    if (!formData.coordinatorAddress.trim()) newErrors.coordinatorAddress = 'Contact address is required';
     
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.contactEmail.trim() && !emailRegex.test(formData.contactEmail.trim())) {
-      newErrors.contactEmail = 'Please enter a valid email address';
+    if (formData.coordinatorEmail.trim() && !emailRegex.test(formData.coordinatorEmail.trim())) {
+      newErrors.coordinatorEmail = 'Please enter a valid email address';
     }
     
     // Phone validation
     const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-    if (formData.contactPhone.trim() && !phoneRegex.test(formData.contactPhone.trim())) {
-      newErrors.contactPhone = 'Please enter a valid phone number';
+    if (formData.coordinatorPhone.trim() && !phoneRegex.test(formData.coordinatorPhone.trim())) {
+      newErrors.coordinatorPhone = 'Please enter a valid phone number';
+    }
+    
+    // Date validation - ensure date is in the future
+    if (formData.programDate) {
+      const selectedDate = new Date(formData.programDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        newErrors.programDate = 'Program date must be in the future';
+      }
     }
     
     return newErrors;
@@ -118,26 +121,18 @@ const VolunteerJobForm = () => {
         }
       }
 
-      if (isEditMode && id) {
-        // Update existing job
-        const updatedJobs = jobs.map(job => 
-          job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
-        );
-        localStorage.setItem('jobs', JSON.stringify(updatedJobs));
-      } else {
-        // Add new job
-        const newJob = {
-          id: Date.now().toString(),
-          ...jobData,
-          isActive: true
-        };
-        jobs.push(newJob);
-        localStorage.setItem('jobs', JSON.stringify(jobs));
-      }
+      // Add new job
+      const newJob = {
+        id: Date.now().toString(),
+        ...jobData,
+        isActive: true
+      };
+      jobs.push(newJob);
+      localStorage.setItem('jobs', JSON.stringify(jobs));
 
       // Show success message
       setShowSuccess(true);
-      toast.success(`Volunteer opportunity ${isEditMode ? 'updated' : 'posted'} successfully!`);
+      toast.success('Volunteer opportunity posted successfully!');
       
       // Navigate back after delay
       setTimeout(() => {
@@ -149,7 +144,7 @@ const VolunteerJobForm = () => {
       const errorCount = Object.keys(newErrors).length;
       toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
     }
-  }, [validateForm, formData, isEditMode, id, navigate]);
+  }, [validateForm, formData, navigate]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
@@ -157,7 +152,7 @@ const VolunteerJobForm = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gray dark:bg-navy">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -175,14 +170,14 @@ const VolunteerJobForm = () => {
       {/* Success Modal */}
       {showSuccess && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="text-green-600 dark:text-green-400" size={32} />
+                <MdCheckCircle className="text-green-600 dark:text-green-400" size={32} />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Success!</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Volunteer opportunity has been {isEditMode ? 'updated' : 'posted'} successfully.
+                Volunteer opportunity has been posted successfully.
               </p>
             </div>
           </div>
@@ -197,14 +192,14 @@ const VolunteerJobForm = () => {
               onClick={handleCancel}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
-              <ArrowLeft className="text-gray-600 dark:text-gray-400" size={24} />
+              <MdArrowBack className="text-gray-600 dark:text-gray-400" size={24} />
             </button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {isEditMode ? 'Edit' : 'Create'} Volunteer Program
+                Create Volunteer Program
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {isEditMode ? 'Update the community service opportunity' : 'Create a community service opportunity'}
+                Create a community service opportunity
               </p>
             </div>
           </div>
@@ -218,55 +213,55 @@ const VolunteerJobForm = () => {
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <Heart className="text-green-600 dark:text-green-400" size={20} />
+                <MdFavorite className="text-green-600 dark:text-green-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Program Information</h2>
             </div>
             
             <div className="space-y-6">
-              {/* Program Title */}
+              {/* Program programTitle */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Program Title <span className="text-red-500">*</span>
+                  Program programTitle <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Heart className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdFavorite className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    value={formData.programTitle}
+                    onChange={(e) => handleInputChange('programTitle', e.target.value)}
                     placeholder="e.g., Community Garden Volunteer"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.title ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.programTitle ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.title && (
+                {errors.programTitle && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
-                    {errors.title}
+                    <MdErrorOutline size={16} />
+                    {errors.programTitle}
                   </div>
                 )}
               </div>
               
-              {/* Program Description */}
+              {/* Program programDescription */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Program Description <span className="text-red-500">*</span>
+                  Program programDescription <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  value={formData.programDescription}
+                  onChange={(e) => handleInputChange('programDescription', e.target.value)}
                   placeholder="Describe the volunteer opportunity and what participants will be doing..."
                   rows={4}
                   className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                    errors.description ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                    errors.programDescription ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                   }`}
                 />
-                {errors.description && (
+                {errors.programDescription && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
-                    {errors.description}
+                    <MdErrorOutline size={16} />
+                    {errors.programDescription}
                   </div>
                 )}
               </div>
@@ -277,7 +272,7 @@ const VolunteerJobForm = () => {
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <Calendar className="text-blue-600 dark:text-blue-400" size={20} />
+                <MdCalendarToday className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Schedule & Location</h2>
             </div>
@@ -289,7 +284,7 @@ const VolunteerJobForm = () => {
                   Location <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdLocationOn className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
                     value={formData.location}
@@ -302,7 +297,7 @@ const VolunteerJobForm = () => {
                 </div>
                 {errors.location && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
+                    <MdErrorOutline size={16} />
                     {errors.location}
                   </div>
                 )}
@@ -314,20 +309,21 @@ const VolunteerJobForm = () => {
                   Program Date <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdCalendarToday className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="date"
-                    value={formData.workDate}
-                    onChange={(e) => handleInputChange('workDate', e.target.value)}
+                    value={formData.programDate}
+                    onChange={(e) => handleInputChange('programDate', e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.workDate ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.programDate ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.workDate && (
+                {errors.programDate && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
-                    {errors.workDate}
+                    <MdErrorOutline size={16} />
+                    {errors.programDate}
                   </div>
                 )}
               </div>
@@ -338,21 +334,21 @@ const VolunteerJobForm = () => {
                   Time Schedule
                 </label>
                 <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdAccessTime className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    value={formData.workTime}
-                    onChange={(e) => handleInputChange('workTime', e.target.value)}
+                    value={formData.programTime}
+                    onChange={(e) => handleInputChange('programTime', e.target.value)}
                     placeholder="e.g., 9:00 AM - 5:00 PM"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.workTime ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.programTime ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.workTime && (
+                {errors.programTime && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
-                    {errors.workTime}
+                    <MdErrorOutline size={16} />
+                    {errors.programTime}
                   </div>
                 )}
               </div>
@@ -363,7 +359,7 @@ const VolunteerJobForm = () => {
                   Duration
                 </label>
                 <div className="relative">
-                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
                     value={formData.duration}
@@ -376,7 +372,7 @@ const VolunteerJobForm = () => {
                 </div>
                 {errors.duration && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
+                    <MdErrorOutline size={16} />
                     {errors.duration}
                   </div>
                 )}
@@ -388,33 +384,33 @@ const VolunteerJobForm = () => {
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <User className="text-orange-600 dark:text-orange-400" size={20} />
+                <MdPerson className="text-orange-600 dark:text-orange-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Contact Person Name */}
+              {/* Contact Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Contact Person Name <span className="text-red-500">*</span>
+                  Contact Person <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    value={formData.contactName}
-                    onChange={(e) => handleInputChange('contactName', e.target.value)}
+                    value={formData.coordinatorName}
+                    onChange={(e) => handleInputChange('coordinatorName', e.target.value)}
                     placeholder="e.g., Sarah Johnson"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.contactName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.coordinatorName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.contactName && (
+                {errors.coordinatorName && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
-                    {errors.contactName}
+                    <MdErrorOutline size={16} />
+                    {errors.coordinatorName}
                   </div>
                 )}
               </div>
@@ -422,24 +418,24 @@ const VolunteerJobForm = () => {
               {/* Contact Phone */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Contact Phone <span className="text-red-500">*</span>
+                  Phone Number <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
-                    type="text"
-                    value={formData.contactPhone}
-                    onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                    type="tel"
+                    value={formData.coordinatorPhone}
+                    onChange={(e) => handleInputChange('coordinatorPhone', e.target.value)}
                     placeholder="e.g., +91 98765 43211"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.contactPhone ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.coordinatorPhone ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.contactPhone && (
+                {errors.coordinatorPhone && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
-                    {errors.contactPhone}
+                    <MdErrorOutline size={16} />
+                    {errors.coordinatorPhone}
                   </div>
                 )}
               </div>
@@ -447,69 +443,69 @@ const VolunteerJobForm = () => {
               {/* Contact Email */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Contact Email <span className="text-red-500">*</span>
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="email"
-                    value={formData.contactEmail}
-                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                    value={formData.coordinatorEmail}
+                    onChange={(e) => handleInputChange('coordinatorEmail', e.target.value)}
                     placeholder="e.g., volunteer@municipality.gov.in"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.contactEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                      errors.coordinatorEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
-                {errors.contactEmail && (
+                {errors.coordinatorEmail && (
                   <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <AlertCircle size={16} />
-                    {errors.contactEmail}
+                    <MdErrorOutline size={16} />
+                    {errors.coordinatorEmail}
+                  </div>
+                )}
+              </div>
+              
+              {/* Contact Address */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Office Address <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={formData.coordinatorAddress}
+                  onChange={(e) => handleInputChange('coordinatorAddress', e.target.value)}
+                  placeholder="e.g., Ward Office, R.S. Puram, Coimbatore - 641002"
+                  rows={3}
+                  className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
+                    errors.coordinatorAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                  }`}
+                />
+                {errors.coordinatorAddress && (
+                  <div className="flex items-center gap-2 text-red-600 text-sm">
+                    <MdErrorOutline size={16} />
+                    {errors.coordinatorAddress}
                   </div>
                 )}
               </div>
             </div>
-            
-            {/* Contact Address */}
-            <div className="mt-6 space-y-2">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Contact Address <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.contactAddress}
-                onChange={(e) => handleInputChange('contactAddress', e.target.value)}
-                placeholder="Complete address of the contact office..."
-                rows={4}
-                className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                  errors.contactAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                }`}
-              />
-              {errors.contactAddress && (
-                <div className="flex items-center gap-2 text-red-600 text-sm">
-                  <AlertCircle size={16} />
-                  {errors.contactAddress}
-                </div>
-              )}
-            </div>
           </div>
-        </div>
 
-        {/* Action Buttons - Smaller and Equal Sizes */}
-        <div className="flex gap-4 mt-8 max-w-md mx-auto">
-          <button
-            onClick={handleSubmit}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 text-sm shadow-lg"
-          >
-            <Save size={18} />
-            {isEditMode ? 'Update' : 'Create'} Program
-          </button>
-          <button
-            onClick={handleCancel}
-            className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-3 px-4 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 text-sm"
-          >
-            <X size={18} />
-            Cancel
-          </button>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 pt-6">
+            <button
+              onClick={handleSubmit}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
+            >
+              <MdSave size={20} />
+              Post Volunteer Opportunity
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+            >
+              <MdClose size={20} />
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -517,3 +513,4 @@ const VolunteerJobForm = () => {
 };
 
 export default VolunteerJobForm;
+
