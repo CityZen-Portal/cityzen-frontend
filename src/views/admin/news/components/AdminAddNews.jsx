@@ -28,10 +28,13 @@ const AddNews = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isInEditMode, setIsInEditMode] = useState(id === 'new');
   const [showImage, setShowImage] = useState(false);
+  const [loading, setLoading] = useState(false);  // New loading state
 
   useEffect(() => {
     if (id && id !== 'new') {
-      axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
+      setLoading(true);  // Start loading
+      axios
+        .get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
         .then(res => {
           const item = res.data.data;
           setFormData({
@@ -48,8 +51,10 @@ const AddNews = () => {
           setIsEditing(true);
           setIsInEditMode(false);
           setShowImage(false);
+          setLoading(false); // Finish loading
         })
         .catch(() => {
+          setLoading(false); // Finish loading with error
           toast.error('Failed to load news post.');
           navigate('/admin/news');
         });
@@ -205,6 +210,7 @@ const AddNews = () => {
   const handleCancel = () => {
     if (isEditing) {
       setIsInEditMode(false);
+      setLoading(true);  // Show loading while re-fetching
       axios.get(`https://city-news-alert-backend-new.onrender.com/api/news/${id}`)
         .then(res => {
           const item = res.data.data;
@@ -221,8 +227,10 @@ const AddNews = () => {
           setExistingImagePath(item.imagePath || []);
           setFormErrors({});
           setShowImage(false);
+          setLoading(false);
         })
         .catch(() => {
+          setLoading(false);
           toast.error('Failed to reload news post.');
           navigate('/admin/news');
         });
@@ -230,6 +238,17 @@ const AddNews = () => {
       navigate('/admin/news');
     }
   };
+
+  // Loading placeholder JSX
+  if (loading) {
+    return (
+      <div className="flex w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-10">
+        <Card extra="w-full max-w-3xl p-6 sm:p-8 shadow-xl rounded-2xl bg-white dark:bg-navy-700">
+          <p className="text-center text-lg text-navy-700 dark:text-white">Loading news post...</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-10">
