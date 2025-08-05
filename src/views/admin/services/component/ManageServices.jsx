@@ -206,16 +206,13 @@ const isValid = validateForm(formData);
         return;
       }
     }
-
     if (!formData.description.trim()) {
       setError("Description is required.");
       toast.error("Description is required.");
       return;
     }
-
     try {
       let uploadedImage = { imageName: "", imagePath: "" };
-
       if (formData.image instanceof File) {
         const imageFormData = new FormData();
         imageFormData.append("name", serviceName);
@@ -226,7 +223,6 @@ const isValid = validateForm(formData);
           imageFormData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-
         uploadedImage = {
           imageName: imgRes.data.data.name,
           imagePath: imgRes.data.data.path,
@@ -254,7 +250,6 @@ const isValid = validateForm(formData);
         );
         toast.success("Service added successfully!");
       }
-
       await loadServices();
       resetForm();
     } catch (err) {

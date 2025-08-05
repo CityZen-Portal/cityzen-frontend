@@ -20,7 +20,9 @@ const CitizenServiceRequests = () => {
     const fetchData = async () => {
       try {
         const id = localStorage.getItem("id");
-        const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/dto/${id}`);
+        const response = await axios.get(
+          `https://utility-booking-backend.onrender.com/api/task/dto/${id}`
+        );
         setData(response.data.data.data);
       } catch (err) {
         console.error("Error fetching requests:", err);
@@ -32,7 +34,9 @@ const CitizenServiceRequests = () => {
   const filteredData = useMemo(() => {
     if (statusFilter === "ALL") return data;
     return data.filter(
-      (request) => request.status.toUpperCase() === statusFilter.toUpperCase()
+      (request) =>
+        request.taskStatus &&
+        request.taskStatus.toUpperCase().trim() === statusFilter.toUpperCase()
     );
   }, [data, statusFilter]);
 
@@ -135,12 +139,12 @@ const CitizenServiceRequests = () => {
                 </div>
               </th>
               <th
-                onClick={() => handleSort("status")}
+                onClick={() => handleSort("taskStatus")}
                 className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
               >
                 <div className="flex items-center gap-1">
                   Status
-                  {sortField === "status" ? (
+                  {sortField === "taskStatus" ? (
                     sortDirection === "asc" ? (
                       <MdArrowUpward />
                     ) : (
@@ -168,13 +172,13 @@ const CitizenServiceRequests = () => {
                   <td className="px-6 py-4">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        request.status.toUpperCase() === "PENDING"
+                        request.taskStatus.toUpperCase() === "PENDING"
                           ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
                           : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
                       }`}
                     >
-                      {request.status.charAt(0).toUpperCase() +
-                        request.status.slice(1).toLowerCase()}
+                      {request.taskStatus.charAt(0).toUpperCase() +
+                        request.taskStatus.slice(1).toLowerCase()}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -216,17 +220,29 @@ const CitizenServiceRequests = () => {
           <h2 className="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">
             Service Request Details
           </h2>
-          <p><strong>Service Name:</strong> {viewingDetails.serviceName}</p>
-          <p><strong>Requested Date:</strong> {viewingDetails.requestedDate}</p>
+          <p>
+            <strong>Service Name:</strong> {viewingDetails.serviceName}
+          </p>
+          <p>
+            <strong>Requested Date:</strong> {viewingDetails.requestedDate}
+          </p>
           <p>
             <strong>Status:</strong>{" "}
-            {viewingDetails.status.charAt(0).toUpperCase() +
-              viewingDetails.status.slice(1).toLowerCase()}
+            {viewingDetails.taskStatus.charAt(0).toUpperCase() +
+              viewingDetails.taskStatus.slice(1).toLowerCase()}
           </p>
-          <p><strong>Citizen Name:</strong> {viewingDetails.citizenName}</p>
-          <p><strong>Staff Name:</strong> {viewingDetails.staffName}</p>
-          <p><strong>Completed Date:</strong> {viewingDetails.completedDate || "N/A"}</p>
-          <p><strong>Description:</strong> {viewingDetails.description || "N/A"}</p>
+          <p>
+            <strong>Citizen Name:</strong> {viewingDetails.citizenName}
+          </p>
+          <p>
+            <strong>Staff Name:</strong> {viewingDetails.staffName}
+          </p>
+          <p>
+            <strong>Completed Date:</strong> {viewingDetails.completedDate || "N/A"}
+          </p>
+          <p>
+            <strong>Description:</strong> {viewingDetails.description || "N/A"}
+          </p>
 
           <button
             onClick={() => setViewingDetails(null)}
