@@ -99,14 +99,14 @@ export default function NewsDetails() {
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-30 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-50 transition"
+                    className="absolute top-1/2 text-white text-8xl left-2 transform -translate-y-1/2 bg-black bg-opacity-30  rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-50 transition"
                     aria-label="Previous Image"
                   >
                     ‹
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-30 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-50 transition"
+                    className="absolute top-1/2 text-8xl right-2 transform -translate-y-1/2 bg-black bg-opacity-30 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-50 transition"
                     aria-label="Next Image"
                   >
                     ›
