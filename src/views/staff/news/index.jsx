@@ -6,6 +6,7 @@ import Card from "components/card";
 import ManageNews from "./components/AddNews";
 import ViewNews from "./components/ViewNews";
 import { newsData } from "./variables/data";
+import NewsHome from "views/citizen/news/components/NewsHome";
 const CityNews = () => {
   const location = useLocation();
   const [newsItems, setNewsItems] = useState(newsData);
@@ -27,6 +28,7 @@ const CityNews = () => {
         onClick={() => navigate("/staff/news/add")}
         onCancel={() => navigate("/staff/news/view")}
       />
+      <NewsHome/>
     </div>
   );
 };
