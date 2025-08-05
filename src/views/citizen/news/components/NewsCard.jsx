@@ -73,6 +73,7 @@ export default function NewsCard() {
           </div>
 
           {/* Pagination Controls */}
+          {totalPages>10&& 
           <div className="mt-8 flex justify-center items-center space-x-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -104,6 +105,7 @@ export default function NewsCard() {
               Next
             </button>
           </div>
+           }
         </>
       )}
     </div>
