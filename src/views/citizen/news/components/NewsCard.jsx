@@ -29,7 +29,7 @@ export default function NewsCard() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
+    <div className=" bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
       {data.length === 0 ? (
         <p className="text-center text-gray-500 dark:text-gray-300">
           Loading news...
@@ -44,7 +44,7 @@ export default function NewsCard() {
                 className="overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-105 dark:bg-navy-900 dark:text-white"
               >
                 <img
-                  src={news.imagePath}
+                  src={news.imagePath[0]}
                   alt={news.title}
                   className="h-48 w-full object-cover"
                 />
