@@ -9,7 +9,7 @@ const AttachmentCard = ({fileUrl}) => {
                 onClick={() => window.open(fileUrl, "_blank")}
                 >
                 <img
-                    src={fileUrl.endsWith('.pdf') ? fileUrl : pdf_file_icon}
+                    src={fileUrl.endsWith('.pdf') ? pdf_file_icon : fileUrl}
                     alt={fileUrl.endsWith('.pdf') ? "PDF" : "Complaint"}
                     className="rounded-md cursor-pointer hover:opacity-80 h-20"
                 />
