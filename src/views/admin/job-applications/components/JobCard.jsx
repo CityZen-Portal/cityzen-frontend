@@ -1,24 +1,41 @@
 import React from 'react';
-import { Building2, MapPin, Calendar, AlertTriangle, Eye } from 'lucide-react';
+import { Building2, MapPin, Calendar, Eye, Edit, Trash2 } from 'lucide-react';
 
-const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
-  const expired = isJobExpired(job);
-  
+// Small Toggle Switch Component for top right corner
+const SmallToggleSwitch = ({ isActive, onToggle }) => (
+  <button
+    onClick={onToggle}
+    className={`relative inline-flex items-center h-4 rounded-full w-8 transition-colors duration-300 focus:outline-none ${
+      isActive ? 'bg-green-500' : 'bg-gray-300'
+    }`}
+  >
+    <span
+      className={`inline-block w-3 h-3 transform bg-white rounded-full transition-transform duration-300 ${
+        isActive ? 'translate-x-4' : 'translate-x-0.5'
+      }`}
+    />
+  </button>
+);
+
+const JobCard = ({ job, onViewDetails, isJobExpired, formatDate, isAdminView = false, onEdit, onDelete, onToggleStatus }) => {
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-      onClick={() => onViewDetails(job.id)}
+      className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+      onClick={() => !isAdminView && onViewDetails(job.id)}
     >
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <h3 className={`text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400`}>
+          <h3 className={`text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400 pr-3`}>
             {job.title}
           </h3>
-          {expired && (
-            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium ml-2 flex items-center gap-1">
-              <AlertTriangle size={12} />
-              EXPIRED
-            </div>
+          {isAdminView && onToggleStatus && (
+            <SmallToggleSwitch 
+              isActive={job.isActive} 
+              onToggle={(e) => {
+                e.stopPropagation();
+                onToggleStatus(job);
+              }}
+            />
           )}
         </div>
 
@@ -37,46 +54,71 @@ const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
             </div>
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <MapPin size={16} />
               <div>
-                <p className="text-xs text-purple-600 dark:text-purple-400">Location</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">Location</p>
                 <p className="font-medium line-clamp-1">{job.location}</p>
               </div>
             </div>
           </div>
 
-          <div className={`${expired ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'} rounded-lg p-3`}>
-            <div className={`flex items-center gap-2 ${expired ? 'text-red-700 dark:text-red-300' : 'text-orange-700 dark:text-orange-300'}`}>
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <Calendar size={16} />
               <div>
-                <p className={`text-xs ${expired ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                <p className="text-xs text-blue-600 dark:text-blue-400">
                   Application Deadline
                 </p>
                 <p className="font-medium">
-                  {formatDate(job.deadline)} {expired && (
-                    <span className="text-red-600 dark:text-red-400 text-xs ml-1">EXPIRED</span>
-                  )}
+                  {formatDate(job.deadline)}
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onViewDetails(job.id);
-          }}
-          className="w-full mt-6 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <Eye size={16} />
-          View Details
-        </button>
+        {/* Conditional buttons based on admin view */}
+        {isAdminView ? (
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit && onEdit(job);
+              }}
+              className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-brand-500 hover:bg-brand-600 text-white"
+            >
+              <Edit size={16} />
+              Edit
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete && onDelete(job);
+              }}
+              className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-red-500 hover:bg-red-600 text-white"
+            >
+              <Trash2 size={16} />
+              Delete
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails(job.id);
+            }}
+            className="w-full mt-6 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Eye size={16} />
+            View Details
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
 export default JobCard;
+
