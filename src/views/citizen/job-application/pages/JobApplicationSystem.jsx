@@ -110,14 +110,22 @@ const JobApplicationSystem = () => {
   useEffect(() => {
     // setLoading(true);
   
-    axios.get(`${JOB_APPLICATION_API}/jobs`)
+    axios.get(`${JOB_APPLICATION_API}/jobs`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
           setJobs(data ? data : [])
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error('Server Error!Unable to Fetch Job Posts Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -130,14 +138,22 @@ const JobApplicationSystem = () => {
         
     // setLoading(true);
 
-    axios.get(`${JOB_APPLICATION_API}/service`, null, null)
+    axios.get(`${JOB_APPLICATION_API}/service`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
           setVolunteers(data ? data : [])
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error('Server Error!Unable to Fetch Volunteer Post Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'

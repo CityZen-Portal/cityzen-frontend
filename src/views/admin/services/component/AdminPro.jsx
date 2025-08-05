@@ -11,6 +11,8 @@ import {
   FaKey,
   FaSignal,
   FaCheckCircle,
+  FaBriefcase,
+  FaRegCalendarCheck,
   FaCalendarAlt,
   FaMars,
   FaVenus,
@@ -97,7 +99,6 @@ const AdminProfile = () => {
     firstName: "Priya",
     lastName: "Kumar",
     adminId: "ADM456",
-    role: "Citizen Admin",
     email: "priya@example.com",
     dob: "1990-05-15",
     gender: "Female",
@@ -106,10 +107,8 @@ const AdminProfile = () => {
     state: "Karnataka",
     pincode: "560001",
     phone: "9876543210",
-    accessLevel: "super admin",
-    status: "Active",
-    lastLogin: "2025-07-26 10:45 AM",
-    userType: "Admin",
+    designation: "Senior Admin",
+    joinedAt: "2022-01-10",
     country: "India",
   });
 
@@ -220,8 +219,17 @@ const AdminProfile = () => {
             </div>
           )}
           <Field label="Admin ID" name="adminId" value={formData.adminId} onChange={handleChange} editable={isEditing} disabled icon={<FaIdCard />} onAttemptEdit={handleBlockedEdit} />
-          <Field label="Role" name="role" value={formData.role} onChange={handleChange} editable={isEditing} disabled icon={<FaKey />} onAttemptEdit={handleBlockedEdit} />
+         
           <Field label="Email" name="email" value={formData.email} onChange={handleChange} editable={isEditing} icon={<FaEnvelope />} />
+          <Field
+            label="Date of Birth"
+            name="dob"
+            value={formData.dob}
+            onChange={handleChange}
+            editable={isEditing}
+            type="date"
+            icon={<FaCalendarAlt />}
+          />
           <Field
             label="Gender"
             name="gender"
@@ -232,15 +240,28 @@ const AdminProfile = () => {
             options={["Male", "Female", "Other"]}
             icon={getGenderIcon(formData.gender)}
           />
+          
           <Field
-            label="Date of Birth"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-            editable={isEditing}
-            type="date"
-            icon={<FaCalendarAlt />}
-          />
+      label="Designation"
+      name="designation"
+      value={formData.designation}
+      onChange={handleChange}
+      editable={isEditing}
+      icon={<FaBriefcase />}
+    />
+
+    {/* ➕ New Joined At Field */}
+    <Field
+      label="Joined At"
+      name="joinedAt"
+      value={formData.joinedAt}
+      onChange={handleChange}
+      editable={isEditing}
+      type="date"
+      disabled icon={<FaIdCard />}
+      onAttemptEdit={handleBlockedEdit}
+      
+    />
         </div>
       </div>
 
@@ -259,54 +280,7 @@ const AdminProfile = () => {
       </div>
 
       {/* System Info */}
-      <div className="bg-white dark:bg-navy-900 rounded-2xl shadow-md p-6 mt-8">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-6 border-b pb-2">
-          System Information
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field
-            label="Access Level"
-            name="accessLevel"
-            value={formData.accessLevel}
-            onChange={handleChange}
-            editable={isEditing}
-            isSelect
-            options={["admin", "super admin", "Service Manager", "Complaint Manager", "Read-Only Admin"]}
-            icon={<FaSignal />}
-          />
-          <Field
-            label="Status"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            editable={isEditing}
-            isSelect
-            options={["Active", "Inactive", "Suspended"]}
-            icon={<FaCheckCircle />}
-          />
-          <div className="flex items-start gap-3 mb-4">
-            <div className="text-gray-700 mt-1"><FaCalendarAlt /></div>
-            <div className="w-full">
-              {isEditing ? (
-                <>
-                  <label className="text-sm text-gray-600 dark:text-gray-300">Last Login</label>
-                  <input
-                    type="text"
-                    name="lastLogin"
-                    value={formData.lastLogin}
-                    readOnly
-                    disabled
-                    className="w-full border rounded px-3 py-2 bg-white dark:bg-navy-800 dark:text-white cursor-default"
-                    title="You can't edit this field"
-                  />
-                </>
-              ) : (
-                <p className="mt-1 text-base text-gray-800 dark:text-gray-100">{formData.lastLogin}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Save Button */}
       {isEditing && (

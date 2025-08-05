@@ -1,5 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import image from "../../../../assets/img/news/image.png"
+const TEMP_IMAGE_URL = image;
 
 const NewsHomeDetails = () => {
   const location = useLocation();
@@ -54,15 +56,17 @@ const NewsHomeDetails = () => {
             ← Back to News
           </button>
 
-          {newsItem.urlToImage && (
-            <div className="mb-6">
-              <img
-                src={newsItem.urlToImage}
-                alt={newsItem.title}
-                className="w-full h-64 sm:h-96 object-cover rounded-xl shadow-md"
-              />
-            </div>
-          )}
+          <div className="mb-6">
+            <img
+              src={newsItem.urlToImage || TEMP_IMAGE_URL}
+              alt={newsItem.title}
+              className="w-full h-64 sm:h-96 object-cover rounded-xl shadow-md"
+              onError={e => {
+                e.target.onerror = null; // Prevents infinite fallback loop
+                e.target.src = TEMP_IMAGE_URL;
+              }}
+            />
+          </div>
 
           <div className="flex flex-wrap justify-between items-center mb-3">
             <span className="text-sm text-gray-500 dark:text-gray-300">
@@ -77,10 +81,6 @@ const NewsHomeDetails = () => {
           <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-6">
             {newsItem.description}
           </p>
-
-          {/* <div className="prose prose-gray dark:prose-invert max-w-none text-base leading-relaxed">
-            <p>{newsItem.content}</p>
-          </div> */}
 
           <div className="mt-8 border-t pt-6 text-base text-gray-600 dark:text-gray-300">
             <h2 className="text-xl font-semibold mb-2">More Detailed Content</h2>
