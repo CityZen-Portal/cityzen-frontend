@@ -98,7 +98,9 @@ function ComplaintForm() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const s= process.env.REACT_APP_API_MEDIA_URL;
+
+  const handleSubmit = async (e) => {
   
     e.preventDefault();
     setLoadingSubmit(true);
@@ -163,10 +165,44 @@ function ComplaintForm() {
       toast.error('Please enter a description');
       return;
     }
-    if (file && file.type !== 'application/pdf') {
-      setLoadingSubmit(false)
-      toast.error('Only PDF files are allowed.');
-      return;
+    if (file) {
+      if (!(file instanceof File)) {
+        setLoadingSubmit(false);
+        toast.error('Invalid file input.');
+        return;
+      }
+      if (file.type !== 'application/pdf') {
+        setLoadingSubmit(false);
+        toast.error('Only PDF files are allowed.');
+        return;
+      }
+    }
+
+    let uploadedImage = { imageName: "", imagePath: "" };
+
+    if (file){
+      if (file instanceof File) {
+        const serviceName = "helpdesk"
+        const imageFormData = new FormData();
+        imageFormData.append("name", serviceName);
+        imageFormData.append("imageFile", file);
+
+        const imgRes = await axios.post(
+          "https://media-api-service-hzx2.onrender.com/api/images/upload",
+          imageFormData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        uploadedImage = {
+          imageName: imgRes.data.data.name,
+          imagePath: imgRes.data.data.path,
+        };
+      }
+      else{
+        setLoadingSubmit(false)
+        toast.error('Network error! Unable to submit attachment.');
+        return;
+      }
     }
 
     const postData = {
@@ -180,6 +216,7 @@ function ComplaintForm() {
       category: complaintType ? complaintType : others,
       issue,
       issueDescription: description,
+      attachment: uploadedImage.imagePath ? uploadedImage.imagePath : null,
     };
 
 

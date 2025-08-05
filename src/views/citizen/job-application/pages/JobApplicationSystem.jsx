@@ -96,8 +96,8 @@ const JobApplicationSystem = () => {
 
   const [jobs, setJobs] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
-  const [filteredJobs, setFilteredJobs] = useState(sampleJobs);
-  const [filteredVolunteers, setFilteredVolunteers] = useState(sampleVolunteers);
+  const [filteredJobs, setFilteredJobs] = useState(jobs);
+  const [filteredVolunteers, setFilteredVolunteers] = useState(volunteers);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());

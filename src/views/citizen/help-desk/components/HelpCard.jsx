@@ -1,27 +1,43 @@
 import { useNavigate } from 'react-router-dom'
 import Card from "components/card";
+import { motion } from 'framer-motion';
 
-const HelpCard = ({ title, description, Icon, link }) => {
+const HelpCard = ({ title, description, Icon, link, color = 'from-blue-500 to-blue-600' }) => {
     const navigate = useNavigate();
     
     return (
-      <Card
-        extra={`flex flex-col w-full h-full !p-3 sm:!p-4 lg:!p-6 3xl:p-![18px] bg-white cursor-pointer hover:shadow-lg transition-shadow duration-300`}
-      >
-        <div className="h-full w-full text-center flex items-center justify-center p-2 sm:p-3 lg:p-4" 
-          onClick={() => {
-            navigate(link)
-            window.scrollTo(0, 0);
-          }}>
-          <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 lg:gap-6">
-            <div className="inline-flex items-center justify-center rounded-full bg-purple-100 shadow-lg shadow-purple-300 p-3 sm:p-4 lg:p-5">
-              <Icon className="text-2xl sm:text-3xl lg:text-4xl text-purple-600" />
-            </div>
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-navy-700 dark:text-white text-center px-2">{title}</h2>
-            <p className="mt-1 text-xs sm:text-sm lg:text-base font-medium text-gray-600 md:mt-2 text-center px-2 leading-relaxed">{description}</p>
-          </div>
-        </div>
-      </Card>
+        <motion.div whileHover={{ y: -5 }}>
+            <Card
+                extra={`flex flex-col w-full h-full !p-0 bg-white overflow-hidden cursor-pointer group`}
+            >
+                <div 
+                    className="h-full w-full"
+                    onClick={() => {
+                        navigate(link)
+                        window.scrollTo(0, 0);
+                    }}
+                >
+                    <div className="relative h-full">
+                        <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${color}`}></div>
+                        
+                        <div className="flex flex-col items-center justify-center gap-4 p-6 sm:p-8 pt-10">
+                            <div className={`inline-flex items-center justify-center rounded-xl bg-gradient-to-br ${color} p-4 text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                                <Icon className="text-3xl" />
+                            </div>
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center dark:text-white">{title}</h2>
+                            <p className="text-sm sm:text-base text-gray-600 text-center leading-relaxed">{description}</p>
+                            
+                            <div className="mt-4 flex items-center text-blue-600 group-hover:text-blue-700 transition-colors duration-300">
+                                <span className="font-medium">Get started</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Card>
+        </motion.div>
     );
 };
 
