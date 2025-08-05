@@ -17,6 +17,9 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const apiurl = process.env.REACT_APP_API_UMS_URL;
   const { login } = useUser();
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false);
   
   // Theme state
   const [isDark, setIsDark] = useState(() => {
@@ -59,7 +62,7 @@ export default function SignIn() {
     };
   }, [isDark]);
   
-  const handleForgotPassword = () => {
+  const handleForgotPassword = async () => {
     if (!email.trim()) {
       toast.error("Email is required to reset password", {
         position: "top-right",
@@ -68,21 +71,39 @@ export default function SignIn() {
       });
       return;
     }
-    if (!validateEmail(email.trim())) {
-      toast.error("Enter a valid email", {
+    
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        `https://auth-backend-2-k3ph.onrender.com/api/auth/forgot-password`,
+        { email }
+      );
+
+      if (response.data.success) {
+        toast.success(`Password reset link sent to ${email}`, {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "colored",
+        });
+        setShowForgotPassword(false);
+      } else {
+        toast.error(response.data.message || "Failed to send reset link", {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "colored",
+        });
+      }
+    } catch (error) {
+      console.error("Password reset error:", error);
+      const errorMsg = error.response?.data?.message || "Error sending reset link";
+      toast.error(errorMsg, {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-    console.log("Password reset requested for:", email);
-    setShowForgotPassword(false);
-    toast.success(`Password reset link sent to ${email}`, {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "colored",
-    });
   };
   
   const validateEmail = (email) => {
@@ -117,18 +138,18 @@ export default function SignIn() {
     }
     try {
       const response = await axios.post(
-        `https://auth-backend-obcu.onrender.com/api/auth/login`,
+        `https://auth-backend-2-k3ph.onrender.com/auth/login`,
         { email, password }
       );
-      const token = response.data.data.token;
-      const roles = response.data.data.roles[0];
+      const { token, roles, username, email: userEmail, id } = response.data.data;
       login({
-        token: token,
-        username: response.data.data.username,
-        email: response.data.data.email,
-        role: response.data.data.roles,
-        id: response.data.data.id,
+        token,
+        username,
+        email: userEmail,
+        role: roles,
+        id
       });
+
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 1000,
@@ -146,12 +167,15 @@ export default function SignIn() {
         },
       });
     } catch (error) {
-      console.error(error);
-      toast.error("Invalid credentials or server error", {
+      console.error("Login error:", error);
+      const errorMsg = error.response?.data?.message || "Invalid credentials or server error";
+      toast.error(errorMsg, {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   

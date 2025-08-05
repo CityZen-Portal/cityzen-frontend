@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import InputField from "components/fields/InputField";
 import Footer from "components/footer/FooterAuthDefault";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Lock } from "lucide-react";
+import axios from "axios";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const token = searchParams.get('token');
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -78,6 +82,16 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     toast.dismiss();
+
+    if (!token) {
+      toast.error('Invalid reset token', {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+      return;
+    }
+
     if (!validateForm()) {
       if (errors.newPassword) {
         toast.error(errors.newPassword, {
@@ -96,16 +110,28 @@ export default function ResetPassword() {
     }
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Password reset successfully! Redirecting...', {
-        position: "top-right",
-        autoClose: 2000,
-        theme: "colored",
-        onClose: () => navigate('/auth/signin')
-      });
+      const response = await axios.post(
+        `https://auth-backend-2-k3ph.onrender.com/auth/reset-password`,
+        {
+          token,
+          newPassword: formData.newPassword,
+          confirmPassword: formData.confirmPassword
+        }
+      );
+
+      if (response.data.success) {
+        toast.success('Password reset successfully! Redirecting to login...', {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "colored",
+          onClose: () => navigate('/auth/signin')
+        });
+      } else {
+        throw new Error(response.data.message || 'Failed to reset password');
+      }
     } catch (error) {
-      toast.error(error.message || 'Failed to reset password.', {
+      console.error('Reset password error:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to reset password', {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
