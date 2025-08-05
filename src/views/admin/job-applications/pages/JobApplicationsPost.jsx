@@ -1,395 +1,424 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
- MdWork,
- MdBusiness,
- MdDelete,
- MdFavorite,
- MdSearch
-} from 'react-icons/md';
-
+  Building2, Heart, AlertTriangle, Search, Filter, Briefcase, TrendingUp
+} from 'lucide-react';
 import JobCard from '../components/JobCard';
+import VolunteerCard from '../components/VolunteerCard';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// Sample job data
+const sampleJobs = [
+  {
+    id: 1,
+    title: "Civil Engineer",
+    department: "Public Works Department",
+    location: "Coimbatore Municipal Corporation",
+    description: "We are seeking an experienced Civil Engineer to join our Public Works Department. The successful candidate will be responsible for planning, designing, and overseeing construction projects including roads, bridges, and municipal infrastructure.",
+    requirements: ["Bachelor's degree in Civil Engineering", "3+ years of experience in municipal projects", "Knowledge of local building codes and regulations", "Proficiency in AutoCAD and project management software"],
+    contactPersonName: "Dr. Rajesh Kumar",
+    contactPhoneNumber: "+91 98765 43210",
+    contactEmail: "rajesh.kumar@coimbatore.gov.in",
+    contactAddress: "Public Works Department, Coimbatore Municipal Corporation, Town Hall, Coimbatore - 641001",
+    isActive: true,
+    deadline: "2025-08-15T23:59:59"
+  },
+  {
+    id: 3,
+    title: "Assistant Town Planner",
+    department: "Urban Planning",
+    location: "Coimbatore Municipal Corporation",
+    description: "Assist in urban planning activities including land use planning, development control, and building plan approvals. The role involves reviewing development proposals, conducting site inspections, and ensuring compliance with planning regulations.",
+    requirements: ["Degree in Urban Planning or Architecture", "Knowledge of planning laws and regulations", "GIS software experience preferred", "Strong analytical and communication skills"],
+    contactPersonName: "Mr. Suresh Babu",
+    contactPhoneNumber: "+91 63694 74451",
+    contactEmail: "suresh.babu@coimbatore.gov.in",
+    contactAddress: "Urban Planning Department, Coimbatore Municipal Corporation",
+    isActive: true,
+    deadline: "2025-08-20T23:59:59"
+  },
+  {
+    id: 5,
+    title: "Accounts Officer",
+    department: "Finance Department",
+    location: "Municipal Corporation Head Office",
+    description: "Handle financial transactions, maintain accounting records, prepare financial reports, and assist in budget preparation. The role requires attention to detail and strong analytical skills in financial management.",
+    requirements: ["BCom/MCom with accounting background", "2+ years experience in government accounting", "Knowledge of financial software", "Understanding of municipal finance procedures"],
+    contactPersonName: "Mrs. Lakshmi Devi",
+    contactPhoneNumber: "+91 63827 58637",
+    contactEmail: "lakshmi.devi@coimbatore.gov.in",
+    contactAddress: "Finance Department, Municipal Corporation, Coimbatore",
+    isActive: true,
+    deadline: "2025-07-25T23:59:59"
+  }
+];
+
+// Sample volunteer data
+const sampleVolunteers = [
+  {
+    id: 2,
+    programTitle: "Community Health Volunteer",
+    location: "Various locations in Coimbatore",
+    programDescription: "Join our community health initiative to promote healthcare awareness and support health programs in various neighborhoods. Volunteers will conduct health surveys, assist in vaccination drives, and educate communities about preventive healthcare measures.",
+    programDate: "2025-08-10",
+    programTime: "09:00:00",
+    duration: "6 months program",
+    coordinatorName: "Ms. Priya Sharma",
+    coordinatorPhone: "+91 87654 32109",
+    coordinatorEmail: "priya.sharma@coimbatore.gov.in",
+    coordinatorAddress: "Health Department, Municipal Corporation Office, Coimbatore",
+    isActive: true
+  },
+  {
+    id: 4,
+    programTitle: "Tree Plantation Drive",
+    location: "Coimbatore City Parks",
+    programDescription: "Participate in our city-wide tree plantation initiative to increase green cover and promote environmental sustainability. Volunteers will help plant saplings, maintain plant records, and support ongoing tree care activities.",
+    programDate: "2025-08-12",
+    programTime: "6:00 AM - 10:00 AM",
+    duration: "One-time event with follow-up care",
+    coordinatorName: "Dr. Meera Nair",
+    coordinatorPhone: "+91 76543 21098",
+    coordinatorEmail: "meera.nair@coimbatore.gov.in",
+    coordinatorAddress: "Environment Department, Municipal Corporation, Coimbatore",
+    isActive: true
+  }
+];
 
 const JobApplicationsPost = () => {
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState([]);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [jobToDelete, setJobToDelete] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
 
-  // Load jobs from localStorage or initialize with sample data
-  const loadJobs = useCallback(() => {
-    const savedJobs = localStorage.getItem('jobs');
-    if (savedJobs) {
-      try {
-        const parsedJobs = JSON.parse(savedJobs);
-        setJobs(sortJobs(parsedJobs));
-      } catch (error) {
-        console.error('Failed to parse jobs', error);
-        setJobs([]);
-      }
-    } else {
-      const sampleJobs = [
-        {
-          id: "1",
-          title: "Senior Civil Engineer",
-          description: "Lead infrastructure development projects and oversee construction activities across the municipal corporation. Responsible for planning, designing, and supervising major public works projects.",
-          department: "Public Works Department",
-          location: "Coimbatore Municipal Corporation HQ",
-          lastDate: "2025-08-15",
-          requirements: "Bachelor's degree in Civil Engineering with 5+ years experience",
-          jobType: "municipal",
-          isActive: true,
-          contactName: "John Smith",
-          contactPhone: "+91 98765 43210",
-          contactEmail: "hr@municipality.gov.in",
-          contactAddress: "Coimbatore Municipal Corporation, Town Hall Road, Coimbatore - 641001"
-        },
-        {
-          id: "2",
-          title: "Ward Health Volunteer",
-          description: "Support community health initiatives in Ward 15. Assist in health awareness campaigns, vaccination drives, and basic health screening programs for residents.",
-          department: "Health & Welfare",
-          location: "Ward 15, R.S. Puram",
-          requirements: "12th pass with basic health knowledge, willingness to serve community",
-          jobType: "volunteer",
-          isActive: true,
-          workDate: "2025-08-20",
-          workTime: "9:00 AM - 5:00 PM",
-          duration: "1 week",
-          contactName: "Sarah Johnson",
-          contactPhone: "+91 98765 43211",
-          contactEmail: "volunteer@municipality.gov.in",
-          contactAddress: "Ward Office, R.S. Puram, Coimbatore - 641002"
-        },
-        {
-          id: "3",
-          title: "Assistant Town Planner",
-          description: "Assist in urban planning activities, prepare development plans, and coordinate with various departments for municipal development projects.",
-          department: "Urban Planning",
-          location: "Coimbatore Municipal Corporation",
-          lastDate: "2025-08-25",
-          requirements: "Master's degree in Urban Planning or related field",
-          salary: "₹35,000 - ₹50,000 per month",
-          jobType: "municipal",
-          isActive: true,
-          contactName: "Michael Brown",
-          contactPhone: "+91 98765 43212",
-          contactEmail: "planning@municipality.gov.in",
-          contactAddress: "Urban Planning Department, Coimbatore Municipal Corporation"
-        },
-        {
-          id: "4",
-          title: "Community Garden Volunteer",
-          description: "Help maintain community gardens in Ward 8, organize gardening workshops, and promote sustainable urban farming among residents.",
-          department: "Environment & Parks",
-          location: "Ward 8, Gandhipuram",
-          requirements: "Interest in gardening, basic knowledge of plants, community service mindset",
-          jobType: "volunteer",
-          isActive: false,
-          workDate: "2025-08-30",
-          workTime: "6:00 AM - 10:00 AM",
-          duration: "ongoing",
-          contactName: "Emily Davis",
-          contactPhone: "+91 98765 43213",
-          contactEmail: "parks@municipality.gov.in",
-          contactAddress: "Parks Department, Ward 8, Gandhipuram, Coimbatore"
-        }
-      ];
-      const sortedJobs = sortJobs(sampleJobs);
-      setJobs(sortedJobs);
-      localStorage.setItem('jobs', JSON.stringify(sortedJobs));
-    }
-  }, []);
+  const [jobs, setJobs] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState(sampleJobs);
+  const [filteredVolunteers, setFilteredVolunteers] = useState(sampleVolunteers);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
+
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+
+  const [jobPosts, setJobPosts] = useState([])
+  const [volunteerPosts, setVolunteerPosts] = useState([])
 
   useEffect(() => {
-    loadJobs();
-  }, [loadJobs]);
+    // setLoading(true);
+  
+    axios.get(`${JOB_APPLICATION_API}/jobs`)
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setJobs(data ? data : [])
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+        
+    // setLoading(true);
 
-  // Sort jobs: Active first, then by job type, then alphabetically
-  const sortJobs = (jobsArray) => {
-    return [...jobsArray].sort((a, b) => {
-      if (a.isActive !== b.isActive) {
-        return a.isActive ? -1 : 1;
-      }
-      if (a.jobType !== b.jobType) {
-        return a.jobType === 'municipal' ? -1 : 1;
-      }
-      return a.title.localeCompare(b.title);
-    });
-  };
+    axios.get(`${JOB_APPLICATION_API}/service`, null, null)
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setVolunteers(data ? data : [])
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+  }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
 
-  // Filter jobs based on active filter and search term
-  const getFilteredJobs = useCallback(() => {
-    let filtered = jobs;
+  // Filter jobs and volunteers based on search and filter criteria
+  useEffect(() => {
+    let filteredJobs = jobs.filter(job => job.isActive);
+    let filteredVolunteers = volunteers.filter(volunteer => volunteer.isActive);
 
     // Apply type filter
-    switch (activeFilter) {
-      case 'active':
-        filtered = jobs.filter(job => job.isActive);
-        break;
-      case 'inactive':
-        filtered = jobs.filter(job => !job.isActive);
-        break;
-      case 'municipal':
-        filtered = jobs.filter(job => job.jobType === 'municipal');
-        break;
-      case 'volunteer':
-        filtered = jobs.filter(job => job.jobType === 'volunteer');
-        break;
-      case 'all':
-      default:
-        filtered = jobs;
-        break;
+    if (activeFilter === 'municipal') {
+      filteredVolunteers = [];
+    } else if (activeFilter === 'volunteer') {
+      filteredJobs = [];
     }
 
     // Apply search filter
     if (searchTerm.trim()) {
-      filtered = filtered.filter(job =>
+      filteredJobs = filteredJobs.filter(job =>
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.location.toLowerCase().includes(searchTerm.toLowerCase())
+        job.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      filteredVolunteers = filteredVolunteers.filter(volunteer =>
+        volunteer.programTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        volunteer.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        volunteer.programDescription.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    return filtered;
-  }, [jobs, activeFilter, searchTerm]);
+    setFilteredJobs(filteredJobs);
+    setFilteredVolunteers(filteredVolunteers);
+  }, [jobs, volunteers, searchTerm, activeFilter]);
 
-  const toggleJobStatus = useCallback((id) => {
-    const updatedJobs = jobs.map(job => 
-      job.id.toString() === id.toString() ? { ...job, isActive: !job.isActive } : job
-    );
-    const sortedJobs = sortJobs(updatedJobs);
-    setJobs(sortedJobs);
-    localStorage.setItem('jobs', JSON.stringify(sortedJobs));
-  }, [jobs]);
-
-  const handleEdit = useCallback((job) => {
-    navigate(`/admin/job-applications/edit/${job.jobType}/${job.id}`);
-  }, [navigate]);
-
-  const handleAddJob = useCallback((jobType) => {
-    navigate(`/admin/job-applications/add/${jobType}`);
-  }, [navigate]);
-
-  const handleDeleteClick = useCallback((job) => {
-    setJobToDelete(job);
-    setShowDeleteModal(true);
-  }, []);
-
-  const confirmDelete = useCallback(() => {
-    if (jobToDelete) {
-      const updatedJobs = jobs.filter(job => job.id.toString() !== jobToDelete.id.toString());
-      const sortedJobs = sortJobs(updatedJobs);
-      setJobs(sortedJobs);
-      localStorage.setItem('jobs', JSON.stringify(sortedJobs));
-      setShowDeleteModal(false);
-      setJobToDelete(null);
+  // Check if job deadline has passed
+  const isJobExpired = useCallback((job) => {
+    if (job.deadline) {
+      const deadline = new Date(job.deadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return deadline < today;
     }
-  }, [jobs, jobToDelete]);
-
-  const cancelDelete = useCallback(() => {
-    setShowDeleteModal(false);
-    setJobToDelete(null);
+    return false;
   }, []);
 
-  // Get job counts
-  const allJobs = jobs.length;
-  const activeJobs = jobs.filter(job => job.isActive).length;
-  const inactiveJobs = jobs.filter(job => !job.isActive).length;
-  const municipalJobs = jobs.filter(job => job.jobType === 'municipal').length;
-  const volunteerJobs = jobs.filter(job => job.jobType === 'volunteer').length;
-  const filteredJobs = getFilteredJobs();
+  // Format date for display
+  const formatDate = useCallback((dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }, []);
+
+  // Handle view details
+  const handleViewDetails = useCallback((id, type) => {
+    if (type === 'municipal') {
+      navigate(`/citizen/job-application/job/${id}`);
+    } else {
+      navigate(`/citizen/job-application/volunteer/${id}`);
+    }
+  }, [navigate]);
+
+  // Handle bookmark toggle
+  const handleBookmark = useCallback((jobId) => {
+    const newBookmarks = new Set(bookmarkedJobs);
+    if (newBookmarks.has(jobId)) {
+      newBookmarks.delete(jobId);
+    } else {
+      newBookmarks.add(jobId);
+    }
+    setBookmarkedJobs(newBookmarks);
+  }, [bookmarkedJobs]);
+
+  // Get counts
+  const activeJobs = jobs.filter(job => job.isActive);
+  const activeVolunteers = volunteers.filter(volunteer => volunteer.isActive);
+  const municipalCount = activeJobs.length;
+  const volunteerCount = activeVolunteers.length;
 
   return (
-    <div className="bg-gray-50 dark:bg-navy-900 min-h-screen">
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-navy-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                <MdDelete className="text-red-600 dark:text-red-400" size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Job Posting</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone</p>
-              </div>
-            </div>
-            <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Are you sure you want to delete "<strong>{jobToDelete?.title}</strong>"? 
-              This will permanently remove the job posting.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={confirmDelete}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl transition-colors font-medium"
-              >
-                Delete Job
-              </button>
-              <button
-                onClick={cancelDelete}
-                className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-3 px-4 rounded-xl transition-colors font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Job Management</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">Manage municipal and volunteer job postings</p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => handleAddJob('municipal')}
-                className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
-              >
-                <MdBusiness size={16} />
-                Add Municipal Job
-              </button>
-              <button
-                onClick={() => handleAddJob('volunteer')}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
-              >
-                <MdFavorite size={20} />
-                Add Volunteer Job
-              </button>
-            </div>
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Job Application</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+              Discover exciting career opportunities and volunteer programs with the Municipal Corporation
+            </p>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {jobs.length === 0 ? (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center bg-white dark:bg-navy-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-12 max-w-lg shadow-lg">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <MdWork className="text-white" size={40} />
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Opportunities</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{municipalCount + volunteerCount}</p>
+                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                  <TrendingUp size={16} className="inline mr-1" />
+                  Active Opportunities
+                </p>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">No Job Postings Yet</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                Start by creating your first municipal or volunteer job posting to connect with qualified candidates.
-              </p>
-              <div className="flex flex-row gap-3 justify-center">
-                <button
-                  onClick={() => handleAddJob('municipal')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium inline-flex items-center gap-2"
-                >
-                  <MdBusiness size={16} />
-                  Create Municipal Job
-                </button>
-                <button
-                  onClick={() => handleAddJob('volunteer')}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium inline-flex items-center gap-2"
-                >
-                  <MdFavorite size={20} />
-                  Create Volunteer Job
-                </button>
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <Briefcase className="text-blue-600 dark:text-blue-400" size={24} />
               </div>
             </div>
           </div>
-        ) : (
-          <div>
-            {/* Search and Filter Controls */}
-            <div className="flex flex-col lg:flex-row gap-6 mb-8">
-              {/* Search Bar */}
-              <div className="relative flex-1 max-w-md">
-                <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search jobs, departments, locations..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                />
-              </div>
 
-              {/* Filter Tabs */}
-              <div className="flex items-center gap-2 bg-white dark:bg-navy-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                <button
-                  onClick={() => setActiveFilter('all')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    activeFilter === 'all'
-                      ? 'bg-brand-500 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  All ({allJobs})
-                </button>
-                <button
-                  onClick={() => setActiveFilter('active')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    activeFilter === 'active'
-                      ? 'bg-brand-500 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Active ({activeJobs})
-                </button>
-                <button
-                  onClick={() => setActiveFilter('inactive')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    activeFilter === 'inactive'
-                      ? 'bg-brand-500 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Inactive ({inactiveJobs})
-                </button>
-                <button
-                  onClick={() => setActiveFilter('municipal')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    activeFilter === 'municipal'
-                      ? 'bg-brand-500 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Municipal ({municipalJobs})
-                </button>
-                <button
-                  onClick={() => setActiveFilter('volunteer')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    activeFilter === 'volunteer'
-                      ? 'bg-brand-500 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Volunteer ({volunteerJobs})
-                </button>
-              </div>
-            </div>
-
-            {/* Jobs Grid */}
-            {filteredJobs.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400 text-lg">
-                  No jobs found matching your criteria.
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Municipal Jobs</p>
+                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{municipalCount}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <Building2 size={16} className="inline mr-1" />
+                  Government Positions
                 </p>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredJobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onToggleStatus={toggleJobStatus}
-                  />
-                ))}
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <Building2 className="text-blue-600 dark:text-blue-400" size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Volunteer Programs</p>
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">{volunteerCount}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <Heart size={16} className="inline mr-1" />
+                  Community Service
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                <Heart className="text-green-600 dark:text-green-400" size={24} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter Section */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row gap-6 items-center">
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search jobs, programs, departments, locations..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              />
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+              <button
+                onClick={() => setActiveFilter('all')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  activeFilter === 'all'
+                    ? 'bg-gray-900 text-white shadow-md'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                All ({municipalCount + volunteerCount})
+              </button>
+              <button
+                onClick={() => setActiveFilter('municipal')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  activeFilter === 'municipal'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                Municipal ({municipalCount})
+              </button>
+              <button
+                onClick={() => setActiveFilter('volunteer')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  activeFilter === 'volunteer'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                Volunteer ({volunteerCount})
+              </button>
+            </div>
+          </div>
+
+          {/* Results Info */}
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mt-4">
+            <Filter size={16} />
+            <span className="text-sm">
+              Showing {filteredJobs.length + filteredVolunteers.length} of {municipalCount + volunteerCount} opportunity{municipalCount + volunteerCount !== 1 ? 's' : ''}
+              {searchTerm && ` matching "${searchTerm}"`}
+            </span>
+          </div>
+        </div>
+
+        {/* Jobs Section */}
+        {filteredJobs.length === 0 && filteredVolunteers.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Briefcase className="text-gray-400" size={40} />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+              {activeJobs.length === 0 && activeVolunteers.length === 0 ? 'No Opportunities Available' : 'No Opportunities Found'}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+              {activeJobs.length === 0 && activeVolunteers.length === 0 
+                ? 'There are currently no opportunities available. Please check back later.'
+                : searchTerm 
+                  ? `No opportunities match your search for "${searchTerm}". Try adjusting your search terms.`
+                  : 'No opportunities match the selected filter. Try selecting a different category.'
+              }
+            </p>
+          </div>
+        ) : (
+          <div>
+            {/* Municipal Jobs Section */}
+            {filteredJobs.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                  <Building2 className="text-blue-600" size={28} />
+                  Available Municipal Corporation Jobs
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredJobs.map((job) => (
+                    <JobCard 
+                      key={job.id} 
+                      job={job} 
+                      onViewDetails={(id) => handleViewDetails(id, 'municipal')}
+                      isJobExpired={isJobExpired} 
+                      formatDate={formatDate} 
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Volunteer Jobs Section */}
+            {filteredVolunteers.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                  <Heart className="text-green-600" size={28} />
+                  Available Volunteer Opportunities
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredVolunteers.map((volunteer) => (
+                    <VolunteerCard 
+                      key={volunteer.id} 
+                      volunteer={volunteer} 
+                      onViewDetails={(id) => handleViewDetails(id, 'volunteer')}
+                      formatDate={formatDate} 
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   );
 };

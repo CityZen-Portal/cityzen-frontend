@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
@@ -27,17 +27,18 @@ import {
   MdPhone,
   MdEmail,
   MdSave,
-  MdBusiness,
-  MdDescription,
-  MdAdd,
-  MdClass,
   MdClose,
-  MdDelete
+  MdDelete,
+  MdAdd,
+  MdDescription,
+  MdBusiness
 } from 'react-icons/md';
 
-const MunicipalJobForm = () => {
+const MunicipalEditForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Municipal Job Form State
   const [formData, setFormData] = useState({
@@ -54,6 +55,41 @@ const MunicipalJobForm = () => {
   });
   const [newRequirement, setNewRequirement] = useState('');
   const [errors, setErrors] = useState({});
+
+  // Load job data for editing
+  useEffect(() => {
+    if (id) {
+      const savedJobs = localStorage.getItem('jobs');
+      if (savedJobs) {
+        try {
+          const jobs = JSON.parse(savedJobs);
+          const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'municipal');
+          if (jobToEdit) {
+            setFormData({
+              title: jobToEdit.title || '',
+              department: jobToEdit.department || '',
+              description: jobToEdit.description || '',
+              location: jobToEdit.location || '',
+              requirements: jobToEdit.requirements ? jobToEdit.requirements.split('; ').filter(req => req.trim()) : [],
+              deadline: jobToEdit.deadline || '',
+              contactPersonName: jobToEdit.contactPersonName || '',
+              contactPhoneNumber: jobToEdit.contactPhoneNumber || '',
+              contactEmail: jobToEdit.contactEmail || '',
+              contactAddress: jobToEdit.contactAddress || ''
+            });
+          } else {
+            toast.error('Job not found');
+            navigate('/admin/job-applications');
+          }
+        } catch (error) {
+          console.error('Failed to load job data', error);
+          toast.error('Failed to load job data');
+          navigate('/admin/job-applications');
+        }
+      }
+      setLoading(false);
+    }
+  }, [id, navigate]);
 
   // Handle form field changes
   const handleInputChange = (field, value) => {
@@ -124,16 +160,6 @@ const MunicipalJobForm = () => {
       newErrors.contactPhoneNumber = 'Please enter a valid phone number';
     }
     
-    // Date validation - ensure date is in the future
-    if (formData.deadline) {
-      const selectedDate = new Date(formData.deadline);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) {
-        newErrors.deadline = 'Application deadline must be in the future';
-      }
-    }
-    
     return newErrors;
   }, [formData]);
 
@@ -161,18 +187,15 @@ const MunicipalJobForm = () => {
         }
       }
 
-      // Add new job
-      const newJob = {
-        id: Date.now().toString(),
-        ...jobData,
-        isActive: true
-      };
-      jobs.push(newJob);
-      localStorage.setItem('jobs', JSON.stringify(jobs));
+      // Update existing job
+      const updatedJobs = jobs.map(job => 
+        job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
+      );
+      localStorage.setItem('jobs', JSON.stringify(updatedJobs));
 
       // Show success message
       setShowSuccess(true);
-      toast.success('Municipal job posted successfully!');
+      toast.success('Municipal job updated successfully!');
       
       // Navigate back after delay
       setTimeout(() => {
@@ -184,12 +207,23 @@ const MunicipalJobForm = () => {
       const errorCount = Object.keys(newErrors).length;
       toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
     }
-  }, [validateForm, formData, navigate]);
+  }, [validateForm, formData, id, navigate]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
     navigate('/admin/job-applications');
   }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading job data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
@@ -217,7 +251,7 @@ const MunicipalJobForm = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Success!</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Municipal job has been posted successfully.
+                Municipal job has been updated successfully.
               </p>
             </div>
           </div>
@@ -236,10 +270,10 @@ const MunicipalJobForm = () => {
             </button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Create Municipal Job
+                Edit Municipal Job
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Post a new government position
+                Update the government position details
               </p>
             </div>
           </div>
@@ -379,7 +413,6 @@ const MunicipalJobForm = () => {
                     type="date"
                     value={formData.deadline}
                     onChange={(e) => handleInputChange('deadline', e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.deadline ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -448,7 +481,7 @@ const MunicipalJobForm = () => {
               
               {errors.requirements && (
                 <div className="flex items-center gap-2 text-red-600 text-sm">
-                  <MdErrorOutline size={16} />
+                  <AlertCircle size={16} />
                   {errors.requirements}
                 </div>
               )}
@@ -459,7 +492,7 @@ const MunicipalJobForm = () => {
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <MdPerson className="text-orange-600 dark:text-orange-400" size={20} />
+                <User className="text-orange-600 dark:text-orange-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
             </div>
@@ -571,7 +604,7 @@ const MunicipalJobForm = () => {
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
             >
               <MdSave size={20} />
-              Post Municipal Job
+              Update Municipal Job
             </button>
             <button
               onClick={handleCancel}
@@ -587,5 +620,5 @@ const MunicipalJobForm = () => {
   );
 };
 
-export default MunicipalJobForm;
+export default MunicipalEditForm;
 

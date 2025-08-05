@@ -89,6 +89,8 @@ import JobDetailsPage from "views/citizen/job-application/pages/JobDetailsPage";
 import VolunteerDetailsPage from "views/citizen/job-application/pages/VolunteerDetailsPage";
 import MunicipalJobForm from "views/admin/job-applications/pages/MunicipalJobForm";
 import VolunteerJobForm from "views/admin/job-applications/pages/VolunteerJobForm";
+import MunicipalEditForm from "views/admin/job-applications/pages/MunicipalEditForm";
+import VolunteerEditForm from "views/admin/job-applications/pages/VolunteerEditForm";
 
 
 const routes = [
@@ -321,13 +323,13 @@ const routes = [
       name: "Edit Municipal Job",
       layout: "/admin",
       path: "job-applications/edit/municipal/:id",
-      component: <MunicipalJobForm />,
+      component: <MunicipalEditForm />,
     },
     {
       name: "Edit Volunteer Job",
       layout: "/admin",
       path: "job-applications/edit/volunteer/:id",
-      component: <VolunteerJobForm />,
+      component: <VolunteerEditForm />,
     },
   ]
 }
