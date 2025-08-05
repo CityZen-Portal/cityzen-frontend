@@ -20,10 +20,15 @@ const App = () => {
   useEffect(() => {
     if (!ready) return;
 
-    const isOnAuth = location.pathname.startsWith("/auth");
+    const isPublicRoute = 
+      location.pathname === "/" || 
+      location.pathname.startsWith("/auth") || 
+      location.pathname === "/unauthorized";
+      
     const isLoggedIn = role && (!(Array.isArray(role) && role.length === 0));
 
-    if (!isLoggedIn && !isOnAuth) {
+    // Only redirect if user is not logged in and trying to access protected route
+    if (!isLoggedIn && !isPublicRoute) {
       navigate("/auth/signin");
     }
   }, [role, ready, location.pathname, navigate]);
@@ -32,43 +37,39 @@ const App = () => {
     <>
       <ScrollToTop />
       <Routes>
+        {/* Public routes accessible to everyone */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="auth/*" element={<AuthLayout />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        
+        {/* Protected routes */}
         <Route
-          path="/"
+          path="citizen/*"
           element={
-            (() => {
-              if (!ready) return null;
-              const hasRole = role && (!(Array.isArray(role) && role.length === 0));
-              if (!hasRole) return <HomePage />;
-              if (Array.isArray(role) && role.includes("ROLE_ADMIN"))
-                return <Navigate to="/admin/dashboard" replace />;
-              if (Array.isArray(role) && role.includes("ROLE_STAFF"))
-                return <Navigate to="/staff/dashboard" replace />;
-              if (Array.isArray(role) && role.includes("ROLE_USER"))
-                return <Navigate to="/citizen/dashboard" replace />;
-              return <HomePage />;
-            })()
+            <ProtectedRoute requiredRole="ROLE_USER">
+              <CitizenLayout />
+            </ProtectedRoute>
           }
         />
-        <Route path="citizen/*" element={<CitizenLayout />} />
-        <Route path="auth/*" element={<AuthLayout />} />
         <Route
           path="admin/*"
           element={
-             <ProtectedRoute requiredRole="ROLE_ADMIN">
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
               <AdminLayout />
-             </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="staff/*"
           element={
-             <ProtectedRoute requiredRole="ROLE_STAFF">
+            <ProtectedRoute requiredRole="ROLE_STAFF">
               <StaffLayout />
-             </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
-        <Route path="/*" element={<CitizenLayout />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        
+        {/* Fallback routes */}
+        <Route path="/*" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

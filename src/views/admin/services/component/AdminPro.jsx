@@ -11,6 +11,8 @@ import {
   FaKey,
   FaSignal,
   FaCheckCircle,
+  FaBriefcase,
+  FaRegCalendarCheck,
   FaCalendarAlt,
   FaMars,
   FaVenus,
@@ -26,7 +28,6 @@ const getGenderIcon = (gender) => {
     case "Female":
       return <FaVenus className="text-gray-700 text-2xl" />;
     case "Other":
-      return <FaGenderless className="text-gray-700 text-2xl" />;
     default:
       return <FaGenderless className="text-gray-700 text-2xl" />;
   }
@@ -44,8 +45,12 @@ const Field = ({
   icon,
   isSelect = false,
   options = [],
+  onAttemptEdit,
 }) => (
-  <div className="flex items-start gap-3 mb-4">
+  <div
+    className="flex items-start gap-3 mb-4"
+    title={disabled ? "You can't edit this field" : ""}
+  >
     <div className="text-gray-700 mt-1">{icon}</div>
     <div className="w-full">
       {editable ? (
@@ -57,6 +62,7 @@ const Field = ({
               value={value}
               onChange={onChange}
               disabled={disabled}
+              onClick={disabled ? onAttemptEdit : undefined}
               className="w-full border rounded px-3 py-2 bg-white dark:bg-navy-800 dark:text-white disabled:cursor-not-allowed"
             >
               {options.map((opt) => (
@@ -72,6 +78,7 @@ const Field = ({
               value={value}
               onChange={onChange}
               disabled={disabled}
+              onClick={disabled ? onAttemptEdit : undefined}
               className="w-full border rounded px-3 py-2 bg-white dark:bg-navy-800 dark:text-white disabled:cursor-not-allowed"
             />
           )}
@@ -86,12 +93,12 @@ const Field = ({
 const AdminProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profilePic, setProfilePic] = useState(avatarPlaceholder);
+  const [originalProfilePic, setOriginalProfilePic] = useState(null); // NEW
 
   const [formData, setFormData] = useState({
     firstName: "Priya",
     lastName: "Kumar",
     adminId: "ADM456",
-    role: "Citizen Admin",
     email: "priya@example.com",
     dob: "1990-05-15",
     gender: "Female",
@@ -100,12 +107,12 @@ const AdminProfile = () => {
     state: "Karnataka",
     pincode: "560001",
     phone: "9876543210",
-    accessLevel: "super admin",
-    status: "Active",
-    lastLogin: "2025-07-26 10:45 AM",
-    userType: "Admin",
+    designation: "Senior Admin",
+    joinedAt: "2022-01-10",
     country: "India",
   });
+
+  const [originalData, setOriginalData] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -115,13 +122,17 @@ const AdminProfile = () => {
     const file = e.target.files[0];
     if (file) {
       setProfilePic(URL.createObjectURL(file));
-      // TODO: Upload logic (e.g., API call) can go here
     }
   };
 
   const handleSave = () => {
     setIsEditing(false);
-    // TODO: Save profile changes to backend
+    setOriginalData(null);
+    setOriginalProfilePic(null);
+  };
+
+  const handleBlockedEdit = () => {
+    alert("You can't edit this field.");
   };
 
   return (
@@ -162,7 +173,21 @@ const AdminProfile = () => {
         </div>
 
         <button
-          onClick={() => setIsEditing((prev) => !prev)}
+          onClick={() => {
+            if (isEditing) {
+              if (originalData) {
+                setFormData(originalData);
+                setProfilePic(originalProfilePic); // Reset profile picture
+              }
+              setOriginalData(null);
+              setOriginalProfilePic(null);
+              setIsEditing(false);
+            } else {
+              setOriginalData({ ...formData });
+              setOriginalProfilePic(profilePic); // Save original picture
+              setIsEditing(true);
+            }
+          }}
           className={`px-4 py-2 rounded flex items-center gap-2 text-white ${
             isEditing ? "bg-red-600 hover:bg-red-700" : "bg-teal-600 hover:bg-teal-700"
           }`}
@@ -193,9 +218,18 @@ const AdminProfile = () => {
               </div>
             </div>
           )}
-          <Field label="Admin ID" name="adminId" value={formData.adminId} onChange={handleChange} editable={isEditing} disabled icon={<FaIdCard />} />
-          <Field label="Role" name="role" value={formData.role} onChange={handleChange} editable={isEditing} disabled icon={<FaKey />} />
+          <Field label="Admin ID" name="adminId" value={formData.adminId} onChange={handleChange} editable={isEditing} disabled icon={<FaIdCard />} onAttemptEdit={handleBlockedEdit} />
+         
           <Field label="Email" name="email" value={formData.email} onChange={handleChange} editable={isEditing} icon={<FaEnvelope />} />
+          <Field
+            label="Date of Birth"
+            name="dob"
+            value={formData.dob}
+            onChange={handleChange}
+            editable={isEditing}
+            type="date"
+            icon={<FaCalendarAlt />}
+          />
           <Field
             label="Gender"
             name="gender"
@@ -206,19 +240,32 @@ const AdminProfile = () => {
             options={["Male", "Female", "Other"]}
             icon={getGenderIcon(formData.gender)}
           />
+          
           <Field
-            label="Date of Birth"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-            editable={isEditing}
-            type="date"
-            icon={<FaCalendarAlt />}
-          />
+      label="Designation"
+      name="designation"
+      value={formData.designation}
+      onChange={handleChange}
+      editable={isEditing}
+      icon={<FaBriefcase />}
+    />
+
+    {/* ➕ New Joined At Field */}
+    <Field
+      label="Joined At"
+      name="joinedAt"
+      value={formData.joinedAt}
+      onChange={handleChange}
+      editable={isEditing}
+      type="date"
+      disabled icon={<FaIdCard />}
+      onAttemptEdit={handleBlockedEdit}
+      
+    />
         </div>
       </div>
 
-      {/* Address Information */}
+      {/* Address Info */}
       <div className="bg-white dark:bg-navy-900 rounded-2xl shadow-md p-6 mt-8">
         <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-6 border-b pb-2">
           Address Information
@@ -232,54 +279,8 @@ const AdminProfile = () => {
         </div>
       </div>
 
-      {/* System Information */}
-      <div className="bg-white dark:bg-navy-900 rounded-2xl shadow-md p-6 mt-8">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-6 border-b pb-2">
-          System Information
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field
-            label="Access Level"
-            name="accessLevel"
-            value={formData.accessLevel}
-            onChange={handleChange}
-            editable={isEditing}
-            isSelect={true}
-            options={["admin", "super admin", "Service Manager", "Complaint Manager", "Read-Only Admin"]}
-            icon={<FaSignal />}
-          />
-          <Field
-            label="Status"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            editable={isEditing}
-            isSelect={true}
-            options={["Active", "Inactive", "Suspended"]}
-            icon={<FaCheckCircle />}
-          />
-          <div className="flex items-start gap-3 mb-4">
-            <div className="text-gray-700 mt-1"><FaCalendarAlt /></div>
-            <div className="w-full">
-              {isEditing ? (
-                <>
-                  <label className="text-sm text-gray-600 dark:text-gray-300">Last Login</label>
-                  <input
-                    type="text"
-                    name="lastLogin"
-                    value={formData.lastLogin}
-                    readOnly
-                    disabled
-                    className="w-full border rounded px-3 py-2 bg-white dark:bg-navy-800 dark:text-white cursor-default"
-                  />
-                </>
-              ) : (
-                <p className="mt-1 text-base text-gray-800 dark:text-gray-100">{formData.lastLogin}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* System Info */}
+      
 
       {/* Save Button */}
       {isEditing && (

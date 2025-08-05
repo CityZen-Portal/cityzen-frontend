@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from 'components/pagination';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-import NewsHome from 'views/citizen/news/components/NewsHome';
 
 const ViewNews = () => {
   const navigate = useNavigate();
@@ -18,19 +17,29 @@ const ViewNews = () => {
   const [newsData, setNewsData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handleDeleteNews = async (id) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this news item?');
-    if (!confirmDelete) return;
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [newsToDelete, setNewsToDelete] = useState(null);
 
+  // Open modal and set which news item is to be deleted
+  const promptDeleteNews = (id) => {
+    setNewsToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  // Confirm delete action inside modal
+  const confirmDeleteNews = async () => {
+    setShowDeleteModal(false);
     try {
-      await axios.delete(`https://city-news-alert-backend-new.onrender.com/api/news/delete/${id}`);
-      const updatedItems = newsData.filter(item => item.id !== id);
+      await axios.delete(`https://city-news-alert-backend-new.onrender.com/api/news/delete/${newsToDelete}`);
+      const updatedItems = newsData.filter(item => item.id !== newsToDelete);
       setNewsData(updatedItems);
       toast.success('News Deleted successfully!');
     } catch (err) {
       console.log('Error deleting news item:', err);
       toast.error('Failed to delete the news item. Please try again.');
     }
+    setNewsToDelete(null);
   };
 
   const filteredNews = (newsData ?? []).filter(item => {
@@ -174,7 +183,7 @@ const ViewNews = () => {
                     <td className="py-3 px-4 w-3/4">
                       <div>
                         <h5 className="text-sm font-semibold text-navy-700 dark:text-white">{item.title}</h5>
-                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1">{item.content}</p>
+                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1" dangerouslySetInnerHTML={{ __html: item.content }}></p>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 w-1/3">
@@ -198,6 +207,7 @@ const ViewNews = () => {
                               setShowPreview(true);
                             }}
                             className="rounded-full p-1 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                            aria-label="Preview Image"
                           >
                             <MdRemoveRedEye className="h-4 w-4" />
                           </button>
@@ -205,12 +215,14 @@ const ViewNews = () => {
                         <button
                           onClick={() => navigate(`/staff/news/add/${item.id}`)}
                           className="rounded-full p-1 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-navy-700"
+                          aria-label="Edit News"
                         >
                           <MdEdit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteNews(item.id)}
+                          onClick={() => promptDeleteNews(item.id)}
                           className="rounded-full p-1 text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                          aria-label="Delete News"
                         >
                           <MdDelete className="h-4 w-4" />
                         </button>
@@ -222,10 +234,12 @@ const ViewNews = () => {
             </tbody>
           </table>
         </div>
-
+       {totalPages>10&&
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+       }
       </Card>
 
+      {/* Preview Image Modal */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl">
@@ -233,26 +247,37 @@ const ViewNews = () => {
             <button
               onClick={() => setShowPreview(false)}
               className="absolute top-2 right-2 text-gray-700 dark:text-white"
+              aria-label="Close Preview"
             >
               ✖
             </button>
           </div>
         </div>
       )}
-      <section className=" mx-auto p-6">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-navy-800 dark:text-white">
-             News
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm md:text-base">
-            Stay updated with the latest announcements and updates
-          </p>
-        </div>
 
-       
-          <NewsHome />
-       
-      </section>
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full text-center shadow-lg">
+            <h2 id="delete-modal-title" className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Confirm Deletion</h2>
+            <p className="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete this news item?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={confirmDeleteNews}
+                className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ToastContainer position="top-right" autoClose={2000} />
     </div>

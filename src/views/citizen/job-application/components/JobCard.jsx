@@ -1,117 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import { FaRegBuilding, FaMapMarkerAlt, FaCalendarAlt, FaClock, FaExclamationTriangle } from 'react-icons/fa';
+import React from 'react';
+import { Building2, MapPin, Calendar, AlertTriangle, Eye } from 'lucide-react';
 
-const JobCard = ({ job, onApply }) => {
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  // Update time every second for live countdown
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Calculate days remaining and time remaining
-  const lastDate = new Date(job.lastDate);
-  const timeDiff = lastDate - currentTime;
-  const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
+  const expired = isJobExpired(job);
   
-  // Calculate hours, minutes, and seconds for countdown
-  const hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
-  const minutesRemaining = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-  const secondsRemaining = Math.floor((timeDiff % (1000 * 60)) / 1000);
-  
-  // Determine urgency - only show red badges for urgent and closing soon
-  const isUrgent = daysRemaining <= 3;
-  const isClosingSoon = daysRemaining <= 7 && daysRemaining > 3;
-
   return (
-    <div className="bg-white dark:bg-navy-700 rounded-xl shadow-md w-full p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border border-gray-200 dark:border-navy-600 overflow-hidden group relative">
-      
-      {/* Urgency Badge - Only show for urgent (red) and closing soon (red) */}
-      {isUrgent && (
-        <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10 font-medium">
-          <FaExclamationTriangle className="text-xs" />
-          URGENT
+    <div
+      className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+      onClick={() => onViewDetails(job.id)}
+    >
+      <div className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <h3 className={`text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400`}>
+            {job.title}
+          </h3>
+          {expired && (
+            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium ml-2 flex items-center gap-1">
+              <AlertTriangle size={12} />
+              EXPIRED
+            </div>
+          )}
         </div>
-      )}
-      
-      {isClosingSoon && (
-        <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10 font-medium">
-          <FaClock className="text-xs" />
-          {daysRemaining} DAYS LEFT
-        </div>
-      )}
-      
-      <div className="space-y-4">
-        {/* Centered Job Title */}
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300 leading-tight text-center">
-          {job.title}
-        </h3>
-        
-        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-center">
+
+        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-6">
           {job.description}
         </p>
 
-        <div className="space-y-3 mt-6">
-          {/* Department - Always blue */}
-          <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <FaRegBuilding className="text-blue-600 flex-shrink-0 text-lg" /> 
-            <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 block">Department</span>
-              <span className="text-sm font-medium text-gray-800 dark:text-white">{job.department}</span>
+        <div className="space-y-4">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+              <Building2 size={16} />
+              <div>
+                <p className="text-xs text-blue-600 dark:text-blue-400">Department</p>
+                <p className="font-medium">{job.department}</p>
+              </div>
             </div>
           </div>
-          
-          {/* Location - Always green */}
-          <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <FaMapMarkerAlt className="text-green-600 flex-shrink-0 text-lg" /> 
-            <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 block">Location</span>
-              <span className="text-sm font-medium text-gray-800 dark:text-white">{job.location}</span>
+
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+              <MapPin size={16} />
+              <div>
+                <p className="text-xs text-purple-600 dark:text-purple-400">Location</p>
+                <p className="font-medium line-clamp-1">{job.location}</p>
+              </div>
             </div>
           </div>
-          
-          {/* Application Deadline - Always gray background, only days left text in red */}
-          <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <FaCalendarAlt className="text-gray-600 flex-shrink-0 text-lg" /> 
-            <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 block">Application Deadline</span>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-800 dark:text-white">{job.lastDate}</span>
-                {daysRemaining > 1 ? (
-                  <span className={`text-xs font-bold ${
-                    isUrgent || isClosingSoon ? 'text-red-600' : 'text-gray-600'
-                  }`}>
-                    {daysRemaining} days left
-                  </span>
-                ) : timeDiff > 0 ? (
-                  <span className="text-xs font-bold text-red-600 font-mono">
-                    {hoursRemaining > 0 
-                      ? `${hoursRemaining.toString().padStart(2, '0')}:${minutesRemaining.toString().padStart(2, '0')}:${secondsRemaining.toString().padStart(2, '0')}`
-                      : `${minutesRemaining.toString().padStart(2, '0')}:${secondsRemaining.toString().padStart(2, '0')}`
-                    }
-                  </span>
-                ) : (
-                  <span className="text-xs font-bold text-red-600">
-                    Expired
-                  </span>
-                )}
+
+          <div className={`${expired ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'} rounded-lg p-3`}>
+            <div className={`flex items-center gap-2 ${expired ? 'text-red-700 dark:text-red-300' : 'text-orange-700 dark:text-orange-300'}`}>
+              <Calendar size={16} />
+              <div>
+                <p className={`text-xs ${expired ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                  Application Deadline
+                </p>
+                <p className="font-medium">
+                  {formatDate(job.deadline)} {expired && (
+                    <span className="text-red-600 dark:text-red-400 text-xs ml-1">EXPIRED</span>
+                  )}
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Apply Button - Always blue, no color changes */}
-      <div className="flex justify-center mt-6">
         <button
-          onClick={onApply}
-          className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-10 rounded-lg font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewDetails(job.id);
+          }}
+          className="w-full mt-6 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-blue-600 hover:bg-blue-700 text-white"
         >
-          Apply Now
+          <Eye size={16} />
+          View Details
         </button>
       </div>
     </div>

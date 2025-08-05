@@ -75,19 +75,20 @@ import JobApplicationPage from "views/citizen/job-application";
 import ReportForm from "views/citizen/services/components/ReportForm";
 import { layout } from "@chakra-ui/system";
 import Locker from "views/citizen/locker";
-import DocumentInfo from "views/citizen/locker/components/DocumentInfo";import AppliedJobs from "views/citizen/job-application/pages/AppliedJobs";
+import DocumentInfo from "views/citizen/locker/components/DocumentInfo";
 import AdminCityNews from "views/admin/news";
 import AdminAddNews from "views/admin/news/components/AdminAddNews";
-import AdminJobManager from "views/admin/job-applications/pages/JobApplicationsPost";
-// import JobForm from "views/admin/job-applications/pages/JobForm";
-import JobApplicationForm from "views/citizen/job-application/pages/JobApplicationForm";
-// import AdminJobApplicants from "views/admin/job-applications/pages/AdminJobApplicants";
-// import ApplicantDetails from "views/admin/job-applications/pages/ApplicantDetails";
-import JobApplicationResponseView from "views/citizen/job-application/pages/JobApplicationResponseView";
-import JobApplicationEdit from "views/citizen/job-application/pages/JobApplicationEdit";
+// import JobApplicationsPost from "views/admin/job-applications/pages/JobApplicationsPost";
 import NewsHomeDetails from "views/citizen/news/components/NewsHomeDetails";
 import JobApplicationsPost from "views/admin/job-applications/pages/JobApplicationsPost";
-import JobFormPages from "views/admin/job-applications/pages/JobFormPages";
+// import JobFormPages from "views/admin/job-applications/pages/JobFormPages";
+// import CitizenJobBoard from "views/citizen/job-application/pages/CitizenJobBoard";
+// import JobDetailsPage from "views/citizen/job-application/pages/JobDetailsPage";
+import JobApplicationSystem from "views/citizen/job-application/pages/JobApplicationSystem";
+import JobDetailsPage from "views/citizen/job-application/pages/JobDetailsPage";
+import VolunteerDetailsPage from "views/citizen/job-application/pages/VolunteerDetailsPage";
+import MunicipalJobForm from "views/admin/job-applications/pages/MunicipalJobForm";
+import VolunteerJobForm from "views/admin/job-applications/pages/VolunteerJobForm";
 
 
 const routes = [
@@ -211,35 +212,21 @@ const routes = [
     layout: "/citizen",
     path: "job-application",
     icon: <MdWork className="h-6 w-6" />,
-    component: <JobApplicationPage />,
-    
+    component: <JobApplicationSystem/>,
     children: [
-       {
-        name: "Job Application List",
+      {
+        name: "Job Details",
         layout: "/citizen",
-        path: "job-application/form",
-        component: <JobApplicationForm />,
+        path: "job-application/job/:id",
+        component: <JobDetailsPage />,
       },
       {
-        name: "Job Application List",
+        name: "Volunteer Details",
         layout: "/citizen",
-        path: "job-application/applications",
-        component: <AppliedJobs />,
+        path: "job-application/volunteer/:id",
+        component: <VolunteerDetailsPage />,
       },
-      {
-        name: "Job Application List",
-        layout: "/citizen",
-        path: "job-application/response/:jobId",
-        component: <JobApplicationResponseView />,
-      },
-      {
-        name: "Job Application List",
-        layout: "/citizen",
-        path: "job-application/edit/:jobId",
-        component: <JobApplicationEdit />,
-      }
-
-    ]
+    ],
   },
 
   // Admin Routes
@@ -312,39 +299,39 @@ const routes = [
   },
   
  {
-    name: "Job Applications",
-    layout: "/admin",
-    path: "job-applications",
-    icon: <MdBallot className="h-6 w-6" />,
-    component: <JobApplicationsPost />,
-    children: [
-      {
-        name: "Add Job",
-        layout: "/admin",
-        path: "job-applications/add",
-        component: <JobFormPages />,
-      },
-      {
-        name: "Edit Job",
-        layout: "/admin",
-        path: "job-applications/edit/:id",
-        component: <JobFormPages />,
-      },
-      // Uncomment and adjust paths if these components exist
-      // {
-      //   name: "View Applicants",
-      //   layout: "/admin",
-      //   path: "job-applications/applicants/:jobId",
-      //   component: <AdminJobApplicants />,
-      // },
-      // {
-      //   name: "Applicants Details",
-      //   layout: "/admin",
-      //   path: "job-applications/applicants/:jobId/details/:applicantId",
-      //   component: <ApplicantDetails />,
-      // }
-    ]
-  },
+  name: "Job Applications",
+  layout: "/admin",
+  path: "job-applications",
+  icon: <MdBallot className="h-6 w-6" />,
+  component: <JobApplicationsPost />,
+  children: [
+    {
+      name: "Add Municipal Job",
+      layout: "/admin",
+      path: "job-applications/add/municipal",
+      component: <MunicipalJobForm />,
+    },
+    {
+      name: "Add Volunteer Job",
+      layout: "/admin",
+      path: "job-applications/add/volunteer",
+      component: <VolunteerJobForm />,
+    },
+    {
+      name: "Edit Municipal Job",
+      layout: "/admin",
+      path: "job-applications/edit/municipal/:id",
+      component: <MunicipalJobForm />,
+    },
+    {
+      name: "Edit Volunteer Job",
+      layout: "/admin",
+      path: "job-applications/edit/volunteer/:id",
+      component: <VolunteerJobForm />,
+    },
+  ]
+}
+,
 
   {
     name: "Profile",
@@ -408,6 +395,27 @@ const routes = [
       },
     ],
   },
+  // {
+  //   name: "Job Application",
+  //   layout: "/staff",
+  //   path: "job-application",
+  //   icon: <MdWork className="h-6 w-6" />,
+  //   component: <JobApplicationSystem/>,
+  //   children: [
+  //     {
+  //       name: "Job Details",
+  //       layout: "/staff",
+  //       path: "job-application/job/:id",
+  //       component: <JobDetailsPage />,
+  //     },
+  //     {
+  //       name: "Volunteer Details",
+  //       layout: "/staff",
+  //       path: "job-application/volunteer/:id",
+  //       component: <VolunteerDetailsPage />,
+  //     },
+  //   ],
+  // },
   {
     name: "City News & Alerts",
     layout: "/staff",

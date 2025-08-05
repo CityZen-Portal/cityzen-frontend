@@ -6,6 +6,9 @@ import {
   MdArrowDownward,
   MdSort,
 } from "react-icons/md";
+import { useNavigate } from "react-router-dom"; // Add this at the top
+
+// Inside your component
 
 const CitizenServiceRequests = () => {
   const [viewingDetails, setViewingDetails] = useState(null);
@@ -30,6 +33,19 @@ const CitizenServiceRequests = () => {
     };
     fetchData();
   }, []);
+
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return date.toLocaleString("en-IN", options);
+  }
 
   const filteredData = useMemo(() => {
     if (statusFilter === "ALL") return data;
@@ -77,10 +93,10 @@ const CitizenServiceRequests = () => {
     }
     setCurrentPage(1);
   };
-
+  const navigate = useNavigate();
   return (
     <div className="text-slate-800 dark:text-slate-100 rounded-2xl bg-white p-6 dark:bg-navy-800">
-      <div className="flex gap-4 mb-4">
+      <div className="mb-4 flex gap-4">
         {["ALL", "PENDING", "COMPLETED"].map((status) => (
           <button
             key={status}
@@ -89,7 +105,7 @@ const CitizenServiceRequests = () => {
               setCurrentPage(1);
               setViewingDetails(null);
             }}
-            className={`px-4 py-2 rounded ${
+            className={`rounded px-4 py-2 ${
               statusFilter === status
                 ? "bg-indigo-600 text-white"
                 : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
@@ -216,8 +232,8 @@ const CitizenServiceRequests = () => {
       )}
 
       {viewingDetails && (
-        <div className="mt-8 rounded-xl border border-gray-200 p-6 dark:border-navy-600 dark:bg-navy-900">
-          <h2 className="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">
+        <div className="mt-8 rounded-xl border border-gray-200 p-6 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
+          <h2 className="mb-4 text-xl font-semibold text-indigo-700 dark:text-indigo-400">
             Service Request Details
           </h2>
           <p>
@@ -244,8 +260,40 @@ const CitizenServiceRequests = () => {
             <strong>Description:</strong> {viewingDetails.description || "N/A"}
           </p>
 
+          <p>
+            <strong>Citizen Name:</strong> {viewingDetails.citizenName}
+          </p>
+          <p>
+            <strong>Staff Name:</strong> {viewingDetails.staffName}
+          </p>
+          <p>
+            <strong>Completed Date:</strong>{" "}
+            {formatDate(viewingDetails.completedDate) || "N/A"}
+          </p>
+          <p>
+            <strong>Description:</strong> {viewingDetails.description || "N/A"}
+          </p>
+
+          {/* Conditional Action Buttons */}
+          {viewingDetails.status.toLowerCase() === "pending" && (
+            <button
+              onClick={() => navigate("reportform")}
+              className="mr-3 mt-4 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+            >
+              Report
+            </button>
+          )}
+          {viewingDetails.status.toLowerCase() === "completed" && (
+            <button
+              onClick={() => navigate("feedform")}
+              className="mr-3 mt-4 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+            >
+              Feedback
+            </button>
+          )}
+
           <button
-            onClick={() => setViewingDetails(null)}
+            onClick={() => setViewingDetails("")}
             className="mt-4 rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
           >
             Close Details

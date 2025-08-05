@@ -1,77 +1,115 @@
-import PieChart from "components/charts/PieChart";
-import { pieChartData, pieChartOptions } from "../../../../variables/charts";
-import Card from "components/card";
+import React from "react";
 
-const updatedPieChartData = [1200000, 850000, 300000];
-const updatedPieChartOptions = {
-  ...pieChartOptions,
-  labels: ["New York", "Los Angeles", "Chicago"],
-  colors: ["#4318FF", "#6AD2FF", "#EFF4FB"],
+// Custom Pie Chart Component
+const PieChart = ({ data, title, size = 200 }) => {
+  const total = data.data.reduce((sum, value) => sum + value, 0);
+  let cumulativeAngle = 0;
+  
+  const segments = data.data.map((value, index) => {
+    const angle = (value / total) * 360;
+    const startAngle = cumulativeAngle;
+    const endAngle = cumulativeAngle + angle;
+    cumulativeAngle += angle;
+    
+    const largeArcFlag = angle > 180 ? 1 : 0;
+    const startX = 50 + 40 * Math.cos((startAngle - 90) * Math.PI / 180);
+    const startY = 50 + 40 * Math.sin((startAngle - 90) * Math.PI / 180);
+    const endX = 50 + 40 * Math.cos((endAngle - 90) * Math.PI / 180);
+    const endY = 50 + 40 * Math.sin((endAngle - 90) * Math.PI / 180);
+    
+    const pathData = [
+      `M 50 50`,
+      `L ${startX} ${startY}`,
+      `A 40 40 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+      'Z'
+    ].join(' ');
+    
+    return {
+      path: pathData,
+      color: data.colors[index],
+      value,
+      label: data.labels[index],
+      percentage: Math.round((value / total) * 100)
+    };
+  });
+
+  return (
+    <div className="group bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 dark:border-gray-700/20 hover:-translate-y-1">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 text-center">
+        {title}
+      </h3>
+      
+      <div className="flex flex-col items-center">
+        <div className="relative mb-6">
+          <svg width={size} height={size} viewBox="0 0 100 100" className="transform -rotate-90">
+            {segments.map((segment, index) => (
+              <path
+                key={index}
+                d={segment.path}
+                fill={segment.color}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+                style={{
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                }}
+              />
+            ))}
+          </svg>
+        </div>
+        
+        <div className="space-y-3 w-full">
+          {segments.map((segment, index) => (
+            <div key={index} className="flex items-center justify-between text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg p-2 transition-colors duration-200">
+              <div className="flex items-center space-x-3">
+                <div 
+                  className="w-3 h-3 rounded-full shadow-sm" 
+                  style={{ backgroundColor: segment.color }}
+                />
+                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                  {segment.label}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-900 dark:text-white font-bold">
+                  {segment.value}
+                </span>
+                <span className="text-gray-500 dark:text-gray-400 text-xs">
+                  ({segment.percentage}%)
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Static data
+const genderData = {
+  labels: ['Male', 'Female', 'Other'],
+  data: [55, 40, 5],
+  colors: ['#3B82F6', '#8B5CF6', '#06B6D4']
+};
+
+const complaintsData = {
+  labels: ['Sanitation', 'Water', 'Electricity', 'Roads'],
+  data: [30, 20, 25, 25],
+  colors: ['#EF4444', '#F59E0B', '#10B981', '#6366F1']
+};
+
+const servicesData = {
+  labels: ['Permits', 'Grievances', 'Updates'],
+  data: [45, 35, 20],
+  colors: ['#EC4899', '#14B8A6', '#F97316']
 };
 
 const PieChartCard = () => {
   return (
-    <Card extra="rounded-[20px] p-3">
-      <div className="flex flex-row justify-between px-3 pt-2">
-        <div>
-          <h4 className="text-lg font-bold text-navy-700 dark:text-white">
-            Population Distribution
-          </h4>
-        </div>
-        <div className="mb-6 flex items-center justify-center">
-          <select className="mb-3 mr-2 flex items-center justify-center text-sm font-bold text-gray-600 hover:cursor-pointer dark:!bg-navy-800 dark:text-white">
-            <option value="2025">2025</option>
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="mb-auto flex h-[220px] w-full items-center justify-center">
-        <PieChart
-          options={updatedPieChartOptions}
-          series={updatedPieChartData}
-        />
-      </div>
-
-      <div className="flex flex-row !justify-between rounded-2xl px-6 py-3 shadow-2xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center">
-            <div className="h-2 w-2 rounded-full bg-[#4318FF]" />
-            <p className="ml-1 text-sm font-normal text-gray-600">New York</p>
-          </div>
-          <p className="mt-px text-xl font-bold text-navy-700 dark:text-white">
-            1,200,000
-          </p>
-        </div>
-
-        <div className="h-11 w-px bg-gray-300 dark:bg-white/10" />
-
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center">
-            <div className="h-2 w-2 rounded-full bg-[#6AD2FF]" />
-            <p className="ml-1 text-sm font-normal text-gray-600">
-              Los Angeles
-            </p>
-          </div>
-          <p className="mt-px text-xl font-bold text-navy-700 dark:text-white">
-            850,000
-          </p>
-        </div>
-
-        <div className="h-11 w-px bg-gray-300 dark:bg-white/10" />
-
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center">
-            <div className="h-2 w-2 rounded-full bg-[#EFF4FB]" />
-            <p className="ml-1 text-sm font-normal text-gray-600">Chicago</p>
-          </div>
-          <p className="mt-px text-xl font-bold text-navy-700 dark:text-white">
-            300,000
-          </p>
-        </div>
-      </div>
-    </Card>
+    <div className="grid md:grid-cols-3 gap-8">
+      <PieChart data={genderData} title="Gender Distribution" />
+      <PieChart data={complaintsData} title="Complaints Raised by Citizens" />
+      <PieChart data={servicesData} title="Services Closed by Staff" />
+    </div>
   );
 };
 

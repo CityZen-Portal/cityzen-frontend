@@ -1,12 +1,12 @@
-import { useEffect } from "react"; // Add this import
+import { useEffect, useState } from "react";
 import InputField from "components/fields/InputField";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "components/checkbox";
-import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Footer from "components/footer/FooterAuthDefault";
-import { ChevronDown, User, Mail, Lock, Phone, Shield, CheckCircle } from "lucide-react";
+import { ChevronDown, User, Mail, Lock, Phone, Shield, CheckCircle, Sun, Moon } from "lucide-react";
+import signupImage from "./assets/undraw_to-do-list_o3jf.svg"
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -25,8 +25,20 @@ export default function SignUp() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [aadhaarSending, setAadhaarSending] = useState(false);
-
-  // Add useEffect to set favicon
+  
+  // Theme state
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme) {
+        return storedTheme === 'dark';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+  
+  // Add useEffect to set favicon and theme
   useEffect(() => {
     // Set favicon
     const favicon = document.querySelector("link[rel='icon']");
@@ -39,14 +51,23 @@ export default function SignUp() {
       document.head.appendChild(newFavicon);
     }
     
+    // Apply theme
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+    
     // Cleanup function to reset favicon when component unmounts
     return () => {
       if (favicon) {
         favicon.href = "/favicon.ico"; // Reset to default
       }
     };
-  }, []);
-
+  }, [isDark]);
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -57,7 +78,7 @@ export default function SignUp() {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-
+  
   const validateEmail = (email) => {
     if (!email.trim()) {
       setErrors(prev => ({ ...prev, email: 'Email is required' }));
@@ -70,11 +91,11 @@ export default function SignUp() {
       return true;
     }
   };
-
+  
   const handleEmailBlur = () => {
     validateEmail(formData.email);
   };
-
+  
   const validateForm = () => {
     const newErrors = {};
     // Name validation
@@ -124,7 +145,7 @@ export default function SignUp() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -184,12 +205,12 @@ export default function SignUp() {
       });
     }
   };
-
+  
   const formatAadharNumber = (value) => {
     const digits = value.replace(/\D/g, '');
     return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
   };
-
+  
   const handleAadharChange = (e) => {
     const formatted = formatAadharNumber(e.target.value);
     if (formatted.replace(/\s/g, '').length <= 12) {
@@ -200,7 +221,7 @@ export default function SignUp() {
       }
     }
   };
-
+  
   const handleAadhaarVerify = async () => {
     const cleanAadhaar = formData.aadharNumber.replace(/\s/g, '');
     if (!/^\d{12}$/.test(cleanAadhaar)) {
@@ -252,11 +273,21 @@ export default function SignUp() {
       setAadhaarSending(false);
     }
   };
-
+  
   return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-blue-100 via-blue-200 to-purple-100 
-                    dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 
-                    transition-all duration-300 overflow-y-auto">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 relative">
+      {/* Theme Toggle - Top Right Corner */}
+      <button
+        onClick={() => setIsDark(!isDark)}
+        className="fixed top-6 right-6 z-50 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 transition-all duration-300"
+      >
+        {isDark ? (
+          <Sun className="w-5 h-5 text-yellow-500" />
+        ) : (
+          <Moon className="w-5 h-5 text-gray-600" />
+        )}
+      </button>
+      
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -271,188 +302,183 @@ export default function SignUp() {
         theme="colored"
       />
       
-      {/* Decorative Gradient Blobs */}
-      <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-500 rounded-full filter blur-3xl opacity-40"></div>
-      <div className="absolute top-10 right-10 w-64 h-64 bg-purple-600 rounded-full filter blur-2xl opacity-30"></div>
-      <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-indigo-400 rounded-full filter blur-2xl opacity-25"></div>
-      
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4 w-full">
-        <div className="relative z-10 w-full max-w-2xl p-10 rounded-2xl shadow-2xl 
-                        border border-blue-200 dark:border-gray-700 
-                        bg-white/95 dark:bg-gray-700/95 backdrop-blur-md 
-                        transition-all duration-300 my-8">
-          <div className="text-center mb-10">
-            <div className="flex justify-center mb-4">
-              {/* Logo with black outline */}
-              <div className="w-16 h-16 flex items-center justify-center">
-                <img
-                  src="/brand-logo.png"
-                  alt="CityZen Logo"
-                  className="w-14 h-14 rounded-lg border-2 border-black shadow-md"
-                />
-              </div>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              Create Citizen Account
+      {/* Left Side - Sign Up Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:max-w-md">
+          {/* Header */}
+          <div className="text-left mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Create CityZen Account
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
-              Join CityZen to transform your city experience
+              Join our platform to access municipal services and connect with your community
             </p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Field */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Full Name*
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  placeholder="Enter your full name"
+                />
+                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
               </div>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 border ${errors.name ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
-                placeholder="Full Name"
-              />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
             </div>
             
             {/* Email */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email*
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  onBlur={handleEmailBlur}
+                  className={`w-full px-4 py-3 border ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                />
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
               </div>
-              <input
-                type="text"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                onBlur={handleEmailBlur}
-                className={`w-full pl-10 pr-4 py-3 border ${errors.email ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
-                placeholder="Email Address"
-                autoComplete="email"
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
             
             {/* Password Field */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Password*
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 pr-12 border ${errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  placeholder="Min. 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               </div>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={`w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
-                placeholder="Password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-blue-500 hover:text-blue-700 dark:hover:text-blue-300"
-              >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
-              </button>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             </div>
             
             {/* Confirm Password Field */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Confirm Password*
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 pr-12 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showConfirmPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+                {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
               </div>
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className={`w-full pl-10 pr-12 py-3 border ${errors.confirmPassword ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
-                placeholder="Confirm Password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-blue-500 hover:text-blue-700 dark:hover:text-blue-300"
-              >
-                {showConfirmPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
-              </button>
-              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             </div>
             
             {/* Phone Number Field */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Phone className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Phone Number*
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  placeholder="10-digit phone number"
+                  maxLength="10"
+                />
+                {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
               </div>
-              <input
-                type="text"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 border ${errors.phoneNumber ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm`}
-                placeholder="Phone Number"
-                maxLength="10"
-              />
-              {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
             </div>
             
             {/* Gender Field */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-blue-500" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Gender*
+              </label>
+              <div className="relative">
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border ${errors.gender ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white appearance-none`}
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <ChevronDown className="h-5 w-5 text-gray-400" />
+                </div>
+                {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
               </div>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleInputChange}
-                className={`w-full pl-10 pr-10 py-3 border ${errors.gender ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm appearance-none`}
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <ChevronDown className="h-5 w-5 text-blue-500" />
-              </div>
-              {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
             </div>
             
             {/* Aadhar Number */}
             <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Aadhaar Number*
+              </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Shield className="h-5 w-5 text-blue-500" />
-                </div>
                 <input
                   type="text"
                   name="aadharNumber"
                   value={formData.aadharNumber}
                   onChange={handleAadharChange}
                   disabled={aadhaarVerified}
-                  className={`w-full pl-10 pr-4 py-3 border ${errors.aadharNumber ? 'border-red-500' : 'border-blue-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:border-blue-600 dark:text-white transition-all duration-200 shadow-sm ${aadhaarVerified ? 'bg-blue-50 dark:bg-blue-900/20 cursor-not-allowed' : ''}`}
-                  placeholder="Aadhar Number"
+                  className={`w-full px-4 py-3 border ${errors.aadharNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white ${aadhaarVerified ? 'bg-blue-50 dark:bg-blue-900/20 cursor-not-allowed' : ''}`}
+                  placeholder="12-digit Aadhaar number"
                   maxLength="14"
                 />
                 {aadhaarVerified && (
@@ -468,8 +494,8 @@ export default function SignUp() {
                   disabled={aadhaarVerified || aadhaarSending}
                   className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center ${aadhaarVerified
                       ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
-                    } ${aadhaarSending ? 'opacity-50 cursor-not-allowed' : ''} transition-all duration-300 shadow-sm`}
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    } ${aadhaarSending ? 'opacity-50 cursor-not-allowed' : ''} transition-colors duration-300`}
                 >
                   {aadhaarSending ? (
                     <>
@@ -515,32 +541,79 @@ export default function SignUp() {
             <button
               type="submit"
               disabled={!aadhaarVerified || !agreeTerms}
-              className={`w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r
-                       from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-                       transition-all duration-300 shadow-lg mt-6 flex items-center justify-center ${(!aadhaarVerified || !agreeTerms) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-xl'}`}
+              className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 ${(!aadhaarVerified || !agreeTerms) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Create Account
             </button>
           </form>
           
           {/* Already have account */}
-          <div className="mt-8 text-center">
-            <p className="text-gray-600 dark:text-gray-300">
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{' '}
               <button
                 onClick={() => navigate("/auth/signin")}
-                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
               >
                 Sign in
               </button>
             </p>
           </div>
         </div>
+        
+        {/* Footer */}
+        {/* <div className="w-full py-4 mt-auto">
+          <Footer />
+        </div> */}
       </div>
       
-      {/* Footer */}
-      <div className="w-full py-4">
-        <Footer />
+      {/* Right Side - Illustration */}
+      <div className="hidden lg:flex w-1/2 bg-blue-50 dark:bg-gray-800 relative overflow-hidden items-center justify-center">
+        <div className="text-center max-w-lg px-8">
+          {/* Illustration Image */}
+          <div className="mb-8">
+            <img
+              src={signupImage}
+              alt="Citizen Signup Illustration"
+              className="w-full max-w-md mx-auto"
+            />
+          </div>
+          
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <span className="text-blue-600">Join CityZen</span>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            Create your account to access municipal services, report civic issues, and stay connected with your community through our comprehensive citizen portal.
+          </p>
+          
+          {/* Feature Checkmarks */}
+          <div className="space-y-4 text-left">
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Secure identity verification with Aadhaar</span>
+            </div>
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Access all municipal services online</span>
+            </div>
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Report and track civic issues</span>
+            </div>
+            <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              </div>
+              <span>Stay updated with city notifications</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

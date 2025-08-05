@@ -131,7 +131,7 @@ const ComplaintTable = ({ complaints }) => {
                 <th
                   key={idx}
                   onClick={() => key && handleSort(key)}
-                  className={`px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-700 dark:text-white border-r last:border-r-0 ${
+                  className={`px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-medium text-gray-700 dark:text-white ${
                     key ? 'cursor-pointer select-none hover:bg-gray-200 dark:hover:bg-navy-800' : ''
                   }`}
                 >
