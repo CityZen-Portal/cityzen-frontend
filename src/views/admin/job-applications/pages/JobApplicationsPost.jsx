@@ -94,8 +94,8 @@ const JobApplicationsPost = () => {
   const email = localStorage.getItem("email")
   const adminId = localStorage.getItem("id")
 
-  const [jobs, setJobs] = useState(sampleJobs);
-  const [volunteers, setVolunteers] = useState(sampleVolunteers);
+  const [jobs, setJobs] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState(jobs);
   const [filteredVolunteers, setFilteredVolunteers] = useState(volunteers);
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,39 +105,63 @@ const JobApplicationsPost = () => {
 
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
 
-  // useEffect(() => {
-  //   // Fetch jobs
-  //   axios.get(`${JOB_APPLICATION_API}/jobs`)
-  //     .then(res => {
-  //         console.log('Jobs Response:', res.data.data);
-  //         const data = res.data.data
-  //         setJobs(data ? data : [])
-  //       })
-  //       .catch(err => {
-  //         toast.error('Server Error! Unable to Fetch Jobs Data', {
-  //           position: 'top-right',
-  //           autoClose: 3000,
-  //           theme: 'colored'
-  //         });
-  //         console.error('Error:', err.response?.data || err.message);
-  //       });
+  useEffect(() => {
+    // setLoading(true);
+  
+    axios.get(`${JOB_APPLICATION_API}/jobs`,
+      {
+        headers:{
+          token,
+          email,
+          id: adminId
+        }
+      }
+    )
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setJobs(data ? data : [])
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Job Posts Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
         
-  //   // Fetch volunteers
-  //   axios.get(`${JOB_APPLICATION_API}/service`)
-  //     .then(res => {
-  //         console.log('Volunteers Response:', res.data.data);
-  //         const data = res.data.data
-  //         setVolunteers(data ? data : [])
-  //       })
-  //       .catch(err => {
-  //         toast.error('Server Error! Unable to Fetch Volunteers Data', {
-  //           position: 'top-right',
-  //           autoClose: 3000,
-  //           theme: 'colored'
-  //         });
-  //         console.error('Error:', err.response?.data || err.message);
-  //       });
-  // }, [token, email, adminId, JOB_APPLICATION_API, navigate])
+    // setLoading(true);
+
+    axios.get(`${JOB_APPLICATION_API}/service`,
+      {
+        headers:{
+          token,
+          email,
+          id: adminId
+        }
+      }
+    )
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setVolunteers(data ? data : [])
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Volunteer Post Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+  }, [token, email, adminId, JOB_APPLICATION_API, navigate])
 
   // Filter jobs and volunteers based on search and filter criteria
   useEffect(() => {
