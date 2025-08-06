@@ -49,7 +49,7 @@ export default function VerifyOTP() {
     );
     if (response.data.status === 200) {
       setShowVerifyModal(false);
-      navigate("/Locker/my-locker");
+      navigate("/citizen/locker/my-locker");
     } else {
       setError("Invalid OTP");
     }
