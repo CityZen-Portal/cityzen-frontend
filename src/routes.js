@@ -21,10 +21,9 @@ import ManageStaffs from "views/admin/services/component/ManageStaffs";
 import ViewTasks from "views/admin/services/component/ViewTasks";
 import ViewSchedule from "views/admin/services/component/ViewSchedule";
 import AdminAnalytics from "views/admin/services/component/analytics";
-import { MdMiscellaneousServices} from "react-icons/md";
+import { MdMiscellaneousServices } from "react-icons/md";
 import { MdBarChart } from "react-icons/md";
 import AdminPro from "views/admin/services/component/AdminPro";
-
 
 import FeedbackManage from "views/admin/services/component/FeedbackManage";
 import ComplaintManagement from "views/admin/complaints";
@@ -67,14 +66,14 @@ import {
   MdAssignment,
   MdBallot,
   MdBuild,
-  MdWork
+  MdWork,
 } from "react-icons/md";
 
 import JobApplicationPage from "views/citizen/job-application";
 
 import ReportForm from "views/citizen/services/components/ReportForm";
 import { layout } from "@chakra-ui/system";
-import Locker from "views/citizen/locker";
+import Locker from "./views/citizen/locker/index.js";
 import DocumentInfo from "views/citizen/locker/components/DocumentInfo";
 import AdminCityNews from "views/admin/news";
 import AdminAddNews from "views/admin/news/components/AdminAddNews";
@@ -91,7 +90,6 @@ import MunicipalJobForm from "views/admin/job-applications/pages/MunicipalJobFor
 import VolunteerJobForm from "views/admin/job-applications/pages/VolunteerJobForm";
 import MunicipalEditForm from "views/admin/job-applications/pages/MunicipalEditForm";
 import VolunteerEditForm from "views/admin/job-applications/pages/VolunteerEditForm";
-
 
 const routes = [
   // Home
@@ -163,14 +161,14 @@ const routes = [
   {
     name: "Locker",
     layout: "/citizen",
-    path: "Locker",
+    path: "locker",
     icon: <MdLock className="h-6 w-6" />,
     component: <Locker />,
     children: [
       {
         name: "My Locker",
         layout: "/citizen",
-        path: "Locker/my-locker",
+        path: "locker/my-locker",
         component: <DocumentInfo />,
       },
     ],
@@ -214,7 +212,7 @@ const routes = [
     layout: "/citizen",
     path: "job-application",
     icon: <MdWork className="h-6 w-6" />,
-    component: <JobApplicationSystem/>,
+    component: <JobApplicationSystem />,
     children: [
       {
         name: "Job Details",
@@ -299,49 +297,47 @@ const routes = [
       },
     ],
   },
-  
- {
-  name: "Job Applications",
-  layout: "/admin",
-  path: "job-applications",
-  icon: <MdBallot className="h-6 w-6" />,
-  component: <JobApplicationsPost />,
-  children: [
-    {
-      name: "Add Municipal Job",
-      layout: "/admin",
-      path: "job-applications/add/municipal",
-      component: <MunicipalJobForm />,
-    },
-    {
-      name: "Add Volunteer Job",
-      layout: "/admin",
-      path: "job-applications/add/volunteer",
-      component: <VolunteerJobForm />,
-    },
-    {
-      name: "Edit Municipal Job",
-      layout: "/admin",
-      path: "job-applications/edit/municipal/:id",
-      component: <MunicipalEditForm />,
-    },
-    {
-      name: "Edit Volunteer Job",
-      layout: "/admin",
-      path: "job-applications/edit/volunteer/:id",
-      component: <VolunteerEditForm />,
-    },
-  ]
-}
-,
 
+  {
+    name: "Job Applications",
+    layout: "/admin",
+    path: "job-applications",
+    icon: <MdBallot className="h-6 w-6" />,
+    component: <JobApplicationsPost />,
+    children: [
+      {
+        name: "Add Municipal Job",
+        layout: "/admin",
+        path: "job-applications/add/municipal",
+        component: <MunicipalJobForm />,
+      },
+      {
+        name: "Add Volunteer Job",
+        layout: "/admin",
+        path: "job-applications/add/volunteer",
+        component: <VolunteerJobForm />,
+      },
+      {
+        name: "Edit Municipal Job",
+        layout: "/admin",
+        path: "job-applications/edit/municipal/:id",
+        component: <MunicipalEditForm />,
+      },
+      {
+        name: "Edit Volunteer Job",
+        layout: "/admin",
+        path: "job-applications/edit/volunteer/:id",
+        component: <VolunteerEditForm />,
+      },
+    ],
+  },
   {
     name: "Profile",
     layout: "/citizen",
     path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminProfile />,
-    sidebar:false
+    sidebar: false,
   },
   {
     name: "Views and Analytics",
@@ -358,8 +354,6 @@ const routes = [
     component: <AdminPro />,
   },
 
-    
-
   // Staff Routes
   {
     name: "Staff Dashboard",
@@ -375,7 +369,7 @@ const routes = [
     icon: <MdTableView className="h-6 w-6" />,
     component: <StaffService />,
   },
-   
+
   {
     name: "Complaint Management",
     layout: "/staff",
@@ -456,7 +450,7 @@ const routes = [
         name: "News Details",
         layout: "/citizen",
         path: "/newsupdate/newshomedetails",
-        component: <NewsHomeDetails/>,
+        component: <NewsHomeDetails />,
       },
     ],
   },
@@ -465,13 +459,13 @@ const routes = [
     layout: "/admin",
     path: "news",
     icon: <MdChatBubble className="h-6 w-6" />,
-    component: <AdminCityNews/>,
+    component: <AdminCityNews />,
     children: [
       {
         name: "Manage News",
         layout: "/admin",
         path: "news/add",
-        component: <AdminAddNews/>,
+        component: <AdminAddNews />,
       },
       {
         name: "Edit News ",

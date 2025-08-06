@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const url = "https://otp-service-4nd9.onrender.com";
-// const url = "http://localhost:9999";
+const url = "https://auth-backend-2-k3ph.onrender.com";
+// const url = "http://localhost:8080";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
@@ -36,20 +36,20 @@ export default function VerifyOTP() {
     }
     setLoading(true);
     const response = await axios.post(
-      `${url}/api/otp/validate-otp`,
+      `${url}/api/auth/validate-otp`,
       {
         email: userEmail,
         otp,
       },
       {
         headers: {
-          token,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
     if (response.data.status === 200) {
       setShowVerifyModal(false);
-      navigate("/Locker/my-locker");
+      navigate("/citizen/locker/my-locker");
     } else {
       setError("Invalid OTP");
     }
@@ -60,7 +60,7 @@ export default function VerifyOTP() {
     if (secondsLeft > 0) return;
     setSecondsLeft(60);
     await axios.post(
-      `${url}/api/otp/generate-otp`,
+      `${url}/api/auth/generate-otp`,
       {
         email: userEmail,
       },
@@ -81,7 +81,7 @@ export default function VerifyOTP() {
     }
     try {
       await axios.post(
-        `${url}/api/otp/generate-otp`,
+        `${url}/api/auth/generate-otp`,
         { email: userEmail },
         {
           headers: {

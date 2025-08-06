@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { Route, Routes, useNavigate, useLocation, Navigate } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 
 import CitizenLayout from "layouts/citizen";
 import AdminLayout from "layouts/admin";
@@ -20,12 +26,12 @@ const App = () => {
   useEffect(() => {
     if (!ready) return;
 
-    const isPublicRoute = 
-      location.pathname === "/" || 
-      location.pathname.startsWith("/auth") || 
+    const isPublicRoute =
+      location.pathname === "/" ||
+      location.pathname.startsWith("/auth") ||
       location.pathname === "/unauthorized";
-      
-    const isLoggedIn = role && (!(Array.isArray(role) && role.length === 0));
+
+    const isLoggedIn = role && !(Array.isArray(role) && role.length === 0);
 
     // Only redirect if user is not logged in and trying to access protected route
     if (!isLoggedIn && !isPublicRoute) {
@@ -41,12 +47,12 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="auth/*" element={<AuthLayout />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        
+
         {/* Protected routes */}
         <Route
           path="citizen/*"
           element={
-            <ProtectedRoute requiredRole="ROLE_USER">
+            <ProtectedRoute requiredRole="CITIZEN">
               <CitizenLayout />
             </ProtectedRoute>
           }
@@ -54,7 +60,7 @@ const App = () => {
         <Route
           path="admin/*"
           element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
+            <ProtectedRoute requiredRole="ADMIN">
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -62,12 +68,12 @@ const App = () => {
         <Route
           path="staff/*"
           element={
-            <ProtectedRoute requiredRole="ROLE_STAFF">
+            <ProtectedRoute requiredRole="STAFF">
               <StaffLayout />
             </ProtectedRoute>
           }
         />
-        
+
         {/* Fallback routes */}
         <Route path="/*" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

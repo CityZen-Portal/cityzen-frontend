@@ -1,11 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-
 export default function DocumentInfo() {
   const MEDIA_API = process.env.REACT_APP_API_MEDIA_URL;
   const LOCKER_API = process.env.REACT_APP_API_LOCKER_URL;
   const USER_API = process.env.REACT_APP_API_UMS_URL;
+  // const USER_API = "http://localhost:8080";
   // const LOCKER_API = "http://localhost:4000";
 
   const token = localStorage.getItem("token");
@@ -42,7 +42,7 @@ export default function DocumentInfo() {
             },
           }
         );
-        const aadharNumber = userRes.data.data.aadharNumber;
+        const aadharNumber = userRes.data.data;
 
         const newUser = { ...userInfo, aadharNumber };
         setUserInfo(newUser);

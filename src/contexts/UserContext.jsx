@@ -58,7 +58,6 @@ export const UserProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Reset state
     setUser({
       token: null,
       username: null,

@@ -5,19 +5,32 @@ import Checkbox from "components/checkbox";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Footer from "components/footer/FooterAuthDefault";
-import { ChevronDown, User, Mail, Lock, Phone, Shield, CheckCircle, Sun, Moon } from "lucide-react";
-import signupImage from "./assets/undraw_to-do-list_o3jf.svg"
+import {
+  ChevronDown,
+  User,
+  Mail,
+  Lock,
+  Phone,
+  Shield,
+  CheckCircle,
+  Sun,
+  Moon,
+} from "lucide-react";
+import signupImage from "./assets/undraw_to-do-list_o3jf.svg";
+import axios from "axios";
+
+const apiurl = process.env.REACT_APP_API_UMS_URL;
 
 export default function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    aadharNumber: '',
-    phoneNumber: '',
-    gender: '' // Added gender field
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    aadharNumber: "",
+    phoneNumber: "",
+    gender: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -25,19 +38,19 @@ export default function SignUp() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [aadhaarSending, setAadhaarSending] = useState(false);
-  
+
   // Theme state
   const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const storedTheme = localStorage.getItem('theme');
+    if (typeof window !== "undefined") {
+      const storedTheme = localStorage.getItem("theme");
       if (storedTheme) {
-        return storedTheme === 'dark';
+        return storedTheme === "dark";
       }
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
     return false;
   });
-  
+
   // Add useEffect to set favicon and theme
   useEffect(() => {
     // Set favicon
@@ -50,16 +63,16 @@ export default function SignUp() {
       newFavicon.href = "/brand-logo.png";
       document.head.appendChild(newFavicon);
     }
-    
+
     // Apply theme
     if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
-    
+
     // Cleanup function to reset favicon when component unmounts
     return () => {
       if (favicon) {
@@ -67,95 +80,103 @@ export default function SignUp() {
       }
     };
   }, [isDark]);
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
-  
+
   const validateEmail = (email) => {
     if (!email.trim()) {
-      setErrors(prev => ({ ...prev, email: 'Email is required' }));
+      setErrors((prev) => ({ ...prev, email: "Email is required" }));
       return false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address",
+      }));
       return false;
     } else {
-      setErrors(prev => ({ ...prev, email: '' }));
+      setErrors((prev) => ({ ...prev, email: "" }));
       return true;
     }
   };
-  
+
   const handleEmailBlur = () => {
     validateEmail(formData.email);
   };
-  
+
   const validateForm = () => {
     const newErrors = {};
     // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     }
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, number and special character';
+      newErrors.password = "Password must be at least 8 characters";
+    } else if (
+      !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}/.test(
+        formData.password
+      )
+    ) {
+      newErrors.password =
+        "Password must contain uppercase, lowercase, number and special character";
     }
     // Confirm Password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
     // Phone validation
     if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = 'Phone number is required';
+      newErrors.phoneNumber = "Phone number is required";
     } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'Phone number must be 10 digits';
+      newErrors.phoneNumber = "Phone number must be 10 digits";
     }
     // Aadhar validation
     if (!formData.aadharNumber.trim()) {
-      newErrors.aadharNumber = 'Aadhar number is required';
-    } else if (!/^\d{12}$/.test(formData.aadharNumber.replace(/\s/g, ''))) {
-      newErrors.aadharNumber = 'Aadhar number must be 12 digits';
+      newErrors.aadharNumber = "Aadhar number is required";
+    } else if (!/^\d{12}$/.test(formData.aadharNumber.replace(/\s/g, ""))) {
+      newErrors.aadharNumber = "Aadhar number must be 12 digits";
     }
     // Gender validation
     if (!formData.gender) {
-      newErrors.gender = 'Please select your gender';
+      newErrors.gender = "Please select your gender";
     }
     // Terms validation
     if (!agreeTerms) {
-      newErrors.terms = 'You must agree to the terms and policy';
+      newErrors.terms = "You must agree to the terms and policy";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
-      Object.values(errors).forEach(error => {
-        if (error && typeof error === 'string') {
+      Object.values(errors).forEach((error) => {
+        if (error && typeof error === "string") {
           toast.error(error, {
-            position: 'top-right',
+            position: "top-right",
             autoClose: 3000,
-            theme: 'colored',
+            theme: "colored",
           });
         }
       });
@@ -166,128 +187,126 @@ export default function SignUp() {
       username: formData.name,
       email: formData.email,
       password: formData.password,
-      aadharNumber: parseInt(formData.aadharNumber.replace(/\s/g, '')),
+      aadhaar: parseInt(formData.aadharNumber.replace(/\s/g, "")),
       phoneNumber: formData.phoneNumber,
       gender: formData.gender, // Added gender to user data
-      role: ["user"] // Default role
+      role: "CITIZEN", // Default role
     };
     try {
-      const response = await fetch("https://auth-backend-2-k3ph.onrender.com/auth/register", {
+      const response = await fetch(`${apiurl}/api/auth/register`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(userData),
       });
+      console.log(JSON.stringify(userData));
       const result = await response.json();
       if (response.ok) {
         toast.success("Account created successfully! Redirecting...", {
-          position: 'top-right',
+          position: "top-right",
           autoClose: 1000,
-          theme: 'colored',
-          onClose: () => navigate("/citizen/dashboard"),
+          theme: "colored",
+          onClose: () => navigate("/auth/signin"),
         });
       } else {
-        // Handle backend validation errors
-        const errorMsg = result.message || result.error || "Registration failed";
+        const errorMsg =
+          result.message || result.error || "Registration failed";
         toast.error(errorMsg, {
-          position: 'top-right',
+          position: "top-right",
           autoClose: 3000,
-          theme: 'colored',
+          theme: "colored",
         });
       }
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("Network error. Please try again.", {
-        position: 'top-right',
+        position: "top-right",
         autoClose: 3000,
-        theme: 'colored',
+        theme: "colored",
       });
     }
   };
-  
+
   const formatAadharNumber = (value) => {
-    const digits = value.replace(/\D/g, '');
-    return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+    const digits = value.replace(/\D/g, "");
+    return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
   };
-  
+
   const handleAadharChange = (e) => {
     const formatted = formatAadharNumber(e.target.value);
-    if (formatted.replace(/\s/g, '').length <= 12) {
-      setFormData(prev => ({ ...prev, aadharNumber: formatted }));
+    if (formatted.replace(/\s/g, "").length <= 12) {
+      setFormData((prev) => ({ ...prev, aadharNumber: formatted }));
       // Reset verification if Aadhaar is changed
       if (aadhaarVerified) {
         setAadhaarVerified(false);
       }
     }
   };
-  
+
   const handleAadhaarVerify = async () => {
-    const cleanAadhaar = formData.aadharNumber.replace(/\s/g, '');
+    const cleanAadhaar = formData.aadharNumber.replace(/\s/g, "");
     if (!/^\d{12}$/.test(cleanAadhaar)) {
-      setErrors(prev => ({ ...prev, aadharNumber: 'Aadhar number must be 12 digits' }));
+      setErrors((prev) => ({
+        ...prev,
+        aadharNumber: "Aadhar number must be 12 digits",
+      }));
       return;
     }
     setAadhaarSending(true);
-    setErrors(prev => ({ ...prev, aadharNumber: '' }));
+    setErrors((prev) => ({ ...prev, aadharNumber: "" }));
+
     try {
-      const response = await fetch(`https://auth-backend-2-k3ph.onrender.com/auth/verify-aadhaar/${cleanAadhaar}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
+      const response = await axios.post(`${apiurl}/api/auth/verify-aadhaar`, {
+        aadhaar: cleanAadhaar,
       });
-      const result = await response.json();
-      if (response.ok) {
-        if (result.data === true) {
-          toast.error("Aadhaar number already registered", {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored',
-          });
-          setErrors(prev => ({ ...prev, aadharNumber: 'Aadhaar number already registered' }));
-        } else {
-          setAadhaarVerified(true);
-          toast.success("Aadhaar number verified successfully!", {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored',
-          });
-        }
-      } else {
-        setAadhaarVerified(true); // Assuming verification passes if not found in system
-        toast.success("Aadhaar number verified successfully!", {
-          position: 'top-right',
+
+      const result = response.data;
+
+      if (result.data.status === 200) {
+        toast.error("Aadhaar number already registered", {
+          position: "top-right",
           autoClose: 3000,
-          theme: 'colored',
+          theme: "colored",
+        });
+        setErrors((prev) => ({
+          ...prev,
+          aadharNumber: "Aadhaar number already registered",
+        }));
+      } else {
+        setAadhaarVerified(true);
+        toast.success("Aadhaar number verified successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "colored",
         });
       }
     } catch (error) {
       console.error("Verification error:", error);
       toast.error("Verification service unavailable. Please try again.", {
-        position: 'top-right',
+        position: "top-right",
         autoClose: 3000,
-        theme: 'colored',
+        theme: "colored",
       });
     } finally {
       setAadhaarSending(false);
     }
   };
-  
+
   return (
-    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 relative">
+    <div className="relative flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Theme Toggle - Top Right Corner */}
       <button
         onClick={() => setIsDark(!isDark)}
-        className="fixed top-6 right-6 z-50 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 transition-all duration-300"
+        className="fixed right-6 top-6 z-50 rounded-full border border-gray-200 bg-white p-3 shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
       >
         {isDark ? (
-          <Sun className="w-5 h-5 text-yellow-500" />
+          <Sun className="h-5 w-5 text-yellow-500" />
         ) : (
-          <Moon className="w-5 h-5 text-gray-600" />
+          <Moon className="h-5 w-5 text-gray-600" />
         )}
       </button>
-      
+
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -301,24 +320,25 @@ export default function SignUp() {
         pauseOnHover
         theme="colored"
       />
-      
+
       {/* Left Side - Sign Up Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
+      <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:max-w-md">
           {/* Header */}
-          <div className="text-left mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="mb-8 text-left">
+            <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
               Create CityZen Account
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
-              Join our platform to access municipal services and connect with your community
+              Join our platform to access municipal services and connect with
+              your community
             </p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Full Name*
               </label>
               <div className="relative">
@@ -327,16 +347,22 @@ export default function SignUp() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full border px-4 py-3 ${
+                    errors.name
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white`}
                   placeholder="Enter your full name"
                 />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                )}
               </div>
             </div>
-            
+
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email*
               </label>
               <div className="relative">
@@ -346,85 +372,159 @@ export default function SignUp() {
                   value={formData.email}
                   onChange={handleInputChange}
                   onBlur={handleEmailBlur}
-                  className={`w-full px-4 py-3 border ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full border px-4 py-3 ${
+                    errors.email
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white`}
                   placeholder="Enter your email"
                   autoComplete="email"
                 />
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
               </div>
             </div>
-            
+
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password*
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 pr-12 border ${errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full border px-4 py-3 pr-12 ${
+                    errors.password
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white`}
                   placeholder="Min. 8 characters"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3"
                 >
                   {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
                     </svg>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
                     </svg>
                   )}
                 </button>
-                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                )}
               </div>
             </div>
-            
+
             {/* Confirm Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Confirm Password*
               </label>
               <div className="relative">
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 pr-12 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full border px-4 py-3 pr-12 ${
+                    errors.confirmPassword
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white`}
                   placeholder="Confirm your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3"
                 >
                   {showConfirmPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
                     </svg>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
                     </svg>
                   )}
                 </button>
-                {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.confirmPassword}
+                  </p>
+                )}
               </div>
             </div>
-            
+
             {/* Phone Number Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Phone Number*
               </label>
               <div className="relative">
@@ -433,17 +533,25 @@ export default function SignUp() {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white`}
+                  className={`w-full border px-4 py-3 ${
+                    errors.phoneNumber
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white`}
                   placeholder="10-digit phone number"
                   maxLength="10"
                 />
-                {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
+                {errors.phoneNumber && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.phoneNumber}
+                  </p>
+                )}
               </div>
             </div>
-            
+
             {/* Gender Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Gender*
               </label>
               <div className="relative">
@@ -451,23 +559,29 @@ export default function SignUp() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border ${errors.gender ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white appearance-none`}
+                  className={`w-full border px-4 py-3 ${
+                    errors.gender
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } appearance-none rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white`}
                 >
                   <option value="">Select Gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                   <ChevronDown className="h-5 w-5 text-gray-400" />
                 </div>
-                {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
+                {errors.gender && (
+                  <p className="mt-1 text-sm text-red-600">{errors.gender}</p>
+                )}
               </div>
             </div>
-            
+
             {/* Aadhar Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Aadhaar Number*
               </label>
               <div className="relative">
@@ -477,12 +591,20 @@ export default function SignUp() {
                   value={formData.aadharNumber}
                   onChange={handleAadharChange}
                   disabled={aadhaarVerified}
-                  className={`w-full px-4 py-3 border ${errors.aadharNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-white ${aadhaarVerified ? 'bg-blue-50 dark:bg-blue-900/20 cursor-not-allowed' : ''}`}
+                  className={`w-full border px-4 py-3 ${
+                    errors.aadharNumber
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white ${
+                    aadhaarVerified
+                      ? "cursor-not-allowed bg-blue-50 dark:bg-blue-900/20"
+                      : ""
+                  }`}
                   placeholder="12-digit Aadhaar number"
                   maxLength="14"
                 />
                 {aadhaarVerified && (
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
                 )}
@@ -492,16 +614,35 @@ export default function SignUp() {
                   type="button"
                   onClick={handleAadhaarVerify}
                   disabled={aadhaarVerified || aadhaarSending}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center ${aadhaarVerified
-                      ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
-                    } ${aadhaarSending ? 'opacity-50 cursor-not-allowed' : ''} transition-colors duration-300`}
+                  className={`flex items-center rounded-lg px-4 py-2 text-sm font-medium ${
+                    aadhaarVerified
+                      ? "cursor-not-allowed bg-green-100 text-green-700"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  } ${
+                    aadhaarSending ? "cursor-not-allowed opacity-50" : ""
+                  } transition-colors duration-300`}
                 >
                   {aadhaarSending ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Verifying...
                     </>
@@ -511,46 +652,68 @@ export default function SignUp() {
                       Verified
                     </>
                   ) : (
-                    'Verify Aadhaar'
+                    "Verify Aadhaar"
                   )}
                 </button>
               </div>
-              {errors.aadharNumber && <p className="mt-1 text-sm text-red-600">{errors.aadharNumber}</p>}
+              {errors.aadharNumber && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.aadharNumber}
+                </p>
+              )}
             </div>
-            
+
             {/* Terms */}
             <div className="pt-2">
               <div className="flex items-start space-x-2">
                 <Checkbox
                   checked={agreeTerms}
                   onChange={(e) => setAgreeTerms(e.target.checked)}
-                  className={errors.terms ? 'border-red-500' : ''}
+                  className={errors.terms ? "border-red-500" : ""}
                 />
-                <label htmlFor="terms" className="text-sm text-gray-600 dark:text-gray-300">
-                  I agree to the <a href="#" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Terms of Service</a> and <a href="#" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Privacy Policy</a>
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-gray-600 dark:text-gray-300"
+                >
+                  I agree to the{" "}
+                  <a
+                    href="#"
+                    className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    href="#"
+                    className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Privacy Policy
+                  </a>
                 </label>
               </div>
               {errors.terms && (
-                <p className="mt-1 ml-6 text-sm text-red-600">
-                  {errors.terms}
-                </p>
+                <p className="ml-6 mt-1 text-sm text-red-600">{errors.terms}</p>
               )}
             </div>
-            
+
             {/* Submit */}
             <button
               type="submit"
               disabled={!aadhaarVerified || !agreeTerms}
-              className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 ${(!aadhaarVerified || !agreeTerms) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors duration-300 hover:bg-blue-700 ${
+                !aadhaarVerified || !agreeTerms
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
+              }`}
             >
               Create Account
             </button>
           </form>
-          
+
           {/* Already have account */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <button
                 onClick={() => navigate("/auth/signin")}
                 className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
@@ -560,55 +723,65 @@ export default function SignUp() {
             </p>
           </div>
         </div>
-        
+
         {/* Footer */}
         {/* <div className="w-full py-4 mt-auto">
           <Footer />
         </div> */}
       </div>
-      
+
       {/* Right Side - Illustration */}
-      <div className="hidden lg:flex w-1/2 bg-blue-50 dark:bg-gray-800 relative overflow-hidden items-center justify-center">
-        <div className="text-center max-w-lg px-8">
+      <div className="relative hidden w-1/2 items-center justify-center overflow-hidden bg-blue-50 dark:bg-gray-800 lg:flex">
+        <div className="max-w-lg px-8 text-center">
           {/* Illustration Image */}
           <div className="mb-8">
             <img
               src={signupImage}
               alt="Citizen Signup Illustration"
-              className="w-full max-w-md mx-auto"
+              className="mx-auto w-full max-w-md"
             />
           </div>
-          
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+
+          <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             <span className="text-blue-600">Join CityZen</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            Create your account to access municipal services, report civic issues, and stay connected with your community through our comprehensive citizen portal.
+          <p className="mb-8 leading-relaxed text-gray-600 dark:text-gray-300">
+            Create your account to access municipal services, report civic
+            issues, and stay connected with your community through our
+            comprehensive citizen portal.
           </p>
-          
+
           {/* Feature Checkmarks */}
           <div className="space-y-4 text-left">
             <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
-              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <span className="text-sm text-blue-600 dark:text-blue-400">
+                  ✓
+                </span>
               </div>
               <span>Secure identity verification with Aadhaar</span>
             </div>
             <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
-              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <span className="text-sm text-blue-600 dark:text-blue-400">
+                  ✓
+                </span>
               </div>
               <span>Access all municipal services online</span>
             </div>
             <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
-              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <span className="text-sm text-blue-600 dark:text-blue-400">
+                  ✓
+                </span>
               </div>
               <span>Report and track civic issues</span>
             </div>
             <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
-              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 dark:text-blue-400 text-sm">✓</span>
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <span className="text-sm text-blue-600 dark:text-blue-400">
+                  ✓
+                </span>
               </div>
               <span>Stay updated with city notifications</span>
             </div>
