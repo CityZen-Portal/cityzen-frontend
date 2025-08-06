@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// const url = "https://auth-backend-2-k3ph.onrender.com";
-const url = "http://localhost:8080";
+const url = "https://auth-backend-2-k3ph.onrender.com";
+// const url = "http://localhost:8080";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
@@ -43,7 +43,7 @@ export default function VerifyOTP() {
       },
       {
         headers: {
-          token,
+          Authorization: `Bearer ${token}`,
         },
       }
     );

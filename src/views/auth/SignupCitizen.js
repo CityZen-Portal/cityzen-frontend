@@ -263,7 +263,7 @@ export default function SignUp() {
 
       const result = response.data;
 
-      if (result.data === true) {
+      if (result.data.status === 200) {
         toast.error("Aadhaar number already registered", {
           position: "top-right",
           autoClose: 3000,

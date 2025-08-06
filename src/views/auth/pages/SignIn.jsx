@@ -142,14 +142,14 @@ export default function SignIn() {
         password,
       });
       const {
-        token,
+        accessToken,
         roles,
         username,
         email: userEmail,
         id,
       } = response.data.data;
       login({
-        token,
+        token: accessToken,
         username,
         email: userEmail,
         role: roles,
@@ -167,8 +167,6 @@ export default function SignIn() {
             navigate("/citizen/dashboard");
           } else if (roles.includes("ADMIN")) {
             navigate("/admin/dashboard");
-          } else {
-            navigate("/");
           }
         },
       });
