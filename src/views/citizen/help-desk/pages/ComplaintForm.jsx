@@ -166,19 +166,24 @@ function ComplaintForm() {
       return;
     }
     if (file) {
-      if (!(file instanceof File)) {
+      
+    if (!(file instanceof File)) {
         setLoadingSubmit(false);
         toast.error('Invalid file input.');
         return;
-      }
-      if (file.type !== 'application/pdf') {
-        setLoadingSubmit(false);
-        toast.error('Only PDF files are allowed.');
-        return;
-      }
     }
 
-    let uploadedImage = { imageName: "", imagePath: "" };
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf';
+
+    if (!isImage && !isPdf) {
+        setLoadingSubmit(false);
+        toast.error('Only PDF or Image files are allowed.');
+        return;
+    }
+    }
+
+    let uploadedFile = { fileName: "", filePath: "" };
 
     if (file){
       if (file instanceof File) {
@@ -193,9 +198,9 @@ function ComplaintForm() {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        uploadedImage = {
-          imageName: imgRes.data.data.name,
-          imagePath: imgRes.data.data.path,
+        uploadedFile = {
+          fileName: imgRes.data.data.name,
+          filePath: imgRes.data.data.path,
         };
       }
       else{
@@ -216,7 +221,7 @@ function ComplaintForm() {
       category: complaintType ? complaintType : others,
       issue,
       issueDescription: description,
-      attachment: uploadedImage.imagePath ? uploadedImage.imagePath : null,
+      attachment: uploadedFile.filePath ? uploadedFile.filePath : null,
     };
 
 
@@ -405,7 +410,7 @@ function ComplaintForm() {
             <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Upload PDF</label>
             <input
               type="file"
-              accept="application/pdf"
+              accept="application/pdf, image/*"
               onChange={(e) => setFile(e.target.files[0])}
               className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-brand-500 file:text-white hover:file:bg-brand-600 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-brand-500"
             />
