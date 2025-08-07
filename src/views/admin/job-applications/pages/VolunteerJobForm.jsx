@@ -31,9 +31,15 @@ import {
   MdClass,
   MdClose
 } from 'react-icons/md';
+import axios from 'axios';
 
 const VolunteerJobForm = () => {
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Volunteer Job Form State
@@ -97,53 +103,91 @@ const VolunteerJobForm = () => {
     return newErrors;
   }, [formData]);
 
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+
   // Handle form submission
   const handleSubmit = useCallback(() => {
+    // setLoadingSubmit(true)
     const newErrors = validateForm();
-    
-    if (Object.keys(newErrors).length === 0) {
-      // Prepare job data
-      const jobData = {
-        ...formData,
-        jobType: 'volunteer',
-        department: 'Community Service',
-        requirements: 'Community service mindset and willingness to help'
-      };
 
-      // Get existing jobs
-      const savedJobs = localStorage.getItem('jobs');
-      let jobs = [];
-      if (savedJobs) {
-        try {
-          jobs = JSON.parse(savedJobs);
-        } catch (error) {
-          console.error('Failed to parse jobs', error);
+    const postData = {
+      ...formData
+    }
+
+    axios.post(`${JOB_APPLICATION_API}/citizen/complaint-form`, postData,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
         }
       }
+    )
+    .then(res => {
+      console.log('Response:', res.data);
+      toast.success('Volunteer Vacancy Post posted successfully!', {
+        position: 'top-right',
+        autoClose: 1000,
+        theme: 'colored',
+        onClose: () => navigate('/citizen/job-application/')
+      });
+    })
+    .catch(err => {
+      console.error('Error:', err.response?.data || err.message);
+      toast.error('Server Error!Unable to Submit Complaint', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored'
+      });
+      return;
+    })
+    .finally(() => {
+      // setLoadingSubmit(false);
+    });
+    
+    // if (Object.keys(newErrors).length === 0) {
+    //   // Prepare job data
+    //   const jobData = {
+    //     ...formData,
+    //     jobType: 'volunteer',
+    //     department: 'Community Service',
+    //     requirements: 'Community service mindset and willingness to help'
+    //   };
 
-      // Add new job
-      const newJob = {
-        id: Date.now().toString(),
-        ...jobData,
-        isActive: true
-      };
-      jobs.push(newJob);
-      localStorage.setItem('jobs', JSON.stringify(jobs));
+    //   // Get existing jobs
+    //   const savedJobs = localStorage.getItem('jobs');
+    //   let jobs = [];
+    //   if (savedJobs) {
+    //     try {
+    //       jobs = JSON.parse(savedJobs);
+    //     } catch (error) {
+    //       console.error('Failed to parse jobs', error);
+    //     }
+    //   }
 
-      // Show success message
-      setShowSuccess(true);
-      toast.success('Volunteer opportunity posted successfully!');
+    //   // Add new job
+    //   const newJob = {
+    //     id: Date.now().toString(),
+    //     ...jobData,
+    //     isActive: true
+    //   };
+    //   jobs.push(newJob);
+    //   localStorage.setItem('jobs', JSON.stringify(jobs));
+
+    //   // Show success message
+    //   setShowSuccess(true);
+    //   toast.success('Volunteer opportunity posted successfully!');
       
-      // Navigate back after delay
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate('/admin/job-applications');
-      }, 2000);
-    } else {
-      setErrors(newErrors);
-      const errorCount = Object.keys(newErrors).length;
-      toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
-    }
+    //   // Navigate back after delay
+    //   setTimeout(() => {
+    //     setShowSuccess(false);
+    //     navigate('/admin/job-applications');
+    //   }, 2000);
+    // } else {
+    //   setErrors(newErrors);
+    //   const errorCount = Object.keys(newErrors).length;
+    //   toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
+    // }
   }, [validateForm, formData, navigate]);
 
   // Handle cancel

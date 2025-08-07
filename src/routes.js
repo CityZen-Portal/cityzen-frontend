@@ -301,32 +301,32 @@ const routes = [
   {
     name: "Job Applications",
     layout: "/admin",
-    path: "job-applications",
+    path: "job-application",
     icon: <MdBallot className="h-6 w-6" />,
     component: <JobApplicationsPost />,
     children: [
       {
         name: "Add Municipal Job",
         layout: "/admin",
-        path: "job-applications/add/municipal",
+        path: "job-application/add/municipal",
         component: <MunicipalJobForm />,
       },
       {
         name: "Add Volunteer Job",
         layout: "/admin",
-        path: "job-applications/add/volunteer",
+        path: "job-application/add/volunteer",
         component: <VolunteerJobForm />,
       },
       {
         name: "Edit Municipal Job",
         layout: "/admin",
-        path: "job-applications/edit/municipal/:id",
+        path: "job-application/edit/municipal/:id",
         component: <MunicipalEditForm />,
       },
       {
         name: "Edit Volunteer Job",
         layout: "/admin",
-        path: "job-applications/edit/volunteer/:id",
+        path: "job-application/edit/volunteer/:id",
         component: <VolunteerEditForm />,
       },
     ],
