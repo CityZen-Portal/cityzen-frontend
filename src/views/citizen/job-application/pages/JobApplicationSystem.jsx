@@ -10,82 +10,82 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Sample job data
-const sampleJobs = [
-  {
-    id: 1,
-    title: "Civil Engineer",
-    department: "Public Works Department",
-    location: "Coimbatore Municipal Corporation",
-    description: "We are seeking an experienced Civil Engineer to join our Public Works Department. The successful candidate will be responsible for planning, designing, and overseeing construction projects including roads, bridges, and municipal infrastructure.",
-    requirements: ["Bachelor's degree in Civil Engineering", "3+ years of experience in municipal projects", "Knowledge of local building codes and regulations", "Proficiency in AutoCAD and project management software"],
-    contactPersonName: "Dr. Rajesh Kumar",
-    contactPhoneNumber: "+91 98765 43210",
-    contactEmail: "rajesh.kumar@coimbatore.gov.in",
-    contactAddress: "Public Works Department, Coimbatore Municipal Corporation, Town Hall, Coimbatore - 641001",
-    isActive: true,
-    deadline: "2025-08-15T23:59:59"
-  },
-  {
-    id: 3,
-    title: "Assistant Town Planner",
-    department: "Urban Planning",
-    location: "Coimbatore Municipal Corporation",
-    description: "Assist in urban planning activities including land use planning, development control, and building plan approvals. The role involves reviewing development proposals, conducting site inspections, and ensuring compliance with planning regulations.",
-    requirements: ["Degree in Urban Planning or Architecture", "Knowledge of planning laws and regulations", "GIS software experience preferred", "Strong analytical and communication skills"],
-    contactPersonName: "Mr. Suresh Babu",
-    contactPhoneNumber: "+91 63694 74451",
-    contactEmail: "suresh.babu@coimbatore.gov.in",
-    contactAddress: "Urban Planning Department, Coimbatore Municipal Corporation",
-    isActive: true,
-    deadline: "2025-08-20T23:59:59"
-  },
-  {
-    id: 5,
-    title: "Accounts Officer",
-    department: "Finance Department",
-    location: "Municipal Corporation Head Office",
-    description: "Handle financial transactions, maintain accounting records, prepare financial reports, and assist in budget preparation. The role requires attention to detail and strong analytical skills in financial management.",
-    requirements: ["BCom/MCom with accounting background", "2+ years experience in government accounting", "Knowledge of financial software", "Understanding of municipal finance procedures"],
-    contactPersonName: "Mrs. Lakshmi Devi",
-    contactPhoneNumber: "+91 63827 58637",
-    contactEmail: "lakshmi.devi@coimbatore.gov.in",
-    contactAddress: "Finance Department, Municipal Corporation, Coimbatore",
-    isActive: true,
-    deadline: "2025-07-25T23:59:59"
-  }
-];
+// const sampleJobs = [
+//   {
+//     id: 1,
+//     title: "Civil Engineer",
+//     department: "Public Works Department",
+//     location: "Coimbatore Municipal Corporation",
+//     description: "We are seeking an experienced Civil Engineer to join our Public Works Department. The successful candidate will be responsible for planning, designing, and overseeing construction projects including roads, bridges, and municipal infrastructure.",
+//     requirements: ["Bachelor's degree in Civil Engineering", "3+ years of experience in municipal projects", "Knowledge of local building codes and regulations", "Proficiency in AutoCAD and project management software"],
+//     contactPersonName: "Dr. Rajesh Kumar",
+//     contactPhoneNumber: "+91 98765 43210",
+//     contactEmail: "rajesh.kumar@coimbatore.gov.in",
+//     contactAddress: "Public Works Department, Coimbatore Municipal Corporation, Town Hall, Coimbatore - 641001",
+//     isActive: true,
+//     deadline: "2025-08-15T23:59:59"
+//   },
+//   {
+//     id: 3,
+//     title: "Assistant Town Planner",
+//     department: "Urban Planning",
+//     location: "Coimbatore Municipal Corporation",
+//     description: "Assist in urban planning activities including land use planning, development control, and building plan approvals. The role involves reviewing development proposals, conducting site inspections, and ensuring compliance with planning regulations.",
+//     requirements: ["Degree in Urban Planning or Architecture", "Knowledge of planning laws and regulations", "GIS software experience preferred", "Strong analytical and communication skills"],
+//     contactPersonName: "Mr. Suresh Babu",
+//     contactPhoneNumber: "+91 63694 74451",
+//     contactEmail: "suresh.babu@coimbatore.gov.in",
+//     contactAddress: "Urban Planning Department, Coimbatore Municipal Corporation",
+//     isActive: true,
+//     deadline: "2025-08-20T23:59:59"
+//   },
+//   {
+//     id: 5,
+//     title: "Accounts Officer",
+//     department: "Finance Department",
+//     location: "Municipal Corporation Head Office",
+//     description: "Handle financial transactions, maintain accounting records, prepare financial reports, and assist in budget preparation. The role requires attention to detail and strong analytical skills in financial management.",
+//     requirements: ["BCom/MCom with accounting background", "2+ years experience in government accounting", "Knowledge of financial software", "Understanding of municipal finance procedures"],
+//     contactPersonName: "Mrs. Lakshmi Devi",
+//     contactPhoneNumber: "+91 63827 58637",
+//     contactEmail: "lakshmi.devi@coimbatore.gov.in",
+//     contactAddress: "Finance Department, Municipal Corporation, Coimbatore",
+//     isActive: true,
+//     deadline: "2025-07-25T23:59:59"
+//   }
+// ];
 
-// Sample volunteer data
-const sampleVolunteers = [
-  {
-    id: 2,
-    programTitle: "Community Health Volunteer",
-    location: "Various locations in Coimbatore",
-    programDescription: "Join our community health initiative to promote healthcare awareness and support health programs in various neighborhoods. Volunteers will conduct health surveys, assist in vaccination drives, and educate communities about preventive healthcare measures.",
-    programDate: "2025-08-10",
-    programTime: "09:00:00",
-    duration: "6 months program",
-    coordinatorName: "Ms. Priya Sharma",
-    coordinatorPhone: "+91 87654 32109",
-    coordinatorEmail: "priya.sharma@coimbatore.gov.in",
-    coordinatorAddress: "Health Department, Municipal Corporation Office, Coimbatore",
-    isActive: true
-  },
-  {
-    id: 4,
-    programTitle: "Tree Plantation Drive",
-    location: "Coimbatore City Parks",
-    programDescription: "Participate in our city-wide tree plantation initiative to increase green cover and promote environmental sustainability. Volunteers will help plant saplings, maintain plant records, and support ongoing tree care activities.",
-    programDate: "2025-08-12",
-    programTime: "6:00 AM - 10:00 AM",
-    duration: "One-time event with follow-up care",
-    coordinatorName: "Dr. Meera Nair",
-    coordinatorPhone: "+91 76543 21098",
-    coordinatorEmail: "meera.nair@coimbatore.gov.in",
-    coordinatorAddress: "Environment Department, Municipal Corporation, Coimbatore",
-    isActive: true
-  }
-];
+// // Sample volunteer data
+// const sampleVolunteers = [
+//   {
+//     id: 2,
+//     programTitle: "Community Health Volunteer",
+//     location: "Various locations in Coimbatore",
+//     programDescription: "Join our community health initiative to promote healthcare awareness and support health programs in various neighborhoods. Volunteers will conduct health surveys, assist in vaccination drives, and educate communities about preventive healthcare measures.",
+//     programDate: "2025-08-10",
+//     programTime: "09:00:00",
+//     duration: "6 months program",
+//     coordinatorName: "Ms. Priya Sharma",
+//     coordinatorPhone: "+91 87654 32109",
+//     coordinatorEmail: "priya.sharma@coimbatore.gov.in",
+//     coordinatorAddress: "Health Department, Municipal Corporation Office, Coimbatore",
+//     isActive: true
+//   },
+//   {
+//     id: 4,
+//     programTitle: "Tree Plantation Drive",
+//     location: "Coimbatore City Parks",
+//     programDescription: "Participate in our city-wide tree plantation initiative to increase green cover and promote environmental sustainability. Volunteers will help plant saplings, maintain plant records, and support ongoing tree care activities.",
+//     programDate: "2025-08-12",
+//     programTime: "6:00 AM - 10:00 AM",
+//     duration: "One-time event with follow-up care",
+//     coordinatorName: "Dr. Meera Nair",
+//     coordinatorPhone: "+91 76543 21098",
+//     coordinatorEmail: "meera.nair@coimbatore.gov.in",
+//     coordinatorAddress: "Environment Department, Municipal Corporation, Coimbatore",
+//     isActive: true
+//   }
+// ];
 
 const JobApplicationSystem = () => {
   const navigate = useNavigate();
