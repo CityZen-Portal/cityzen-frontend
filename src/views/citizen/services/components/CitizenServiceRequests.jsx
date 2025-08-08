@@ -188,13 +188,12 @@ const CitizenServiceRequests = () => {
                   <td className="px-6 py-4">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        request.taskStatus.toUpperCase() === "PENDING"
+                        request.status === "PENDING"
                           ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
                           : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
                       }`}
-                    >
-                      {request.taskStatus.charAt(0).toUpperCase() +
-                        request.taskStatus.slice(1).toLowerCase()}
+                    >  
+                       {request.status}
                     </span>
                   </td>
                   <td className="px-6 py-4">
