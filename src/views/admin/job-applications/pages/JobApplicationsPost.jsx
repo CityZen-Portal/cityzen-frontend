@@ -306,14 +306,14 @@ const JobApplicationsPost = () => {
   }, [jobs, volunteers]);
 
   // Get counts
-  const allJobs = jobs.length;
-  const allVolunteers = volunteers.length;
-  const activeJobs = jobs.filter(job => job.isActive).length;
-  const activeVolunteers = volunteers.filter(volunteer => volunteer.isActive).length;
-  const inactiveJobs = jobs.filter(job => !job.isActive).length;
-  const inactiveVolunteers = volunteers.filter(volunteer => !volunteer.isActive).length;
-  const municipalCount = allJobs;
-  const volunteerCount = allVolunteers;
+  const allJobs = jobs.filter(job => !job.isDeleted).length;
+  const allVolunteers = volunteers.filter(job => !job.isDeleted).length;
+  const activeJobs = jobs.filter(job => job.isActive && !job.isDeleted).length;
+  const activeVolunteers = volunteers.filter(volunteer => volunteer.isActive && !volunteer.isDeleted).length;
+  const inactiveJobs = jobs.filter(job => !job.isActive && !job.isDeleted).length;
+  const inactiveVolunteers = volunteers.filter(volunteer => !volunteer.isActive && !volunteer.isDeleted).length;
+  const municipalCount = allJobs.filter(job => !job.isDeleted);
+  const volunteerCount = allVolunteers.filter(job => !job.isDeleted);
   const totalOpportunities = municipalCount + volunteerCount;
 
   return (
