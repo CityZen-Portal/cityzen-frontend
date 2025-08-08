@@ -443,10 +443,18 @@ const isValid = validateForm(formData);
 
   {/* IMAGE UPLOAD */}
   <div>
-    <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
-      Upload Image <span className="text-red-500">*</span>
+  <label className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
+    Upload Image <span className="text-red-500">*</span>
+  </label>
+  <div className="flex items-center gap-3">
+    <label
+      htmlFor="upload-image"
+      className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md cursor-pointer hover:bg-blue-700 transition"
+    >
+      {formData.image ? "Change Image" : "Choose Image"}
     </label>
     <input
+      id="upload-image"
       type="file"
       accept="image/*"
       ref={fileInputRef}
@@ -462,9 +470,14 @@ const isValid = validateForm(formData);
           setPreviewImage(null);
         }
       }}
-      className="w-full"
+      className="hidden"
     />
+    {formData.image && (
+      <span className="text-sm text-gray-600 dark:text-gray-300">{formData.image.name}</span>
+    )}
   </div>
+</div>
+
 
   {previewImage && (
     <div className="flex justify-center">
