@@ -42,7 +42,8 @@ export default function DocumentInfo() {
             },
           }
         );
-        const aadharNumber = userRes.data.data;
+        const aadharNumber = userRes.data.data.aadhaar;
+        console.log(aadharNumber);
 
         const newUser = { ...userInfo, aadharNumber };
         setUserInfo(newUser);
