@@ -34,9 +34,17 @@ import {
   MdClose,
   MdDelete
 } from 'react-icons/md';
+import axios from 'axios';
 
 const MunicipalJobForm = () => {
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL
+
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Municipal Job Form State
@@ -98,6 +106,20 @@ const MunicipalJobForm = () => {
     }
   }, [addRequirement]);
 
+  const formatDate = (date) => {
+    return date instanceof Date
+      ? date.toISOString().split('T')[0]
+      : date; // assumes it's already a string
+  };
+
+  const isValidDeadline = (dateStr) => {
+    const selectedDate = new Date(dateStr);
+    const minDate = new Date();
+    minDate.setDate(minDate.getDate() + 3);
+    return selectedDate >= minDate;
+  };
+
+
   // Validate form
   const validateForm = useCallback(() => {
     const newErrors = {};
@@ -106,7 +128,7 @@ const MunicipalJobForm = () => {
     if (!formData.description.trim()) newErrors.description = 'Job description is required';
     if (!formData.location.trim()) newErrors.location = 'Location is required';
     if (formData.requirements.length === 0) newErrors.requirements = 'At least one requirement is needed';
-    if (!formData.deadline) newErrors.deadline = 'Application deadline is required';
+    if (!isValidDeadline(formData.deadline)) newErrors.deadline = 'Application deadline is required';
     if (!formData.contactPersonName.trim()) newErrors.contactPersonName = 'Contact name is required';
     if (!formData.contactPhoneNumber.trim()) newErrors.contactPhoneNumber = 'Contact phone is required';
     if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
@@ -140,55 +162,90 @@ const MunicipalJobForm = () => {
   // Handle form submission
   const handleSubmit = useCallback(() => {
     const newErrors = validateForm();
-    
-    if (Object.keys(newErrors).length === 0) {
-      // Prepare job data
-      const jobData = {
-        ...formData,
-        jobType: 'municipal',
-        requirements: formData.requirements.join('; '),
-        department: formData.department || 'General'
-      };
+    const postData = {
+      ...formData,
+      deadline: new Date()
+    }
 
-      // Get existing jobs
-      const savedJobs = localStorage.getItem('jobs');
-      let jobs = [];
-      if (savedJobs) {
-        try {
-          jobs = JSON.parse(savedJobs);
-        } catch (error) {
-          console.error('Failed to parse jobs', error);
+    axios.post(`${JOB_APPLICATION_API}/jobs`, postData,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
         }
       }
+    )
+    .then(res => {
+      console.log('Response:', res.data);
+      toast.success('Job Vacancy Post posted successfully!', {
+        position: 'top-right',
+        autoClose: 1000,
+        theme: 'colored',
+        onClose: () => navigate('/admin/job-application')
+      });
+    })
+    .catch(err => {
+      console.error('Error:', err?.response?.data || err?.message);
+      toast.error('Server Error!Unable to Submit Post', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored'
+      });
+      return;
+    })
+    .finally(() => {
+      // setLoadingSubmit(false);
+    });
+    
+    // if (Object.keys(newErrors).length === 0) {
+    //   // Prepare job data
+    //   const jobData = {
+    //     ...formData,
+    //     jobType: 'municipal',
+    //     requirements: formData.requirements.join('; '),
+    //     department: formData.department || 'General'
+    //   };
 
-      // Add new job
-      const newJob = {
-        id: Date.now().toString(),
-        ...jobData,
-        isActive: true
-      };
-      jobs.push(newJob);
-      localStorage.setItem('jobs', JSON.stringify(jobs));
+    //   // Get existing jobs
+    //   const savedJobs = localStorage.getItem('jobs');
+    //   let jobs = [];
+    //   if (savedJobs) {
+    //     try {
+    //       jobs = JSON.parse(savedJobs);
+    //     } catch (error) {
+    //       console.error('Failed to parse jobs', error);
+    //     }
+    //   }
 
-      // Show success message
-      setShowSuccess(true);
-      toast.success('Municipal job posted successfully!');
+    //   // Add new job
+    //   const newJob = {
+    //     id: Date.now().toString(),
+    //     ...jobData,
+    //     isActive: true
+    //   };
+    //   jobs.push(newJob);
+    //   localStorage.setItem('jobs', JSON.stringify(jobs));
+
+    //   // Show success message
+    //   setShowSuccess(true);
+    //   toast.success('Municipal job posted successfully!');
       
-      // Navigate back after delay
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate('/admin/job-applications');
-      }, 2000);
-    } else {
-      setErrors(newErrors);
-      const errorCount = Object.keys(newErrors).length;
-      toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
-    }
+    //   // Navigate back after delay
+    //   setTimeout(() => {
+    //     setShowSuccess(false);
+    //     navigate('/admin/job-application');
+    //   }, 2000);
+    // } else {
+    //   setErrors(newErrors);
+    //   const errorCount = Object.keys(newErrors).length;
+    //   toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
+    // }
   }, [validateForm, formData, navigate]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
-    navigate('/admin/job-applications');
+    navigate('/admin/job-application');
   }, [navigate]);
 
   return (
@@ -377,7 +434,7 @@ const MunicipalJobForm = () => {
                   <MdCalendarToday className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="date"
-                    value={formData.deadline}
+                    value={formatDate(formData.deadline)}
                     onChange={(e) => handleInputChange('deadline', e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${

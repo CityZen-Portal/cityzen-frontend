@@ -47,7 +47,7 @@ const VolunteerJobForm = () => {
     programTitle: '',
     programDescription: '',
     location: '',
-    programDate: '',
+    programDate: new Date().toISOString(),
     programTime: '',
     duration: '',
     coordinatorName: '',
@@ -111,10 +111,11 @@ const VolunteerJobForm = () => {
     const newErrors = validateForm();
 
     const postData = {
-      ...formData
+      ...formData,
+      programTime: `${formData.programTime}:00`
     }
 
-    axios.post(`${JOB_APPLICATION_API}/citizen/complaint-form`, postData,
+    axios.post(`${JOB_APPLICATION_API}/service`, postData,
       {
         headers:{
           token,
@@ -129,12 +130,12 @@ const VolunteerJobForm = () => {
         position: 'top-right',
         autoClose: 1000,
         theme: 'colored',
-        onClose: () => navigate('/citizen/job-application/')
+        onClose: () => navigate('/admin/job-application')
       });
     })
     .catch(err => {
-      console.error('Error:', err.response?.data || err.message);
-      toast.error('Server Error!Unable to Submit Complaint', {
+      console.error('Error:', err?.response?.data || err?.message);
+      toast.error('Server Error!Unable to Submit Post', {
         position: 'top-right',
         autoClose: 3000,
         theme: 'colored'
@@ -181,7 +182,7 @@ const VolunteerJobForm = () => {
     //   // Navigate back after delay
     //   setTimeout(() => {
     //     setShowSuccess(false);
-    //     navigate('/admin/job-applications');
+    //     navigate('/admin/job-application');
     //   }, 2000);
     // } else {
     //   setErrors(newErrors);
@@ -192,7 +193,7 @@ const VolunteerJobForm = () => {
 
   // Handle cancel
   const handleCancel = useCallback(() => {
-    navigate('/admin/job-applications');
+    navigate('/admin/job-application');
   }, [navigate]);
 
   return (
@@ -380,7 +381,7 @@ const VolunteerJobForm = () => {
                 <div className="relative">
                   <MdAccessTime className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
-                    type="text"
+                    type="time"
                     value={formData.programTime}
                     onChange={(e) => handleInputChange('programTime', e.target.value)}
                     placeholder="e.g., 9:00 AM - 5:00 PM"

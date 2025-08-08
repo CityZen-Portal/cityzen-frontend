@@ -225,17 +225,17 @@ const JobApplicationsPost = () => {
 
   // Handle add new job/volunteer
   const handleAddMunicipalJob = useCallback(() => {
-    navigate('/admin/job-applications/add/municipal');
+    navigate('/admin/job-application/add/municipal');
   }, [navigate]);
 
   const handleAddVolunteerJob = useCallback(() => {
-    navigate('/admin/job-applications/add/volunteer');
+    navigate('/admin/job-application/add/volunteer');
   }, [navigate]);
 
   // Handle edit
   const handleEdit = useCallback((item) => {
     const type = item.programTitle ? 'volunteer' : 'municipal';
-    navigate(`/admin/job-applications/edit/${type}/${item.id}`);
+    navigate(`/admin/job-application/edit/${type}/${item.id}`);
   }, [navigate]);
 
   // Handle delete
@@ -519,6 +519,7 @@ const JobApplicationsPost = () => {
           ) : (
             <>
               {filteredJobs.map(job => (
+                !job.isDeleted &&
                 <JobCard
                   key={job.id}
                   job={job}
@@ -531,6 +532,7 @@ const JobApplicationsPost = () => {
                 />
               ))}
               {filteredVolunteers.map(volunteer => (
+                !volunteer.isDeleted &&
                 <VolunteerCard
                   key={volunteer.id}
                   volunteer={volunteer}

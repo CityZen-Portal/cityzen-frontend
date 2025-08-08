@@ -28,10 +28,16 @@ import {
   MdEmail,
   MdSave
 } from 'react-icons/md';
+import axios from 'axios';
 
 
 const VolunteerEditForm = () => {
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
   const { id } = useParams();
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -51,39 +57,76 @@ const VolunteerEditForm = () => {
   });
   const [errors, setErrors] = useState({});
 
-  // Load job data for editing
+
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
   useEffect(() => {
-    if (id) {
-      const savedJobs = localStorage.getItem('jobs');
-      if (savedJobs) {
-        try {
-          const jobs = JSON.parse(savedJobs);
-          const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'volunteer');
-          if (jobToEdit) {
-            setFormData({
-              programTitle: jobToEdit.programTitle || '',
-              programDescription: jobToEdit.programDescription || '',
-              location: jobToEdit.location || '',
-              programDate: jobToEdit.programDate || '',
-              programTime: jobToEdit.programTime || '',
-              duration: jobToEdit.duration || '',
-              coordinatorName: jobToEdit.coordinatorName || '',
-              coordinatorPhone: jobToEdit.coordinatorPhone || '',
-              coordinatorEmail: jobToEdit.coordinatorEmail || '',
-              coordinatorAddress: jobToEdit.coordinatorAddress || ''
-            });
-          } else {
-            toast.error('Volunteer opportunity not found');
-            navigate('/admin/job-applications');
-          }
-        } catch (error) {
-          console.error('Failed to load job data', error);
-          toast.error('Failed to load volunteer opportunity data');
-          navigate('/admin/job-applications');
+    // setLoading(true);
+  
+    axios.get(`${JOB_APPLICATION_API}/service/${id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
         }
       }
-      setLoading(false);
-    }
+    )
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          if(data){
+            setFormData(data)
+          }
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Job Posts Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+        
+    // setLoading(true);
+
+  }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
+
+  // Load job data for editing
+  useEffect(() => {
+    // if (id) {
+    //   const savedJobs = localStorage.getItem('jobs');
+    //   if (savedJobs) {
+    //     try {
+    //       const jobs = JSON.parse(savedJobs);
+    //       const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'volunteer');
+    //       if (jobToEdit) {
+    //         setFormData({
+    //           programTitle: jobToEdit.programTitle || '',
+    //           programDescription: jobToEdit.programDescription || '',
+    //           location: jobToEdit.location || '',
+    //           programDate: jobToEdit.programDate || '',
+    //           programTime: jobToEdit.programTime || '',
+    //           duration: jobToEdit.duration || '',
+    //           coordinatorName: jobToEdit.coordinatorName || '',
+    //           coordinatorPhone: jobToEdit.coordinatorPhone || '',
+    //           coordinatorEmail: jobToEdit.coordinatorEmail || '',
+    //           coordinatorAddress: jobToEdit.coordinatorAddress || ''
+    //         });
+    //       } else {
+    //         toast.error('Volunteer opportunity not found');
+    //         navigate('/admin/job-applications');
+    //       }
+    //     } catch (error) {
+    //       console.error('Failed to load job data', error);
+    //       toast.error('Failed to load volunteer opportunity data');
+    //       navigate('/admin/job-applications');
+    //     }
+    //   }
+    //   setLoading(false);
+    // }
   }, [id, navigate]);
 
   // Handle form field changes
@@ -125,47 +168,83 @@ const VolunteerEditForm = () => {
   // Handle form submission
   const handleSubmit = useCallback(() => {
     const newErrors = validateForm();
-    
-    if (Object.keys(newErrors).length === 0) {
-      // Prepare job data
-      const jobData = {
-        ...formData,
-        jobType: 'volunteer',
-        department: 'Community Service',
-        requirements: 'Community service mindset and willingness to help'
-      };
 
-      // Get existing jobs
-      const savedJobs = localStorage.getItem('jobs');
-      let jobs = [];
-      if (savedJobs) {
-        try {
-          jobs = JSON.parse(savedJobs);
-        } catch (error) {
-          console.error('Failed to parse jobs', error);
+    const putData = {
+      ...formData,
+      programTime: `${formData.programTime}:00`
+    }
+
+    axios.put(`${JOB_APPLICATION_API}/service`, putData,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
         }
       }
+    )
+    .then(res => {
+      console.log('Response:', res.data);
+      toast.success('Volunteer Vacancy Post posted successfully!', {
+        position: 'top-right',
+        autoClose: 1000,
+        theme: 'colored',
+        onClose: () => navigate('/admin/job-application')
+      });
+    })
+    .catch(err => {
+      console.error('Error:', err?.response?.data || err?.message);
+      toast.error('Server Error!Unable to Submit Post', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored'
+      });
+      return;
+    })
+    .finally(() => {
+      // setLoadingSubmit(false);
+    });
+    
+    // if (Object.keys(newErrors).length === 0) {
+    //   // Prepare job data
+    //   const jobData = {
+    //     ...formData,
+    //     jobType: 'volunteer',
+    //     department: 'Community Service',
+    //     requirements: 'Community service mindset and willingness to help'
+    //   };
 
-      // Update existing job
-      const updatedJobs = jobs.map(job => 
-        job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
-      );
-      localStorage.setItem('jobs', JSON.stringify(updatedJobs));
+    //   // Get existing jobs
+    //   const savedJobs = localStorage.getItem('jobs');
+    //   let jobs = [];
+    //   if (savedJobs) {
+    //     try {
+    //       jobs = JSON.parse(savedJobs);
+    //     } catch (error) {
+    //       console.error('Failed to parse jobs', error);
+    //     }
+    //   }
 
-      // Show success message
-      setShowSuccess(true);
-      toast.success('Volunteer opportunity updated successfully!');
+    //   // Update existing job
+    //   const updatedJobs = jobs.map(job => 
+    //     job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
+    //   );
+    //   localStorage.setItem('jobs', JSON.stringify(updatedJobs));
+
+    //   // Show success message
+    //   setShowSuccess(true);
+    //   toast.success('Volunteer opportunity updated successfully!');
       
-      // Navigate back after delay
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate('/admin/job-applications');
-      }, 2000);
-    } else {
-      setErrors(newErrors);
-      const errorCount = Object.keys(newErrors).length;
-      toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
-    }
+    //   // Navigate back after delay
+    //   setTimeout(() => {
+    //     setShowSuccess(false);
+    //     navigate('/admin/job-applications');
+    //   }, 2000);
+    // } else {
+    //   setErrors(newErrors);
+    //   const errorCount = Object.keys(newErrors).length;
+    //   toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
+    // }
   }, [validateForm, formData, id, navigate]);
 
   // Handle cancel

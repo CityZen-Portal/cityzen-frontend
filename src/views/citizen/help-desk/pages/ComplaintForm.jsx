@@ -185,7 +185,7 @@ function ComplaintForm() {
 
     let uploadedFile = { fileName: "", filePath: "" };
 
-    if (file){
+    if (file && uploadedFile.filePath === ""){
       if (file instanceof File) {
         const serviceName = "helpdesk"
         const imageFormData = new FormData();
@@ -196,6 +196,8 @@ function ComplaintForm() {
           "https://media-api-service-hzx2.onrender.com/api/images/upload",
           imageFormData,
           { headers: { "Content-Type": "multipart/form-data" } }
+        ).finally(
+          setLoadingSubmit(false)
         );
 
         uploadedFile = {

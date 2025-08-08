@@ -34,8 +34,15 @@ import {
   MdBusiness
 } from 'react-icons/md';
 
+import axios from 'axios';
+
 const MunicipalEditForm = () => {
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token")
+  const email = localStorage.getItem("email")
+  const citizenId = localStorage.getItem("id")
+
   const { id } = useParams();
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -56,39 +63,88 @@ const MunicipalEditForm = () => {
   const [newRequirement, setNewRequirement] = useState('');
   const [errors, setErrors] = useState({});
 
-  // Load job data for editing
+    const formatDate = (date) => {
+    return date instanceof Date
+      ? date.toISOString().split('T')[0]
+      : date; // assumes it's already a string
+  };
+
+  const isValidDeadline = (dateStr) => {
+    const selectedDate = new Date(dateStr);
+    const minDate = new Date();
+    minDate.setDate(minDate.getDate() + 3);
+    return selectedDate >= minDate;
+  };
+
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
   useEffect(() => {
-    if (id) {
-      const savedJobs = localStorage.getItem('jobs');
-      if (savedJobs) {
-        try {
-          const jobs = JSON.parse(savedJobs);
-          const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'municipal');
-          if (jobToEdit) {
-            setFormData({
-              title: jobToEdit.title || '',
-              department: jobToEdit.department || '',
-              description: jobToEdit.description || '',
-              location: jobToEdit.location || '',
-              requirements: jobToEdit.requirements ? jobToEdit.requirements.split('; ').filter(req => req.trim()) : [],
-              deadline: jobToEdit.deadline || '',
-              contactPersonName: jobToEdit.contactPersonName || '',
-              contactPhoneNumber: jobToEdit.contactPhoneNumber || '',
-              contactEmail: jobToEdit.contactEmail || '',
-              contactAddress: jobToEdit.contactAddress || ''
-            });
-          } else {
-            toast.error('Job not found');
-            navigate('/admin/job-applications');
-          }
-        } catch (error) {
-          console.error('Failed to load job data', error);
-          toast.error('Failed to load job data');
-          navigate('/admin/job-applications');
+    // setLoading(true);
+  
+    axios.get(`${JOB_APPLICATION_API}/jobs/${id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
         }
       }
-      setLoading(false);
-    }
+    )
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          if(data){
+            setFormData(data)
+          }
+        })
+        .catch(err => {
+          toast.error('Server Error!Unable to Fetch Job Posts Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          // setLoading(false);
+        });
+        
+    // setLoading(true);
+
+  }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
+
+  // Load job data for editing
+  useEffect(() => {
+    // if (id) {
+    //   const savedJobs = localStorage.getItem('jobs');
+    //   if (savedJobs) {
+    //     try {
+    //       const jobs = JSON.parse(savedJobs);
+    //       const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'municipal');
+    //       if (jobToEdit) {
+    //         setFormData({
+    //           title: jobToEdit.title || '',
+    //           department: jobToEdit.department || '',
+    //           description: jobToEdit.description || '',
+    //           location: jobToEdit.location || '',
+    //           requirements: jobToEdit.requirements ? jobToEdit.requirements.split('; ').filter(req => req.trim()) : [],
+    //           deadline: jobToEdit.deadline || '',
+    //           contactPersonName: jobToEdit.contactPersonName || '',
+    //           contactPhoneNumber: jobToEdit.contactPhoneNumber || '',
+    //           contactEmail: jobToEdit.contactEmail || '',
+    //           contactAddress: jobToEdit.contactAddress || ''
+    //         });
+    //       } else {
+    //         toast.error('Job not found');
+    //         navigate('/admin/job-applications');
+    //       }
+    //     } catch (error) {
+    //       console.error('Failed to load job data', error);
+    //       toast.error('Failed to load job data');
+    //       navigate('/admin/job-applications');
+    //     }
+    //   }
+    //   setLoading(false);
+    // }
   }, [id, navigate]);
 
   // Handle form field changes
@@ -136,77 +192,123 @@ const MunicipalEditForm = () => {
 
   // Validate form
   const validateForm = useCallback(() => {
-    const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Job title is required';
-    if (!formData.department.trim()) newErrors.department = 'Department is required';
-    if (!formData.description.trim()) newErrors.description = 'Job description is required';
-    if (!formData.location.trim()) newErrors.location = 'Location is required';
-    if (formData.requirements.length === 0) newErrors.requirements = 'At least one requirement is needed';
-    if (!formData.deadline) newErrors.deadline = 'Application deadline is required';
-    if (!formData.contactPersonName.trim()) newErrors.contactPersonName = 'Contact name is required';
-    if (!formData.contactPhoneNumber.trim()) newErrors.contactPhoneNumber = 'Contact phone is required';
-    if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
-    if (!formData.contactAddress.trim()) newErrors.contactAddress = 'Contact address is required';
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.contactEmail.trim() && !emailRegex.test(formData.contactEmail.trim())) {
-      newErrors.contactEmail = 'Please enter a valid email address';
-    }
-    
-    // Phone validation
-    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-    if (formData.contactPhoneNumber.trim() && !phoneRegex.test(formData.contactPhoneNumber.trim())) {
-      newErrors.contactPhoneNumber = 'Please enter a valid phone number';
-    }
-    
-    return newErrors;
-  }, [formData]);
+      const newErrors = {};
+      if (!formData.title.trim()) newErrors.title = 'Job title is required';
+      if (!formData.department.trim()) newErrors.department = 'Department is required';
+      if (!formData.description.trim()) newErrors.description = 'Job description is required';
+      if (!formData.location.trim()) newErrors.location = 'Location is required';
+      if (formData.requirements.length === 0) newErrors.requirements = 'At least one requirement is needed';
+      if (!isValidDeadline(formData.deadline)) newErrors.deadline = 'Application deadline is required';
+      if (!formData.contactPersonName.trim()) newErrors.contactPersonName = 'Contact name is required';
+      if (!formData.contactPhoneNumber.trim()) newErrors.contactPhoneNumber = 'Contact phone is required';
+      if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
+      if (!formData.contactAddress.trim()) newErrors.contactAddress = 'Contact address is required';
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (formData.contactEmail.trim() && !emailRegex.test(formData.contactEmail.trim())) {
+        newErrors.contactEmail = 'Please enter a valid email address';
+      }
+      
+      // Phone validation
+      const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+      if (formData.contactPhoneNumber.trim() && !phoneRegex.test(formData.contactPhoneNumber.trim())) {
+        newErrors.contactPhoneNumber = 'Please enter a valid phone number';
+      }
+      
+      // Date validation - ensure date is in the future
+      if (formData.deadline) {
+        const selectedDate = new Date(formData.deadline);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+          newErrors.deadline = 'Application deadline must be in the future';
+        }
+      }
+      
+      return newErrors;
+    }, [formData]);
 
   // Handle form submission
   const handleSubmit = useCallback(() => {
     const newErrors = validateForm();
-    
-    if (Object.keys(newErrors).length === 0) {
-      // Prepare job data
-      const jobData = {
-        ...formData,
-        jobType: 'municipal',
-        requirements: formData.requirements.join('; '),
-        department: formData.department || 'General'
-      };
 
-      // Get existing jobs
-      const savedJobs = localStorage.getItem('jobs');
-      let jobs = [];
-      if (savedJobs) {
-        try {
-          jobs = JSON.parse(savedJobs);
-        } catch (error) {
-          console.error('Failed to parse jobs', error);
+    const putData = {
+          ...formData,
+          deadline: new Date()
         }
-      }
+    
+        axios.put(`${JOB_APPLICATION_API}/jobs/${id}`, putData,
+          {
+            headers:{
+              token,
+              email,
+              id: citizenId
+            }
+          }
+        )
+        .then(res => {
+          console.log('Response:', res.data);
+          toast.success('Job Vacancy Post posted successfully!', {
+            position: 'top-right',
+            autoClose: 1000,
+            theme: 'colored',
+            onClose: () => navigate('/admin/job-application')
+          });
+        })
+        .catch(err => {
+          console.error('Error:', err?.response?.data || err?.message);
+          toast.error('Server Error!Unable to Submit Post', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          return;
+        })
+        .finally(() => {
+          // setLoadingSubmit(false);
+        });
+    
+    // if (Object.keys(newErrors).length === 0) {
+    //   // Prepare job data
+    //   const jobData = {
+    //     ...formData,
+    //     jobType: 'municipal',
+    //     requirements: formData.requirements.join('; '),
+    //     department: formData.department || 'General'
+    //   };
 
-      // Update existing job
-      const updatedJobs = jobs.map(job => 
-        job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
-      );
-      localStorage.setItem('jobs', JSON.stringify(updatedJobs));
+    //   // Get existing jobs
+    //   const savedJobs = localStorage.getItem('jobs');
+    //   let jobs = [];
+    //   if (savedJobs) {
+    //     try {
+    //       jobs = JSON.parse(savedJobs);
+    //     } catch (error) {
+    //       console.error('Failed to parse jobs', error);
+    //     }
+    //   }
 
-      // Show success message
-      setShowSuccess(true);
-      toast.success('Municipal job updated successfully!');
+    //   // Update existing job
+    //   const updatedJobs = jobs.map(job => 
+    //     job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
+    //   );
+    //   localStorage.setItem('jobs', JSON.stringify(updatedJobs));
+
+    //   // Show success message
+    //   setShowSuccess(true);
+    //   toast.success('Municipal job updated successfully!');
       
-      // Navigate back after delay
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate('/admin/job-applications');
-      }, 2000);
-    } else {
-      setErrors(newErrors);
-      const errorCount = Object.keys(newErrors).length;
-      toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
-    }
+    //   // Navigate back after delay
+    //   setTimeout(() => {
+    //     setShowSuccess(false);
+    //     navigate('/admin/job-applications');
+    //   }, 2000);
+    // } else {
+    //   setErrors(newErrors);
+    //   const errorCount = Object.keys(newErrors).length;
+    //   toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
+    // }
   }, [validateForm, formData, id, navigate]);
 
   // Handle cancel
@@ -214,16 +316,16 @@ const MunicipalEditForm = () => {
     navigate('/admin/job-applications');
   }, [navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading job data...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+  //         <p className="text-gray-600 dark:text-gray-400">Loading job data...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-900">

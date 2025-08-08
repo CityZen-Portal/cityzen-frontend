@@ -73,6 +73,8 @@ const AssignStaff = () => {
           console.log('Complaint:', res.data.data);
           const data = res.data.data
           setComplaint(data ? data : {})
+          // setAssignedDepartment(data.assignedDepartment)
+          // setAssignedStaff(data.assignedStaff)
         })
         .catch(err => {
           toast.error('Server Error!Unable to Fetch Complaint Data', {

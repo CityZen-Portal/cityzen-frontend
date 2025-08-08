@@ -28,10 +28,10 @@ export const getStatusText = (status = "") => {
   const opt = status.trim().toLowerCase();
   switch (opt) {
     case "pending":       return "Pending";
-    case "under-review":  return "Under Review";
+    case "under-review":  return "Under-Review";
     case "assigned":      return "Assigned";
-    case "in-progress":   return "In Progress";
-    case "on-hold":       return "On Hold";
+    case "in-progress":   return "In-Progress";
+    case "on-hold":       return "On-Hold";
     case "resolved":      return "Resolved";
     case "rejected":      return "Rejected";
     default:              return status.charAt(0).toUpperCase() + status.slice(1);
