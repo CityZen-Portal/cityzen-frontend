@@ -118,7 +118,7 @@ const CitizenServiceRequests = () => {
 
       <div className="overflow-x-auto rounded-xl">
         <table className="min-w-full border-collapse text-left text-sm">
-          <thead className="text-slate-800 dark:text-slate-100 dark:bg-navy-700">
+          <thead className="text-slate-800 dark:text-white dark:text-slate-100 dark:bg-navy-700">
             <tr className="text-xs uppercase tracking-wider">
               <th
                 onClick={() => handleSort("serviceName")}
@@ -179,7 +179,7 @@ const CitizenServiceRequests = () => {
               paginatedRequest.map((request, idx) => (
                 <tr
                   key={request.serviceId || idx}
-                  className="hover:bg-slate-50 border-b bg-white transition-colors dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
+                  className="hover:bg-slate-50 border-b bg-white transition-colors dark:text-white dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
                 >
                   <td className="text-slate-900 px-6 py-4 font-medium dark:text-white">
                     {request.serviceName}
@@ -210,7 +210,7 @@ const CitizenServiceRequests = () => {
               <tr>
                 <td
                   colSpan="4"
-                  className="text-slate-600 dark:text-slate-400 px-6 py-4 text-center"
+                  className="text-slate-600 dark:text-white dark:text-slate-400 px-6 py-4 text-center"
                 >
                   No requests found.
                 </td>

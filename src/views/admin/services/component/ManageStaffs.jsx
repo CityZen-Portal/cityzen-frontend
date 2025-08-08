@@ -326,7 +326,7 @@ useEffect(() => {
               type="text"
               value={searchText}
               onChange={handleSearchChange}
-              className="bg-transparent ml-2 w-full outline-none text-gray-700 dark:text-white"
+              className="bg-transparent ml-2 w-full outline-none text-gray-700  dark:text-white"
               placeholder="Search by name, mobile, or email..."
             />
           </div>
@@ -442,18 +442,6 @@ useEffect(() => {
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
-                  </div>
-                  <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    Status:{" "}
-                    <span
-                      className={
-                        staff.status === "active"
-                          ? "text-red-500"
-                          : "text-green-600"
-                      }
-                    >
-                      {staff.status === "active" ? "Inactive" : "Active"}
-                    </span>
                   </div>
                 </div>
               ))

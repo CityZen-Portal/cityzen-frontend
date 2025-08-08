@@ -37,20 +37,34 @@ function Servicelist() {
 
   return (
     <>
-      <div
-        className="border-r-lg border bg-cover bg-center dark:border-navy-900 md:h-72"
-        style={{ backgroundImage: `url(${img1})` }}
-      >
-        <h1 className="flex items-center justify-center pt-6 text-4xl font-bold text-white">
-          Services
-        </h1>
-        <p className="text-center text-sm text-white md:pe-14 md:ps-14 md:pt-4 md:text-lg">
-          Municipality services include water supply, waste management, road
-          maintenance, street lighting, sanitation, public health, and
-          infrastructure development—ensuring essential civic amenities and
-          improving the quality of life in urban and rural areas.
-        </p>
-      </div>
+<div className="relative md:h-72 w-full overflow-hidden">
+  {/* Background Image */}
+  <img
+    src={img1}
+    alt="Background"
+    className="w-full h-full object-cover absolute inset-0 z-0"
+  />
+
+  {/* Colorful Gradient Overlay (gives depth & style) */}
+  <div className="absolute inset-0 bg-gradient-to-br from-[#243a6c] via-[#4078c1] to-[#244357] opacity-80 mix-blend-multiply z-10"></div>
+
+  {/* Extra Dark Overlay for strong contrast */}
+  <div className="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
+
+  {/* Text Content */}
+  <div className="relative z-20 flex flex-col items-center justify-center h-full text-center px-4">
+    <h1 className="text-4xl md:text-5xl font-extrabold drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)] mb-3 text-white bg-gradient-to-r from-[#fff] to-[#92c7f7] bg-clip-text text-transparent">
+      Services
+    </h1>
+    <p className="max-w-3xl text-base md:text-lg font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] leading-relaxed text-white backdrop-blur-sm p-4 rounded-lg bg-black/30 shadow-lg">
+      Municipality services include water supply, waste management, road maintenance,
+      street lighting, sanitation, public health, and infrastructure development —
+      ensuring essential civic amenities and improving the quality of life in urban and rural areas.
+    </p>
+  </div>
+</div>
+
+
 
       <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2 md:p-10">
         {loading
