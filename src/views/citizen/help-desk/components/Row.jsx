@@ -7,7 +7,7 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
   return (
     <>
       {/* Desktop Table Row - Hidden on mobile */}
-      <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors hidden md:table-row">
+      <tr className="dark:bg-navy-700 hover:bg-n-50 transition-colors hidden md:table-row">
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.id}</td>
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.issue.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}</td>
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.department ? complaint.department : complaint.category}</td>
@@ -33,9 +33,9 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
               navigate(link);
               window.scrollTo(0, 0);
             }}
-            disabled={complaint.status !== 'resolved'}
+            disabled={!((complaint.status).toLowerCase() === 'resolved' && complaint.feedback === null)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-              complaint.status === 'resolved' && !complaint?.feedback?.isSubmitted
+              (complaint.status).toLowerCase() === 'resolved' && complaint?.feedback === null
                 ? 'bg-brand-500 text-white hover:bg-brand-600'
                 : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
             }`}
@@ -46,9 +46,9 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
       </tr>
 
       {/* Mobile Card Layout - Hidden on desktop */}
-      <tr className="md:hidden">
+      <tr className="md:hidden dark:bg-navy-700">
         <td colSpan="100%" className="p-0">
-          <div className="bg-white dark:bg-gray-800 rounded-lg m-2 p-4 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white dark:bg-navy-700 rounded-lg m-2 p-4 shadow-sm hover:shadow-md transition-shadow">
             {/* Header with ID and Status */}
             <div className="flex justify-between items-start mb-3">
               <div className="flex flex-col">
@@ -93,14 +93,14 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
                   navigate(link);
                   window.scrollTo(0, 0);
                 }}
-                disabled={(complaint.status).toLowerCase() !== 'resolved'}
+                disabled={(complaint.status).toLowerCase() === 'resolved' && !complaint.feedback === null}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  (complaint.status).toLowerCase() === 'resolved'
+                  (complaint.status).toLowerCase() === 'resolved' && !complaint?.feedback?.isSubmitted
                     ? 'bg-brand-500 text-white hover:bg-brand-600'
                     : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
                 }`}
               >
-                Give Feedbackk
+                {!complaint?.feedback?.isSubmitted ? "Give Feedback" : "Submitted"}
               </button>
             </div>
           </div>
