@@ -62,7 +62,7 @@ const NewsStaffDetails = () => {
               alt={newsItem.title}
               className="w-full h-64 sm:h-96 object-cover rounded-xl shadow-md"
               onError={e => {
-                e.target.onerror = null; // Prevents infinite fallback loop
+                e.target.onerror = null; 
                 e.target.src = TEMP_IMAGE_URL;
               }}
             />
@@ -90,7 +90,7 @@ const NewsStaffDetails = () => {
                 href={newsItem.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 hover:underline dark:text-cyan-500"
               >
                 Read Full Article
               </a>

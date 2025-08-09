@@ -1,0 +1,48 @@
+
+.my-quill-editor .ql-editor {
+  @apply text-gray-800 bg-white;
+}
+
+.my-quill-editor .ql-editor.ql-blank::before {
+  @apply text-gray-400;
+}
+
+
+
+
+
+
+.dark .my-quill-editor .ql-editor {
+  @apply text-white bg-navy-700;
+}
+
+.dark .my-quill-editor .ql-editor.ql-blank::before {
+  @apply text-white opacity-70;
+}
+
+.dark .my-quill-editor .ql-editor strong {
+  @apply text-white font-bold;
+}
+
+.dark .my-quill-editor .ql-editor em {
+  @apply text-white italic;
+}
+
+.dark .my-quill-editor .ql-editor u,
+.dark .my-quill-editor .ql-editor s {
+  @apply text-white;
+}
+
+.dark .my-quill-editor .ql-toolbar {
+  @apply bg-navy-700 text-white;
+}
+.dark .my-quill-editor .ql-toolbar button,
+.dark .my-quill-editor .ql-toolbar .ql-picker,
+.dark .my-quill-editor .ql-toolbar .ql-picker-label {
+  color: #fff !important;
+  fill: #fff !important;
+  stroke: #fff !important;
+}
+.dark .my-quill-editor .ql-picker-options {
+  @apply bg-navy-700 text-white;
+}

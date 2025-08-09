@@ -90,7 +90,7 @@ const NewsHomeDetails = () => {
                 href={newsItem.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 hover:underline dark:text-cyan-500 "
               >
                 Read Full Article
               </a>
