@@ -114,13 +114,13 @@ const ViewNews = () => {
       <Card extra="p-6">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h4 className="text-xl font-bold text-navy-700 dark:text-white">City News Feed</h4>
+            <h4 className="text-xl font-bold text-navy-700 dark:text-white"> News / Update Feed</h4>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Stay updated with the latest city announcements</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => navigate('../news/add')}
-              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 dark:bg-brand-400 dark:hover:bg-brand-300"
+              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 dark:bg-brand-500 dark:hover:bg-brand-600"
             >
               <MdAdd className="h-4 w-4" /> Add News
             </button>

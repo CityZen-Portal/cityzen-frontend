@@ -2,12 +2,12 @@ import React, { useState, useRef } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import EmojiPicker from 'emoji-picker-react';
-
+import "./quill-overrides.css"
 function MyTextEditor({ value, onChange }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const quillRef = useRef(null);
 
-  // Insert emoji at cursor position
+
   const onEmojiClick = (emojiData) => {
     const emoji = emojiData.emoji;
     if (quillRef.current) {
@@ -49,16 +49,20 @@ function MyTextEditor({ value, onChange }) {
           <EmojiPicker onEmojiClick={onEmojiClick} />
         </div>
       )}
-      <ReactQuill
-        ref={quillRef}
-        theme="snow"
-        value={value}
-        onChange={onChange}
-        modules={modules}
-        placeholder="Start typing here..."
-        className="my-quill-editor"
-         style={{ height: 100 }}
-      />
+      <div className="my-quill-editor">
+        <ReactQuill
+          ref={quillRef}
+          theme="snow"
+          value={value}
+          onChange={onChange}
+          modules={modules}
+          placeholder="Start typing here..."
+          style={{ height: 200 }}
+        />
+      </div>
+
+
+
     </div>
   );
 }
