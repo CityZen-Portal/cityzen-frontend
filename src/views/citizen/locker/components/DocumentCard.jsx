@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, Trash2, Eye, Edit } from "lucide-react";
+import { Download, Trash2, Eye, Edit, Loader2 } from "lucide-react";
 
 export default function DocumentCard({
   title,
@@ -11,6 +11,10 @@ export default function DocumentCard({
   onDownload,
   onDelete,
   onUpdate,
+  loadingView = false,
+  loadingDownload = false,
+  loadingUpdate = false,
+  loadingDelete = false,
 }) {
   return (
     <div className="relative flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-900">
@@ -42,24 +46,40 @@ export default function DocumentCard({
 
       {/* Icon Buttons */}
       <div className="flex justify-between gap-3">
-        <IconButton onClick={onView} title="View" color="gray">
-          <Eye />
-        </IconButton>
-        <IconButton onClick={onDownload} title="Download" color="blue">
-          <Download />
-        </IconButton>
-        <IconButton onClick={onUpdate} title="Update" color="yellow">
-          <Edit />
-        </IconButton>
-        <IconButton onClick={onDelete} title="Delete" color="red">
-          <Trash2 />
-        </IconButton>
+        <IconButton
+          onClick={onView}
+          title="View"
+          color="gray"
+          loading={loadingView}
+          icon={<Eye />}
+        />
+        <IconButton
+          onClick={onDownload}
+          title="Download"
+          color="blue"
+          loading={loadingDownload}
+          icon={<Download />}
+        />
+        <IconButton
+          onClick={onUpdate}
+          title="Update"
+          color="yellow"
+          loading={loadingUpdate}
+          icon={<Edit />}
+        />
+        <IconButton
+          onClick={onDelete}
+          title="Delete"
+          color="red"
+          loading={loadingDelete}
+          icon={<Trash2 />}
+        />
       </div>
     </div>
   );
 }
 
-function IconButton({ onClick, title, color, children }) {
+function IconButton({ onClick, title, color, loading, icon }) {
   const colors = {
     gray: "border-gray-200 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300",
     blue: "border-blue-500 bg-blue-500 hover:bg-blue-600 text-white",
@@ -69,11 +89,18 @@ function IconButton({ onClick, title, color, children }) {
 
   return (
     <button
-      onClick={onClick}
+      onClick={loading ? undefined : onClick}
       title={title}
-      className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-colors duration-200 ${colors[color]}`}
+      disabled={loading}
+      className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-colors duration-200 ${
+        colors[color]
+      } ${loading ? "cursor-wait" : "cursor-pointer"}`}
     >
-      {React.cloneElement(children, { className: "h-5 w-5" })}
+      {loading ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : (
+        React.cloneElement(icon, { className: "h-5 w-5" })
+      )}
     </button>
   );
 }
