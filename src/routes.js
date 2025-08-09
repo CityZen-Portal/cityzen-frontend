@@ -91,6 +91,8 @@ import VolunteerJobForm from "views/admin/job-applications/pages/VolunteerJobFor
 import MunicipalEditForm from "views/admin/job-applications/pages/MunicipalEditForm";
 import VolunteerEditForm from "views/admin/job-applications/pages/VolunteerEditForm";
 import NewsStaffDetails from "views/staff/news/components/NewsStaffDetails";
+import ViewNewsDetails from "views/staff/news/components/ViewNewsDetails";
+import AdminViewNewsDetails from "views/admin/news/components/AdminViewNewsDetails";
 
 const routes = [
   // Home
@@ -438,6 +440,12 @@ const routes = [
         path: "news/newshomedetails",
         component: <NewsStaffDetails/>,
       },
+      {
+        name: "View News Details",
+        layout: "/staff",
+        path: "news/view/:id",
+        component: <ViewNewsDetails/>,
+      }
     ],
   },
   {
@@ -479,6 +487,12 @@ const routes = [
         layout: "/admin",
         path: "news/add/:id",
         component: <AdminAddNews />,
+      },
+      {
+        name: "View News ",
+        layout: "/admin",
+        path: "news/view/:id",
+        component: <AdminViewNewsDetails/>,
       },
     ],
   },
