@@ -120,7 +120,7 @@ const ViewNews = () => {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => navigate('../news/add')}
-              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 dark:bg-brand-400 dark:hover:bg-brand-300"
+              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 dark:bg-blue-500 dark:hover:bg-blue-600"
             >
               <MdAdd className="h-4 w-4" /> Add News
             </button>

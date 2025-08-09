@@ -6,7 +6,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import MyTextEditor from '../../../../components/textEditor/MyTextEditor';
-
+import loading_gif from "../../../../assets/gif/loading-gif.gif"
 const AddNews = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -29,7 +29,7 @@ const AddNews = () => {
   const [isInEditMode, setIsInEditMode] = useState(id === 'new');
   const [showImage, setShowImage] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [load, setLoad] = useState(false);
   useEffect(() => {
     if (id && id !== 'new') {
       setLoading(true);
@@ -162,6 +162,7 @@ const AddNews = () => {
   };
 
   const handleSubmit = async () => {
+    setLoad(!load);
     if (!validateForm()) return;
     try {
       const { imageName, imagePaths } = await uploadImage();
@@ -178,9 +179,11 @@ const AddNews = () => {
       };
       if (isEditing) {
         await axios.put(`https://city-news-alert-backend-new.onrender.com/api/news/update/${id}`, payload);
+        setLoad(!load);
         toast.success('News updated successfully!');
       } else {
         await axios.post('https://city-news-alert-backend-new.onrender.com/api/news/add', payload);
+        setLoad(!load);
         toast.success('News posted successfully!');
       }
       setTimeout(() => navigate('/staff/news'), 2000);
@@ -223,10 +226,33 @@ const AddNews = () => {
 
   if (loading) {
     return (
-      <div className="flex w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-10">
+      <div className="flex w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-10 min-h-[300px]">
         <Card extra="w-full max-w-3xl p-6 sm:p-8 shadow-xl rounded-2xl bg-white dark:bg-navy-700">
-          <p className="text-center text-lg text-navy-700 dark:text-white">Loading news post...</p>
+          <div className="animate-pulse space-y-6 w-full">
+            <div className="h-6 w-2/3 rounded bg-gray-200 dark:bg-gray-600"></div>
+            <div className="h-32 w-full rounded bg-gray-200 dark:bg-gray-600"></div>
+            <div className="h-6 w-1/2 rounded bg-gray-200 dark:bg-gray-600"></div>
+            <div className="h-6 w-1/3 rounded bg-gray-200 dark:bg-gray-600"></div>
+            <div className="h-20 w-full rounded bg-gray-200 dark:bg-gray-600"></div>
+            <div className="h-5 w-24 rounded bg-gray-200 dark:bg-gray-600"></div>
+          </div>
         </Card>
+      </div>
+    );
+  }
+
+
+
+  if (load) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+
+        <img
+          src={loading_gif}
+          alt="Loading..."
+          className="w-12 h-12 sm:w-16 sm:h-16"
+        />
+        <p className='dark:text-white ms-5'> Please don't refresh the page, it may take a while.</p>
       </div>
     );
   }
