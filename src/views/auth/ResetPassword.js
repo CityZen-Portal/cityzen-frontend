@@ -111,7 +111,7 @@ export default function ResetPassword() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `https://auth-backend-2-k3ph.onrender.com/auth/reset-password`,
+        `https://auth-backend-2-k3ph.onrender.com/api/auth/reset-password`,
         {
           token,
           newPassword: formData.newPassword,
