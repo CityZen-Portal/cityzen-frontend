@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import loading_gif from '../../../../assets/img/loading/loading_gif.gif'
+import loading_gif from '../../../../assets/gif/loading-gif.gif'
+import FileUpload from '../components/FileUpload';
 
 function ComplaintForm() {
   const token = localStorage.getItem("token")
@@ -11,6 +12,7 @@ function ComplaintForm() {
   const citizenId = localStorage.getItem("id")
 
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
+  const MEDIA_UPLOAD_API = process.env.REACT_APP_API_MEDIA_URL;
   
   const navigate = useNavigate();
   const [loadingSubmit, setLoadingSubmit] = useState(false);  
@@ -98,10 +100,10 @@ function ComplaintForm() {
     }
   };
 
-  const s= process.env.REACT_APP_API_MEDIA_URL;
+
+  const [uploadedFile, setUploadedFile] = useState({ fileName: "", filePath: "" });
 
   const handleSubmit = async (e) => {
-  
     e.preventDefault();
     setLoadingSubmit(true);
 
@@ -185,35 +187,74 @@ function ComplaintForm() {
 
     let uploadedFile = { fileName: "", filePath: "" };
 
-    if (file && uploadedFile.filePath === ""){
-      if (file instanceof File) {
-        const serviceName = "helpdesk"
-        const imageFormData = new FormData();
-        imageFormData.append("name", serviceName);
-        imageFormData.append("imageFile", file);
-
-        const imgRes = await axios.post(
-          "https://media-api-service-hzx2.onrender.com/api/images/upload",
-          imageFormData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        ).finally(
-          setLoadingSubmit(false)
-        );
-
-        uploadedFile = {
-          fileName: imgRes.data.data.name,
-          filePath: imgRes.data.data.path,
-        };
+    // Axios Post File
+    if (file) {
+      if (!(file instanceof File)) {
+        setLoadingSubmit(false);
+        toast.error('Invalid file input.');
+        return;
       }
-      else{
-        setLoadingSubmit(false)
-        toast.error('Network error! Unable to submit attachment.');
+
+      const isImage = file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf';
+
+      if (!isImage && !isPdf) {
+        setLoadingSubmit(false);
+        toast.error('Only PDF or Image files are allowed.');
+        return;
+      }
+    }
+
+    let filePath = "";
+
+    if (file && !uploadedFile.filePath) {
+      try {
+        const fileType = file.type;
+        const serviceName = "helpdesk";
+        let uploadUrl = "";
+        let formData = new FormData();
+
+        if (fileType.startsWith("image/")) {
+          uploadUrl = `${MEDIA_UPLOAD_API}/api/images/upload`;
+          formData.append("name", serviceName);
+          formData.append("imageFile", file);
+        } else if (fileType === "application/pdf") {
+          uploadUrl = `${MEDIA_UPLOAD_API}/api/images/upload/base`;
+          formData.append("name", serviceName);
+          formData.append("file", file);
+        }
+
+        const fileRes = await axios.post(uploadUrl, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        console.log(fileRes)
+
+        if (fileType.startsWith("image/")) {
+          filePath = fileRes.data.data.path;
+          setUploadedFile({
+            fileName: fileRes.data.data.name,
+            filePath: fileRes.data.data.path,
+          });
+        }
+        else if (fileType === "application/pdf") {
+          filePath = fileRes.data;
+          console.log(fileRes.data);
+          setUploadedFile({
+            filePath: fileRes.data,
+          });
+        }
+        
+      } catch (error) {
+        setLoadingSubmit(false);
+        toast.error("Upload failed. Please try again.");
+        console.error(error);
         return;
       }
     }
 
     const postData = {
-      citizenId: 1,
+      citizenId,
       street,
       taluk,
       district,
@@ -223,7 +264,7 @@ function ComplaintForm() {
       category: complaintType ? complaintType : others,
       issue,
       issueDescription: description,
-      attachment: uploadedFile.filePath ? uploadedFile.filePath : null,
+      attachment: filePath ? filePath : null,
     };
 
 
@@ -260,17 +301,15 @@ function ComplaintForm() {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
+    <div className="relative flex items-center justify-center min-h-scree py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
       
-      {loadingSubmit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
-          <img
+      {loadingSubmit && (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+        <img
             src={loading_gif}
             alt="Loading..."
             className="w-12 h-12 sm:w-16 sm:h-16"
-          />
-        </div>
-      )}
+        />
+      </div>)}
 
       <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
         <h1 className="font-bold text-center text-lg sm:text-xl lg:text-2xl mb-4 sm:mb-6">Complaint Form</h1>
@@ -408,18 +447,11 @@ function ComplaintForm() {
             ></textarea>
           </div>
 
-          <div>
-            <label className="block font-bold text-sm sm:text-base mb-1 sm:mb-2">Upload PDF</label>
-            <input
-              type="file"
-              accept="application/pdf, image/*"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-brand-500 file:text-white hover:file:bg-brand-600 cursor-pointer rounded-md outline-none focus:ring-2 focus:ring-brand-500"
-            />
-            {file && (
-              <p className="text-xs text-green-600 mt-1">Selected: {file.name}</p>
-            )}
-          </div>
+          <FileUpload
+            file={file}
+            setFile={setFile}
+          />
+
 
           <div className="text-center pt-2 sm:pt-4">
             <button
