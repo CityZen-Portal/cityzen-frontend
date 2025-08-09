@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import NewsCardSkeleton from "components/placeholder/NewsCardSkeleton";
 
 export default function NewsCard() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
   const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchNews = async () => {
+       setLoading(true);
+      setError(null);
       try {
         const response = await axios.get(
           "https://city-news-alert-backend-new.onrender.com/api/news/get-all"
@@ -17,6 +22,9 @@ export default function NewsCard() {
         setData(response.data.data.records);
       } catch (err) {
         console.log(err);
+         setError("Failed to load news. Please try again later.");
+      }finally {
+        setLoading(false);
       }
     };
     fetchNews();
@@ -30,13 +38,21 @@ export default function NewsCard() {
 
   return (
     <div className=" bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
-      {data.length === 0 ? (
-        <p className="text-center text-gray-500 dark:text-gray-300">
-          Loading news...
-        </p>
-      ) : (
+      {loading && (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+                {Array.from({ length: itemsPerPage }).map((_, index) => (
+                  <NewsCardSkeleton key={index} />
+                ))}
+              </div>
+            )}
+            {error && !loading && (
+              <div className="text-center py-16 text-red-500 font-medium">
+                {error}
+              </div>
+            )}
+      {!loading && !error && data.length> 0 && (
         <>
-          {/* News Cards */}
+      
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
             {paginatedData.map((news, index) => (
               <div
@@ -63,7 +79,7 @@ export default function NewsCard() {
                         }
                       )
                     }
-                    className="font-medium text-blue-600 hover:underline"
+                    className="font-medium text-blue-600 hover:underline dark:text-cyan-500"
                   >
                     Read more →
                   </button>
