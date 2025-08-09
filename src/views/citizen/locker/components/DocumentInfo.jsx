@@ -12,6 +12,13 @@ export default function DocumentInfo() {
 
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState({
+    upload: false,
+    update: false,
+    viewId: null,
+    downloadId: null,
+    deleteId: null,
+  });
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [userInfo, setUserInfo] = useState({
@@ -52,13 +59,13 @@ export default function DocumentInfo() {
       }
     };
     if (userInfo.email) fetchAll();
-  }, []);
+  }, [userInfo.email, LOCKER_API, USER_API, token]);
 
   const uploadDocument = async () => {
     if (!selectedFile || !userInfo.aadharNumber || !fileNameInput.trim())
       return;
     try {
-      setLoading(true);
+      setButtonLoading((b) => ({ ...b, upload: true }));
       const formData = new FormData();
       formData.append("file", selectedFile);
       const mediaRes = await axios.post(`${MEDIA_API}`, formData, {
@@ -84,14 +91,14 @@ export default function DocumentInfo() {
       setErrorMsg("Failed to upload document");
       setTimeout(() => setErrorMsg(""), 3000);
     } finally {
-      setLoading(false);
+      setButtonLoading((b) => ({ ...b, upload: false }));
     }
   };
 
   const updateDocument = async () => {
     if (!updateDocData || !updateFileName.trim()) return;
     try {
-      setLoading(true);
+      setButtonLoading((b) => ({ ...b, update: true }));
       let filePath = updateDocData.filePath;
 
       if (updateSelectedFile) {
@@ -129,13 +136,14 @@ export default function DocumentInfo() {
       setErrorMsg("Failed to update document");
       setTimeout(() => setErrorMsg(""), 3000);
     } finally {
-      setLoading(false);
+      setButtonLoading((b) => ({ ...b, update: false }));
     }
   };
 
   // Download
   const downloadDoc = async (doc) => {
     try {
+      setButtonLoading((b) => ({ ...b, downloadId: doc.fileId }));
       const response = await fetch(doc.filePath);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -146,11 +154,17 @@ export default function DocumentInfo() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch {}
+    } catch {
+      setErrorMsg("Failed to download document");
+      setTimeout(() => setErrorMsg(""), 3000);
+    } finally {
+      setButtonLoading((b) => ({ ...b, downloadId: null }));
+    }
   };
 
   const deleteDoc = async (doc) => {
     try {
+      setButtonLoading((b) => ({ ...b, deleteId: doc.fileId }));
       await axios.delete(
         `${LOCKER_API}/api/lock/delete/${userInfo.aadharNumber}/${doc.fileId}`,
         { headers: { token } }
@@ -161,12 +175,19 @@ export default function DocumentInfo() {
     } catch {
       setErrorMsg("Failed to delete document");
       setTimeout(() => setErrorMsg(""), 3000);
+    } finally {
+      setButtonLoading((b) => ({ ...b, deleteId: null }));
     }
   };
 
   // View
   const viewDoc = (doc) => {
-    window.open(doc.filePath, "_blank");
+    try {
+      setButtonLoading((b) => ({ ...b, viewId: doc.fileId }));
+      window.open(doc.filePath, "_blank");
+    } finally {
+      setButtonLoading((b) => ({ ...b, viewId: null }));
+    }
   };
 
   // Open update modal
@@ -187,8 +208,15 @@ export default function DocumentInfo() {
           <button
             onClick={() => setShowModal(true)}
             className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+            disabled={buttonLoading.upload}
           >
-            <Upload className="h-4 w-4" /> Upload
+            {buttonLoading.upload ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <Upload className="h-4 w-4" /> Upload
+              </>
+            )}
           </button>
         </div>
 
@@ -224,6 +252,9 @@ export default function DocumentInfo() {
                 onDownload={() => downloadDoc(doc)}
                 onDelete={() => deleteDoc(doc)}
                 onUpdate={() => updateDoc(doc)}
+                loadingView={buttonLoading.viewId === doc.fileId}
+                loadingDownload={buttonLoading.downloadId === doc.fileId}
+                loadingDelete={buttonLoading.deleteId === doc.fileId}
               />
             ))}
           </div>
@@ -256,14 +287,20 @@ export default function DocumentInfo() {
               <button
                 onClick={() => setShowModal(false)}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300"
+                disabled={buttonLoading.upload}
               >
                 Cancel
               </button>
               <button
                 onClick={uploadDocument}
                 className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white"
+                disabled={buttonLoading.upload}
               >
-                Upload
+                {buttonLoading.upload ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Upload"
+                )}
               </button>
             </div>
           </div>
@@ -283,11 +320,13 @@ export default function DocumentInfo() {
               onChange={(e) => setUpdateFileName(e.target.value)}
               placeholder="Enter new file name"
               className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-navy-700 dark:text-white"
+              disabled={buttonLoading.update}
             />
             <input
               type="file"
               onChange={(e) => setUpdateSelectedFile(e.target.files[0])}
               className="w-full text-gray-900 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-500 file:px-4 file:py-2 file:text-sm file:text-white hover:file:bg-indigo-600 dark:text-white"
+              disabled={buttonLoading.update}
             />
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -297,15 +336,23 @@ export default function DocumentInfo() {
                   setUpdateSelectedFile(null);
                 }}
                 className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 dark:border-gray-600 dark:text-white"
+                disabled={buttonLoading.update}
               >
                 Cancel
               </button>
               <button
                 onClick={updateDocument}
-                disabled={!updateFileName.trim() && !updateSelectedFile}
+                disabled={
+                  (!updateFileName.trim() && !updateSelectedFile) ||
+                  buttonLoading.update
+                }
                 className="rounded-md bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
-                Update
+                {buttonLoading.update ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Update"
+                )}
               </button>
             </div>
           </div>

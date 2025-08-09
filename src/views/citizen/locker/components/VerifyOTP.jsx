@@ -1,12 +1,14 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 const url = "https://auth-backend-2-k3ph.onrender.com";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("      ");
   const [loading, setLoading] = useState(false);
+  const [generatingOtp, setGeneratingOtp] = useState(false);
   const [error, setError] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [otpSent, setOtpSent] = useState(false);
@@ -35,6 +37,7 @@ export default function VerifyOTP() {
       return;
     }
     try {
+      setGeneratingOtp(true);
       await axios.post(
         `${url}/api/auth/generate-otp`,
         { email: userEmail },
@@ -46,6 +49,8 @@ export default function VerifyOTP() {
       setError("");
     } catch {
       setError("Failed to generate OTP");
+    } finally {
+      setGeneratingOtp(false);
     }
   };
 
@@ -106,9 +111,16 @@ export default function VerifyOTP() {
           {!otpSent && (
             <button
               onClick={generateOtp}
-              className="mb-4 rounded-xl bg-brand-500 px-6 py-3 font-medium text-white transition hover:bg-brand-600 dark:bg-brand-400 dark:hover:bg-brand-300"
+              disabled={generatingOtp}
+              className="mb-4 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-6 py-3 font-medium text-white transition hover:bg-brand-600 disabled:opacity-60 dark:bg-brand-400 dark:hover:bg-brand-300"
             >
-              Generate OTP
+              {generatingOtp ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" /> Sending...
+                </>
+              ) : (
+                "Generate OTP"
+              )}
             </button>
           )}
 
@@ -170,7 +182,14 @@ export default function VerifyOTP() {
                 disabled={loading}
                 className="w-full rounded-xl bg-brand-500 px-6 py-3 font-medium text-white transition hover:bg-brand-600 disabled:opacity-60 dark:bg-brand-400 dark:hover:bg-brand-300"
               >
-                {loading ? "Verifying..." : "Verify OTP"}
+                {loading ? (
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Verifying...
+                  </span>
+                ) : (
+                  "Verify OTP"
+                )}
               </button>
             </>
           )}
