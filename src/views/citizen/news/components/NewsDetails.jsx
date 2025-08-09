@@ -83,7 +83,7 @@ export default function NewsDetails() {
         <div className="p-6 sm:p-8">
           <button
             onClick={() => navigate(-1)}
-            className="mb-4 text-blue-600 hover:underline hover:text-blue-800 text-sm transition"
+            className="mb-4 text-blue-600 hover:underline dark:text-cyan-500 hover:text-blue-800 text-sm transition"
           >
             ← Back to News
           </button>

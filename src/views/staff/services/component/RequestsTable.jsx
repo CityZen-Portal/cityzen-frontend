@@ -66,7 +66,7 @@ const RequestsTable = ({
     const startIndex = (currentPage - 1) * itemsPerPage;
     return sortedRequests.slice(startIndex, startIndex + itemsPerPage);
   }, [sortedRequests, currentPage, itemsPerPage]);
-
+   console.log(paginatedRequests);
   const totalPages = Math.ceil(searchedRequests.length / itemsPerPage);
 
   return (
