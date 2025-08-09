@@ -6,7 +6,7 @@ import DocumentCard from "./DocumentCard";
 export default function DocumentInfo() {
   const MEDIA_API =
     "https://media-api-service-hzx2.onrender.com/api/images/upload/base";
-  const LOCKER_API = "http://localhost:4000";
+  const LOCKER_API = process.env.REACT_APP_API_LOCKER_URL;
   const USER_API = process.env.REACT_APP_API_UMS_URL;
   const token = localStorage.getItem("token");
 
@@ -29,7 +29,6 @@ export default function DocumentInfo() {
   const [updateSelectedFile, setUpdateSelectedFile] = useState(null);
   const [updateDocData, setUpdateDocData] = useState(null);
 
-  // Fetch documents
   useEffect(() => {
     const fetchAll = async () => {
       try {
