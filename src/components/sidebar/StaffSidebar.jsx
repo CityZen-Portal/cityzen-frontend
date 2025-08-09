@@ -56,7 +56,6 @@ const StaffSidebar = ({ open, onClose }) => {
               className="w-[150px]"
             />
           </div>
-          <p className="mt-2 text-lg font-medium">Staff Portal</p>
         </div>
       </div>
 
