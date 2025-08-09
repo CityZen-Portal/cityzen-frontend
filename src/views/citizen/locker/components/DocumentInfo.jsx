@@ -29,6 +29,7 @@ export default function DocumentInfo() {
   const [updateSelectedFile, setUpdateSelectedFile] = useState(null);
   const [updateDocData, setUpdateDocData] = useState(null);
 
+  // Fetch documents
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -39,6 +40,7 @@ export default function DocumentInfo() {
         );
         const aadharNumber = userRes.data.data.aadhaar;
         setUserInfo((prev) => ({ ...prev, aadharNumber }));
+
         const docsRes = await axios.get(
           `${LOCKER_API}/api/lock/listDocument/${aadharNumber}`,
           { headers: { token } }
@@ -63,13 +65,12 @@ export default function DocumentInfo() {
       const mediaRes = await axios.post(`${MEDIA_API}`, formData, {
         headers: { "Content-Type": "multipart/form-data", token },
       });
-      const { filePath } = mediaRes.data;
-      if (!filePath) return;
+
       const lockerRes = await axios.post(
         `${LOCKER_API}/api/lock/add`,
         {
           aadharNumber: userInfo.aadharNumber,
-          filePath,
+          filePath: mediaRes.data,
           fileName: fileNameInput,
         },
         { headers: { token } }
@@ -133,6 +134,7 @@ export default function DocumentInfo() {
     }
   };
 
+  // Download
   const downloadDoc = async (doc) => {
     try {
       const response = await fetch(doc.filePath);
@@ -163,6 +165,12 @@ export default function DocumentInfo() {
     }
   };
 
+  // View
+  const viewDoc = (doc) => {
+    window.open(doc.filePath, "_blank");
+  };
+
+  // Open update modal
   const updateDoc = (doc) => {
     setUpdateDocData(doc);
     setUpdateFileName(doc.fileName);
@@ -172,6 +180,7 @@ export default function DocumentInfo() {
   return (
     <div className="min-h-screen w-full bg-lightPrimary p-6 dark:bg-navy-900">
       <div className="mx-auto w-full max-w-5xl">
+        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-navy-700 dark:text-white">
             Documents
@@ -184,6 +193,7 @@ export default function DocumentInfo() {
           </button>
         </div>
 
+        {/* Alerts */}
         {successMsg && (
           <div className="mb-4 rounded-xl bg-green-500/10 p-3 text-sm text-green-600">
             {successMsg}
@@ -195,6 +205,7 @@ export default function DocumentInfo() {
           </div>
         )}
 
+        {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
@@ -206,10 +217,14 @@ export default function DocumentInfo() {
             {docs.map((doc) => (
               <DocumentCard
                 key={doc.fileId}
-                doc={doc}
-                onDownload={downloadDoc}
-                onDelete={deleteDoc}
-                onUpdate={updateDoc}
+                title={doc.fileName}
+                description={doc.filePath}
+                uploadedBy={userInfo.username}
+                date={doc.creationDate || ""}
+                onView={() => viewDoc(doc)}
+                onDownload={() => downloadDoc(doc)}
+                onDelete={() => deleteDoc(doc)}
+                onUpdate={() => updateDoc(doc)}
               />
             ))}
           </div>
@@ -219,14 +234,16 @@ export default function DocumentInfo() {
       {/* Upload Modal */}
       {showModal && (
         <div className="bg-black/40 fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-navy-800">
-            <h2 className="mb-4 text-xl font-semibold">Upload Document</h2>
+          <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+              Upload Document
+            </h2>
             <input
               type="text"
               value={fileNameInput}
               onChange={(e) => setFileNameInput(e.target.value)}
               placeholder="Enter file name"
-              className="mb-4 w-full rounded-lg border px-4 py-2"
+              className="mb-4 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
             <input
               type="file"
@@ -234,10 +251,21 @@ export default function DocumentInfo() {
                 setSelectedFile(e.target.files[0]);
                 setFileNameInput(e.target.files[0]?.name.split(".")[0] || "");
               }}
+              className="w-full text-gray-900 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-500 file:px-4 file:py-2 file:text-sm file:text-white hover:file:bg-indigo-600 dark:text-white"
             />
-            <div className="mt-4 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)}>Cancel</button>
-              <button onClick={uploadDocument}>Upload</button>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={uploadDocument}
+                className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white"
+              >
+                Upload
+              </button>
             </div>
           </div>
         </div>
@@ -250,56 +278,33 @@ export default function DocumentInfo() {
             <h2 className="mb-4 text-xl font-semibold text-navy-700 dark:text-white">
               Update Document
             </h2>
-
-            {/* File Name Input */}
-            <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                New File Name
-              </label>
-              <input
-                type="text"
-                value={updateFileName}
-                onChange={(e) => setUpdateFileName(e.target.value)}
-                placeholder="Enter new file name"
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-navy-700 dark:text-white"
-              />
-            </div>
-
-            {/* File Upload */}
-            <div className="mb-4">
-              <label
-                htmlFor="update-file-upload"
-                className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-100 dark:border-gray-600 dark:bg-navy-700 dark:text-white dark:hover:bg-navy-600"
-              >
-                {updateSelectedFile ? updateSelectedFile.name : "Choose a file"}
-                <span className="ml-4 rounded-md bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-600 dark:bg-brand-400 dark:hover:bg-brand-300">
-                  Browse
-                </span>
-                <input
-                  id="update-file-upload"
-                  type="file"
-                  onChange={(e) => setUpdateSelectedFile(e.target.files[0])}
-                  className="hidden"
-                />
-              </label>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-3">
+            <input
+              type="text"
+              value={updateFileName}
+              onChange={(e) => setUpdateFileName(e.target.value)}
+              placeholder="Enter new file name"
+              className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-navy-700 dark:text-white"
+            />
+            <input
+              type="file"
+              onChange={(e) => setUpdateSelectedFile(e.target.files[0])}
+              className="w-full text-gray-900 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-500 file:px-4 file:py-2 file:text-sm file:text-white hover:file:bg-indigo-600 dark:text-white"
+            />
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => {
                   setShowUpdateModal(false);
                   setUpdateFileName("");
                   setUpdateSelectedFile(null);
                 }}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-navy-700"
+                className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 dark:border-gray-600 dark:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={updateDocument}
                 disabled={!updateFileName.trim() && !updateSelectedFile}
-                className="rounded-md bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+                className="rounded-md bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 Update
               </button>
