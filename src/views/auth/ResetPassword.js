@@ -171,8 +171,8 @@ export default function ResetPassword() {
         }
       );
       
-      if (response.data.success) {
-        toast.success('Password reset successfully! Redirecting to login...', {
+      if (response.status === 200) {
+        toast.success('Password reset successfully', {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,

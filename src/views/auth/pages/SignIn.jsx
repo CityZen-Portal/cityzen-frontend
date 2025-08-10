@@ -111,7 +111,7 @@ export default function SignIn() {
         const response = await axios.post(`${apiurl}/api/auth/forgot-password`, {
         email,
       });
-      if (response.data.success) {
+      if (response.status === 200) {
         toast.success(`Password reset link sent to ${email}`, {
           position: "top-right",
           autoClose: 3000,
