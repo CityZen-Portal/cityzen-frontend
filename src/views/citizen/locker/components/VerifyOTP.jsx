@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { set } from "date-fns";
 
 const url = "https://auth-backend-2-k3ph.onrender.com";
 
