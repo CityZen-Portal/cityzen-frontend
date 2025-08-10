@@ -22,7 +22,7 @@ const Field = ({ label, value, icon, loading = false }) => (
       {loading ? (
         <div className="h-5 w-3/4 bg-gray-200 dark:bg-navy-700 rounded animate-pulse mt-1"></div>
       ) : (
-        <p className="mt-1 text-base text-gray-800 dark:text-gray-100">{value}</p>
+        <p className="mt-1 text-base text-gray-800 dark:text-gray-100">{value || "N/A"}</p>
       )}
     </div>
   </div>
@@ -33,7 +33,7 @@ const AdminProfile = () => {
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    id: "",
+    staffid: "",
     fullName: "",
     department: "",
     contactNumber: "",
@@ -41,25 +41,26 @@ const AdminProfile = () => {
     fullAddress: "",
     dob: "",
     aadharNumber: "",
-    created_date: "",
     designation: "",
     requestToResetPassword: false,
-    active: false,
-    delete: false,
+   
   });
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/staff/6884f01fc660d8c3d55ddf5e"
+          "https://utility-booking-backend.onrender.com/api/staff/email/poovarasan936161@gmail.com"
         );
 
-        const staff = response.data.data;
-        console.log("Fetched Staff Data:", staff);
+        // ✅ LOG RESPONSE TO CHECK
+        console.log("API Response:", response.data);
+
+        // ✅ Use correct structure based on response shape
+        const staff = response.data?.data || response.data;
 
         setFormData({
-          id: staff.id || "",
+           staffid: staff.staffId || "",
           fullName: staff.fullName || "",
           department: staff.department || "",
           contactNumber: staff.contactNumber || "",
@@ -67,14 +68,12 @@ const AdminProfile = () => {
           fullAddress: staff.fullAddress || "",
           dob: staff.dob || "",
           aadharNumber: staff.aadharNumber || "N/A",
-         
           designation: staff.designation || "",
           requestToResetPassword: staff.requestToResetPassword || false,
-          active: staff.active || false,
-          delete: staff.delete || false,
+          
         });
       } catch (error) {
-        console.error("Failed to fetch profile:", error);
+        console.error("❌ Failed to fetch profile:", error.message);
       } finally {
         setLoading(false);
       }
@@ -120,19 +119,13 @@ const AdminProfile = () => {
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="ID" value={formData.id} icon={<FaIdCard />} loading={loading} />
+          <Field label="Staff ID" value={formData.staffid} icon={<FaIdCard />} loading={loading} />
           <Field label="Full Name" value={formData.fullName} icon={<FaUser />} loading={loading} />
           <Field label="Designation" value={formData.designation} icon={<FaKey />} loading={loading} />
           <Field label="Department" value={formData.department} icon={<FaKey />} loading={loading} />
           <Field label="Date of Birth" value={formData.dob} icon={<FaCalendarAlt />} loading={loading} />
           <Field label="Aadhaar Number" value={formData.aadharNumber} icon={<FaIdCard />} loading={loading} />
-         
-          <Field
-            label="Active Status"
-            value={formData.active ? "Active" : "Inactive"}
-            icon={<FaCheckCircle className={formData.active ? "text-green-600" : "text-red-500"} />}
-            loading={loading}
-          />
+          
         </div>
       </div>
 
@@ -145,7 +138,6 @@ const AdminProfile = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field label="Contact Number" value={formData.contactNumber} icon={<FaPhone />} loading={loading} />
           <Field label="Email Address" value={formData.emailAddress} icon={<FaEnvelope />} loading={loading} />
-          
           <Field label="Full Address" value={formData.fullAddress} icon={<FaMapMarkerAlt />} loading={loading} />
         </div>
       </div>
