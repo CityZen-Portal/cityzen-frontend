@@ -63,10 +63,10 @@ const MunicipalEditForm = () => {
   const [newRequirement, setNewRequirement] = useState('');
   const [errors, setErrors] = useState({});
 
-    const formatDate = (date) => {
-    return date instanceof Date
-      ? date.toISOString().split('T')[0]
-      : date; // assumes it's already a string
+  const formatDate = (date) => {
+  return date instanceof Date
+    ? date.toISOString().split('T')[0]
+    : date;
   };
 
   const isValidDeadline = (dateStr) => {
@@ -77,6 +77,8 @@ const MunicipalEditForm = () => {
   };
 
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+
+  // Fetch Job Post Details
   useEffect(() => {
     // setLoading(true);
   
@@ -111,41 +113,6 @@ const MunicipalEditForm = () => {
     // setLoading(true);
 
   }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
-
-  // Load job data for editing
-  useEffect(() => {
-    // if (id) {
-    //   const savedJobs = localStorage.getItem('jobs');
-    //   if (savedJobs) {
-    //     try {
-    //       const jobs = JSON.parse(savedJobs);
-    //       const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'municipal');
-    //       if (jobToEdit) {
-    //         setFormData({
-    //           title: jobToEdit.title || '',
-    //           department: jobToEdit.department || '',
-    //           description: jobToEdit.description || '',
-    //           location: jobToEdit.location || '',
-    //           requirements: jobToEdit.requirements ? jobToEdit.requirements.split('; ').filter(req => req.trim()) : [],
-    //           deadline: jobToEdit.deadline || '',
-    //           contactPersonName: jobToEdit.contactPersonName || '',
-    //           contactPhoneNumber: jobToEdit.contactPhoneNumber || '',
-    //           contactEmail: jobToEdit.contactEmail || '',
-    //           contactAddress: jobToEdit.contactAddress || ''
-    //         });
-    //       } else {
-    //         toast.error('Job not found');
-    //         navigate('/admin/job-applications');
-    //       }
-    //     } catch (error) {
-    //       console.error('Failed to load job data', error);
-    //       toast.error('Failed to load job data');
-    //       navigate('/admin/job-applications');
-    //     }
-    //   }
-    //   setLoading(false);
-    // }
-  }, [id, navigate]);
 
   // Handle form field changes
   const handleInputChange = (field, value) => {
@@ -234,40 +201,40 @@ const MunicipalEditForm = () => {
     const newErrors = validateForm();
 
     const putData = {
-          ...formData,
-          deadline: new Date()
+      ...formData,
+      deadline: new Date()
+    }
+  
+    axios.put(`${JOB_APPLICATION_API}/jobs/${id}`, putData,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
         }
-    
-        axios.put(`${JOB_APPLICATION_API}/jobs/${id}`, putData,
-          {
-            headers:{
-              token,
-              email,
-              id: citizenId
-            }
-          }
-        )
-        .then(res => {
-          console.log('Response:', res.data);
-          toast.success('Job Vacancy Post posted successfully!', {
-            position: 'top-right',
-            autoClose: 1000,
-            theme: 'colored',
-            onClose: () => navigate('/admin/job-application')
-          });
-        })
-        .catch(err => {
-          console.error('Error:', err?.response?.data || err?.message);
-          toast.error('Server Error!Unable to Submit Post', {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored'
-          });
-          return;
-        })
-        .finally(() => {
-          // setLoadingSubmit(false);
-        });
+      }
+    )
+    .then(res => {
+      console.log('Response:', res.data);
+      toast.success('Job Vacancy Post posted successfully!', {
+        position: 'top-right',
+        autoClose: 1000,
+        theme: 'colored',
+        onClose: () => navigate('/admin/job-application')
+      });
+    })
+    .catch(err => {
+      console.error('Error:', err?.response?.data || err?.message);
+      toast.error('Server Error!Unable to Submit Post', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored'
+      });
+      return;
+    })
+    .finally(() => {
+      // setLoadingSubmit(false);
+    });
     
     // if (Object.keys(newErrors).length === 0) {
     //   // Prepare job data
