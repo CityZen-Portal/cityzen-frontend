@@ -16,12 +16,11 @@ export default function SignIn() {
   const [emailState, setEmailState] = useState("");
   const [passwordState, setPasswordState] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const apiurl = process.env.REACT_APP_API_UMS_URL;
+  // Fixed: Added fallback URL
+  const apiurl = process.env.REACT_APP_API_UMS_URL || "http://localhost:3000";
   const { login } = useUser();
-
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
-
   // Theme state
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -33,7 +32,7 @@ export default function SignIn() {
     }
     return false;
   });
-
+  
   // Favicon setup and theme effect
   useEffect(() => {
     // Set favicon
@@ -46,7 +45,6 @@ export default function SignIn() {
       newFavicon.href = "/brand-logo.png";
       document.head.appendChild(newFavicon);
     }
-
     // Apply theme
     if (isDark) {
       document.documentElement.classList.add("dark");
@@ -55,7 +53,6 @@ export default function SignIn() {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
-
     return () => {
       if (favicon) {
         favicon.href = "/favicon.ico";
@@ -72,13 +69,22 @@ export default function SignIn() {
       });
       return;
     }
-
+    
+    // Fixed: Added API URL validation
+    if (!apiurl) {
+      toast.error("Server configuration error. Please contact support.", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "colored",
+      });
+      return;
+    }
+    
     try {
       setIsLoading(true);
       const response = await axios.post(`${apiurl}/api/auth/forgot-password`, {
         email,
       });
-
       if (response.data.success) {
         toast.success(`Password reset link sent to ${email}`, {
           position: "top-right",
@@ -140,27 +146,45 @@ export default function SignIn() {
       setPasswordState("success");
     }
     
+    // Fixed: Added API URL validation
+    if (!apiurl) {
+      toast.error("Server configuration error. Please contact support.", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "colored",
+      });
+      return;
+    }
+    
     try {
-      setIsLoading(true); // Start loading
+      setIsLoading(true);
       const response = await axios.post(`${apiurl}/api/auth/login`, {
         email,
         password,
       });
+      
+      // Fixed: Destructure using the correct field name from backend (userName, not username)
       const {
         accessToken,
         roles,
-        username,
+        userName,  // ✅ This matches the backend field name exactly
         email: userEmail,
         id,
       } = response.data.data;
+      
+      // Debug log to verify the data
+      console.log("Login response data:", response.data.data);
+      console.log("UserName from response:", userName);
+      
+      // Pass the userName directly to the login function
       login({
         token: accessToken,
-        username,
+        userName: userName,  // ✅ This will now contain the actual username
         email: userEmail,
         role: roles,
         id,
       });
-
+      
       toast.success("Login successful", {
         position: "top-right",
         autoClose: 1000,
@@ -185,7 +209,7 @@ export default function SignIn() {
         theme: "colored",
       });
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
@@ -201,7 +225,6 @@ export default function SignIn() {
           />
         </div>
       )}
-
       {/* Theme Toggle - Top Right Corner */}
       <button
         onClick={() => setIsDark(!isDark)}
@@ -213,7 +236,6 @@ export default function SignIn() {
           <Moon className="h-5 w-5 text-gray-600" />
         )}
       </button>
-
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -227,7 +249,6 @@ export default function SignIn() {
         pauseOnHover
         theme="colored"
       />
-
       {/* Left Side - Sign In Form */}
       <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:max-w-md">
@@ -240,7 +261,6 @@ export default function SignIn() {
               Sign in to access your citizen portal and manage civic services
             </p>
           </div>
-
           <form 
             onSubmit={handleSubmit} 
             className="space-y-6" 
@@ -276,7 +296,6 @@ export default function SignIn() {
                 )}
               </div>
             </div>
-
             {/* Password Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -317,7 +336,6 @@ export default function SignIn() {
                 )}
               </div>
             </div>
-
             <div className="text-right">
               <button
                 type="button"
@@ -328,7 +346,6 @@ export default function SignIn() {
                 Forgot password?
               </button>
             </div>
-
             {/* Sign In Button */}
             <button
               type="submit"
@@ -341,7 +358,6 @@ export default function SignIn() {
             >
               {isLoading ? "Signing In..." : "Sign In to Your Account"}
             </button>
-
             {/* Sign Up Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -359,7 +375,6 @@ export default function SignIn() {
           </form>
         </div>
       </div>
-
       {/* Right Side - Illustration */}
       <div className="relative hidden w-1/2 items-center justify-center overflow-hidden bg-blue-50 dark:bg-gray-800 lg:flex">
         <div className="max-w-lg px-8 text-center">
@@ -371,7 +386,6 @@ export default function SignIn() {
               className="mx-auto w-full max-w-md"
             />
           </div>
-
           <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             <span className="text-blue-600">Citizen Portal</span>
           </h1>
@@ -379,7 +393,6 @@ export default function SignIn() {
             Access municipal services, report civic issues, and stay connected
             with your community through our comprehensive citizen portal.
           </p>
-
           {/* Feature Checkmarks */}
           <div className="space-y-4 text-left">
             <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
@@ -417,7 +430,6 @@ export default function SignIn() {
           </div>
         </div>
       </div>
-
       {/* Forgot Password Modal */}
       {showForgotPassword && (
         <div className="bg-black/50 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
@@ -443,7 +455,6 @@ export default function SignIn() {
                 />
               </svg>
             </button>
-
             <div className="mb-6 text-center">
               <h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
                 Reset Password
@@ -452,7 +463,6 @@ export default function SignIn() {
                 Enter your email to receive a password reset link
               </p>
             </div>
-
             <div className="relative mb-6">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <Mail className="h-5 w-5 text-gray-400" />
@@ -469,7 +479,6 @@ export default function SignIn() {
                 disabled={isLoading}
               />
             </div>
-
             <button
               type="button"
               onClick={handleForgotPassword}
@@ -482,7 +491,6 @@ export default function SignIn() {
             >
               {isLoading ? "Sending..." : "Send Reset Link"}
             </button>
-
             <div className="text-center">
               <button
                 type="button"

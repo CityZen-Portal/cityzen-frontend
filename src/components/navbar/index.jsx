@@ -8,11 +8,11 @@ import avatar from "assets/img/avatars/avatar4.png";
 import { motion } from "framer-motion";
 import ProfileDropdown from "../dropdown/ProfileDropdown";
 import axios from "axios";
-import { useUser } from "contexts/UserContext"; // ✅ Import UserContext for logout
+import { useUser } from "contexts/UserContext"; // ✅ Import UserContext for user data and logout
 
 const Navbar = (props) => {
   const { onOpenSidenav, brandText, newsState } = props;
-  const { logout } = useUser(); // ✅ Get logout function
+  const { logout, userName, role, email } = useUser(); // ✅ Get user data and logout function
   const navigate = useNavigate();
 
   // Theme state management
@@ -75,6 +75,32 @@ const Navbar = (props) => {
 
   const toggleTheme = () => {
     setDarkmode(!darkmode);
+  };
+
+  // ✅ Helper function to format role display
+  const formatRole = (userRole) => {
+    if (!userRole) return "User";
+    
+    // Handle array of roles
+    if (Array.isArray(userRole)) {
+      const primaryRole = userRole[0] || "User";
+      return primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1).toLowerCase();
+    }
+    
+    // Handle single role string
+    return userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase();
+  };
+
+  // ✅ Helper function to get display name
+  const getDisplayName = () => {
+    if (userName) {
+      return userName;
+    }
+    if (email) {
+      // Extract name from email (part before @)
+      return email.split('@')[0];
+    }
+    return "User";
   };
 
   return (
@@ -237,11 +263,13 @@ const Navbar = (props) => {
                   alt="User Avatar"
                 />
                 <div>
+                  {/* ✅ Dynamic username display */}
                   <p className="text-base font-bold text-gray-800 dark:text-white">
-                    Adela Parkson
+                    {getDisplayName()}
                   </p>
+                  {/* ✅ Dynamic role display */}
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Citizen
+                    {formatRole(role)}
                   </p>
                 </div>
               </div>
@@ -265,7 +293,7 @@ const Navbar = (props) => {
                   Profile
                 </Link>
 
-                {/* ✅ Updated Logout button */}
+                {/* ✅ Logout button */}
                 <button
                   onClick={() => {
                     logout(); // Clear state + localStorage
