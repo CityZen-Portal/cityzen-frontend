@@ -1,9 +1,82 @@
-import React from "react";
-import { Plus, BarChart3, TrendingUp, Users, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, BarChart3, TrendingUp, Users, CheckCircle, Clock, AlertCircle, Briefcase } from "lucide-react";
 import NewsGallery from "./components/NewsGallery.jsx";
 import PieChartCard from "./components/PieChart";
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
+  const [jobs, setJobs] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Get token and user info from localStorage
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("email");
+  const citizenId = localStorage.getItem("id");
+
+  const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+
+  // Fetch jobs and volunteers data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch jobs data
+        const jobsResponse = await axios.get(`${JOB_APPLICATION_API}/jobs`, {
+          headers: {
+            token,
+            email,
+            id: citizenId
+          }
+        });
+        
+        // Fetch volunteers data
+        const volunteersResponse = await axios.get(`${JOB_APPLICATION_API}/service`, {
+          headers: {
+            token,
+            email,
+            id: citizenId
+          }
+        });
+        
+        const jobsData = jobsResponse.data?.data || [];
+        const volunteersData = volunteersResponse.data?.data || [];
+        
+        setJobs(jobsData);
+        setVolunteers(volunteersData);
+        
+      } catch (error) {
+        console.error('Error fetching opportunities data:', error);
+        toast.error('Unable to fetch opportunities data', {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored'
+        });
+        // Keep default values if API fails
+        setJobs([]);
+        setVolunteers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Only fetch if we have the required auth info
+    if (token && email && citizenId && JOB_APPLICATION_API) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [token, email, citizenId, JOB_APPLICATION_API]);
+
+  // Calculate counts from fetched data
+  const activeJobs = jobs.filter(job => job.isActive);
+  const activeVolunteers = volunteers.filter(volunteer => volunteer.isActive);
+  const municipalCount = activeJobs.length;
+  const volunteerCount = activeVolunteers.length;
+  const totalOpportunities = municipalCount + volunteerCount;
+
   const quickStats = [
     { 
       number: "12", 
@@ -27,10 +100,10 @@ const Dashboard = () => {
       color: "from-orange-500 to-orange-600"
     },
     { 
-      number: "95%", 
-      label: "Satisfaction Score", 
-      icon: TrendingUp, 
-      change: "+2% improved",
+      number: loading ? "..." : totalOpportunities.toString(), 
+      label: "Total Opportunities", 
+      icon: Briefcase, 
+      change: loading ? "Loading..." : `${municipalCount} jobs, ${volunteerCount} volunteer`,
       color: "from-blue-500 to-blue-600"  
     }
   ];
