@@ -13,6 +13,18 @@ const initialNewTaskState = {
   description: "",
 };
 
+const SkeletonCard = () => (
+  <div className="bg-gradient-to-br from-blue-50 via-white to-pink-50 
+                  dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 
+                  shadow-2xl rounded-3xl border-2 border-blue-200 
+                  dark:border-gray-700 p-6 animate-pulse">
+    <div className="h-5 w-2/3 bg-gray-300 dark:bg-gray-600 rounded mb-4"></div>
+    <div className="h-4 w-1/2 bg-gray-300 dark:bg-gray-600 rounded mb-3"></div>
+    <div className="h-4 w-3/4 bg-gray-300 dark:bg-gray-600 rounded mb-3"></div>
+    <div className="h-4 w-1/3 bg-gray-300 dark:bg-gray-600 rounded"></div>
+  </div>
+);
+
 function ViewTasks() {
   const navigate = useNavigate();
 
@@ -24,22 +36,30 @@ function ViewTasks() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [selectedBookingData, setSelectedBookingData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    const fetchRequest = async () => {
-      try {
-        const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/services/request/all"
-        );
-        const visibleRequests = response.data.data.filter((request) => request.show === false);
-        setBookingRequests(visibleRequests);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchRequest();
-  }, []);
+useEffect(() => {
+  const fetchRequest = async () => {
+    setLoading(true); // ✅ Start loading
+    try {
+      const response = await axios.get(
+        "https://utility-booking-backend.onrender.com/api/services/request/all"
+      );
+      const visibleRequests = response.data.data.filter(
+        (request) => request.show === false
+      );
+      setBookingRequests(visibleRequests);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false); // ✅ Stop loading
+    }
+  };
+  fetchRequest();
+}, []);
+
+  
 
   useEffect(() => {
     setCurrentPage(1);
@@ -115,14 +135,14 @@ function ViewTasks() {
 
   const handleSaveTask = async () => {
     if (!newTask.title || !newTask.staff || !newTask.date || !newTask.time || !newTask.address) {
-      alert("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return;
     }
 
     try {
       const selectedStaff = staffList.find((s) => s.name === newTask.staff);
       if (!selectedStaff || !selectedBookingData) {
-        alert("Invalid staff or booking request selection.");
+        toast.error("Invalid staff or booking request selection.");
         return;
       }
 
@@ -154,7 +174,7 @@ function ViewTasks() {
           <div>
             <button
               onClick={() => navigate("/admin/services")}
-              className="text-white hover:text-gray-200 transition-colors flex items-center gap-2 mb-2 text-sm"
+              className="text-white hover:text-gray-200 dark:text-cyan-100 transition-colors flex items-center gap-2 mb-2 text-sm"
             >
               <span>←</span> Back to Services
             </button>
@@ -173,9 +193,13 @@ function ViewTasks() {
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-200">
             User Booking Requests
           </h3>
-          {bookingRequests.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-300">No booking requests found.</p>
-          ) : (
+         {bookingRequests.length === 0 ? (
+  <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
+    {[...Array(6)].map((_, idx) => (
+      <SkeletonCard key={idx} />
+    ))}
+  </div>
+) : (
             <>
               <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
                 {currentRequests.map((req) => (

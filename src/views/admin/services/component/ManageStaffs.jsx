@@ -47,6 +47,8 @@ function ManageStaffs() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [resetRequestStaffIds, setResetRequestStaffIds] = useState([]);
+  const [saving, setSaving] = useState(false);
+
 
 
   useEffect(() => {
@@ -110,73 +112,74 @@ function ManageStaffs() {
     return age;
   };
 
-  const handleAddOrUpdateStaff = async () => {
-    const requiredFields = [
-      "fullName",
-      "department",
-      "designation",
-      "contactNumber",
-      "emailAddress",
-      "fullAddress",
-      "dob",
-      "aadharNumber",
-    ];
-    const missing = requiredFields.filter((field) => !newStaff[field]);
-    if (missing.length) {
-      toast.error(`Please fill all fields: ${missing.join(", ")}`);
-      return;
+const handleAddOrUpdateStaff = async () => {
+  const requiredFields = [
+    "fullName", "department", "designation", "contactNumber", 
+    "emailAddress", "fullAddress", "dob", "aadharNumber"
+  ];
+
+  const missing = requiredFields.filter((field) => !newStaff[field]);
+  if (missing.length) {
+    toast.error(`Please fill all fields: ${missing.join(", ")}`);
+    return;
+  }
+  if (!isValidEmail(newStaff.emailAddress)) {
+    toast.error("Enter a valid email address.");
+    return;
+  }
+  if (!isValidPhone(newStaff.contactNumber)) {
+    toast.error("Contact number must be 10 digits.");
+    return;
+  }
+  if (!isValidAadhar(newStaff.aadharNumber)) {
+    toast.error("Aadhar number must be 12 digits.");
+    return;
+  }
+  const age = calculateAge(newStaff.dob);
+  if (age < 18 || age > 60) {
+    toast.error("Staff age must be between 18 and 60 years.");
+    return;
+  }
+  if (new Date(newStaff.dob) > new Date()) {
+    toast.error("DOB cannot be a future date.");
+    return;
+  }
+
+  try {
+    setSaving(true); // ✅ Start loading
+
+    if (editId) {
+      await axios.put(
+        `https://utility-booking-backend.onrender.com/api/staff/${editId}`,
+        newStaff
+      );
+      setStaffs((prev) =>
+        prev.map((s) => (s.id === editId ? { ...s, ...newStaff, id: editId } : s))
+      );
+      setRefreshTrigger((prev) => !prev);
+      toast.success("Staff updated successfully!");
+    } else {
+      const response = await axios.post(
+        "https://utility-booking-backend.onrender.com/api/staff/add",
+        newStaff
+      );
+      const createdStaff = response.data?.data;
+      setStaffs((prev) => [...prev, createdStaff]);
+      setRefreshTrigger((prev) => !prev);
+      toast.success("Staff added successfully!");
     }
-    if (!isValidEmail(newStaff.emailAddress)) {
-      toast.error("Enter a valid email address.");
-      return;
+    handleClose();
+  } catch (error) {
+    if (error.response?.data?.statusCode === 409) {
+      toast.error("Failed to save staff. Email is Already registered ");
+    } else {
+      toast.error("Failed to save staff. Please try again.");
     }
-    if (!isValidPhone(newStaff.contactNumber)) {
-      toast.error("Contact number must be 10 digits.");
-      return;
-    }
-    if (!isValidAadhar(newStaff.aadharNumber)) {
-      toast.error("Aadhar number must be 12 digits.");
-      return;
-    }
-    const age = calculateAge(newStaff.dob);
-    if (age < 18 || age > 60) {
-      toast.error("Staff age must be between 18 and 60 years.");
-      return;
-    }
-    if (new Date(newStaff.dob) > new Date()) {
-      toast.error("DOB cannot be a future date.");
-      return;
-    }
-    try {
-      if (editId) {
-        await axios.put(
-          `https://utility-booking-backend.onrender.com/api/staff/${editId}`,
-          newStaff
-        );
-        setStaffs((prev) =>
-          prev.map((s) => (s.id === editId ? { ...s, ...newStaff, id: editId } : s))
-        );
-        setRefreshTrigger((prev) => !prev);
-        toast.success("Staff updated successfully!");
-      } else {
-        const response = await axios.post(
-          "https://utility-booking-backend.onrender.com/api/staff/add",
-          newStaff
-        );
-        const createdStaff = response.data?.data;
-        setStaffs((prev) => [...prev, createdStaff]);
-        setRefreshTrigger((prev) => !prev);
-        toast.success("Staff added successfully!");
-      }
-      handleClose();
-    } catch (error) {
-      if (error.response?.data?.statusCode === 409) {
-        toast.error("Failed to save staff. Email is Already registered ");
-      } else {
-        toast.error("Failed to save staff. Please try again.");
-      }
-    }
-  };
+  } finally {
+    setSaving(false); // ✅ Stop loading
+  }
+};
+
 
   const confirmDeleteStaff = (id) => {
     setDeleteId(id);
@@ -521,7 +524,15 @@ useEffect(() => {
             </div>
             <div className="mt-8 flex justify-end gap-4">
               <button onClick={handleClose} className="rounded-lg border px-5 py-2.5 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700">Cancel</button>
-              <button onClick={handleAddOrUpdateStaff} className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700">{editId ? "Update Staff" : "Add Staff"}</button>
+             <button
+  onClick={handleAddOrUpdateStaff}
+  disabled={saving}
+  className={`rounded-lg px-5 py-2.5 font-semibold text-white transition-colors 
+    ${saving ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+>
+  {saving ? "Saving..." : (editId ? "Update Staff" : "Add Staff")}
+</button>
+
             </div>
           </div>
         </div>
