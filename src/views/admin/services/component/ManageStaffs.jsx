@@ -223,20 +223,20 @@ function ManageStaffs() {
     }
   };
 
-  useEffect(() => {
-    const fetchResetPasswordRequests = async () => {
-      try {
-        const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/staff/reset-password-request/688b49083f074e456ee154c9?isRequestToResetPassword=true"
-        );
-        const idsWithResetRequests = response.data?.data ?? [];
-        setResetRequestStaffIds(idsWithResetRequests);
-      } catch (error) {
-        setResetRequestStaffIds([]);
-      }
-    };
-    fetchResetPasswordRequests();
-  }, []);
+  // useEffect(() => {
+  //   const fetchResetPasswordRequests = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://utility-booking-backend.onrender.com/api/staff/reset-password-request/688b49083f074e456ee154c9?isRequestToResetPassword=true"
+  //       );
+  //       const idsWithResetRequests = response.data?.data ?? [];
+  //       setResetRequestStaffIds(idsWithResetRequests);
+  //     } catch (error) {
+  //       setResetRequestStaffIds([]);
+  //     }
+  //   };
+  //   fetchResetPasswordRequests();
+  // }, []);
 
   useEffect(() => {
     const fetchStaff = async () => {
@@ -425,13 +425,14 @@ function ManageStaffs() {
                     </div>
                   </div>
                 </div>
-                <button
+              
+                <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
+                    <button
                   onClick={() => resetPasswordHandler(staff.emailAddress)}
-                  className="flex-1 text-white py-2 rounded-md"
+                  className="flex-1 text-red-500 dark:text-cyan-500 py-2 rounded-md"
                 >
                   Reset Password
                 </button>
-                <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
                   <button
                     onClick={() => handleOpen(staff)}
                     className="text-yellow-500 transition-colors hover:text-yellow-600"
