@@ -13,7 +13,7 @@ const CompletionForm = ({
   handleInputChange,
   errors,
   setErrors,
-   fetchRequests
+  fetchRequests
 }) => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -44,7 +44,7 @@ const CompletionForm = ({
       const reader = new FileReader();
       reader.onloadend = () => setPhotoPreview(reader.result);
       reader.readAsDataURL(file);
-      if (setErrors) setErrors((prev={}) => ({ ...prev, photo: undefined })); // Clear photo error
+      if (setErrors) setErrors((prev = {}) => ({ ...prev, photo: undefined })); // Clear photo error
     }
   };
 
@@ -67,10 +67,10 @@ const CompletionForm = ({
 
     try {
 
-        const uploadRes = await uploadImage(photo);
+      const uploadRes = await uploadImage(photo);
 
-        imageName = uploadRes.data.name;
-        imagePath = uploadRes.data.path;
+      imageName = uploadRes.data.name;
+      imagePath = uploadRes.data.path;
 
       const payload = {
         serviceId: task.serviceId,
@@ -113,11 +113,11 @@ const CompletionForm = ({
               {selectedRequest.citizenName}
             </p>
             <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <span className="font-medium text-navy-700 dark:text-white">Service:</span>
-              {selectedRequest.serviceName}
+              <span className="font-medium text-navy-700 dark:text-white">Service Request:</span>
+              {selectedRequest.description}
             </p>
             <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <span className="font-medium text-navy-700 dark:text-white">Date:</span>
+              <span className="font-medium text-navy-700 dark:text-white">Request Date:</span>
               {selectedRequest.requested_Date}
             </p>
           </div>
@@ -141,10 +141,11 @@ const CompletionForm = ({
                   id="completionDate"
                   value={formData.completionDate}
                   onChange={handleInputChange}
-                  className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border ${
-                    errors?.completionDate ? 'border-red-500' : 'border-gray-200'
-                  } bg-white/0 p-3 text-sm outline-none dark:!border-white/10 dark:text-white focus:border-brand-500 dark:focus:border-brand-400 transition-colors`}
+                  min={new Date().toISOString().split("T")[0]} // disables past dates
+                  className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border ${errors?.completionDate ? 'border-red-500' : 'border-gray-200'
+                    } bg-white/0 p-3 text-sm outline-none dark:!border-white/10 dark:text-white focus:border-brand-500 dark:focus:border-brand-400 transition-colors`}
                 />
+
                 {errors?.completionDate && (
                   <p className="text-red-500 text-xs mt-1 ml-1">{errors.completionDate}</p>
                 )}

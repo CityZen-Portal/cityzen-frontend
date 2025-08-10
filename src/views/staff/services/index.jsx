@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FilterButtons, RequestDetails, CompletionForm, RequestsTable } from './component';
-
+import loading_gif from "../../../assets/gif/loading-gif.gif"
 const StaffService = () => {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -142,10 +142,13 @@ const StaffService = () => {
     viewMode === "all"
       ? requests
       : viewMode === "pending"
-        ? requests.filter(req => req.status === "pending")
-        : requests.filter(req => req.status === "completed");
+        ? requests.filter(req => req.taskStatus === "PENDING")
+        : requests.filter(req => req.taskStatus === "COMPLETED");
 
-  if (loading) return <p className="text-center mt-5">Loading...</p>;
+  if (loading) return <div className="flex justify-center items-center py-16">
+              <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
+            </div>
+
   if (error) return <p className="text-center text-red-500 mt-5">{error}</p>;
 
   return (
