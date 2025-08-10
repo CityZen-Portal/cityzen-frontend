@@ -8,13 +8,20 @@ import avatar from "assets/img/avatars/avatar4.png";
 import { motion } from "framer-motion";
 import ProfileDropdown from "../dropdown/ProfileDropdown";
 import axios from "axios";
+import { useUser } from "contexts/UserContext";
+
+const Navbar = (props) => {
+  const { onOpenSidenav, brandText, newsState } = props;
+  const { logout } = useUser();
+
 import { useUser } from "contexts/UserContext"; // ✅ Import UserContext for user data and logout
 
 const Navbar = (props) => {
   const { onOpenSidenav, brandText, newsState } = props;
   const { logout, userName, role, email } = useUser(); // ✅ Get user data and logout function
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  
   // Theme state management
   const [darkmode, setDarkmode] = useState(() => {
     if (typeof window !== "undefined") {
@@ -26,6 +33,27 @@ const Navbar = (props) => {
     }
     return false;
   });
+
+  // Favicon setup
+  useEffect(() => {
+    // Set favicon
+    const favicon = document.querySelector("link[rel='icon']");
+    if (favicon) {
+      favicon.href = "/brand-logo.png";
+    } else {
+      const newFavicon = document.createElement("link");
+      newFavicon.rel = "icon";
+      newFavicon.href = "/brand-logo.png";
+      document.head.appendChild(newFavicon);
+    }
+    
+    // Cleanup function to reset favicon when component unmounts
+    return () => {
+      if (favicon) {
+        favicon.href = "/favicon.ico";
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (darkmode) {
@@ -39,7 +67,7 @@ const Navbar = (props) => {
 
   const [news, setNews] = useState(null);
   const [breakingNews, setBreakingNews] = useState([]);
-
+  
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -118,7 +146,6 @@ const Navbar = (props) => {
             />
           </div>
         </div>
-
         {/* Page Title */}
         <div className="ml-8">
           <p className="text-[28px] font-bold text-gray-800 dark:text-white">
@@ -126,7 +153,7 @@ const Navbar = (props) => {
           </p>
         </div>
       </div>
-
+      
       <div className="relative mt-[3px] flex h-[61px] w-[355px] flex-grow items-center justify-around gap-2 rounded-full bg-gray-50 px-2 py-2 shadow-sm dark:bg-gray-800 md:w-[365px] md:flex-grow-0 md:gap-1 xl:w-[365px] xl:gap-2 transition-all duration-300">
         {/* Search */}
         <div className="flex h-full items-center rounded-full bg-white px-4 text-gray-700 dark:bg-gray-700 dark:text-white xl:w-[225px] shadow-sm transition-all duration-300">
@@ -139,7 +166,7 @@ const Navbar = (props) => {
             className="block h-full w-full rounded-full bg-white text-sm font-medium text-gray-700 outline-none placeholder:text-gray-400 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 sm:w-fit transition-all duration-300"
           />
         </div>
-
+        
         {/* Mobile menu button */}
         <span
           className="flex cursor-pointer text-xl text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 xl:hidden transition-colors duration-300"
@@ -147,7 +174,7 @@ const Navbar = (props) => {
         >
           <FiAlignJustify className="h-5 w-5" />
         </span>
-
+        
         {/* Notifications */}
         {newsState && (
           <Dropdown
@@ -229,7 +256,7 @@ const Navbar = (props) => {
             }
           />
         )}
-
+        
         {/* Theme Toggle */}
         <div
           className="flex items-center justify-center p-2 rounded-full cursor-pointer text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
@@ -241,7 +268,7 @@ const Navbar = (props) => {
             <RiMoonFill className="h-5 w-5" />
           )}
         </div>
-
+        
         {/* Profile Dropdown */}
         <ProfileDropdown
           button={
@@ -293,11 +320,10 @@ const Navbar = (props) => {
                   Profile
                 </Link>
 
-                {/* ✅ Logout button */}
                 <button
                   onClick={() => {
-                    logout(); // Clear state + localStorage
-                    navigate("/auth/signin"); // Redirect
+                    logout();
+                    navigate("/auth/signin");
                   }}
                   className="flex items-center gap-3 text-sm font-medium text-red-500 hover:text-red-700 transition-colors duration-300 w-full text-left"
                 >
