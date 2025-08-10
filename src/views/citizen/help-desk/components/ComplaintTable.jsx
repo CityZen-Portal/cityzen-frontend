@@ -167,7 +167,7 @@ const ComplaintTable = ({ complaints, loading }) => {
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-navy-800">
             {loading ? (
               Array.from({ length: rowsPerPage }).map((_, index) => (
                 <SkeletonRow key={index} />

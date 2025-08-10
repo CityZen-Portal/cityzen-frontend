@@ -82,9 +82,9 @@ const ComplaintLog = () => {
   ];
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen p-6 bg-gray-50 dark:bg-navy-900">
       {/* Header */}
-      <div className="mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="mb-4 sm:mb-6 bg-white dark:bg-navy-800 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <MdTrackChanges className="text-3xl sm:text-4xl text-blue-600" />
