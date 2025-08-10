@@ -4,17 +4,18 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 function FeedBack() {
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [date,setDate]=useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const userName = localStorage.getItem("userName");
+    const date = new Date().toISOString();
 
     const data = {
-      name: fullName,
+      name: userName,
       description: feedback,
-      date
+      date,
     };
+    console.log(data);
 
     try {
       await axios.post(
@@ -47,39 +48,6 @@ function FeedBack() {
           Feedback Form
         </h2>
         <form onSubmit={handleSubmit}>
-          <label
-            htmlFor="feedbackName"
-            className="m-3 block text-base font-semibold text-[#07074D] dark:text-white sm:text-xl"
-          >
-            Your FullName
-          </label>
-          <input
-            type="text"
-            name="feedbackName"
-            id="feedbackName"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Full Name"
-            className="bg-whiten w-full rounded-md border border-[#e0e0e0] px-6 py-3 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md dark:border-navy-800 dark:bg-navy-900 dark:text-white"
-            required
-          />
-          <label
-            htmlFor="feedbackName"
-            className="m-3 block text-base font-semibold text-[#07074D] dark:text-white sm:text-xl"
-          >
-          Date
-          </label>
-          <input
-            type="date"
-            name="date"
-            id="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            placeholder="Full Name"
-            className="bg-whiten w-full rounded-md border border-[#e0e0e0] px-6 py-3 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md dark:border-navy-800 dark:bg-navy-900 dark:text-white"
-            required
-          />
-
           <label
             htmlFor="feedbackText"
             className="m-3 block text-base font-semibold text-[#07074D] dark:text-white sm:text-xl"
