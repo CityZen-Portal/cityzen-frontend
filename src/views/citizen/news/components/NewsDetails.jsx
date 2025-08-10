@@ -152,7 +152,7 @@ export default function NewsDetails() {
           </div>
 
           {newsItem.location && (
-            <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">📍 Location: {newsItem.location}</div>
+            <div className="mt-6  text-gray-500 dark:text-white-700 text-md"> Location: <span className="">{newsItem.location}</span></div>
           )}
         </div>
       </div>
