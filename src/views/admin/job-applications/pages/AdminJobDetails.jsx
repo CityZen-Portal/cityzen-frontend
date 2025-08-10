@@ -134,9 +134,9 @@ const AdminJobDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-10">
+      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -176,7 +176,7 @@ const AdminJobDetailsPage = () => {
           {/* Left Column - Main Details */}
           <div className="lg:col-span-2 space-y-8">
             {/* Title and Basic Info */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
@@ -237,7 +237,7 @@ const AdminJobDetailsPage = () => {
             </div>
 
             {/* Description */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                 <FileText className="text-blue-600 dark:text-blue-400" size={24} />
                 Job Description
@@ -251,7 +251,7 @@ const AdminJobDetailsPage = () => {
 
             {/* Requirements */}
             {job.requirements && job.requirements.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
+              <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                   <CheckCircle className="text-blue-600 dark:text-blue-400" size={24} />
                   Requirements
@@ -259,7 +259,7 @@ const AdminJobDetailsPage = () => {
                 <ul className="space-y-3">
                   {job.requirements.map((requirement, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <CheckCircle className="text-green-500 mt-1 flex-shrink-0" size={16} />
+                      <CheckCircle className="text-gray-500 mt-1 flex-shrink-0" size={16} />
                       <span className="text-gray-700 dark:text-gray-300">{requirement}</span>
                     </li>
                   ))}
@@ -271,9 +271,9 @@ const AdminJobDetailsPage = () => {
           {/* Right Column - Contact Info */}
           <div className="space-y-6">
             {/* Contact Information */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-24">
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-24">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                <User className="text-purple-600 dark:text-purple-400" size={20} />
+                <User className="text-blue-600 dark:text-blue-400" size={20} />
                 Contact Information
               </h3>
               
@@ -332,7 +332,7 @@ const AdminJobDetailsPage = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <a
                     href={`tel:${job.contactPhoneNumber}`}
-                    className="flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-sm font-medium"
+                    className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/80 transition-colors text-sm font-medium"
                   >
                     <Phone size={16} />
                     Call
@@ -340,7 +340,7 @@ const AdminJobDetailsPage = () => {
                   {job.contactEmail && (
                     <a
                       href={`mailto:${job.contactEmail}`}
-                      className="flex items-center justify-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 py-2 px-3 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors text-sm font-medium"
+                      className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/80 transition-colors text-sm font-medium"
                     >
                       <Mail size={16} />
                       Email

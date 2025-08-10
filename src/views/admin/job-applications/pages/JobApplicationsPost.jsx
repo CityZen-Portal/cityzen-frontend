@@ -419,7 +419,7 @@ const JobApplicationsPost = () => {
         {municipalJobs.length > 0 && (
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <Building2 className="text-blue-600" size={24} />
+              <Building2 className="text-gray-900 dark:text-white" size={24} />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Municipal Jobs ({municipalJobs.length})
               </h2>
@@ -454,7 +454,7 @@ const JobApplicationsPost = () => {
         {volunteerJobs.length > 0 && (
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <Heart className="text-green-600" size={24} />
+              <Heart className="text-gray-900 dark:text-white" size={24} />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Volunteer Programs ({volunteerJobs.length})
               </h2>
@@ -526,9 +526,9 @@ const JobApplicationsPost = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
@@ -563,7 +563,7 @@ const JobApplicationsPost = () => {
       {/* Stats Cards */}
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <TrendingUp className="text-blue-600 dark:text-blue-400" size={24} />
@@ -575,7 +575,7 @@ const JobApplicationsPost = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <Building2 className="text-blue-600 dark:text-blue-400" size={24} />
@@ -587,10 +587,10 @@ const JobApplicationsPost = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <Heart className="text-green-600 dark:text-green-400" size={24} />
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Heart className="text-blue-600 dark:text-blue-400" size={24} />
               </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Volunteer Programs</p>
@@ -599,10 +599,10 @@ const JobApplicationsPost = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                <Trash className="text-red-600 dark:text-red-400" size={24} />
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Trash className="text-blue-600 dark:text-blue-400" size={24} />
               </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Deleted Items</p>
@@ -613,7 +613,7 @@ const JobApplicationsPost = () => {
         </div>
 
         {/* Search and Filter */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
+        <div className="bg-white dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -623,7 +623,7 @@ const JobApplicationsPost = () => {
                   placeholder="Search jobs and volunteer programs..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-navy-700 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -643,7 +643,7 @@ const JobApplicationsPost = () => {
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                     activeFilter === key
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      : 'bg-gray-100 dark:bg-navy-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-navy-600'
                   }`}
                 >
                   <Icon size={16} />
@@ -661,7 +661,7 @@ const JobApplicationsPost = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-white dark:bg-navy-800 rounded-xl p-6 max-w-md w-full mx-4">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                 <AlertTriangle className="text-red-600 dark:text-red-400" size={24} />
