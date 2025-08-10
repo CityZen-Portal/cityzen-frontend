@@ -246,9 +246,9 @@ const JobApplicationSystem = () => {
   const volunteerCount = activeVolunteers.length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Job Application</h1>
@@ -259,15 +259,15 @@ const JobApplicationSystem = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 ">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Opportunities</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{municipalCount + volunteerCount}</p>
-                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                <p className="text-3xl font-bold text-black-900 dark:text-white">{municipalCount + volunteerCount}</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
                   <TrendingUp size={16} className="inline mr-1" />
                   Active Opportunities
                 </p>
@@ -278,11 +278,11 @@ const JobApplicationSystem = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Municipal Jobs</p>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{municipalCount}</p>
+                <p className="text-3xl font-bold text-black-600 dark:text-white">{municipalCount}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   <Building2 size={16} className="inline mr-1" />
                   Government Positions
@@ -294,18 +294,18 @@ const JobApplicationSystem = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Volunteer Programs</p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400">{volunteerCount}</p>
+                <p className="text-3xl font-bold text-black-600 dark:text-white">{volunteerCount}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   <Heart size={16} className="inline mr-1" />
                   Community Service
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <Heart className="text-green-600 dark:text-green-400" size={24} />
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <Heart className="text-blue-600 dark:text-blue-400" size={24} />
               </div>
             </div>
           </div>
@@ -322,17 +322,17 @@ const JobApplicationSystem = () => {
                 placeholder="Search jobs, programs, departments, locations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 border border-navy-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               />
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex items-center gap-2 bg-white dark:bg-navy-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeFilter === 'all'
-                    ? 'bg-gray-900 text-white shadow-md'
+                    ? 'bg-blue-600 text-white shadow-md'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
@@ -352,7 +352,7 @@ const JobApplicationSystem = () => {
                 onClick={() => setActiveFilter('volunteer')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeFilter === 'volunteer'
-                    ? 'bg-green-600 text-white shadow-md'
+                    ? 'bg-blue-600 text-white shadow-md'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
@@ -395,7 +395,7 @@ const JobApplicationSystem = () => {
             {filteredJobs.length > 0 && (
               <div className="mb-12">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                  <Building2 className="text-blue-600" size={28} />
+                  <Building2 className="text-black-600 dark:text-white" size={28} />
                   Available Municipal Corporation Jobs
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -416,7 +416,7 @@ const JobApplicationSystem = () => {
             {filteredVolunteers.length > 0 && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                  <Heart className="text-green-600" size={28} />
+                  <Heart className="text-black-600 dark:text-white" size={28} />
                   Available Volunteer Opportunities
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

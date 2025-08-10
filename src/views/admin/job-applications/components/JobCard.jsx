@@ -10,8 +10,8 @@ const SmallToggleSwitch = ({ isActive, onToggle, isDeleted = false }) => (
       isDeleted 
         ? 'bg-gray-300 cursor-not-allowed opacity-50' 
         : isActive 
-          ? 'bg-green-500' 
-          : 'bg-gray-300'
+          ? 'bg-blue-500' 
+          : 'bg-gray-400'
     }`}
   >
     <span
@@ -74,7 +74,7 @@ const JobCard = ({
                 e.stopPropagation();
                 onToggleStatus && onToggleStatus(job); // This will be the restore function
               }}
-              className="text-green-600 hover:text-green-700 p-1 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+              className="text-blue-600 hover:text-blue-700 p-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
               title="Restore"
             >
               <RotateCcw size={16} />
@@ -173,7 +173,7 @@ const JobCard = ({
                     e.stopPropagation();
                     onToggleStatus && onToggleStatus(job); // Restore function
                   }}
-                  className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-green-500 hover:bg-green-600 text-white"
+                  className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <RotateCcw size={16} />
                   Restore
@@ -183,7 +183,7 @@ const JobCard = ({
                     e.stopPropagation();
                     onDelete && onDelete(job); // Permanent delete function
                   }}
-                  className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-red-600 hover:bg-red-700 text-white"
+                  className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-red-500 hover:bg-red-700 text-white"
                 >
                   <Trash size={16} />
                   Delete Forever
@@ -200,7 +200,7 @@ const JobCard = ({
                   className={`flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center ${
                     isDeleted
                       ? 'bg-gray-400 cursor-not-allowed text-white'
-                      : 'bg-brand-500 hover:bg-brand-600 text-white'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
                   }`}
                   disabled={isDeleted}
                 >
