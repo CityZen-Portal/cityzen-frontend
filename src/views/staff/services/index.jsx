@@ -145,9 +145,7 @@ const StaffService = () => {
         ? requests.filter(req => req.taskStatus === "PENDING")
         : requests.filter(req => req.taskStatus === "COMPLETED");
 
-  if (loading) return <div className="flex justify-center items-center py-16">
-              <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
-            </div>
+  
 
   if (error) return <p className="text-center text-red-500 mt-5">{error}</p>;
 
@@ -188,6 +186,7 @@ const StaffService = () => {
             filteredRequests={filteredRequests}
             handleViewDetails={handleViewDetails}
             handleComplete={handleComplete}
+             loading={loading} 
           />
         </>
       }
