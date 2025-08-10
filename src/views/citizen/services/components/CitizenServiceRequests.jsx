@@ -7,10 +7,15 @@ import {
   MdSort,
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom"; // Add this at the top
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
 
 // Inside your component
 
 const CitizenServiceRequests = () => {
+
+  const [loading, setLoading] = useState(true);
   const [viewingDetails, setViewingDetails] = useState(null);
   const [sortField, setSortField] = useState("requestedDate");
   const [sortDirection, setSortDirection] = useState("asc");
@@ -19,20 +24,24 @@ const CitizenServiceRequests = () => {
   const [data, setData] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const id = localStorage.getItem("id");
-        const response = await axios.get(
-          `https://utility-booking-backend.onrender.com/api/task/dto/${id}`
-        );
-        setData(response.data.data.data);
-      } catch (err) {
-        console.error("Error fetching requests:", err);
-      }
-    };
-    fetchData();
-  }, []);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const id = localStorage.getItem("id");
+      const response = await axios.get(
+        `https://utility-booking-backend.onrender.com/api/task/dto/${id}`
+      );
+      setData(response.data.data.data);
+    } catch (err) {
+      console.error("Error fetching requests:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
+
 
   function formatDate(isoString) {
     const date = new Date(isoString);
@@ -174,49 +183,67 @@ const CitizenServiceRequests = () => {
               <th className="px-6 py-3">Action</th>
             </tr>
           </thead>
-          <tbody>
-            {paginatedRequest.length > 0 ? (
-              paginatedRequest.map((request, idx) => (
-                <tr
-                  key={request.serviceId || idx}
-                  className="hover:bg-slate-50 border-b bg-white transition-colors dark:text-white dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
-                >
-                  <td className="text-slate-900 px-6 py-4 font-medium dark:text-white">
-                    {request.serviceName}
-                  </td>
-                  <td className="px-6 py-4">{request.requestedDate}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        request.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
-                          : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
-                      }`}
-                    >  
-                       {request.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => setViewingDetails(request)}
-                      className="rounded-lg bg-indigo-100 px-4 py-1.5 text-xs font-medium text-indigo-700 transition-all hover:bg-indigo-200 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-500"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="text-slate-600 dark:text-white dark:text-slate-400 px-6 py-4 text-center"
-                >
-                  No requests found.
-                </td>
-              </tr>
-            )}
-          </tbody>
+         <tbody>
+  {loading
+    ? Array.from({ length: itemsPerPage }).map((_, idx) => (
+        <tr key={idx} className="border-b bg-white dark:bg-navy-700">
+          <td className="px-6 py-4">
+            <Skeleton width={120} height={16} />
+          </td>
+          <td className="px-6 py-4">
+            <Skeleton width={100} height={16} />
+          </td>
+          <td className="px-6 py-4">
+            <Skeleton width={80} height={16} />
+          </td>
+          <td className="px-6 py-4">
+            <Skeleton width={60} height={24} />
+          </td>
+        </tr>
+      ))
+    : paginatedRequest.length > 0
+    ? paginatedRequest.map((request, idx) => (
+        <tr
+          key={request.serviceId || idx}
+          className="hover:bg-slate-50 border-b bg-white transition-colors dark:text-white dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
+        >
+          <td className="text-slate-900 px-6 py-4 font-medium dark:text-white">
+            {request.serviceName}
+          </td>
+          <td className="px-6 py-4">{request.requestedDate}</td>
+          <td className="px-6 py-4">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                request.status === "PENDING"
+                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
+                  : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
+              }`}
+            >
+              {request.status}
+            </span>
+          </td>
+          <td className="px-6 py-4">
+            <button
+              onClick={() => setViewingDetails(request)}
+              className="rounded-lg bg-indigo-100 px-4 py-1.5 text-xs font-medium text-indigo-700 transition-all hover:bg-indigo-200 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-500"
+            >
+              View
+            </button>
+          </td>
+        </tr>
+      ))
+    : (
+        <tr>
+          <td
+            colSpan="4"
+            className="text-slate-600 dark:text-white dark:text-slate-400 px-6 py-4 text-center"
+          >
+            No requests found.
+          </td>
+        </tr>
+      )}
+</tbody>
+
         </table>
       </div>
 
