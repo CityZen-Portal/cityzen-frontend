@@ -11,7 +11,8 @@ function ServiceForm() {
   const services = location.state?.nameOfService;
   const id = localStorage.getItem("id");
 
-  // Prefill with localStorage OR default phone
+  const [loading, setLoading] = useState(false); // Loader state
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,9 +35,8 @@ function ServiceForm() {
       email: localStorage.getItem("email") || "",
       phone: localStorage.getItem("phone") || "9876543210",
     }));
-    // Citizen Id may (optionally) update too
   }, []);
-  console.log(formData);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -72,6 +72,7 @@ function ServiceForm() {
     };
 
     try {
+      setLoading(true); // Start loader
       await axios.post(
         "https://utility-booking-backend.onrender.com/api/services/request/add",
         payload
@@ -82,6 +83,8 @@ function ServiceForm() {
       }, 2000);
     } catch {
       toast.error("Failed to submit form.");
+    } finally {
+      setLoading(false); // Stop loader
     }
   };
 
@@ -99,54 +102,7 @@ function ServiceForm() {
                 <span>←</span> Back
               </button>
             </div>
-            {/* <div className="m-8 dark:text-white">
-              <label
-                htmlFor="name"
-                className="mb-2 block text-lg font-semibold"
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Full Name"
-                className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
-              />
-            </div>
-            <div className="m-8">
-              <label
-                htmlFor="phone"
-                className="mb-2 block text-lg font-semibold dark:text-white"
-              >
-                Phone Number
-              </label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="Phone Number"
-                className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
-              />
-            </div>
-            <div className="m-8">
-              <label
-                htmlFor="email"
-                className="mb-2 block text-lg font-semibold dark:text-white"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-                className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
-              />
-            </div> */}
+
             <div className="flex flex-wrap">
               <div className="w-full px-3 sm:w-1/2">
                 <div className="m-5">
@@ -183,6 +139,7 @@ function ServiceForm() {
                 </div>
               </div>
             </div>
+
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
                 Description
@@ -196,6 +153,7 @@ function ServiceForm() {
                 className="w-full rounded-md border px-4 py-2 text-sm"
               />
             </div>
+
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
                 Address
@@ -209,6 +167,7 @@ function ServiceForm() {
                 className="w-full rounded-md border px-4 py-2 text-sm"
               />
             </div>
+
             <div className="-mx-4 flex flex-wrap">
               <div className="w-full px-6 sm:w-1/2">
                 <div className="m-4">
@@ -256,12 +215,38 @@ function ServiceForm() {
                 </div>
               </div>
             </div>
+
             <div className="mb-5 flex justify-center">
               <button
                 type="submit"
-                className="rounded-md bg-[#6A64F1] px-4 py-3 text-base font-semibold text-white"
+                className={`flex items-center justify-center gap-2 rounded-md bg-[#6A64F1] px-4 py-3 text-base font-semibold text-white ${
+                  loading ? "cursor-not-allowed opacity-70" : ""
+                }`}
+                disabled={loading}
               >
-                Book Appointment
+                {loading && (
+                  <svg
+                    className="h-5 w-5 animate-spin text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    ></path>
+                  </svg>
+                )}
+                {loading ? "Booking..." : "Book Appointment"}
               </button>
             </div>
           </div>
