@@ -335,7 +335,7 @@ const routes = [
         layout: "/admin",
         path: "job-application/edit/volunteer/:id",
         component: <VolunteerEditForm />,
-      },
+      }
       ,
       {
         name: "Admin job Details view",
