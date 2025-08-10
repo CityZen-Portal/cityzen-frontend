@@ -1,13 +1,16 @@
-import loading_gif from "../../../assets/gif/loading-gif.gif";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+// import {
+//   MdCalendarToday,
+//   MdPerson,
+
+// } from "react-icons/md";
 import Cropper from "react-easy-crop";
 import {
   FaEdit,
   FaSave,
   FaTimes,
   FaPen,
-  FaTrashAlt,
   FaTint,
   FaLightbulb,
   FaMars,
@@ -15,6 +18,8 @@ import {
   FaGenderless,
 } from "react-icons/fa";
 import {
+  MdWork,
+  MdCheckCircle,
   MdPerson,
   MdBadge,
   MdEmail,
@@ -26,7 +31,8 @@ import {
   MdCalendarToday,
   MdHome,
 } from "react-icons/md";
-import avatar from "assets/img/avatars/avatar4.png";
+import avatar from "assets/img/avatars/avatar6.jpg";
+import loading_gif from "../../../assets/gif/loading-gif.gif";
 
 // Crop image helper function
 function getCroppedImg(imageSrc, pixelCrop) {
@@ -76,7 +82,7 @@ export default function ProfileCard() {
   const citizenId = localStorage.getItem("id");
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [user, setUser] = useState({
     user_name: "",
@@ -101,8 +107,75 @@ export default function ProfileCard() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
+  // Effect: Fetch ALL profile data before displaying UI
+  useEffect(() => {
+    let active = true;
+    async function fetchAll() {
+      setLoading(true);
+      try {
+        const [userRes, bookingsRes, complaintsRes] = await Promise.all([
+          axios.get(
+            `https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`
+          ),
+          axios.get(
+            `https://utility-booking-backend.onrender.com/api/task/dto/${citizenId}`
+          ),
+          axios.get(`${HELPDESK_API}/citizen/complaints`, {
+            headers: {
+              token,
+              email,
+              id: citizenId,
+            },
+          }),
+        ]);
+        if (!active) return;
+        // Set User
+        const data = userRes.data?.data || userRes.data || {};
+        const userObj = {
+          user_name: data.userName || "",
+          citizen_id: data.id || "",
+          aadhaar: data.aadhaar || "",
+          email: data.email || "",
+          address: data.address || "not update",
+          city: data.city || "not update yet",
+          dob: data.dob || "not update yet",
+          gender: data.gender || "",
+          pincode: data.pincode || "not update yet",
+          state: data.state || "not update yet",
+        };
+        setUser(userObj);
+        setOriginalUser(userObj);
+        setOriginalImage(avatar);
+        setCroppedImage(avatar);
+        // Set Bookings & Complaints
+        setBookings(bookingsRes.data?.data?.data || []);
+        setComplaints(complaintsRes.data?.data || []);
+      } catch (err) {
+        console.error("Failed to fetch initial data:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    if (token && email && citizenId && HELPDESK_API) {
+      fetchAll();
+    } else {
+      setLoading(false);
+    }
+    return () => {
+      active = false;
+    };
+  }, [token, email, citizenId, HELPDESK_API]);
+
+  // Standard input, image, and modal handlers
   const handleChange = (field, value) => {
     setUser((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", options);
   };
 
   const handleProfilePicChange = (e) => {
@@ -124,90 +197,6 @@ export default function ProfileCard() {
       console.error(e);
     }
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      let showLoaderTimeout;
-
-      try {
-        showLoaderTimeout = setTimeout(() => {
-          setLoading(true);
-        }, 300);
-
-        const userRes = await axios.get(
-          `https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`
-        );
-        const data = userRes.data?.data || userRes.data || {};
-        const userObj = {
-          user_name: data.userName || "",
-          citizen_id: data.id || "",
-          aadhaar: data.aadhaar || "",
-          email: data.email || "",
-          address: data.address || "not update",
-          city: data.city || "not update yet",
-          dob: data.dob || "not update yet",
-          gender: data.gender || "",
-          pincode: data.pincode || "not update yet",
-          state: data.state || "not update yet",
-        };
-        setUser(userObj);
-        setOriginalUser(userObj);
-        setOriginalImage(avatar);
-        setCroppedImage(avatar);
-
-        const id = localStorage.getItem("id");
-        if (id) {
-          const bookingsRes = await axios.get(
-            `https://utility-booking-backend.onrender.com/api/task/dto/${citizenId}`
-          );
-          setBookings(bookingsRes.data?.data?.data || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      } finally {
-        clearTimeout(showLoaderTimeout);
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (!token || !email || !citizenId || !HELPDESK_API) return;
-
-    setLoading(true);
-
-    axios
-      .get(`${HELPDESK_API}/citizen/complaints`, {
-        headers: {
-          token,
-          email,
-          id: citizenId,
-        },
-      })
-      .then((res) => {
-        console.log("Complaints Response:", res.data.data);
-        setComplaints(res.data.data || []);
-      })
-      .catch((err) => {
-        console.error(
-          "Failed to fetch complaints:",
-          err.response?.data || err.message
-        );
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [token, email, citizenId, HELPDESK_API]);
-
-  const getStatusClass = (status) => {
-    if (!status) return "text-gray-500";
-    const s = status.toLowerCase();
-    if (s.includes("completed") || s === "resolved")
-      return "text-green-600 font-medium";
-    if (s.includes("pending")) return "text-yellow-600 font-medium";
-    if (s.includes("scheduled")) return "text-blue-600 font-medium";
-    return "text-gray-600";
-  };
 
   const handleSave = async () => {
     try {
@@ -223,18 +212,26 @@ export default function ProfileCard() {
         pincode: user.pincode,
         dob: user.dob,
       };
-
       await axios.put(
         `https://auth-backend-2-k3ph.onrender.com/citizen-profiles/${user.citizen_id}`,
         payload
       );
-
       setOriginalUser(user);
       setUser(user);
       setEditMode(false);
     } catch (error) {
       console.error("Failed to save user:", error);
     }
+  };
+
+  const getStatusClass = (status) => {
+    if (!status) return "text-gray-500";
+    const s = status.toLowerCase();
+    if (s.includes("completed") || s === "resolved")
+      return "text-green-600 font-medium";
+    if (s.includes("pending")) return "text-yellow-600 font-medium";
+    if (s.includes("scheduled")) return "text-blue-600 font-medium";
+    return "text-gray-600";
   };
 
   const fields = [
@@ -250,19 +247,22 @@ export default function ProfileCard() {
     ["state", "State", <MdLocationOn />],
   ];
 
+  // --- Loader page ---
+  if (loading) {
+    return (
+      <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm">
+        <img
+          src={loading_gif}
+          alt="Loading..."
+          className="h-12 w-12 sm:h-16 sm:w-16"
+        />
+      </div>
+    );
+  }
+
+  // --- Main profile page ---
   return (
     <div className="space-y-6 p-6 font-sans">
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm">
-          <img
-            src={loading_gif}
-            alt="Loading..."
-            className="h-12 w-12 sm:h-16 sm:w-16"
-          />
-        </div>
-      )}
-
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Profile Picture */}
         <div className="flex w-full flex-col items-center rounded-2xl bg-blue-600 p-6 shadow-lg lg:w-1/3">
@@ -408,13 +408,53 @@ export default function ProfileCard() {
             {bookings.map((b, index) => (
               <li
                 key={index}
-                className="flex items-center gap-3 rounded-2xl bg-gray-100 p-4 shadow-md dark:bg-gray-800"
+                className="flex flex-col gap-3 rounded-2xl bg-gray-100 p-4 shadow-md transition-colors duration-300 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 sm:flex-row sm:items-center sm:justify-between"
               >
-                <FaTint />
-                <span>
-                  {b.serviceName} – {b.requestedDate} –{" "}
-                  <span className={getStatusClass(b.status)}>{b.status}</span>
-                </span>
+                <div className="flex min-w-[120px] flex-1 items-center gap-2">
+                  <MdWork className="text-xl text-blue-600" />
+                  <span className="truncate font-semibold text-gray-900 dark:text-white">
+                    {b.serviceName}
+                  </span>
+                </div>
+
+                <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
+                  <MdCalendarToday className="text-xl text-green-600" />
+                  <span>{formatDate(b.requestedDate)}</span>
+                </div>
+
+                {/* Status */}
+                <div className="flex min-w-[90px] flex-1 items-center justify-center gap-2">
+                  <MdCheckCircle
+                    className={`text-xl ${
+                      b.status.toLowerCase() === "completed"
+                        ? "text-green-600"
+                        : b.status.toLowerCase() === "pending"
+                        ? "text-yellow-500"
+                        : "text-gray-600"
+                    }`}
+                  />
+                  <span className={`font-medium ${getStatusClass(b.status)}`}>
+                    {b.status}
+                  </span>
+                </div>
+
+                {/* Staff Name */}
+                <div className="flex min-w-[120px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
+                  <MdPerson className="text-xl text-gray-700 dark:text-gray-300" />
+                  <span className="truncate">{b.staffName}</span>
+                </div>
+
+                {b.completedDate ? (
+                  <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
+                    <MdCalendarToday className="text-xl text-teal-600" />
+                    <span>{formatDate(b.completedDate)}</span>
+                  </div>
+                ) : (
+                  <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
+                    <MdCalendarToday className="text-xl text-teal-600" />
+                    <span>Not Completed</span>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -424,7 +464,6 @@ export default function ProfileCard() {
       {/* Previous Complaints */}
       <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
         <h3 className="text-lg font-semibold">Previous Complaints</h3>
-
         {complaints.length === 0 ? (
           <p className="text-gray-500">No previous complaints found.</p>
         ) : (
