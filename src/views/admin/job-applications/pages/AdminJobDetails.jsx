@@ -7,13 +7,13 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const JobDetailsPage = () => {
+const AdminJobDetailsPage = () => {
   const navigate = useNavigate();
   const {id} = useParams();
   
   const token = localStorage.getItem("token")
   const email = localStorage.getItem("email")
-  const citizenId = localStorage.getItem("id")
+  const adminId = localStorage.getItem("id")
 
   const jobId = parseInt(id, 10);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -31,7 +31,7 @@ const JobDetailsPage = () => {
         headers:{
           token,
           email,
-          id: citizenId
+          id: adminId
         }
       }
     )
@@ -57,7 +57,7 @@ const JobDetailsPage = () => {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored',
-            onClose: () => navigate("/citizen/job-application")
+            onClose: () => navigate("/admin/job-application")
           });
 
           console.error('Error:', backendError || err);
@@ -66,7 +66,7 @@ const JobDetailsPage = () => {
           setLoading(false);
         });
         
-  }, [id, token, email, citizenId, JOB_APPLICATION_API, navigate])
+  }, [id, token, email, adminId, JOB_APPLICATION_API, navigate])
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -95,11 +95,7 @@ const JobDetailsPage = () => {
   }, [job, jobId]);
 
   const handleBack = () => {
-    navigate('/citizen/job-application');
-  };
-
-  const handleApply = () => {
-    navigate(`/citizen/job-application/apply/${id}`);
+    navigate('/admin/job-application');
   };
 
   if (loading) {
@@ -118,7 +114,7 @@ const JobDetailsPage = () => {
 
   if (!Object.keys(job).length) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="text-gray-400" size={32} />
@@ -272,10 +268,10 @@ const JobDetailsPage = () => {
             )}
           </div>
 
-          {/* Right Column - Contact Info only */}
+          {/* Right Column - Contact Info */}
           <div className="space-y-6">
             {/* Contact Information */}
-            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-32">
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-24">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                 <User className="text-blue-600 dark:text-blue-400" size={20} />
                 Contact Information
@@ -336,7 +332,7 @@ const JobDetailsPage = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <a
                     href={`tel:${job.contactPhoneNumber}`}
-                    className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/100 transition-colors text-sm font-medium"
+                    className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/80 transition-colors text-sm font-medium"
                   >
                     <Phone size={16} />
                     Call
@@ -344,7 +340,7 @@ const JobDetailsPage = () => {
                   {job.contactEmail && (
                     <a
                       href={`mailto:${job.contactEmail}`}
-                      className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/100 transition-colors text-sm font-medium"
+                      className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/80 transition-colors text-sm font-medium"
                     >
                       <Mail size={16} />
                       Email
@@ -361,4 +357,4 @@ const JobDetailsPage = () => {
   );
 };
 
-export default JobDetailsPage;
+export default AdminJobDetailsPage;

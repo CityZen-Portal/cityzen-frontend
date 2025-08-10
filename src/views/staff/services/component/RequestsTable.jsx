@@ -16,7 +16,7 @@ const RequestsTable = ({
   handleViewDetails,
   handleComplete,
   loading,
-  scrollToForm // 👈 NEW PROP
+  scrollToForm 
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -39,7 +39,7 @@ const RequestsTable = ({
     const searchLower = searchTerm.toLowerCase();
     return filteredRequests.filter(request =>
       (request.citizenName || '').toLowerCase().includes(searchLower) ||
-      (request.serviceName || '').toLowerCase().includes(searchLower) ||
+      (request.description || '').toLowerCase().includes(searchLower) ||
       (request.requested_Date || '').toLowerCase().includes(searchLower) ||
       (request.taskStatus || '').toLowerCase().includes(searchLower) ||
       (request.staffName || '').toLowerCase().includes(searchLower) ||
@@ -66,7 +66,7 @@ const RequestsTable = ({
     const startIndex = (currentPage - 1) * itemsPerPage;
     return sortedRequests.slice(startIndex, startIndex + itemsPerPage);
   }, [sortedRequests, currentPage, itemsPerPage]);
-
+   console.log(paginatedRequests);
   const totalPages = Math.ceil(searchedRequests.length / itemsPerPage);
 
   return (
@@ -138,7 +138,7 @@ const RequestsTable = ({
               <tr className="bg-gray-50 dark:bg-navy-900 border-b border-gray-200 dark:border-navy-700">
                 {[
                   { label: 'Citizen', key: 'citizenName' },
-                  { label: 'Service', key: 'serviceName' },
+                  { label: 'Service', key: 'description' },
                   { label: 'Date', key: 'requested_Date' },
                   { label: 'Status', key: 'taskStatus' },
                   ...(viewMode === 'completed'
@@ -194,7 +194,7 @@ const RequestsTable = ({
                     }`}
                   >
                     <td className="py-4 px-4">{request.citizenName}</td>
-                    <td className="py-4 px-4">{request.serviceName}</td>
+                    <td className="py-4 px-4">{request.description}</td>
                     <td className="py-4 px-4">{request.requested_Date}</td>
                     <td className="py-4 px-4">
                       <span
@@ -230,7 +230,7 @@ const RequestsTable = ({
                             handleViewDetails(request);
                             scrollToForm?.();
                           }}
-                          className="text-blue-500 hover:underline"
+                          className="text-blue-500 dark:text-cyan-500 "
                         >
                           View
                         </button>
@@ -241,7 +241,7 @@ const RequestsTable = ({
                               handleComplete(request);
                               scrollToForm?.();
                             }}
-                            className="text-green-600 hover:underline"
+                            className="text-green-700 dark:text-green-500"
                           >
                             Complete
                           </button>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -11,10 +11,11 @@ function ServiceForm() {
   const services = location.state?.nameOfService;
   const id = localStorage.getItem("id");
 
+  // Prefill with localStorage OR default phone
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    phone: "9876543210",
     date: "",
     time: "",
     address: "",
@@ -26,6 +27,16 @@ function ServiceForm() {
     services,
   });
 
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      name: localStorage.getItem("name") || "John Doe",
+      email: localStorage.getItem("email") || "",
+      phone: localStorage.getItem("phone") || "9876543210",
+    }));
+    // Citizen Id may (optionally) update too
+  }, []);
+  console.log(formData);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -34,63 +45,47 @@ function ServiceForm() {
     }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const now = new Date();
+    const bookingDate = now.toISOString().split("T")[0];
+    const bookingTime = now.toTimeString().slice(0, 5);
+    const errors = [];
+    if (!formData.name.trim()) errors.push("Full Name is required.");
+    if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone))
+      errors.push("Enter a valid 10-digit phone number.");
+    if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email))
+      errors.push("Enter a valid email address.");
+    if (!formData.address.trim()) errors.push("Address is required.");
+    if (!formData.area.trim()) errors.push("Area is required.");
+    if (!formData.city.trim()) errors.push("City is required.");
+    if (!formData.postcode.trim()) errors.push("Post Code is required.");
 
-  const errors = [];
+    if (errors.length > 0) {
+      errors.forEach(toast.error);
+      return;
+    }
 
-  if (!formData.name.trim()) {
-    errors.push("Full Name is required.");
-  }
-  if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone)) {
-    errors.push("Enter a valid 10-digit phone number.");
-  }
-  if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
-    errors.push("Enter a valid email address.");
-  }
-  if (!formData.date) {
-    errors.push("Please select a date.");
-  }
-  if (!formData.time) {
-    errors.push("Please select a time.");
-  }
-  if (!formData.address.trim()) {
-    errors.push("Address is required.");
-  }
-  if (!formData.area.trim()) {
-    errors.push("Area is required.");
-  }
-  if (!formData.city.trim()) {
-    errors.push("City is required.");
-  }
-  if (!formData.postcode.trim()) {
-    errors.push("Post Code is required.");
-  }
+    const payload = {
+      ...formData,
+      date: bookingDate,
+      time: bookingTime,
+      services: serviceName || "",
+    };
 
-  if (errors.length > 0) {
-    errors.forEach((err) => toast.error(err));
-    return;
-  }
-
-  const payload = {
-    ...formData,
-    services: serviceName || "",
+    try {
+      await axios.post(
+        "https://utility-booking-backend.onrender.com/api/services/request/add",
+        payload
+      );
+      toast.success("Serivce Booked Successfully!");
+      setTimeout(() => {
+        navigate("/citizen/Services");
+      }, 2000);
+    } catch {
+      toast.error("Failed to submit form.");
+    }
   };
-
-  try {
-    const res = await axios.post(
-      "https://utility-booking-backend.onrender.com/api/services/request/add",
-      payload
-    );
-    toast.success("Form submitted successfully!");
-    setTimeout(() => {
-      navigate("/citizen/Services");
-    }, 2000);
-  } catch (error) {
-    toast.error("Failed to submit form.");
-  }
-};
-
 
   return (
     <>
@@ -106,9 +101,11 @@ function ServiceForm() {
                 <span>←</span> Back
               </button>
             </div>
-
-            <div className="m-8 dark:text-white">
-              <label htmlFor="name" className="mb-2 block text-lg font-semibold">
+            {/* <div className="m-8 dark:text-white">
+              <label
+                htmlFor="name"
+                className="mb-2 block text-lg font-semibold"
+              >
                 Full Name
               </label>
               <input
@@ -120,9 +117,11 @@ function ServiceForm() {
                 className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
               />
             </div>
-
             <div className="m-8">
-              <label htmlFor="phone" className="mb-2 block text-lg font-semibold dark:text-white">
+              <label
+                htmlFor="phone"
+                className="mb-2 block text-lg font-semibold dark:text-white"
+              >
                 Phone Number
               </label>
               <input
@@ -134,9 +133,11 @@ function ServiceForm() {
                 className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
               />
             </div>
-
             <div className="m-8">
-              <label htmlFor="email" className="mb-2 block text-lg font-semibold dark:text-white">
+              <label
+                htmlFor="email"
+                className="mb-2 block text-lg font-semibold dark:text-white"
+              >
                 Email Address
               </label>
               <input
@@ -147,39 +148,7 @@ function ServiceForm() {
                 placeholder="Email"
                 className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
               />
-            </div>
-
-            <div className="flex flex-wrap">
-              <div className="w-full px-3 sm:w-1/2">
-                <div className="m-5">
-                  <label htmlFor="date" className="mb-2 block font-semibold dark:text-white">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    className="w-full rounded-md border px-6 py-3"
-                  />
-                </div>
-              </div>
-
-              <div className="w-full px-3 sm:w-1/2">
-                <div className="m-5">
-                  <label htmlFor="time" className="mb-2 block font-semibold dark:text-white">
-                    Time
-                  </label>
-                  <input
-                    type="time"
-                    name="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                    className="w-full rounded-md border px-6 py-3"
-                  />
-                </div>
-              </div>
-            </div>
+            </div> */}
 
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
@@ -194,7 +163,6 @@ function ServiceForm() {
                 className="w-full rounded-md border px-4 py-2 text-sm"
               />
             </div>
-
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
                 Address
@@ -208,7 +176,6 @@ function ServiceForm() {
                 className="w-full rounded-md border px-4 py-2 text-sm"
               />
             </div>
-
             <div className="-mx-4 flex flex-wrap">
               <div className="w-full px-6 sm:w-1/2">
                 <div className="m-4">
@@ -225,7 +192,6 @@ function ServiceForm() {
                   />
                 </div>
               </div>
-
               <div className="w-full px-6 sm:w-1/2">
                 <div className="m-4">
                   <label className="mb-2 block font-semibold dark:text-white">
@@ -241,7 +207,6 @@ function ServiceForm() {
                   />
                 </div>
               </div>
-
               <div className="w-full px-6 sm:w-1/2">
                 <div className="m-4">
                   <label className="mb-2 block font-semibold dark:text-white">
@@ -258,7 +223,6 @@ function ServiceForm() {
                 </div>
               </div>
             </div>
-
             <div className="mb-5 flex justify-center">
               <button
                 type="submit"

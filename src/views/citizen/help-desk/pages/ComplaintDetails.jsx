@@ -10,7 +10,7 @@ import { getStatusText, getStatusColor } from '../utils/helpers';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import loading_gif from '../../../../assets/img/loading/loading_gif.gif';
+import loading_gif from '../../../../assets/gif/loading-gif.gif';
 
 
 const ComplaintDetails = () => {
@@ -60,8 +60,12 @@ const ComplaintDetails = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-12 px-4 sm:px-6 lg:px-8">
       {loading ? (
-        <div className="flex justify-center items-center py-16">
-          <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+              src={loading_gif}
+              alt="Loading..."
+              className="w-12 h-12 sm:w-16 sm:h-16"
+          />
         </div>
       ) : (
         <div className="max-w-7xl mx-auto">
@@ -126,17 +130,17 @@ const ComplaintDetails = () => {
             /> */}
 
           {/* Back Button */}
-          {/* <div className="mt-8">
+          <div className="mt-8">
             <button
               onClick={() => {
-                navigate(`/citizen/help-desk/complaint/log`)
+                navigate(-1)  
                 window.scrollTo(0,0)
               }}
-              className="bg-blue-600 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
+              className="bg-brand-500 text-white font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
             >
               Back to Complaint Log
             </button>
-          </div> */}
+          </div>
         </div>
       )}
       <ToastContainer />

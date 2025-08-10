@@ -87,7 +87,7 @@ const VolunteerEditForm = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
         
     // setLoading(true);
@@ -249,14 +249,14 @@ const VolunteerEditForm = () => {
 
   // Handle cancel
   const handleCancel = useCallback(() => {
-    navigate('/admin/job-applications');
+    navigate('/admin/job-application');
   }, [navigate]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading volunteer opportunity data...</p>
         </div>
       </div>
@@ -324,8 +324,8 @@ const VolunteerEditForm = () => {
           {/* Basic Information */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <MdFavorite className="text-green-600 dark:text-green-400" size={20} />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <MdFavorite className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Program Information</h2>
             </div>
@@ -494,8 +494,8 @@ const VolunteerEditForm = () => {
           {/* Contact Information */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <MdPerson  className="text-orange-600 dark:text-orange-400" size={20} />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <MdPerson  className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
             </div>
@@ -604,7 +604,7 @@ const VolunteerEditForm = () => {
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
             <button
               onClick={handleSubmit}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
             >
               <MdSave size={20} />
               Update Volunteer Opportunity

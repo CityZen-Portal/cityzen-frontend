@@ -10,8 +10,8 @@ export default function NewsHome() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null); 
+  const [loading, setLoading] = useState(true); // loading state
+  const [error, setError] = useState(null); // error state
   const itemsPerPage = 6;
   const TEMP_IMAGE_URL = image;
 
@@ -44,9 +44,9 @@ export default function NewsHome() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
-      {/* <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
+      <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
         News
-      </h1> */}
+      </h1>
   
       {loading && (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
@@ -90,7 +90,7 @@ export default function NewsHome() {
                         "currentNewsDetail",
                         JSON.stringify(news)
                       );
-                      navigate("/citizen/news/newshomedetails");
+                      navigate("/staff/news/newshomedetails");
                     }}
                     className="font-medium text-blue-600 dark:text-cyan-500 hover:underline"
                   >

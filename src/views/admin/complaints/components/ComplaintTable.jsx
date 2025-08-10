@@ -43,7 +43,7 @@ const ComplaintTable = ({ complaints }) => {
     const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
+    <div className="bg-white dark:bg-navy-800 rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
       {/* Filter & Search */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className='flex gap-4'>
@@ -156,7 +156,7 @@ const ComplaintTable = ({ complaints }) => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+              <tbody className="bg-white dark:bg-navy-800 divide-y divide-gray-200 dark:divide-gray-600">
                 <Rows 
                   complaints={paginatedComplaints}
                   getStatusColor={getStatusColor}

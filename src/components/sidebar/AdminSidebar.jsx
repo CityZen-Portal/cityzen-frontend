@@ -57,7 +57,6 @@ const AdminSidebar = ({ open, onClose }) => {
               className="w-[150px]"
             />
           </div>
-          <p className="mt-2 text-lg font-medium">Admin Portal</p>
         </div>
       </div>
 

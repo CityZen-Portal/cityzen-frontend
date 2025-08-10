@@ -8,8 +8,9 @@ import {
   filterComplaints,
   sortComplaints,
 } from '../utils/helpers';
+import SkeletonRow from './SkeletonRow';
 
-const ComplaintTable = ({ complaints }) => {
+const ComplaintTable = ({ complaints, loading }) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,7 +44,7 @@ const ComplaintTable = ({ complaints }) => {
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 md:p-6">
+    <div className="rounded-lg shadow-sm p-3 sm:p-4 md:p-6">
       {/* Filter & Search */}
       <div className="mb-4 space-y-4 md:space-y-0 md:flex md:items-end md:justify-between md:gap-4">
         {/* Left side - Filters */}
@@ -117,7 +118,7 @@ const ComplaintTable = ({ complaints }) => {
       <div className="overflow-x-auto -mx-3 sm:mx-0 sm:rounded-lg">
         <table className="w-full min-w-full">
           {/* Desktop Table Header - Hidden on mobile */}
-          <thead className="bg-gray-100 dark:bg-navy-700 hidden md:table-header-group">
+          <thead className="bg-gray-100 dark:bg-navy-800 hidden md:table-header-group">
             <tr>
               {[
                 { label: 'ID', key: 'id' },
@@ -167,21 +168,29 @@ const ComplaintTable = ({ complaints }) => {
           </thead>
 
           <tbody className="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
-            <Rows 
-              complaints={paginatedComplaints}
-              getStatusColor={getStatusColor}
-              getStatusText={getStatusText}
-            />
-            {paginatedComplaints.length === 0 && (
-              <tr>
-                <td colSpan="7" className="text-center py-8 px-4 text-gray-500 dark:text-gray-300">
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className="text-4xl"><MdSearch /></div>
-                    <div className="text-sm font-medium">No complaints found</div>
-                  </div>
-                </td>
-              </tr>
-            )}
+            {loading ? (
+              Array.from({ length: rowsPerPage }).map((_, index) => (
+                <SkeletonRow key={index} />
+              ))
+            ) : (
+              <>
+                <Rows 
+                  complaints={paginatedComplaints}
+                  getStatusColor={getStatusColor}
+                  getStatusText={getStatusText}
+                />
+                {paginatedComplaints.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center py-8 px-4 text-gray-500 dark:text-gray-300">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="text-4xl"><MdSearch /></div>
+                        <div className="text-sm font-medium">No complaints found</div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+          )}
           </tbody>
         </table>
       </div>
