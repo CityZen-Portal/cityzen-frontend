@@ -313,7 +313,7 @@ const MunicipalEditForm = () => {
 
   // Handle cancel
   const handleCancel = useCallback(() => {
-    navigate('/admin/job-applications');
+    navigate('/admin/job-application');
   }, [navigate]);
 
   // if (loading) {
@@ -472,8 +472,8 @@ const MunicipalEditForm = () => {
           {/* Location & Timeline */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <MdLocationOn className="text-green-600 dark:text-green-400" size={20} />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <MdLocationOn className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Location & Timeline</h2>
             </div>
@@ -533,8 +533,8 @@ const MunicipalEditForm = () => {
           {/* Requirements */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                <MdDescription className="text-purple-600 dark:text-purple-400" size={20} />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <MdDescription className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Job Requirements</h2>
             </div>
@@ -593,8 +593,8 @@ const MunicipalEditForm = () => {
           {/* Contact Information */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                <User className="text-orange-600 dark:text-orange-400" size={20} />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <User className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
             </div>
