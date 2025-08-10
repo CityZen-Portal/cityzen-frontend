@@ -303,11 +303,11 @@ useEffect(() => {
           <div>
             <button
               onClick={() => navigate("/admin/services")}
-              className="mb-2 flex items-center gap-2 text-sm text-white transition-colors hover:text-gray-200"
+              className="mb-2 flex items-center gap-2 text-sm text-white dark:text-cyan-500 transition-colors hover:text-gray-200"
             >
               <span>←</span> Back to Services
             </button>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-white ">
               Manage Staff Members
             </h2>
           </div>
@@ -320,16 +320,24 @@ useEffect(() => {
           </button>
         </div>
         <div className="flex items-center justify-between px-6 pt-6 gap-4">
-          <div className="flex items-center w-full max-w-sm bg-gray-50 border rounded-lg px-3 py-2 dark:bg-navy-700 dark:border-navy-600">
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              value={searchText}
-              onChange={handleSearchChange}
-              className="bg-transparent ml-2 w-full outline-none text-gray-700  dark:text-white"
-              placeholder="Search by name, mobile, or email..."
-            />
-          </div>
+<div className="flex items-center w-full max-w-sm 
+                bg-gray-50 dark:bg-navy-700 
+                border dark:border-navy-600 
+                rounded-lg px-3 py-2">
+  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-300" />
+  <input
+    type="text"
+    value={searchText}
+    onChange={handleSearchChange}
+    className="ml-2 w-full outline-none 
+               text-gray-700 dark:text-white 
+               placeholder-gray-400 dark:placeholder-gray-300
+               bg-transparent appearance-none"
+    style={{ backgroundColor: 'transparent' }}
+    placeholder="Search by name, mobile, or email..."
+  />
+</div>
+
           <select
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}
@@ -492,6 +500,7 @@ useEffect(() => {
               <input name="designation" placeholder="Designation" value={newStaff.designation} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="contactNumber" placeholder="Contact Number" value={newStaff.contactNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="aadharNumber" placeholder="Aadhaar Number" value={newStaff.aadharNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              
               <input
                 name="dob"
                 type="date"
