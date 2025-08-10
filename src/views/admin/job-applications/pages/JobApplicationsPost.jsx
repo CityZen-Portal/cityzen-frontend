@@ -732,4 +732,3 @@ const JobApplicationsPost = () => {
 };
 
 export default JobApplicationsPost;
-
