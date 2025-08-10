@@ -5,81 +5,17 @@ import {
   MdArrowUpward,
   MdArrowDownward,
   MdSort,
-  MdBuild,
-  MdDateRange,
-  MdPerson,
-  MdSupervisorAccount,
-  MdCheckCircle,
-  MdDescription,
-  MdClose,
-  MdReport,
-  MdFeedback,
 } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Add this at the top
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-// Spinner component for loading inside buttons
-const ButtonSpinner = () => (
-  <svg
-    className="h-4 w-4 animate-spin text-white"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    ></circle>
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8v8H4z"
-    ></path>
-  </svg>
-);
 
-// Skeleton loader for table rows
-const TableSkeleton = ({ rows = 5 }) => (
-  <>
-    {Array.from({ length: rows }).map((_, idx) => (
-      <tr
-        key={idx}
-        className="animate-pulse border-b bg-white dark:bg-navy-700"
-      >
-        <td className="px-6 py-4">
-          <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-600"></div>
-        </td>
-        <td className="px-6 py-4">
-          <div className="h-4 w-24 rounded bg-gray-200 dark:bg-gray-600"></div>
-        </td>
-        <td className="px-6 py-4">
-          <div className="h-4 w-20 rounded bg-gray-200 dark:bg-gray-600"></div>
-        </td>
-        <td className="px-6 py-4">
-          <div className="h-6 w-16 rounded bg-gray-200 dark:bg-gray-600"></div>
-        </td>
-      </tr>
-    ))}
-  </>
-);
-
-// Skeleton for details view
-const DetailsSkeleton = () => (
-  <div className="animate-pulse rounded-xl border border-gray-200 p-6 shadow-md dark:border-navy-600 dark:bg-navy-700">
-    <div className="mb-4 h-6 w-48 rounded bg-gray-200 dark:bg-gray-600"></div>
-    {Array.from({ length: 6 }).map((_, idx) => (
-      <div
-        key={idx}
-        className="mb-3 h-4 w-56 rounded bg-gray-200 dark:bg-gray-600"
-      ></div>
-    ))}
-  </div>
-);
+// Inside your component
 
 const CitizenServiceRequests = () => {
+
+  const [loading, setLoading] = useState(true);
   const [viewingDetails, setViewingDetails] = useState(null);
   const [sortField, setSortField] = useState("requestedDate");
   const [sortDirection, setSortDirection] = useState("asc");
@@ -87,31 +23,27 @@ const CitizenServiceRequests = () => {
   const itemsPerPage = 5;
   const [data, setData] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [loading, setLoading] = useState(true);
-  const [buttonLoading, setButtonLoading] = useState(null);
 
-  const navigate = useNavigate();
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const id = localStorage.getItem("id");
+      const response = await axios.get(
+        `https://utility-booking-backend.onrender.com/api/task/dto/${id}`
+      );
+      setData(response.data.data.data);
+    } catch (err) {
+      console.error("Error fetching requests:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
 
-  // Fetch data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const id = localStorage.getItem("id");
-        const response = await axios.get(
-          `https://utility-booking-backend.onrender.com/api/task/dto/${id}`
-        );
-        setData(response.data.data.data);
-      } catch (err) {
-        console.error("Error fetching requests:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   function formatDate(isoString) {
-    if (!isoString) return "N/A";
     const date = new Date(isoString);
     const options = {
       day: "2-digit",
@@ -170,18 +102,9 @@ const CitizenServiceRequests = () => {
     }
     setCurrentPage(1);
   };
-
-  const handleButtonClick = (type, callback) => {
-    setButtonLoading(type);
-    setTimeout(() => {
-      callback();
-      setButtonLoading(null);
-    }, 800);
-  };
-
+  const navigate = useNavigate();
   return (
     <div className="text-slate-800 dark:text-slate-100 rounded-2xl bg-white p-6 dark:bg-navy-800">
-      {/* Filter Buttons */}
       <div className="mb-4 flex gap-4">
         {["ALL", "PENDING", "COMPLETED"].map((status) => (
           <button
@@ -191,107 +114,140 @@ const CitizenServiceRequests = () => {
               setCurrentPage(1);
               setViewingDetails(null);
             }}
-            className={`rounded-xl px-4 py-2 font-medium shadow-sm transition-colors duration-200
-              ${
-                statusFilter === status
-                  ? "bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white"
-                  : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30"
-              }`}
+            className={`rounded px-4 py-2 ${
+              statusFilter === status
+                ? "bg-indigo-600 text-white"
+                : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+            }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
           </button>
         ))}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl shadow">
+      <div className="overflow-x-auto rounded-xl">
         <table className="min-w-full border-collapse text-left text-sm">
-          <thead className="text-slate-800 dark:text-slate-100 bg-gray-100 dark:bg-navy-700">
+          <thead className="text-slate-800 dark:text-white dark:text-slate-100 dark:bg-navy-700">
             <tr className="text-xs uppercase tracking-wider">
-              {[
-                { label: "Service", field: "serviceName" },
-                { label: "Date", field: "requestedDate" },
-                { label: "Status", field: "taskStatus" },
-              ].map(({ label, field }) => (
-                <th
-                  key={field}
-                  onClick={() => handleSort(field)}
-                  className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600 dark:hover:text-indigo-400"
-                >
-                  <div className="flex items-center gap-1">
-                    {label}
-                    {sortField === field ? (
-                      sortDirection === "asc" ? (
-                        <MdArrowUpward className="text-indigo-600 dark:text-indigo-400" />
-                      ) : (
-                        <MdArrowDownward className="text-indigo-600 dark:text-indigo-400" />
-                      )
+              <th
+                onClick={() => handleSort("serviceName")}
+                className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
+              >
+                <div className="flex items-center gap-1">
+                  Service
+                  {sortField === "serviceName" ? (
+                    sortDirection === "asc" ? (
+                      <MdArrowUpward />
                     ) : (
-                      <MdSort className="dark:text-slate-500 text-gray-400" />
-                    )}
-                  </div>
-                </th>
-              ))}
+                      <MdArrowDownward />
+                    )
+                  ) : (
+                    <MdSort className="dark:text-slate-500 text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort("requestedDate")}
+                className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
+              >
+                <div className="flex items-center gap-1">
+                  Date
+                  {sortField === "requestedDate" ? (
+                    sortDirection === "asc" ? (
+                      <MdArrowUpward />
+                    ) : (
+                      <MdArrowDownward />
+                    )
+                  ) : (
+                    <MdSort className="dark:text-slate-500 text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort("taskStatus")}
+                className="cursor-pointer select-none px-6 py-3 hover:text-indigo-600"
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  {sortField === "taskStatus" ? (
+                    sortDirection === "asc" ? (
+                      <MdArrowUpward />
+                    ) : (
+                      <MdArrowDownward />
+                    )
+                  ) : (
+                    <MdSort className="dark:text-slate-500 text-gray-400" />
+                  )}
+                </div>
+              </th>
               <th className="px-6 py-3">Action</th>
             </tr>
           </thead>
-          <tbody>
-            {loading ? (
-              <TableSkeleton rows={5} />
-            ) : paginatedRequest.length > 0 ? (
-              paginatedRequest.map((request, idx) => (
-                <tr
-                  key={request.serviceId || idx}
-                  className="text-slate-800 hover:bg-slate-50 dark:text-slate-100 border-b bg-white dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
-                >
-                  <td className="px-6 py-4 font-medium">
-                    {request.serviceName}
-                  </td>
-                  <td className="px-6 py-4">
-                    {formatDate(request.requestedDate)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        request.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
-                          : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
-                      }`}
-                    >
-                      {request.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() =>
-                        handleButtonClick("view", () =>
-                          setViewingDetails(request)
-                        )
-                      }
-                      className="flex items-center gap-2 rounded-lg bg-indigo-100 px-4 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-500"
-                    >
-                      {buttonLoading === "view" && <ButtonSpinner />}
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="4"
-                  className="text-slate-600 dark:text-slate-400 px-6 py-4 text-center"
-                >
-                  No requests found.
-                </td>
-              </tr>
-            )}
-          </tbody>
+         <tbody>
+  {loading
+    ? Array.from({ length: itemsPerPage }).map((_, idx) => (
+        <tr key={idx} className="border-b bg-white dark:bg-navy-700">
+          <td className="px-6 py-4">
+            <Skeleton width={120} height={16} />
+          </td>
+          <td className="px-6 py-4">
+            <Skeleton width={100} height={16} />
+          </td>
+          <td className="px-6 py-4">
+            <Skeleton width={80} height={16} />
+          </td>
+          <td className="px-6 py-4">
+            <Skeleton width={60} height={24} />
+          </td>
+        </tr>
+      ))
+    : paginatedRequest.length > 0
+    ? paginatedRequest.map((request, idx) => (
+        <tr
+          key={request.serviceId || idx}
+          className="hover:bg-slate-50 border-b bg-white transition-colors dark:text-white dark:border-navy-600 dark:bg-navy-700 dark:hover:bg-navy-600"
+        >
+          <td className="text-slate-900 px-6 py-4 font-medium dark:text-white">
+            {request.serviceName}
+          </td>
+          <td className="px-6 py-4">{request.requestedDate}</td>
+          <td className="px-6 py-4">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                request.status === "PENDING"
+                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-200/20 dark:text-yellow-400"
+                  : "bg-green-100 text-green-800 dark:bg-green-200/20 dark:text-green-400"
+              }`}
+            >
+              {request.status}
+            </span>
+          </td>
+          <td className="px-6 py-4">
+            <button
+              onClick={() => setViewingDetails(request)}
+              className="rounded-lg bg-indigo-100 px-4 py-1.5 text-xs font-medium text-indigo-700 transition-all hover:bg-indigo-200 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-500"
+            >
+              View
+            </button>
+          </td>
+        </tr>
+      ))
+    : (
+        <tr>
+          <td
+            colSpan="4"
+            className="text-slate-600 dark:text-white dark:text-slate-400 px-6 py-4 text-center"
+          >
+            No requests found.
+          </td>
+        </tr>
+      )}
+</tbody>
+
         </table>
       </div>
 
-      {/* Pagination */}
-      {!loading && totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="mt-4 flex justify-center">
           <Pagination
             currentPage={currentPage}
@@ -301,88 +257,75 @@ const CitizenServiceRequests = () => {
         </div>
       )}
 
-      {/* Details View */}
-      {viewingDetails &&
-        (loading ? (
-          <DetailsSkeleton />
-        ) : (
-          <div className="dark:text-slate-100 mt-8 rounded-xl border border-gray-200 p-6 shadow-md dark:border-navy-600 dark:bg-navy-700">
-            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-indigo-700 dark:text-indigo-400">
-              <MdBuild /> Service Request Details
-            </h2>
-            <div className="space-y-2 text-sm">
-              <p className="flex items-center gap-2">
-                <MdBuild className="text-indigo-500 dark:text-indigo-400" />{" "}
-                {viewingDetails.serviceName}
-              </p>
-              <p className="flex items-center gap-2">
-                <MdDateRange className="text-green-500 dark:text-green-400" />{" "}
-                {formatDate(viewingDetails.requestedDate)}
-              </p>
-              <p className="flex items-center gap-2">
-                <MdCheckCircle
-                  className={
-                    viewingDetails.status === "PENDING"
-                      ? "text-yellow-500 dark:text-yellow-400"
-                      : "text-green-500 dark:text-green-400"
-                  }
-                />
-                {viewingDetails.status}
-              </p>
-              <p className="flex items-center gap-2">
-                <MdPerson className="text-blue-500 dark:text-blue-400" />{" "}
-                {viewingDetails.citizenName}
-              </p>
-              <p className="flex items-center gap-2">
-                <MdSupervisorAccount className="text-purple-500 dark:text-purple-400" />{" "}
-                {viewingDetails.staffName}
-              </p>
-              <p className="flex items-center gap-2">
-                <MdDateRange className="text-gray-500 dark:text-gray-400" />{" "}
-                {formatDate(viewingDetails.completedDate)}
-              </p>
-              <p className="flex items-center gap-2">
-                <MdDescription className="text-orange-500 dark:text-orange-400" />{" "}
-                {viewingDetails.description || "N/A"}
-              </p>
-            </div>
+      {viewingDetails && (
+        <div className="mt-8 rounded-xl border border-gray-200 p-6 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
+          <h2 className="mb-4 text-xl font-semibold text-indigo-700 dark:text-indigo-400">
+            Service Request Details
+          </h2>
+          <p>
+            <strong>Service Name:</strong> {viewingDetails.serviceName}
+          </p>
+          <p>
+            <strong>Requested Date:</strong> {viewingDetails.requestedDate}
+          </p>
+          <p>
+            <strong>Status:</strong>{" "}
+            {viewingDetails.taskStatus.charAt(0).toUpperCase() +
+              viewingDetails.taskStatus.slice(1).toLowerCase()}
+          </p>
+          <p>
+            <strong>Citizen Name:</strong> {viewingDetails.citizenName}
+          </p>
+          <p>
+            <strong>Staff Name:</strong> {viewingDetails.staffName}
+          </p>
+          <p>
+            <strong>Completed Date:</strong> {viewingDetails.completedDate || "N/A"}
+          </p>
+          <p>
+            <strong>Description:</strong> {viewingDetails.description || "N/A"}
+          </p>
 
-            {/* Action Buttons */}
-            <div className="mt-4 flex gap-3">
-              {viewingDetails.status.toLowerCase() === "pending" && (
-                <button
-                  onClick={() =>
-                    handleButtonClick("report", () => navigate("reportform"))
-                  }
-                  className="flex items-center gap-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400"
-                >
-                  {buttonLoading === "report" && <ButtonSpinner />}
-                  <MdReport /> Report
-                </button>
-              )}
-              {viewingDetails.status.toLowerCase() === "completed" && (
-                <button
-                  onClick={() =>
-                    handleButtonClick("feedback", () => navigate("feedform"))
-                  }
-                  className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400"
-                >
-                  {buttonLoading === "feedback" && <ButtonSpinner />}
-                  <MdFeedback /> Feedback
-                </button>
-              )}
-              <button
-                onClick={() =>
-                  handleButtonClick("close", () => setViewingDetails(null))
-                }
-                className="flex items-center gap-2 rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-              >
-                {buttonLoading === "close" && <ButtonSpinner />}
-                <MdClose /> Close
-              </button>
-            </div>
-          </div>
-        ))}
+          <p>
+            <strong>Citizen Name:</strong> {viewingDetails.citizenName}
+          </p>
+          <p>
+            <strong>Staff Name:</strong> {viewingDetails.staffName}
+          </p>
+          <p>
+            <strong>Completed Date:</strong>{" "}
+            {formatDate(viewingDetails.completedDate) || "N/A"}
+          </p>
+          <p>
+            <strong>Description:</strong> {viewingDetails.description || "N/A"}
+          </p>
+
+          {/* Conditional Action Buttons */}
+          {viewingDetails.status.toLowerCase() === "pending" && (
+            <button
+              onClick={() => navigate("reportform")}
+              className="mr-3 mt-4 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+            >
+              Report
+            </button>
+          )}
+          {viewingDetails.status.toLowerCase() === "completed" && (
+            <button
+              onClick={() => navigate("feedform")}
+              className="mr-3 mt-4 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+            >
+              Feedback
+            </button>
+          )}
+
+          <button
+            onClick={() => setViewingDetails("")}
+            className="mt-4 rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          >
+            Close Details
+          </button>
+        </div>
+      )}
     </div>
   );
 };

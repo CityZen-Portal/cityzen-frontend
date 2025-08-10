@@ -43,6 +43,7 @@
     "react-helmet": "^6.1.0",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^4.4.0",
+    "react-loading-skeleton": "^3.5.0",
     "react-quill-new": "^3.6.0",
     "react-router-dom": "^7.7.1",
     "react-scripts": "^5.0.1",
