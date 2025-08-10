@@ -1,5 +1,5 @@
 import axios from "axios";
-import avatarPlaceholder from "assets/img/avatars/avatar1.png";
+import avatarPlaceholder from "assets/img/avatars/avatar2.png";
 import React, { useState, useEffect } from "react";
 
 import {
@@ -12,6 +12,9 @@ import {
   FaPhone,
   FaCheckCircle,
 } from "react-icons/fa";
+
+// **Import your loading gif here — make sure path & name is correct!**
+import loading_gif from "../../../assets/gif/loading-gif.gif";
 
 // Reusable Field Component (Read-Only)
 const Field = ({ label, value, icon, loading = false }) => (
@@ -43,7 +46,6 @@ const AdminProfile = () => {
     aadharNumber: "",
     designation: "",
     requestToResetPassword: false,
-   
   });
 
   useEffect(() => {
@@ -53,14 +55,12 @@ const AdminProfile = () => {
           "https://utility-booking-backend.onrender.com/api/staff/email/poovarasan936161@gmail.com"
         );
 
-        // ✅ LOG RESPONSE TO CHECK
         console.log("API Response:", response.data);
 
-        // ✅ Use correct structure based on response shape
         const staff = response.data?.data || response.data;
 
         setFormData({
-           staffid: staff.staffId || "",
+          staffid: staff.staffId || "",
           fullName: staff.fullName || "",
           department: staff.department || "",
           contactNumber: staff.contactNumber || "",
@@ -70,7 +70,6 @@ const AdminProfile = () => {
           aadharNumber: staff.aadharNumber || "N/A",
           designation: staff.designation || "",
           requestToResetPassword: staff.requestToResetPassword || false,
-          
         });
       } catch (error) {
         console.error("❌ Failed to fetch profile:", error.message);
@@ -83,7 +82,19 @@ const AdminProfile = () => {
   }, []);
 
   return (
-    <div className="p-4 dark:bg-navy-700 dark:text-white max-w-screen-lg mx-auto">
+    <div className="p-4 dark:bg-navy-700 dark:text-white max-w-screen-lg mx-auto relative">
+      
+      {/* Loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
+
       {/* Top Section */}
       <div className="flex justify-between items-start mb-4 bg-blue-500 rounded-2xl p-6 shadow-md text-white">
         <div className="flex items-center gap-4">
@@ -125,7 +136,6 @@ const AdminProfile = () => {
           <Field label="Department" value={formData.department} icon={<FaKey />} loading={loading} />
           <Field label="Date of Birth" value={formData.dob} icon={<FaCalendarAlt />} loading={loading} />
           <Field label="Aadhaar Number" value={formData.aadharNumber} icon={<FaIdCard />} loading={loading} />
-          
         </div>
       </div>
 
