@@ -26,8 +26,6 @@ const initialNewStaffState = {
   fullAddress: "",
   dob: "",
   aadharNumber: "",
-  gender: "",
-  profileImage: ""
 };
 
 const PAGE_SIZE = 6;
@@ -50,6 +48,7 @@ function ManageStaffs() {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [resetRequestStaffIds, setResetRequestStaffIds] = useState([]);
 
+
   useEffect(() => {
     const fetchDepartment = async () => {
       try {
@@ -59,7 +58,7 @@ function ManageStaffs() {
         const serviceList = response.data.data;
         const extractedDepartments = serviceList.map((item) => item.serviceName);
         setDepartments(extractedDepartments);
-      } catch (err) { }
+      } catch (err) {}
     };
     fetchDepartment();
   }, []);
@@ -76,8 +75,6 @@ function ManageStaffs() {
         fullAddress: staff.fullAddress || "",
         dob: staff.dob || "",
         aadharNumber: staff.aadharNumber || "",
-        gender: staff.gender || "",
-        profileImage: staff.profileImage || ""
       });
     } else {
       setEditId(null);
@@ -123,7 +120,6 @@ function ManageStaffs() {
       "fullAddress",
       "dob",
       "aadharNumber",
-      "gender"
     ];
     const missing = requiredFields.filter((field) => !newStaff[field]);
     if (missing.length) {
@@ -177,7 +173,7 @@ function ManageStaffs() {
       if (error.response?.data?.statusCode === 409) {
         toast.error("Failed to save staff. Email is Already registered ");
       } else {
-        toast.error(error.response.data.message);
+        toast.error("Failed to save staff. Please try again.");
       }
     }
   };
@@ -205,39 +201,40 @@ function ManageStaffs() {
     }
   };
 
-  const resetPasswordHandler = async (email) => {
+const resetPasswordHandler = async (email) => {
+  try {
+    await axios.put(
+      `https://utility-booking-backend.onrender.com/api/staff/resend-password/${encodeURIComponent(email)}`
+    );
+    toast.success("Password reset link sent.");
+
+    setStaffs((prev) =>
+      prev.map((staff) =>
+        staff.emailAddress === email
+          ? { ...staff, requestToResetPassword: false }
+          : staff
+      )
+    );
+  } catch (error) {
+    console.error("Password reset error:", error);
+    toast.error("Failed to send reset link.");
+  }
+};
+
+useEffect(() => {
+  const fetchResetPasswordRequests = async () => {
     try {
-      await axios.put(
-        `https://utility-booking-backend.onrender.com/api/staff/resend-password/${encodeURIComponent(email)}`
+      const response = await axios.get(
+        "https://utility-booking-backend.onrender.com/api/staff/reset-password-request/688b49083f074e456ee154c9?isRequestToResetPassword=true"
       );
-      toast.success("Password reset link sent.");
-      setStaffs((prev) =>
-        prev.map((staff) =>
-          staff.emailAddress === email
-            ? { ...staff, requestToResetPassword: false }
-            : staff
-        )
-      );
+      const idsWithResetRequests = response.data?.data ?? [];
+      setResetRequestStaffIds(idsWithResetRequests);
     } catch (error) {
-      toast.error("Failed to send reset link.");
+      setResetRequestStaffIds([]);
     }
   };
-
-  // useEffect(() => {
-  //   const fetchResetPasswordRequests = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         "https://utility-booking-backend.onrender.com/api/staff/reset-password-request/688b49083f074e456ee154c9?isRequestToResetPassword=true"
-  //       );
-  //       const idsWithResetRequests = response.data?.data ?? [];
-  //       setResetRequestStaffIds(idsWithResetRequests);
-  //     } catch (error) {
-  //       setResetRequestStaffIds([]);
-  //     }
-  //   };
-  //   fetchResetPasswordRequests();
-  // }, []);
-
+  fetchResetPasswordRequests();
+}, []);
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -259,31 +256,32 @@ function ManageStaffs() {
     fetchStaff();
   }, [refreshTrigger]);
 
-  useEffect(() => {
-    let filtered = staffs || [];
-    if (selectedDepartment) {
-      filtered = filtered.filter(
-        (staff) => staff.department === selectedDepartment
-      );
-    }
-    if (searchText.trim()) {
-      const query = searchText.toLowerCase();
-      filtered = filtered.filter(
-        (staff) =>
-          (staff.fullName && staff.fullName.toLowerCase().includes(query)) ||
-          (staff.contactNumber && staff.contactNumber.includes(query)) ||
-          (staff.emailAddress && staff.emailAddress.toLowerCase().includes(query))
-      );
-    }
-    filtered.sort((a, b) => {
-      const aPriority = a.requestToResetPassword ? 0 : 1;
-      const bPriority = b.requestToResetPassword ? 0 : 1;
-      return aPriority - bPriority;
-    });
+useEffect(() => {
+  let filtered = staffs || [];
+  if (selectedDepartment) {
+    filtered = filtered.filter(
+      (staff) => staff.department === selectedDepartment
+    );
+  }
+  if (searchText.trim()) {
+    const query = searchText.toLowerCase();
+    filtered = filtered.filter(
+      (staff) =>
+        (staff.fullName && staff.fullName.toLowerCase().includes(query)) ||
+        (staff.contactNumber && staff.contactNumber.includes(query)) ||
+        (staff.emailAddress && staff.emailAddress.toLowerCase().includes(query))
+    );
+  }
+  filtered.sort((a, b) => {
+    const aPriority = a.requestToResetPassword ? 0 : 1;
+    const bPriority = b.requestToResetPassword ? 0 : 1;
+    return aPriority - bPriority;
+  });
 
-    setFilteredStaffs(filtered);
-    setCurrentPage(1);
-  }, [searchText, staffs, selectedDepartment, resetRequestStaffIds]);
+
+  setFilteredStaffs(filtered);
+  setCurrentPage(1);
+}, [searchText, staffs, selectedDepartment, resetRequestStaffIds]);
 
   const totalStaffs = filteredStaffs.length;
   const totalPages = Math.ceil(totalStaffs / PAGE_SIZE);
@@ -305,11 +303,11 @@ function ManageStaffs() {
           <div>
             <button
               onClick={() => navigate("/admin/services")}
-              className="mb-2 flex items-center gap-2 text-sm text-white transition-colors hover:text-gray-200"
+              className="mb-2 flex items-center gap-2 text-sm text-white dark:text-cyan-500 transition-colors hover:text-gray-200"
             >
               <span>←</span> Back to Services
             </button>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-white ">
               Manage Staff Members
             </h2>
           </div>
@@ -322,21 +320,29 @@ function ManageStaffs() {
           </button>
         </div>
         <div className="flex items-center justify-between px-6 pt-6 gap-4">
-          <div className="flex items-center w-full max-w-sm bg-gray-50 border rounded-lg px-3 py-2 dark:bg-navy-700 dark:border-navy-600">
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              value={searchText}
-              onChange={handleSearchChange}
-              className="bg-transparent ml-2 w-full outline-none text-gray-700  dark:text-white"
-              placeholder="Search by name, mobile, or email..."
-            />
-          </div>
+<div className="flex items-center w-full max-w-sm 
+                bg-gray-50 dark:bg-navy-700 
+                border dark:border-navy-600 
+                rounded-lg px-3 py-2">
+  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-300" />
+  <input
+    type="text"
+    value={searchText}
+    onChange={handleSearchChange}
+    className="ml-2 w-full outline-none 
+               text-gray-700 dark:text-white 
+               placeholder-gray-400 dark:placeholder-gray-300
+               bg-transparent appearance-none"
+    style={{ backgroundColor: 'transparent' }}
+    placeholder="Search by name, mobile, or email..."
+  />
+</div>
+
           <select
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}
             className="rounded-lg border px-3 py-2 bg-gray-50 text-gray-700 dark:bg-navy-700 dark:text-white"
-            style={{ minWidth: "180px" }}
+            style={{minWidth:"180px"}}
           >
             <option value="">All Departments</option>
             {departments.map((dep) => (
@@ -373,91 +379,91 @@ function ManageStaffs() {
             </div>
           ) : (
             Array.isArray(currentStaffs) &&
-            currentStaffs.map((staff) => (
-              <div
-                key={staff.id}
-                className="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-5 shadow-lg dark:border-navy-700 dark:bg-navy-900/50"
-              >
-                <div>
-                  <div className="mb-4 flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-navy-700">
-                        <UserIcon className="h-8 w-8 text-blue-500 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-                          {staff.fullName}
-                          {staff.requestToResetPassword && (
-                            <span className="text-xs font-semibold text-red-600 ml-2">
-                              Reset Requested
-                            </span>
-                          )}
-                        </h3>
-                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                          {staff.department}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {staff.designation}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2.5 text-sm text-gray-700 dark:text-gray-300">
-                    <div className="flex items-center gap-3">
-                      <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                      <span>{staff.emailAddress}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <PhoneIcon className="h-5 w-5 text-gray-400" />
-                      <span>{staff.contactNumber}</span>
-                    </div>
-                    <div className="flex items-start gap-2 w-full">
-                      <div className="pt-1">
-                        <MapPinIcon className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-words w-full overflow-hidden">
-                        {staff.fullAddress}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <CalendarIcon className="h-5 w-5 text-gray-400" />
-                      <span>Age: {calculateAge(staff.dob)}</span>
-                    </div>
-                  </div>
-                </div>
-              
-                <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
-                    <button
-                  onClick={() => resetPasswordHandler(staff.emailAddress)}
-                  className="flex-1 text-red-500 dark:text-cyan-500 py-2 rounded-md"
+              currentStaffs.map((staff) => (
+                <div
+                  key={staff.id}
+                  className="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-5 shadow-lg dark:border-navy-700 dark:bg-navy-900/50"
                 >
-                  Reset Password
-                </button>
+                  <div>
+                    <div className="mb-4 flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-navy-700">
+                          <UserIcon className="h-8 w-8 text-blue-500 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+                            {staff.fullName}
+                          {staff.requestToResetPassword && (
+  <span className="text-xs font-semibold text-red-600 ml-2">
+    Reset Requested
+  </span>
+)}
+                          </h3>
+                          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                            {staff.department}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {staff.designation}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2.5 text-sm text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center gap-3">
+                        <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                        <span>{staff.emailAddress}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <PhoneIcon className="h-5 w-5 text-gray-400" />
+                        <span>{staff.contactNumber}</span>
+                      </div>
+                      <div className="flex items-start gap-2 w-full">
+                        <div className="pt-1">
+                          <MapPinIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-words w-full overflow-hidden">
+                          {staff.fullAddress}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CalendarIcon className="h-5 w-5 text-gray-400" />
+                        <span>Age: {calculateAge(staff.dob)}</span>
+                      </div>
+                    </div>
+                  </div>
                   <button
-                    onClick={() => handleOpen(staff)}
-                    className="text-yellow-500 transition-colors hover:text-yellow-600"
-                  >
-                    <PencilSquareIcon className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => confirmDeleteStaff(staff.id)}
-                    className="text-red-500 transition-colors hover:text-red-600"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                   onClick={() => resetPasswordHandler(staff.emailAddress)}
+                    className="flex-1 text-white py-2 rounded-md"
+                                       >
+                    Reset Password
+                     </button>
+                  <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
+                    <button
+                      onClick={() => handleOpen(staff)}
+                      className="text-yellow-500 transition-colors hover:text-yellow-600"
+                    >
+                      <PencilSquareIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => confirmDeleteStaff(staff.id)}
+                      className="text-red-500 transition-colors hover:text-red-600"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
           )}
         </div>
         <div className="flex justify-center items-center my-6 gap-2">
           <button
             onClick={handlePrev}
             disabled={currentPage === 1}
-            className={`p-2 rounded-lg ${currentPage === 1
+            className={`p-2 rounded-lg ${
+              currentPage === 1
                 ? 'bg-gray-200 text-gray-400'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+            }`}
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
@@ -467,10 +473,11 @@ function ManageStaffs() {
           <button
             onClick={handleNext}
             disabled={currentPage === totalPages || totalPages === 0}
-            className={`p-2 rounded-lg ${currentPage === totalPages || totalPages === 0
+            className={`p-2 rounded-lg ${
+              currentPage === totalPages || totalPages === 0
                 ? 'bg-gray-200 text-gray-400'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+            }`}
           >
             <ChevronRightIcon className="h-5 w-5" />
           </button>
@@ -493,15 +500,24 @@ function ManageStaffs() {
               <input name="designation" placeholder="Designation" value={newStaff.designation} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="contactNumber" placeholder="Contact Number" value={newStaff.contactNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="aadharNumber" placeholder="Aadhaar Number" value={newStaff.aadharNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
-              <input name="dob" type="date" max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]} value={newStaff.dob} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+              
+              <input
+                name="dob"
+                type="date"
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]}
+                value={newStaff.dob}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
+              />
               <input name="emailAddress" placeholder="Email Address" value={newStaff.emailAddress} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
-              <select name="gender" value={newStaff.gender} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
-                <option value="">Select Gender</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
-              </select>
-              <textarea name="fullAddress" placeholder="Full Address" value={newStaff.fullAddress} onChange={handleInputChange} rows={3} className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white resize-none" />
+              <textarea
+                name="fullAddress"
+                placeholder="Full Address"
+                value={newStaff.fullAddress}
+                onChange={handleInputChange}
+                rows={3}
+                className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white resize-none"
+              />
             </div>
             <div className="mt-8 flex justify-end gap-4">
               <button onClick={handleClose} className="rounded-lg border px-5 py-2.5 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700">Cancel</button>
@@ -510,7 +526,6 @@ function ManageStaffs() {
           </div>
         </div>
       )}
-
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
