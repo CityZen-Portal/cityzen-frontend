@@ -79,7 +79,7 @@ export default function SignIn() {
         email,
       });
 
-      if (response.data.success) {
+      if (response.status === 200) {
         toast.success(`Password reset link sent to ${email}`, {
           position: "top-right",
           autoClose: 3000,
