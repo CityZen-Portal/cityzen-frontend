@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { set } from "date-fns";
 
 const url = "https://auth-backend-2-k3ph.onrender.com";
 
@@ -74,14 +75,18 @@ export default function VerifyOTP() {
         setError("Invalid OTP");
       }
     } catch (err) {
-      setError("Verification failed. Try again.");
+      if (err.response.data.status === 400) {
+        setError("Invalid OTP");
+      } else {
+        setError("Verification Failed, Please Try Again");
+        console.log(err);
+      }
     }
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen w-full bg-white px-6 py-10 text-gray-800 dark:bg-navy-900 dark:text-white">
-      {/* Header */}
       <section className="mb-12 text-center">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
           Advertise it Locker
@@ -107,7 +112,6 @@ export default function VerifyOTP() {
             <li>Cross-device verification</li>
           </ul>
 
-          {/* Generate OTP Button */}
           {!otpSent && (
             <button
               onClick={generateOtp}
@@ -170,6 +174,10 @@ export default function VerifyOTP() {
                     />
                   ))}
               </div>
+              {/* Resend countdown or error */}
+              <div className="text-md my-4  text-center text-red-500 dark:text-red-400">
+                {error}
+              </div>
 
               <button
                 onClick={() => {
@@ -194,10 +202,6 @@ export default function VerifyOTP() {
             </>
           )}
 
-          {/* Resend countdown or error */}
-          <div className="mt-4 text-sm text-red-500 dark:text-red-400">
-            {error}
-          </div>
           {otpSent && secondsLeft > 0 && (
             <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               You can resend OTP in {secondsLeft}s
