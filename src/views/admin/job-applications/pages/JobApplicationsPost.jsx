@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Building2, Heart, AlertTriangle, Search, Filter, Briefcase, TrendingUp, Plus, Trash
+  Building2, Heart, AlertTriangle, Search, Filter, Briefcase, TrendingUp, Plus, Trash, CheckCircle
 } from 'lucide-react';
 import JobCard from '../components/JobCard';
 import VolunteerCard from '../components/VolunteerCard';
@@ -263,6 +263,15 @@ const JobApplicationsPost = () => {
     navigate(`/admin/job-application/edit/${type}/${item.id}`);
   }, [navigate]);
 
+  // Handle view details - NEW FUNCTION FOR ADMIN DETAIL PAGES
+  const handleViewJobDetails = useCallback((jobId) => {
+    navigate(`/admin/job-application/job-details/${jobId}`);
+  }, [navigate]);
+
+  const handleViewVolunteerDetails = useCallback((volunteerId) => {
+    navigate(`/admin/job-application/volunteer-details/${volunteerId}`);
+  }, [navigate]);
+
   // Handle delete - now marks as deleted instead of removing
   const handleDeleteClick = useCallback((item) => {
     setItemToDelete(item);
@@ -417,22 +426,31 @@ const JobApplicationsPost = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {municipalJobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  isJobExpired={isJobExpired}
-                  formatDate={formatDate}
-                  isAdminView={true}
-                  onEdit={handleEdit}
-                  onDelete={activeFilter === 'deleted' ? handlePermanentDelete : handleDeleteClick}
-                  onToggleStatus={activeFilter === 'deleted' ? handleRestore : handleToggleStatus}
-                />
+                <div 
+                  key={job.id} 
+                  className="cursor-pointer transform transition-transform hover:scale-105"
+                  onClick={() => handleViewJobDetails(job.id)}
+                >
+                  <JobCard
+                    job={job}
+                    onViewDetails={handleViewJobDetails}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                    onToggleStatus={handleToggleStatus}
+                    onRestore={handleRestore}
+                    onPermanentDelete={handlePermanentDelete}
+                    isJobExpired={isJobExpired}
+                    formatDate={formatDate}
+                    isAdminView={true}
+                    isDeletedView={activeFilter === 'deleted'}
+                  />
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Volunteer Jobs Section */}
+        {/* Volunteer Programs Section */}
         {volunteerJobs.length > 0 && (
           <div>
             <div className="flex items-center gap-3 mb-6">
@@ -443,37 +461,64 @@ const JobApplicationsPost = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {volunteerJobs.map((volunteer) => (
-                <VolunteerCard
-                  key={volunteer.id}
-                  volunteer={volunteer}
-                  formatDate={formatDate}
-                  isAdminView={true}
-                  onEdit={handleEdit}
-                  onDelete={activeFilter === 'deleted' ? handlePermanentDelete : handleDeleteClick}
-                  onToggleStatus={activeFilter === 'deleted' ? handleRestore : handleToggleStatus}
-                />
+                <div 
+                  key={volunteer.id} 
+                  className="cursor-pointer transform transition-transform hover:scale-105"
+                  onClick={() => handleViewVolunteerDetails(volunteer.id)}
+                >
+                  <VolunteerCard
+                    volunteer={volunteer}
+                    onViewDetails={handleViewVolunteerDetails}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                    onToggleStatus={handleToggleStatus}
+                    onRestore={handleRestore}
+                    onPermanentDelete={handlePermanentDelete}
+                    formatDate={formatDate}
+                    isAdminView={true}
+                    isDeletedView={activeFilter === 'deleted'}
+                  />
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* No results message */}
+        {/* No Results */}
         {municipalJobs.length === 0 && volunteerJobs.length === 0 && (
           <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Briefcase className="text-gray-400" size={32} />
+            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="text-gray-400" size={48} />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               No {activeFilter === 'deleted' ? 'deleted items' : 'opportunities'} found
             </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              {activeFilter === 'deleted' 
-                ? 'No deleted jobs or volunteer programs to display.'
-                : searchTerm 
-                  ? 'Try adjusting your search terms or filters.'
-                  : 'Start by adding new job postings or volunteer programs.'
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {searchTerm 
+                ? `No results match your search "${searchTerm}"`
+                : activeFilter === 'deleted' 
+                  ? 'No deleted items to display'
+                  : 'There are no opportunities available at the moment'
               }
             </p>
+            {!searchTerm && activeFilter !== 'deleted' && (
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={handleAddMunicipalJob}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <Plus size={16} />
+                  Add Municipal Job
+                </button>
+                <button
+                  onClick={handleAddVolunteerJob}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                >
+                  <Plus size={16} />
+                  Add Volunteer Program
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -482,212 +527,175 @@ const JobApplicationsPost = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <ToastContainer />
-      
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Job Applications & Volunteer Programs
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Manage municipal job postings and volunteer opportunities
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleAddMunicipalJob}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 justify-center"
+              >
+                <Plus size={16} />
+                Add Municipal Job
+              </button>
+              <button
+                onClick={handleAddVolunteerJob}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 justify-center"
+              >
+                <Plus size={16} />
+                Add Volunteer Program
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <TrendingUp className="text-blue-600 dark:text-blue-400" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Opportunities</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalOpportunities}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Building2 className="text-blue-600 dark:text-blue-400" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Municipal Jobs</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{municipalCount}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <Heart className="text-green-600 dark:text-green-400" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Volunteer Programs</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{volunteerCount}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                <Trash className="text-red-600 dark:text-red-400" size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Deleted Items</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalDeleted}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search jobs and volunteer programs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: 'all', label: `All (${totalOpportunities})`, icon: TrendingUp },
+                { key: 'municipal', label: `Municipal (${municipalCount})`, icon: Building2 },
+                { key: 'volunteer', label: `Volunteer (${volunteerCount})`, icon: Heart },
+                { key: 'active', label: `Active (${activeJobs + activeVolunteers})`, icon: CheckCircle },
+                { key: 'inactive', label: `Inactive (${inactiveJobs + inactiveVolunteers})`, icon: AlertTriangle },
+                { key: 'deleted', label: `Deleted (${totalDeleted})`, icon: Trash }
+              ].map(({ key, label, icon: Icon }) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveFilter(key)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                    activeFilter === key
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  <Icon size={16} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        {renderCategorizedView()}
+      </div>
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-navy-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="flex items-center gap-4 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                 <AlertTriangle className="text-red-600 dark:text-red-400" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Move to Deleted</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">This item will be moved to deleted items</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Confirm Delete</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">This action cannot be undone</p>
               </div>
             </div>
+            
             <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Are you sure you want to move "<strong>{itemToDelete?.title || itemToDelete?.programTitle}</strong>" to deleted? 
-              You can restore it later from the deleted items section.
+              Are you sure you want to delete "{itemToDelete?.title || itemToDelete?.programTitle}"? 
+              This will move it to the deleted items section.
             </p>
-            <div className="flex gap-3">
-              <button
-                onClick={confirmDelete}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl transition-colors font-medium"
-              >
-                Move to Deleted
-              </button>
+            
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={cancelDelete}
-                className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-3 px-4 rounded-xl transition-colors font-medium"
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Header */}
-      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="text-center lg:text-left">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Admin - Job Management</h1>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl">
-                Manage municipal job postings and volunteer programs for the Municipal Corporation
-              </p>
-            </div>
-            
-            {/* Add Job Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={handleAddMunicipalJob}
-                className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
-              >
-                <Plus size={20} />
-                Add Municipal Job
-              </button>
-              <button
-                onClick={handleAddVolunteerJob}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg"
-              >
-                <Plus size={20} />
-                Add Volunteer Job
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Opportunities</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalOpportunities}</p>
-                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                  <TrendingUp size={16} className="inline mr-1" />
-                  Active: {activeJobs + activeVolunteers}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <Briefcase className="text-blue-600 dark:text-blue-400" size={24} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Municipal Jobs</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{municipalCount}</p>
-                <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                  <Building2 size={16} className="inline mr-1" />
-                  Active: {activeJobs}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <Building2 className="text-blue-600 dark:text-blue-400" size={24} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Volunteer Programs</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{volunteerCount}</p>
-                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                  <Heart size={16} className="inline mr-1" />
-                  Active: {activeVolunteers}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <Heart className="text-green-600 dark:text-green-400" size={24} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Search and Filter Section */}
-        <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search Bar */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search jobs, departments, locations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Filter Buttons */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveFilter('all')}
-                className={`px-4 py-3 rounded-xl font-medium transition-colors ${
-                  activeFilter === 'all'
-                    ? 'bg-brand-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                All ({totalOpportunities})
-              </button>
-              <button
-                onClick={() => setActiveFilter('active')}
-                className={`px-4 py-3 rounded-xl font-medium transition-colors ${
-                  activeFilter === 'active'
-                    ? 'bg-brand-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                Active ({activeJobs + activeVolunteers})
-              </button>
-              <button
-                onClick={() => setActiveFilter('inactive')}
-                className={`px-4 py-3 rounded-xl font-medium transition-colors ${
-                  activeFilter === 'inactive'
-                    ? 'bg-brand-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                Inactive ({inactiveJobs + inactiveVolunteers})
-              </button>
-              <button
-                onClick={() => setActiveFilter('municipal')}
-                className={`px-4 py-3 rounded-xl font-medium transition-colors ${
-                  activeFilter === 'municipal'
-                    ? 'bg-brand-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                Municipal ({municipalCount})
-              </button>
-              <button
-                onClick={() => setActiveFilter('volunteer')}
-                className={`px-4 py-3 rounded-xl font-medium transition-colors ${
-                  activeFilter === 'volunteer'
-                    ? 'bg-brand-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                Volunteer ({volunteerCount})
-              </button>
-              <button
-                onClick={() => setActiveFilter('deleted')}
-                className={`px-4 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 ${
-                  activeFilter === 'deleted'
-                    ? 'bg-red-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                <Trash size={16} />
-                Deleted ({totalDeleted})
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Content Area */}
-        {renderCategorizedView()}
-      </div>
+      <ToastContainer />
     </div>
   );
 };

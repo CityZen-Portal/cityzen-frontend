@@ -90,6 +90,8 @@ import MunicipalJobForm from "views/admin/job-applications/pages/MunicipalJobFor
 import VolunteerJobForm from "views/admin/job-applications/pages/VolunteerJobForm";
 import MunicipalEditForm from "views/admin/job-applications/pages/MunicipalEditForm";
 import VolunteerEditForm from "views/admin/job-applications/pages/VolunteerEditForm";
+import AdminJobDetailsPage from "views/admin/job-applications/pages/AdminJobDetails";
+import AdminVolunteerDetailsPage from "views/admin/job-applications/pages/AdminVolunteerDetailsPage";
 
 const routes = [
   // Home
@@ -328,6 +330,20 @@ const routes = [
         layout: "/admin",
         path: "job-application/edit/volunteer/:id",
         component: <VolunteerEditForm />,
+      },
+      ,
+      {
+        name: "Admin job Details view",
+        layout: "/admin",
+        path: "job-application/job-details/:id",
+        component: <AdminJobDetailsPage />,
+      },
+      ,
+      {
+        name: "Admin volunteer Details view",
+        layout: "/admin",
+        path: "job-application/volunteer-details/:id",
+        component: <AdminVolunteerDetailsPage />,
       },
     ],
   },

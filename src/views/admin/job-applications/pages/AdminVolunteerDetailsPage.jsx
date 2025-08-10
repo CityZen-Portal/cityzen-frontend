@@ -1,67 +1,37 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  Heart, MapPin, Calendar, Clock, Users, User, Phone, Mail, FileText, CheckCircle, Share2, Check, AlertTriangle
+  Heart, MapPin, Calendar, Clock, Users, User, Phone, Mail, FileText, CheckCircle, Share2, Check, AlertTriangle, ArrowLeft
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const sampleVolunteers = [
-  {
-    id: 2,
-    programTitle: "Community Health Volunteer",
-    location: "Various locations in Coimbatore",
-    programDescription: "Join our community health initiative to promote healthcare awareness and support health programs in various neighborhoods. Volunteers will conduct health surveys, assist in vaccination drives, and educate communities about preventive healthcare measures.",
-    programDate: "2025-08-10",
-    programTime: "9:00 AM - 5:00 PM",
-    duration: "6 months program",
-    coordinatorName: "Ms. Priya Sharma",
-    coordinatorPhone: "+91 87654 32109",
-    coordinatorEmail: "priya.sharma@coimbatore.gov.in",
-    coordinatorAddress: "Health Department, Municipal Corporation Office, Coimbatore",
-    isActive: true
-  },
-  {
-    id: 4,
-    programTitle: "Tree Plantation Drive",
-    location: "Coimbatore City Parks",
-    programDescription: "Participate in our city-wide tree plantation initiative to increase green cover and promote environmental sustainability. Volunteers will help plant saplings, maintain plant records, and support ongoing tree care activities.",
-    programDate: "2025-08-12",
-    programTime: "6:00 AM - 10:00 AM",
-    duration: "One-time event with follow-up care",
-    coordinatorName: "Dr. Meera Nair",
-    coordinatorPhone: "+91 76543 21098",
-    coordinatorEmail: "meera.nair@coimbatore.gov.in",
-    coordinatorAddress: "Environment Department, Municipal Corporation, Coimbatore",
-    isActive: true
-  }
-];
-
-const VolunteerDetailsPage = () => {
+const AdminVolunteerDetailsPage = () => {
   const navigate = useNavigate();
   const {id} = useParams();
   
   const token = localStorage.getItem("token")
   const email = localStorage.getItem("email")
-  const citizenId = localStorage.getItem("id")
+  const adminId = localStorage.getItem("id")
 
   const volunteerId = parseInt(id, 10);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
   
   const [volunteer, setVolunteer] = useState({})
 
   useEffect(() => {
-    // setLoading(true);
+    setLoading(true);
   
     axios.get(`${JOB_APPLICATION_API}/service/${id}`,
       {
         headers:{
           token,
           email,
-          id: citizenId
+          id: adminId
         }
       }
     )
@@ -87,16 +57,16 @@ const VolunteerDetailsPage = () => {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored',
-            onClose: () => navigate("/citizen/job-application")
+            onClose: () => navigate("/admin/job-application")
           });
 
           console.error('Error:', backendError || err);
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
         
-  }, [id, token, email, citizenId, JOB_APPLICATION_API, navigate])
+  }, [id, token, email, adminId, JOB_APPLICATION_API, navigate])
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -124,27 +94,59 @@ const VolunteerDetailsPage = () => {
     }
   }, [volunteer, volunteerId]);
 
-  // if (!Object.keys(volunteer).length) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-  //           <AlertTriangle className="text-gray-400" size={32} />
-  //         </div>
-  //         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Program Not Found</h2>
-  //         <p className="text-gray-600 dark:text-gray-400 mb-6">The volunteer program you're looking for doesn't exist or has been removed.</p>
-  //       </div>
-  //       <ToastContainer />
-  //     </div>
-  //   );
-  // }
+  const handleBack = () => {
+    navigate('/admin/job-application');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Heart className="text-gray-400" size={32} />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loading...</h2>
+          <p className="text-gray-600 dark:text-gray-400">Please wait while we fetch the program details.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!Object.keys(volunteer).length) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="text-gray-400" size={32} />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Program Not Found</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">The volunteer program you're looking for doesn't exist or has been removed.</p>
+          <button
+            onClick={handleBack}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Back to Programs
+          </button>
+        </div>
+        <ToastContainer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <button
+                onClick={handleBack}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                title="Back to programs"
+              >
+                <ArrowLeft className="text-gray-600 dark:text-gray-400" size={20} />
+              </button>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">Program Details</h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Volunteer Opportunity</p>
@@ -168,9 +170,12 @@ const VolunteerDetailsPage = () => {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Main Details */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Title and Basic Info */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-start gap-4">
@@ -186,11 +191,20 @@ const VolunteerDetailsPage = () => {
                         <Heart size={16} />
                         Volunteer Opportunity
                       </div>
+                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                        volunteer.isActive
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                      }`}>
+                        <CheckCircle size={16} />
+                        {volunteer.isActive ? 'Active' : 'Inactive'}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="flex items-center gap-3">
                   <MapPin className="text-gray-400" size={20} />
@@ -228,6 +242,7 @@ const VolunteerDetailsPage = () => {
               </div>
             </div>
 
+            {/* Description */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                 <FileText className="text-green-600 dark:text-green-400" size={24} />
@@ -241,8 +256,10 @@ const VolunteerDetailsPage = () => {
             </div>
           </div>
 
+          {/* Right Column - Contact Info */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-32">
+            {/* Coordinator Information */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-24">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                 <User className="text-purple-600 dark:text-purple-400" size={20} />
                 Coordinator Information
@@ -298,6 +315,7 @@ const VolunteerDetailsPage = () => {
                 )}
               </div>
 
+              {/* Contact Actions */}
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <div className="grid grid-cols-2 gap-3">
                   <a
@@ -327,4 +345,4 @@ const VolunteerDetailsPage = () => {
   );
 };
 
-export default VolunteerDetailsPage;
+export default AdminVolunteerDetailsPage;
