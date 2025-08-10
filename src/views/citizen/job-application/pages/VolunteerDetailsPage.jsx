@@ -140,8 +140,8 @@ const VolunteerDetailsPage = () => {
   // }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
+      <div className="bg-white dark:bg-navy-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -171,18 +171,18 @@ const VolunteerDetailsPage = () => {
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-green-100 dark:bg-green-900/30">
-                    <Heart className="text-green-600 dark:text-green-400" size={32} />
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
+                    <Heart className="text-blue-600 dark:text-blue-400" size={32} />
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                       {volunteer.programTitle}
                     </h1>
                     <div className="flex items-center gap-4">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
                         <Heart size={16} />
                         Volunteer Opportunity
                       </div>
@@ -228,9 +228,9 @@ const VolunteerDetailsPage = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                <FileText className="text-green-600 dark:text-green-400" size={24} />
+                <FileText className="text-blue-600 dark:text-blue-400" size={24} />
                 Program Description
               </h2>
               <div className="prose prose-gray dark:prose-invert max-w-none">
@@ -242,9 +242,9 @@ const VolunteerDetailsPage = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-32">
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6 sticky top-32">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                <User className="text-purple-600 dark:text-purple-400" size={20} />
+                <User className="text-blue-600 dark:text-blue-400" size={20} />
                 Coordinator Information
               </h3>
               
@@ -302,7 +302,7 @@ const VolunteerDetailsPage = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <a
                     href={`tel:${volunteer.coordinatorPhone}`}
-                    className="flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-sm font-medium"
+                    className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors text-sm font-medium"
                   >
                     <Phone size={16} />
                     Call
@@ -310,7 +310,7 @@ const VolunteerDetailsPage = () => {
                   {volunteer.coordinatorEmail && (
                     <a
                       href={`mailto:${volunteer.coordinatorEmail}`}
-                      className="flex items-center justify-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 py-2 px-3 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors text-sm font-medium"
+                      className="flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 py-2 px-3 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors text-sm font-medium"
                     >
                       <Mail size={16} />
                       Email
