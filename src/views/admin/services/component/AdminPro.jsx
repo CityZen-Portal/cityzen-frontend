@@ -1,7 +1,8 @@
+import loading_gif from "../../../../assets/gif/loading-gif.gif";
 import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import Cropper from "react-easy-crop";
-import avatarPlaceholder from "assets/img/avatars/avatar1.png";
+import avatarPlaceholder from "assets/img/avatars/avatar5.png";
 import {
   FaPen, FaEnvelope, FaMapMarkerAlt, FaUser, FaIdCard, FaCity,
   FaFlag, FaCalendarAlt, FaMars, FaVenus, FaGenderless, FaPhone,
@@ -64,6 +65,8 @@ const AdminProfile = () => {
   const [profilePic, setProfilePic] = useState(avatarPlaceholder);
   const [originalProfilePic, setOriginalProfilePic] = useState(null);
   const [originalData, setOriginalData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", adminId: "", email: "", dob: "",
     gender: "", address: "", city: "", state: "", pincode: "",
@@ -144,10 +147,19 @@ const AdminProfile = () => {
   };
 
   useEffect(() => {
-    const adminId = "ADM007"; // Change this as needed
-
+    let showLoaderTimeout;
     const fetchProfile = async () => {
       try {
+        // Delay loader by 300ms
+        showLoaderTimeout = setTimeout(() => {
+          setLoading(true);
+        }, 300);
+
+        const adminId = "ADM007"; // Change this as needed
+
+        // Artificial delay 2s to test loader
+        await new Promise(res => setTimeout(res, 2000));
+
         const response = await axios.get(
           `https://auth-backend-2-k3ph.onrender.com/admin-profiles/${adminId}`
         );
@@ -175,14 +187,29 @@ const AdminProfile = () => {
         }
       } catch (err) {
         console.error("Error fetching admin profile:", err);
+      } finally {
+        clearTimeout(showLoaderTimeout);
+        setLoading(false);
       }
     };
 
     fetchProfile();
+    return () => clearTimeout(showLoaderTimeout);
   }, []);
 
   return (
     <div className="p-4 dark:bg-navy-700 dark:text-white max-w-screen-lg mx-auto">
+      {/* Loader */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-start mb-4 bg-blue-500 rounded-2xl p-6 shadow-md text-white">
         <div className="flex items-center gap-4">
