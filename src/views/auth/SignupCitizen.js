@@ -15,8 +15,10 @@ import {
   CheckCircle,
   Sun,
   Moon,
+  Edit,
 } from "lucide-react";
 import signupImage from "./assets/undraw_to-do-list_o3jf.svg";
+import loading_gif from "../../assets/gif/loading-gif.gif";
 import axios from "axios";
 
 const apiurl = process.env.REACT_APP_API_UMS_URL;
@@ -38,6 +40,7 @@ export default function SignUp() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [aadhaarSending, setAadhaarSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Main loading state
 
   // Theme state
   const [isDark, setIsDark] = useState(() => {
@@ -171,17 +174,18 @@ export default function SignUp() {
     e.preventDefault();
 
     if (!validateForm()) {
-      Object.values(errors).forEach((error) => {
-        if (error && typeof error === "string") {
-          toast.error(error, {
-            position: "top-right",
-            autoClose: 3000,
-            theme: "colored",
-          });
-        }
-      });
+      // Show first error found
+      const firstError = Object.values(errors).find(error => error && typeof error === "string");
+      if (firstError) {
+        toast.error(firstError, {
+          position: "top-right",
+          autoClose: 3000,
+          theme: "colored",
+        });
+      }
       return;
     }
+
     // Prepare user data for backend
     const userData = {
       username: formData.name,
@@ -192,7 +196,9 @@ export default function SignUp() {
       gender: formData.gender, // Added gender to user data
       role: "CITIZEN", // Default role
     };
+
     try {
+      setIsLoading(true); // Start loading
       const response = await fetch(`${apiurl}/api/auth/register`, {
         method: "POST",
         headers: {
@@ -210,13 +216,35 @@ export default function SignUp() {
           onClose: () => navigate("/auth/signin"),
         });
       } else {
-        const errorMsg =
-          result.message || result.error || "Registration failed";
-        toast.error(errorMsg, {
-          position: "top-right",
-          autoClose: 3000,
-          theme: "colored",
-        });
+        const errorMsg = result.message || result.error || "Registration failed";
+        
+        // Check if the error is related to Aadhaar already being used
+        if (errorMsg.toLowerCase().includes("aadhaar") && 
+            (errorMsg.toLowerCase().includes("already") || 
+             errorMsg.toLowerCase().includes("exists") || 
+             errorMsg.toLowerCase().includes("registered"))) {
+          
+          // Reset Aadhaar verification status to make the field editable
+          setAadhaarVerified(false);
+          
+          // Set specific error for Aadhaar field
+          setErrors((prev) => ({
+            ...prev,
+            aadharNumber: "Aadhaar number is already used"
+          }));
+          
+          toast.error("Aadhaar number is already used", {
+            position: "top-right",
+            autoClose: 3000,
+            theme: "colored",
+          });
+        } else {
+          toast.error(errorMsg, {
+            position: "top-right",
+            autoClose: 3000,
+            theme: "colored",
+          });
+        }
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -225,6 +253,8 @@ export default function SignUp() {
         autoClose: 3000,
         theme: "colored",
       });
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
@@ -240,6 +270,10 @@ export default function SignUp() {
       // Reset verification if Aadhaar is changed
       if (aadhaarVerified) {
         setAadhaarVerified(false);
+      }
+      // Clear any existing Aadhaar errors when user starts editing
+      if (errors.aadharNumber) {
+        setErrors((prev) => ({ ...prev, aadharNumber: "" }));
       }
     }
   };
@@ -263,24 +297,15 @@ export default function SignUp() {
 
       const result = response.data;
 
-      if (result.data.status === 200) {
-        toast.error("Aadhaar number already registered", {
-          position: "top-right",
-          autoClose: 3000,
-          theme: "colored",
-        });
-        setErrors((prev) => ({
-          ...prev,
-          aadharNumber: "Aadhaar number already registered",
-        }));
-      } else {
-        setAadhaarVerified(true);
-        toast.success("Aadhaar number verified successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-          theme: "colored",
-        });
-      }
+      // For verification, we allow it to succeed even if Aadhaar exists
+      // The actual "already used" check will happen during account creation
+      setAadhaarVerified(true);
+      toast.success("Aadhaar number verified successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+      
     } catch (error) {
       console.error("Verification error:", error);
       toast.error("Verification service unavailable. Please try again.", {
@@ -295,6 +320,17 @@ export default function SignUp() {
 
   return (
     <div className="relative flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
+
       {/* Theme Toggle - Top Right Corner */}
       <button
         onClick={() => setIsDark(!isDark)}
@@ -335,7 +371,7 @@ export default function SignUp() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" data-form-type="other" autoComplete="off">
             {/* Name Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -347,6 +383,7 @@ export default function SignUp() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
+                  disabled={isLoading}
                   className={`w-full border px-4 py-3 ${
                     errors.name
                       ? "border-red-500"
@@ -372,6 +409,7 @@ export default function SignUp() {
                   value={formData.email}
                   onChange={handleInputChange}
                   onBlur={handleEmailBlur}
+                  disabled={isLoading}
                   className={`w-full border px-4 py-3 ${
                     errors.email
                       ? "border-red-500"
@@ -397,6 +435,9 @@ export default function SignUp() {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
+                  disabled={isLoading}
+                  autoComplete="new-password"
+                  data-form-type="other"
                   className={`w-full border px-4 py-3 pr-12 ${
                     errors.password
                       ? "border-red-500"
@@ -407,6 +448,7 @@ export default function SignUp() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
                   className="absolute inset-y-0 right-0 flex items-center pr-3"
                 >
                   {showPassword ? (
@@ -447,10 +489,10 @@ export default function SignUp() {
                     </svg>
                   )}
                 </button>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
               </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
             </div>
 
             {/* Confirm Password Field */}
@@ -464,6 +506,9 @@ export default function SignUp() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
+                  disabled={isLoading}
+                  autoComplete="new-password"
+                  data-form-type="other"
                   className={`w-full border px-4 py-3 pr-12 ${
                     errors.confirmPassword
                       ? "border-red-500"
@@ -474,6 +519,7 @@ export default function SignUp() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={isLoading}
                   className="absolute inset-y-0 right-0 flex items-center pr-3"
                 >
                   {showConfirmPassword ? (
@@ -514,12 +560,12 @@ export default function SignUp() {
                     </svg>
                   )}
                 </button>
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.confirmPassword}
-                  </p>
-                )}
               </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
 
             {/* Phone Number Field */}
@@ -533,6 +579,7 @@ export default function SignUp() {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
+                  disabled={isLoading}
                   className={`w-full border px-4 py-3 ${
                     errors.phoneNumber
                       ? "border-red-500"
@@ -559,6 +606,7 @@ export default function SignUp() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
+                  disabled={isLoading}
                   className={`w-full border px-4 py-3 ${
                     errors.gender
                       ? "border-red-500"
@@ -590,20 +638,16 @@ export default function SignUp() {
                   name="aadharNumber"
                   value={formData.aadharNumber}
                   onChange={handleAadharChange}
-                  disabled={aadhaarVerified}
+                  disabled={isLoading}
                   className={`w-full border px-4 py-3 ${
                     errors.aadharNumber
                       ? "border-red-500"
                       : "border-gray-300 dark:border-gray-600"
-                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white ${
-                    aadhaarVerified
-                      ? "cursor-not-allowed bg-blue-50 dark:bg-blue-900/20"
-                      : ""
-                  }`}
+                  } rounded-lg bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white`}
                   placeholder="12-digit Aadhaar number"
                   maxLength="14"
                 />
-                {aadhaarVerified && (
+                {aadhaarVerified && !errors.aadharNumber && (
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
@@ -613,13 +657,13 @@ export default function SignUp() {
                 <button
                   type="button"
                   onClick={handleAadhaarVerify}
-                  disabled={aadhaarVerified || aadhaarSending}
+                  disabled={aadhaarSending || isLoading}
                   className={`flex items-center rounded-lg px-4 py-2 text-sm font-medium ${
-                    aadhaarVerified
+                    aadhaarVerified && !errors.aadharNumber
                       ? "cursor-not-allowed bg-green-100 text-green-700"
                       : "bg-blue-600 text-white hover:bg-blue-700"
                   } ${
-                    aadhaarSending ? "cursor-not-allowed opacity-50" : ""
+                    aadhaarSending || isLoading ? "cursor-not-allowed opacity-50" : ""
                   } transition-colors duration-300`}
                 >
                   {aadhaarSending ? (
@@ -646,7 +690,7 @@ export default function SignUp() {
                       </svg>
                       Verifying...
                     </>
-                  ) : aadhaarVerified ? (
+                  ) : aadhaarVerified && !errors.aadharNumber ? (
                     <>
                       <CheckCircle className="mr-1 h-4 w-4" />
                       Verified
@@ -670,6 +714,7 @@ export default function SignUp() {
                   checked={agreeTerms}
                   onChange={(e) => setAgreeTerms(e.target.checked)}
                   className={errors.terms ? "border-red-500" : ""}
+                  disabled={isLoading}
                 />
                 <label
                   htmlFor="terms"
@@ -699,14 +744,16 @@ export default function SignUp() {
             {/* Submit */}
             <button
               type="submit"
-              disabled={!aadhaarVerified || !agreeTerms}
-              className={`w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors duration-300 hover:bg-blue-700 ${
-                !aadhaarVerified || !agreeTerms
-                  ? "cursor-not-allowed opacity-50"
-                  : ""
+              disabled={!aadhaarVerified || !agreeTerms || isLoading}
+              className={`w-full rounded-lg px-4 py-3 font-medium text-white transition-colors duration-300 ${
+                isLoading 
+                  ? "bg-blue-400 cursor-not-allowed" 
+                  : !aadhaarVerified || !agreeTerms
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
-              Create Account
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 
@@ -717,6 +764,7 @@ export default function SignUp() {
               <button
                 onClick={() => navigate("/auth/signin")}
                 className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                disabled={isLoading}
               >
                 Sign in
               </button>

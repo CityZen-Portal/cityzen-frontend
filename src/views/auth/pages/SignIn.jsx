@@ -6,6 +6,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, Sun, Moon } from "lucide-react";
 import { useUser } from "../../../contexts/UserContext";
 import Checkbox from "components/checkbox";
 import images from "../assets/Mobile login-rafiki.svg";
+import loading_gif from "../../../assets/gif/loading-gif.gif";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -114,6 +115,7 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const passwordRegex = /^.{4,}$/;
+    
     if (!validateEmail(email)) {
       toast.error("Enter a valid email", {
         position: "top-right",
@@ -125,6 +127,7 @@ export default function SignIn() {
     } else {
       setEmailState("success");
     }
+    
     if (!passwordRegex.test(password)) {
       toast.error("Enter a strong password", {
         position: "top-right",
@@ -136,7 +139,9 @@ export default function SignIn() {
     } else {
       setPasswordState("success");
     }
+    
     try {
+      setIsLoading(true); // Start loading
       const response = await axios.post(`${apiurl}/api/auth/login`, {
         email,
         password,
@@ -180,12 +185,23 @@ export default function SignIn() {
         theme: "colored",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Stop loading
     }
   };
 
   return (
     <div className="relative flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
+
       {/* Theme Toggle - Top Right Corner */}
       <button
         onClick={() => setIsDark(!isDark)}
@@ -225,7 +241,13 @@ export default function SignIn() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form 
+            onSubmit={handleSubmit} 
+            className="space-y-6" 
+            data-form-type="other" 
+            autoComplete="off"
+            data-lpignore="true"
+          >
             {/* Email Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -242,7 +264,10 @@ export default function SignIn() {
                       : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600"
                   } rounded-lg bg-white focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white`}
                   placeholder="Enter your email"
-                  autoComplete="email"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  disabled={isLoading}
                 />
                 {emailState === "error" && (
                   <p className="mt-2 text-sm text-red-600">
@@ -268,11 +293,16 @@ export default function SignIn() {
                       : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600"
                   } rounded-lg bg-white focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white`}
                   placeholder="Min. 8 characters"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 flex items-center pr-3"
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -288,29 +318,12 @@ export default function SignIn() {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-                >
-                  I agree to the Terms of Service and Privacy Policy
-                </label>
-              </div>
-            </div>
-
             <div className="text-right">
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(true)}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                disabled={isLoading}
               >
                 Forgot password?
               </button>
@@ -319,9 +332,14 @@ export default function SignIn() {
             {/* Sign In Button */}
             <button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors duration-300 hover:bg-blue-700"
+              disabled={isLoading}
+              className={`w-full rounded-lg px-4 py-3 font-medium text-white transition-colors duration-300 ${
+                isLoading 
+                  ? "bg-blue-400 cursor-not-allowed" 
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Sign In to Your Account
+              {isLoading ? "Signing In..." : "Sign In to Your Account"}
             </button>
 
             {/* Sign Up Link */}
@@ -332,6 +350,7 @@ export default function SignIn() {
                   type="button"
                   onClick={() => navigate("/auth/signup")}
                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                  disabled={isLoading}
                 >
                   Create Account
                 </button>
@@ -407,6 +426,7 @@ export default function SignIn() {
               type="button"
               onClick={() => setShowForgotPassword(false)}
               className="absolute right-4 top-4 rounded-full p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              disabled={isLoading}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -443,16 +463,24 @@ export default function SignIn() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 placeholder="Enter your email"
-                autoComplete="email"
+                autoComplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                disabled={isLoading}
               />
             </div>
 
             <button
               type="button"
               onClick={handleForgotPassword}
-              className="mb-4 w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors duration-300 hover:bg-blue-700"
+              disabled={isLoading}
+              className={`mb-4 w-full rounded-lg px-4 py-3 font-medium text-white transition-colors duration-300 ${
+                isLoading 
+                  ? "bg-blue-400 cursor-not-allowed" 
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Send Reset Link
+              {isLoading ? "Sending..." : "Send Reset Link"}
             </button>
 
             <div className="text-center">
@@ -460,6 +488,7 @@ export default function SignIn() {
                 type="button"
                 onClick={() => setShowForgotPassword(false)}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                disabled={isLoading}
               >
                 Back to Sign In
               </button>

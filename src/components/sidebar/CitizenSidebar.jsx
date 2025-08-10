@@ -63,7 +63,6 @@ const CitizenSidebar = ({ open, onClose }) => {
               className={isDarkMode ? "w-[150px]" : "w-[150px]"}
             />
           </div>
-          <p className="mt-2 text-lg font-medium">Citizen Portal</p>
         </div>
       </div>
 

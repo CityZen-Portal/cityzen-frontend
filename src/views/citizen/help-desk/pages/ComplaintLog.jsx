@@ -45,7 +45,7 @@ const ComplaintLog = () => {
   }, [token, email, citizenId, HELPDESK_API]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl">
       <div>
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 text-center sm:text-left">Complaint Log</h1>
@@ -53,13 +53,7 @@ const ComplaintLog = () => {
         </div>
 
         <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex justify-center items-center py-16">
-              <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
-            </div>
-          ) : (
-            <ComplaintTable complaints={complaints} />
-          )}
+          <ComplaintTable complaints={complaints} loading={loading} />
         </div>
       </div>
       <ToastContainer />

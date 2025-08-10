@@ -11,7 +11,7 @@ function NewsUpdate() {
       <div>
         <h1 className="p-4 text-2xl font-bold text-gray-800 dark:text-white">Updates</h1>
         <NewsCard />
-        <h1 className="p-4 text-2xl font-bold text-gray-800 dark:text-white">Updates</h1>
+        <h1 className="p-4 text-2xl font-bold text-gray-800 dark:text-white">News</h1>
         <NewsHome/>
       </div>
     </>

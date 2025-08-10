@@ -3,7 +3,7 @@ import pdf_file_icon from '../../../../assets/svg/pdf_file_icon.svg'
 
 const AttachmentCard = ({fileUrl}) => {
   return ( fileUrl ? (
-            <div className="mt-2 max-w-xs p-3 rounded-md border shadow-md bg-white dark:bg-gray-800 dark:border-gray-700">
+            <div className="mt-2 max-w-xs p-3 rounded-md border shadow-md bg-white dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
                 <div
                 className="flex items-center space-x-3 cursor-pointer hover:opacity-80"
                 onClick={() => window.open(fileUrl, "_blank")}
@@ -11,7 +11,7 @@ const AttachmentCard = ({fileUrl}) => {
                 <img
                     src={fileUrl.endsWith('.pdf') ? pdf_file_icon : fileUrl}
                     alt={fileUrl.endsWith('.pdf') ? "PDF" : "Complaint"}
-                    className="rounded-md cursor-pointer hover:opacity-80 h-20"
+                    className="rounded-md cursor-pointer hover:opacity-80 h-20 w-20"
                 />
                 <span className="text-sm font-medium text-brand-600 dark:text-brand-400 wrap">
                     {`${fileUrl.split('/').pop().slice(0, 20)}...`}
