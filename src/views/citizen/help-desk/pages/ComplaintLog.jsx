@@ -15,6 +15,7 @@ const ComplaintLog = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Fetch Complaint
   useEffect( () => {
     setLoading(true);
     axios.get(`${HELPDESK_API}/citizen/complaints`,

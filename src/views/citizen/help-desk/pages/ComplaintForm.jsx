@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -169,20 +169,20 @@ function ComplaintForm() {
     }
     if (file) {
       
-    if (!(file instanceof File)) {
-        setLoadingSubmit(false);
-        toast.error('Invalid file input.');
-        return;
-    }
+      if (!(file instanceof File)) {
+          setLoadingSubmit(false);
+          toast.error('Invalid file input.');
+          return;
+      }
 
-    const isImage = file.type.startsWith('image/');
-    const isPdf = file.type === 'application/pdf';
+      const isImage = file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf';
 
-    if (!isImage && !isPdf) {
-        setLoadingSubmit(false);
-        toast.error('Only PDF or Image files are allowed.');
-        return;
-    }
+      if (!isImage && !isPdf) {
+          setLoadingSubmit(false);
+          toast.error('Only PDF or Image files are allowed.');
+          return;
+      }
     }
 
     let uploadedFile = { fileName: "", filePath: "" };
@@ -282,9 +282,12 @@ function ComplaintForm() {
       toast.success('Complaint submitted successfully!', {
         position: 'top-right',
         autoClose: 1000,
-        theme: 'colored',
-        onClose: () => navigate('/citizen/help-desk/')
+        theme: 'colored'
       });
+
+      setTimeout(() => {
+        navigate('/citizen/help-desk/');
+      }, 1500);
     })
     .catch(err => {
       console.error('Error:', err.response?.data || err.message);
@@ -300,16 +303,25 @@ function ComplaintForm() {
     });
   };
 
+  useEffect(() => {
+    document.body.style.overflow = loadingSubmit ? 'hidden' : 'auto';
+  }, [loadingSubmit]);
+
+
   return (
-    <div className="relative flex items-center justify-center min-h-scree py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
-      
-      {loadingSubmit && (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
-        <img
+    <div 
+      className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
+      style={{ overflow: loadingSubmit ? 'hidden' : 'auto' }}
+    >
+      {loadingSubmit && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
             src={loading_gif}
             alt="Loading..."
             className="w-12 h-12 sm:w-16 sm:h-16"
-        />
-      </div>)}
+          />
+        </div>
+      )}
 
       <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
         <h1 className="font-bold text-center text-lg sm:text-xl lg:text-2xl mb-4 sm:mb-6">Complaint Form</h1>

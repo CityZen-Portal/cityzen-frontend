@@ -26,6 +26,7 @@ const ComplaintDetails = () => {
   const [loading, setLoading] = useState(false);
   const [complaint, setComplaint] = useState({});
 
+  // Fetch Complaint details
   useEffect(() => {
     setLoading(true);
   
@@ -58,91 +59,93 @@ const ComplaintDetails = () => {
   }, [id, complaint.id, token, email, citizenId, HELPDESK_API, navigate])
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-12 px-4 sm:px-6 lg:px-8">
-      {loading ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+    <div 
+      className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
+      style={{ overflow: loading ? 'hidden' : 'auto' }}
+    >
+      {loading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
           <img
-              src={loading_gif}
-              alt="Loading..."
-              className="w-12 h-12 sm:w-16 sm:h-16"
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
           />
-        </div>
-      ) : (
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <TitleCard 
-            title={`Complaint #${complaint.id}`}
-            Icon={MdError}
-            complaintStatus={complaint.status}
-            getStatusColor={getStatusColor}
-            getStatusText={getStatusText}
-          />
-
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Section */}
-            <div className="lg:col-span-2">
-              <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Location Details */}
-                  <DetailsList
-                    key={1}
-                    title={'Location Details'}
-                    Icon={MdLocationOn}
-                    complaintData={complaint}
-                    fields={['citizenName', 'street', 'wardNumber', 'pincode', 'citizenEmail']}
-                  />
-
-                  {/* Complaint Details */}
-                  <DetailsList
-                    key={2}
-                    title={'Complaint Details'}
-                    Icon={MdError}
-                    complaintData={complaint}
-                    fields={['category','department', 'issue', 'issueDescription', 'attachment']}
-                  />
-                </div>
-              </div>
-                <ResponseCard 
-                  extra={'mt-8'}
-                  responses={complaint.responses}
-                  />
-            </div>
-
-            {/* Right Sidebar */}
-            <div className="space-y-6">
-              {/* Staff */}
-              <StaffCard 
-                complaintData={complaint}
-                fields={['staffName', 'department']}
-                />
-
-              {/* Status History */}
-              <StatusHistory statusHistory={complaint.complaintHistory} />
-            
-            </div>
-          </div>
-
-          {/* Response & Resolutions */}
-          {/* <ResponseCard 
-            extra={'grid grid-cols-1 lg:grid-cols-3 mt-8'}
-            responses={complaint.responses}
-            /> */}
-
-          {/* Back Button */}
-          <div className="mt-8">
-            <button
-              onClick={() => {
-                navigate(-1)  
-                window.scrollTo(0,0)
-              }}
-              className="bg-brand-500 text-white font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
-            >
-              Back to Complaint Log
-            </button>
-          </div>
         </div>
       )}
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <TitleCard 
+          title={`Complaint #${complaint.id}`}
+          Icon={MdError}
+          complaintStatus={complaint.status}
+          getStatusColor={getStatusColor}
+          getStatusText={getStatusText}
+        />
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Section */}
+          <div className="lg:col-span-2">
+            <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Location Details */}
+                <DetailsList
+                  key={1}
+                  title={'Location Details'}
+                  Icon={MdLocationOn}
+                  complaintData={complaint}
+                  fields={['citizenName', 'street', 'wardNumber', 'pincode', 'citizenEmail']}
+                />
+
+                {/* Complaint Details */}
+                <DetailsList
+                  key={2}
+                  title={'Complaint Details'}
+                  Icon={MdError}
+                  complaintData={complaint}
+                  fields={['category','department', 'issue', 'issueDescription', 'attachment']}
+                />
+              </div>
+            </div>
+              <ResponseCard 
+                extra={'mt-8'}
+                responses={complaint.responses}
+                />
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="space-y-6">
+            {/* Staff */}
+            <StaffCard 
+              complaintData={complaint}
+              fields={['staffName', 'department']}
+              />
+
+            {/* Status History */}
+            <StatusHistory statusHistory={complaint.complaintHistory} />
+          
+          </div>
+        </div>
+
+        {/* Response & Resolutions */}
+        {/* <ResponseCard 
+          extra={'grid grid-cols-1 lg:grid-cols-3 mt-8'}
+          responses={complaint.responses}
+          /> */}
+
+        {/* Back Button */}
+        <div className="mt-8">
+          <button
+            onClick={() => {
+              navigate(-1)  
+              window.scrollTo(0,0)
+            }}
+            className="bg-brand-500 text-white font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
+          >
+            Back to Complaint Log
+          </button>
+        </div>
+      </div>
       <ToastContainer />
     </div>
   );
