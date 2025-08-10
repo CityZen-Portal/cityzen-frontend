@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FilterButtons, RequestDetails, CompletionForm, RequestsTable } from './component';
-
+import loading_gif from "../../../assets/gif/loading-gif.gif"
 const StaffService = () => {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [statusCode, setStatusCode] = useState(null);
   const [formData, setFormData] = useState({
     staffName: "",
     completionDate: new Date().toISOString().split('T')[0],
@@ -34,7 +35,8 @@ const StaffService = () => {
       const response = await axios.get(`https://utility-booking-backend.onrender.com/api/task/email/${email}`);
       setRequests(response.data.data);
     } catch (err) {
-      setError("Failed to fetch data");
+      setStatusCode(err.status);
+      // setError("Failed to fetch data");
     } finally {
       setLoading(false);
     }
@@ -85,13 +87,13 @@ const StaffService = () => {
     setPhotoPreview(null);
     setViewingDetails(null);
     setErrors({});
-    scrollToForm(); 
+    scrollToForm();
   };
 
   const handleViewDetails = (request) => {
     setViewingDetails(request);
     setSelectedRequest(null);
-    scrollToForm(); 
+    scrollToForm();
   };
 
   const handleSubmitCompletion = async (e) => {
@@ -140,22 +142,55 @@ const StaffService = () => {
     viewMode === "all"
       ? requests
       : viewMode === "pending"
-        ? requests.filter(req => req.status === "pending")
-        : requests.filter(req => req.status === "completed");
+        ? requests.filter(req => req.taskStatus === "PENDING")
+        : requests.filter(req => req.taskStatus === "COMPLETED");
 
-  if (loading) return <p className="text-center mt-5">Loading...</p>;
+  if (loading) return <div className="flex justify-center items-center py-16">
+              <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
+            </div>
+
   if (error) return <p className="text-center text-red-500 mt-5">{error}</p>;
 
   return (
     <div className="mt-3">
-      <FilterButtons viewMode={viewMode} setViewMode={setViewMode} />
-      <RequestsTable
-        viewMode={viewMode}
-        filteredRequests={filteredRequests}
-        handleViewDetails={handleViewDetails}
-        handleComplete={handleComplete}
-      />
-   
+      {statusCode === 404 ?
+        <div className="flex items-center justify-center min-h-[70vh]">
+          <div className="
+      bg-white dark:bg-navy-700 
+      text-center px-8 py-6 rounded-lg shadow-lg max-w-lg w-full 
+      border border-gray-300 dark:border-gray-700
+    ">
+
+            <div className="flex justify-center mb-4">
+              <div className="
+          flex items-center justify-center w-12 h-12 rounded-full 
+          border-2 border-yellow-400 
+          bg-yellow-50 dark:bg-gray-800
+        ">
+                <span className="text-yellow-500 text-lg font-bold">!</span>
+              </div>
+            </div>
+
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+              <span className=" text-white px-1 rounded">No</span> Service Requests Available
+            </h2>
+
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+               You have no service requests at the moment.
+            </p>
+          </div>
+        </div>
+        : <>
+          <FilterButtons viewMode={viewMode} setViewMode={setViewMode} />
+
+          <RequestsTable
+            viewMode={viewMode}
+            filteredRequests={filteredRequests}
+            handleViewDetails={handleViewDetails}
+            handleComplete={handleComplete}
+          />
+        </>
+      }
       <div ref={formRef}>
         <CompletionForm
           selectedRequest={selectedRequest}

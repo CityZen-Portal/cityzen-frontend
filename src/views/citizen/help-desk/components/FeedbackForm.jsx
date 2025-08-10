@@ -94,7 +94,7 @@ const FeedbackForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
       {/* Loading overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
@@ -124,7 +124,7 @@ const FeedbackForm = () => {
             name="complaintId"
             value={id}
             disabled
-            className="w-full border border-gray-300 dark:border-gray-600 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-base"
+            className="w-full dark:bg-navy-700 dark:text-white rounded px-3 py-2 text-base"
           />
         </div>
 

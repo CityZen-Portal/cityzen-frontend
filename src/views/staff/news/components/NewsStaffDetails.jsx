@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import image from "../../../../assets/img/news/image.png"
 const TEMP_IMAGE_URL = image;
 
-const NewsHomeDetails = () => {
+const NewsStaffDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   let newsItem = location.state;
@@ -51,7 +51,7 @@ const NewsHomeDetails = () => {
         <div className="p-6 sm:p-8">
           <button
             onClick={handleBack}
-            className="mb-4 dark:text-cyan-500 text-blue-600 hover:underline hover:text-blue-800 text-sm transition"
+            className="mb-4 text-blue-600 dark:text-cyan-500 hover:underline hover:text-blue-800 text-sm transition"
           >
             ← Back to News
           </button>
@@ -62,7 +62,7 @@ const NewsHomeDetails = () => {
               alt={newsItem.title}
               className="w-full h-64 sm:h-96 object-cover rounded-xl shadow-md"
               onError={e => {
-                e.target.onerror = null; // Prevents infinite fallback loop
+                e.target.onerror = null; 
                 e.target.src = TEMP_IMAGE_URL;
               }}
             />
@@ -90,7 +90,7 @@ const NewsHomeDetails = () => {
                 href={newsItem.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline dark:text-cyan-500 "
+                className="text-blue-600 hover:underline dark:text-cyan-500"
               >
                 Read Full Article
               </a>
@@ -102,4 +102,4 @@ const NewsHomeDetails = () => {
   );
 };
 
-export default NewsHomeDetails;
+export default NewsStaffDetails;
