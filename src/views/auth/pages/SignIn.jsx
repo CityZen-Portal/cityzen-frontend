@@ -75,10 +75,36 @@ export default function SignIn() {
 
     try {
       setIsLoading(true);
-      const response = await axios.post(`${apiurl}/api/auth/forgot-password`, {
+      const res = await axios.get(`https://utility-booking-backend.onrender.com/api/staff/email/${email}`);
+      const id = res.data.id;
+      const staffresponse = await axios.put(`https://utility-booking-backend.onrender.com/api/staff/reset-password-request/${id}?isRequestToResetPassword=true`);
+      // console.log(staffresponse);
+      if (staffresponse.data.status = 200) {
+        toast.success('Password reset requested,', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          className: "!bg-green-500 !text-white",
+          onClose: () => navigate('/auth/signin')
+        });
+         setShowForgotPassword(false);
+      }
+       else{
+      
+      
+    }
+    } catch (error) {
+      console.log(error.response.status)
+      if(error.response.status===404)
+      {
+        const response = await axios.post(`${apiurl}/api/auth/forgot-password`, {
         email,
       });
-
+        
       if (response.data.success) {
         toast.success(`Password reset link sent to ${email}`, {
           position: "top-right",
@@ -87,13 +113,15 @@ export default function SignIn() {
         });
         setShowForgotPassword(false);
       } else {
-        toast.error(response.data.message || "Failed to send reset link", {
+
+        toast.success(response.data.message || "Failed to send reset link", {
           position: "top-right",
           autoClose: 3000,
           theme: "colored",
         });
       }
-    } catch (error) {
+      }
+      else{
       console.error("Password reset error:", error);
       const errorMsg =
         error.response?.data?.message || "Error sending reset link";
@@ -102,6 +130,7 @@ export default function SignIn() {
         autoClose: 3000,
         theme: "colored",
       });
+    }
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +144,7 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const passwordRegex = /^.{4,}$/;
-    
+
     if (!validateEmail(email)) {
       toast.error("Enter a valid email", {
         position: "top-right",
@@ -127,7 +156,7 @@ export default function SignIn() {
     } else {
       setEmailState("success");
     }
-    
+
     if (!passwordRegex.test(password)) {
       toast.error("Enter a strong password", {
         position: "top-right",
@@ -139,7 +168,7 @@ export default function SignIn() {
     } else {
       setPasswordState("success");
     }
-    
+
     try {
       setIsLoading(true); // Start loading
       const response = await axios.post(`${apiurl}/api/auth/login`, {
@@ -241,10 +270,10 @@ export default function SignIn() {
             </p>
           </div>
 
-          <form 
-            onSubmit={handleSubmit} 
-            className="space-y-6" 
-            data-form-type="other" 
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6"
+            data-form-type="other"
             autoComplete="off"
             data-lpignore="true"
           >
@@ -258,11 +287,10 @@ export default function SignIn() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full border px-4 py-3 ${
-                    emailState === "error"
+                  className={`w-full border px-4 py-3 ${emailState === "error"
                       ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600"
-                  } rounded-lg bg-white focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white`}
+                    } rounded-lg bg-white focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white`}
                   placeholder="Enter your email"
                   autoComplete="off"
                   data-lpignore="true"
@@ -287,11 +315,10 @@ export default function SignIn() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full border px-4 py-3 pr-12 ${
-                    passwordState === "error"
+                  className={`w-full border px-4 py-3 pr-12 ${passwordState === "error"
                       ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600"
-                  } rounded-lg bg-white focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white`}
+                    } rounded-lg bg-white focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white`}
                   placeholder="Min. 8 characters"
                   autoComplete="off"
                   data-lpignore="true"
@@ -333,11 +360,10 @@ export default function SignIn() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full rounded-lg px-4 py-3 font-medium text-white transition-colors duration-300 ${
-                isLoading 
-                  ? "bg-blue-400 cursor-not-allowed" 
+              className={`w-full rounded-lg px-4 py-3 font-medium text-white transition-colors duration-300 ${isLoading
+                  ? "bg-blue-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
-              }`}
+                }`}
             >
               {isLoading ? "Signing In..." : "Sign In to Your Account"}
             </button>
@@ -474,11 +500,10 @@ export default function SignIn() {
               type="button"
               onClick={handleForgotPassword}
               disabled={isLoading}
-              className={`mb-4 w-full rounded-lg px-4 py-3 font-medium text-white transition-colors duration-300 ${
-                isLoading 
-                  ? "bg-blue-400 cursor-not-allowed" 
+              className={`mb-4 w-full rounded-lg px-4 py-3 font-medium text-white transition-colors duration-300 ${isLoading
+                  ? "bg-blue-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
-              }`}
+                }`}
             >
               {isLoading ? "Sending..." : "Send Reset Link"}
             </button>
