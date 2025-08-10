@@ -10,11 +10,6 @@ import ProfileDropdown from "../dropdown/ProfileDropdown";
 import axios from "axios";
 import { useUser } from "contexts/UserContext";
 
-const Navbar = (props) => {
-  const { onOpenSidenav, brandText, newsState } = props;
-  const { logout } = useUser();
-
-import { useUser } from "contexts/UserContext"; // ✅ Import UserContext for user data and logout
 
 const Navbar = (props) => {
   const { onOpenSidenav, brandText, newsState } = props;
