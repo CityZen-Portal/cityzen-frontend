@@ -90,7 +90,7 @@ export default function NewsHome() {
                         "currentNewsDetail",
                         JSON.stringify(news)
                       );
-                      navigate("/citizen/news/newshomedetails");
+                      navigate("/citizen/newsupdate/newshomedetails");
                     }}
                     className="font-medium text-blue-600 dark:text-cyan-500 hover:underline"
                   >
