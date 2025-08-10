@@ -71,13 +71,12 @@ const getGenderIcon = (gender) => {
 };
 
 export default function ProfileCard() {
-  // Variables from localStorage & env
   const token = localStorage.getItem("token");
   const email = localStorage.getItem("email");
   const citizenId = localStorage.getItem("id");
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
 
-  const [loading, setLoading] = useState(false); // Loader state
+  const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [user, setUser] = useState({
     user_name: "",
@@ -125,8 +124,6 @@ export default function ProfileCard() {
       console.error(e);
     }
   };
-
-  // Fetch profile and bookings
   useEffect(() => {
     const fetchData = async () => {
       let showLoaderTimeout;
@@ -137,20 +134,20 @@ export default function ProfileCard() {
         }, 300);
 
         const userRes = await axios.get(
-          "https://auth-backend-2-k3ph.onrender.com/citizen-profiles/CIT005"
+          `https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`
         );
         const data = userRes.data?.data || userRes.data || {};
         const userObj = {
           user_name: data.userName || "",
-          citizen_id: data.citizenId || "",
+          citizen_id: data.id || "",
           aadhaar: data.aadhaar || "",
           email: data.email || "",
-          address: data.address || "",
-          city: data.city || "",
-          dob: data.dob || "",
+          address: data.address || "not update",
+          city: data.city || "not update yet",
+          dob: data.dob || "not update yet",
           gender: data.gender || "",
-          pincode: data.pincode || "",
-          state: data.state || "",
+          pincode: data.pincode || "not update yet",
+          state: data.state || "not update yet",
         };
         setUser(userObj);
         setOriginalUser(userObj);
@@ -160,7 +157,7 @@ export default function ProfileCard() {
         const id = localStorage.getItem("id");
         if (id) {
           const bookingsRes = await axios.get(
-            `https://utility-booking-backend.onrender.com/api/task/dto/49`
+            `https://utility-booking-backend.onrender.com/api/task/dto/${citizenId}`
           );
           setBookings(bookingsRes.data?.data?.data || []);
         }
@@ -174,7 +171,6 @@ export default function ProfileCard() {
     fetchData();
   }, []);
 
-  // Fetch complaints separately
   useEffect(() => {
     if (!token || !email || !citizenId || !HELPDESK_API) return;
 
@@ -255,31 +251,31 @@ export default function ProfileCard() {
   ];
 
   return (
-    <div className="p-6 space-y-6 font-sans">
+    <div className="space-y-6 p-6 font-sans">
       {/* Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm">
           <img
             src={loading_gif}
             alt="Loading..."
-            className="w-12 h-12 sm:w-16 sm:h-16"
+            className="h-12 w-12 sm:h-16 sm:w-16"
           />
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Profile Picture */}
-        <div className="flex flex-col items-center bg-blue-600 rounded-2xl p-6 w-full lg:w-1/3 shadow-lg">
+        <div className="flex w-full flex-col items-center rounded-2xl bg-blue-600 p-6 shadow-lg lg:w-1/3">
           <div className="relative mb-2">
             <img
               src={croppedImage || avatar}
               alt="User"
-              className="rounded-full border-2 border-white w-56 h-56 object-cover shadow-md"
+              className="h-56 w-56 rounded-full border-2 border-white object-cover shadow-md"
             />
             {editMode && (
               <>
                 <label htmlFor="profilePicUpload">
-                  <div className="absolute bottom-2 right-2 bg-white rounded-full p-2 cursor-pointer shadow hover:bg-gray-100">
+                  <div className="absolute bottom-2 right-2 cursor-pointer rounded-full bg-white p-2 shadow hover:bg-gray-100">
                     <FaPen className="text-blue-600" />
                   </div>
                 </label>
@@ -293,12 +289,14 @@ export default function ProfileCard() {
               </>
             )}
           </div>
-          <h2 className="text-2xl font-semibold text-white">{user.user_name}</h2>
+          <h2 className="text-2xl font-semibold text-white">
+            {user.user_name}
+          </h2>
         </div>
 
         {/* Profile Info */}
-        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-2xl p-6 w-full lg:w-2/3 shadow-lg">
-          <div className="flex justify-end gap-2 mb-4">
+        <div className="w-full rounded-2xl bg-white p-6 text-gray-900 shadow-lg dark:bg-gray-900 dark:text-white lg:w-2/3">
+          <div className="mb-4 flex justify-end gap-2">
             {!editMode ? (
               <button
                 onClick={() => {
@@ -306,7 +304,7 @@ export default function ProfileCard() {
                   setOriginalImage(croppedImage);
                   setEditMode(true);
                 }}
-                className="bg-yellow-400 text-white px-3 py-1.5 rounded-full shadow hover:bg-yellow-500 flex items-center gap-1 text-sm font-semibold"
+                className="flex items-center gap-1 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-yellow-500"
               >
                 <FaEdit /> Edit
               </button>
@@ -314,7 +312,7 @@ export default function ProfileCard() {
               <>
                 <button
                   onClick={handleSave}
-                  className="bg-green-600 text-white px-3 py-1.5 rounded-full shadow hover:bg-green-700 flex items-center gap-1 text-sm font-semibold"
+                  className="flex items-center gap-1 rounded-full bg-green-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-green-700"
                 >
                   <FaSave /> Save
                 </button>
@@ -325,7 +323,7 @@ export default function ProfileCard() {
                     setSelectedImage(null);
                     setEditMode(false);
                   }}
-                  className="bg-red-600 text-white px-3 py-1.5 rounded-full shadow hover:bg-red-700 flex items-center gap-1 text-sm font-semibold"
+                  className="flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-red-700"
                 >
                   <FaTimes /> Cancel
                 </button>
@@ -333,19 +331,21 @@ export default function ProfileCard() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {fields.map(([key, label, icon, isReadOnly = false]) => (
               <div key={key}>
                 {editMode ? (
                   <>
-                    <label className="block text-sm font-semibold mb-1">{label}</label>
+                    <label className="mb-1 block text-sm font-semibold">
+                      {label}
+                    </label>
                     {key === "dob" ? (
                       <input
                         type="date"
-                        className={`w-full p-2 rounded border ${
+                        className={`w-full rounded border p-2 ${
                           isReadOnly
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-                            : "bg-white dark:bg-[#0b1331] text-gray-900 dark:text-white border border-gray-400 dark:border-gray-200"
+                            ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
+                            : "border border-gray-400 bg-white text-gray-900 dark:border-gray-200 dark:bg-[#0b1331] dark:text-white"
                         }`}
                         value={user[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
@@ -353,10 +353,10 @@ export default function ProfileCard() {
                       />
                     ) : key === "gender" ? (
                       <select
-                        className={`w-full p-2 rounded border ${
+                        className={`w-full rounded border p-2 ${
                           isReadOnly
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-                            : "bg-white dark:bg-[#0b1331] text-gray-900 dark:text-white border border-gray-400 dark:border-gray-200"
+                            ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
+                            : "border border-gray-400 bg-white text-gray-900 dark:border-gray-200 dark:bg-[#0b1331] dark:text-white"
                         }`}
                         value={user[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
@@ -369,10 +369,10 @@ export default function ProfileCard() {
                     ) : (
                       <input
                         type="text"
-                        className={`w-full p-2 rounded border ${
+                        className={`w-full rounded border p-2 ${
                           isReadOnly
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-                            : "bg-white dark:bg-[#0b1331] text-gray-900 dark:text-white border border-gray-400 dark:border-gray-200"
+                            ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
+                            : "border border-gray-400 bg-white text-gray-900 dark:border-gray-200 dark:bg-[#0b1331] dark:text-white"
                         }`}
                         value={user[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
@@ -399,7 +399,7 @@ export default function ProfileCard() {
       </div>
 
       {/* Previous Bookings */}
-      <div className="bg-white dark:bg-gray-900 dark:text-white rounded-xl shadow-md p-6 space-y-4">
+      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
         <h3 className="text-lg font-semibold">Previous Bookings</h3>
         {bookings.length === 0 ? (
           <p className="text-gray-500">No previous bookings found.</p>
@@ -408,7 +408,7 @@ export default function ProfileCard() {
             {bookings.map((b, index) => (
               <li
                 key={index}
-                className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 flex items-center gap-3 shadow-md"
+                className="flex items-center gap-3 rounded-2xl bg-gray-100 p-4 shadow-md dark:bg-gray-800"
               >
                 <FaTint />
                 <span>
@@ -422,7 +422,7 @@ export default function ProfileCard() {
       </div>
 
       {/* Previous Complaints */}
-      <div className="bg-white dark:bg-gray-900 dark:text-white rounded-xl shadow-md p-6 space-y-4">
+      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
         <h3 className="text-lg font-semibold">Previous Complaints</h3>
 
         {complaints.length === 0 ? (
@@ -432,7 +432,7 @@ export default function ProfileCard() {
             {complaints.map((comp) => (
               <li
                 key={comp.id}
-                className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 shadow-md"
+                className="rounded-2xl bg-gray-100 p-4 shadow-md dark:bg-gray-800"
               >
                 <div className="flex items-center gap-3">
                   <FaLightbulb className="flex-shrink-0 text-yellow-500" />
@@ -443,7 +443,7 @@ export default function ProfileCard() {
                     <div className="text-sm text-gray-700 dark:text-gray-300">
                       {comp.issueDescription || "No description provided"}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Date:{" "}
                       {comp.complaintDate
                         ? new Date(comp.complaintDate).toLocaleDateString()
@@ -469,9 +469,9 @@ export default function ProfileCard() {
 
       {/* Crop Modal */}
       {cropModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-4 w-[90%] max-w-md shadow-lg">
-            <div className="relative w-full h-64 bg-gray-100">
+        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-60">
+          <div className="w-[90%] max-w-md rounded-lg bg-white p-4 shadow-lg">
+            <div className="relative h-64 w-full bg-gray-100">
               <Cropper
                 image={selectedImage}
                 crop={crop}
@@ -484,7 +484,7 @@ export default function ProfileCard() {
                 }
               />
             </div>
-            <div className="flex justify-between mt-4">
+            <div className="mt-4 flex justify-between">
               <input
                 type="range"
                 min={1}
@@ -495,13 +495,13 @@ export default function ProfileCard() {
               />
               <div className="flex gap-4">
                 <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded shadow"
+                  className="rounded bg-blue-600 px-4 py-2 text-white shadow"
                   onClick={showCroppedImage}
                 >
                   Crop
                 </button>
                 <button
-                  className="bg-gray-400 text-white px-4 py-2 rounded shadow"
+                  className="rounded bg-gray-400 px-4 py-2 text-white shadow"
                   onClick={() => {
                     setCropModalOpen(false);
                     setSelectedImage(null);
