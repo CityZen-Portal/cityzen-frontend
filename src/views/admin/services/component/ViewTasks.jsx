@@ -13,6 +13,18 @@ const initialNewTaskState = {
   description: "",
 };
 
+const SkeletonCard = () => (
+  <div className="bg-gradient-to-br from-blue-50 via-white to-pink-50 
+                  dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 
+                  shadow-2xl rounded-3xl border-2 border-blue-200 
+                  dark:border-gray-700 p-6 animate-pulse">
+    <div className="h-5 w-2/3 bg-gray-300 dark:bg-gray-600 rounded mb-4"></div>
+    <div className="h-4 w-1/2 bg-gray-300 dark:bg-gray-600 rounded mb-3"></div>
+    <div className="h-4 w-3/4 bg-gray-300 dark:bg-gray-600 rounded mb-3"></div>
+    <div className="h-4 w-1/3 bg-gray-300 dark:bg-gray-600 rounded"></div>
+  </div>
+);
+
 function ViewTasks() {
   const navigate = useNavigate();
 
@@ -24,22 +36,32 @@ function ViewTasks() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [selectedBookingData, setSelectedBookingData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [assigning, setAssigning] = useState(false);
+
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    const fetchRequest = async () => {
-      try {
-        const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/services/request/all"
-        );
-        const visibleRequests = response.data.data.filter((request) => request.show === false);
-        setBookingRequests(visibleRequests);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchRequest();
-  }, []);
+useEffect(() => {
+  const fetchRequest = async () => {
+    setLoading(true); // ✅ Start loading
+    try {
+      const response = await axios.get(
+        "https://utility-booking-backend.onrender.com/api/services/request/all"
+      );
+      const visibleRequests = response.data.data.filter(
+        (request) => request.show === false
+      );
+      setBookingRequests(visibleRequests);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false); // ✅ Stop loading
+    }
+  };
+  fetchRequest();
+}, []);
+
+  
 
   useEffect(() => {
     setCurrentPage(1);
@@ -113,39 +135,45 @@ function ViewTasks() {
     setNewTask((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveTask = async () => {
-    if (!newTask.title || !newTask.staff || !newTask.date || !newTask.time || !newTask.address) {
-      alert("Please fill in all required fields.");
+const handleSaveTask = async () => {
+  if (!newTask.title || !newTask.staff || !newTask.date || !newTask.time || !newTask.address) {
+    toast.error("Please fill in all required fields.");
+    return;
+  }
+
+  try {
+    setAssigning(true); // start loader
+
+    const selectedStaff = staffList.find((s) => s.name === newTask.staff);
+    if (!selectedStaff || !selectedBookingData) {
+      toast.error("Invalid staff or booking request selection.");
+      setAssigning(false);
       return;
     }
 
-    try {
-      const selectedStaff = staffList.find((s) => s.name === newTask.staff);
-      if (!selectedStaff || !selectedBookingData) {
-        alert("Invalid staff or booking request selection.");
-        return;
-      }
+    const taskPayload = {
+      serviceId: selectedBookingData.id,
+      citizenId: selectedBookingData.citizenId || "1",
+      staffId: selectedStaff.id,
+      status: "PENDING",
+    };
 
-      const taskPayload = {
-        serviceId: selectedBookingData.id,
-        citizenId: selectedBookingData.citizenId || "1",
-        staffId: selectedStaff.id,
-        status: "PENDING",
-      };
+    await axios.post("https://utility-booking-backend.onrender.com/api/task/add", taskPayload);
+    await axios.put(`https://utility-booking-backend.onrender.com/api/services/request/${selectedBookingData.id}`, {
+      ...selectedBookingData,
+      show: true,
+    });
 
-      await axios.post("https://utility-booking-backend.onrender.com/api/task/add", taskPayload);
-      await axios.put(`https://utility-booking-backend.onrender.com/api/services/request/${selectedBookingData.id}`, {
-        ...selectedBookingData,
-        show: true,
-      });
+    toast.success("Task assigned successfully!");
+    handleClose();
+  } catch (error) {
+    console.error("Error saving task:", error);
+    toast.error("Failed to assign task.");
+  } finally {
+    setAssigning(false); // stop loader
+  }
+};
 
-      toast.success("Task assigned successfully!");
-      handleClose();
-    } catch (error) {
-      console.error("Error saving task:", error);
-      toast.error("Failed to assign task.");
-    }
-  };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12 px-4 md:px-6">
@@ -154,7 +182,7 @@ function ViewTasks() {
           <div>
             <button
               onClick={() => navigate("/admin/services")}
-              className="text-white hover:text-gray-200 transition-colors flex items-center gap-2 mb-2 text-sm"
+              className="text-white hover:text-gray-200 dark:text-cyan-100 transition-colors flex items-center gap-2 mb-2 text-sm"
             >
               <span>←</span> Back to Services
             </button>
@@ -173,9 +201,13 @@ function ViewTasks() {
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-200">
             User Booking Requests
           </h3>
-          {bookingRequests.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-300">No booking requests found.</p>
-          ) : (
+         {bookingRequests.length === 0 ? (
+  <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
+    {[...Array(6)].map((_, idx) => (
+      <SkeletonCard key={idx} />
+    ))}
+  </div>
+) : (
             <>
               <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
                 {currentRequests.map((req) => (
@@ -319,12 +351,40 @@ function ViewTasks() {
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSaveTask}
-                className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600 font-semibold"
-              >
-                {currentTask ? "Save Changes" : "Assign Task"}
-              </button>
+<button
+  onClick={handleSaveTask}
+  disabled={assigning}
+  className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600 font-semibold flex items-center justify-center gap-2"
+>
+  {assigning ? (
+    <>
+      <svg
+        className="animate-spin h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+        ></path>
+      </svg>
+      Assigning...
+    </>
+  ) : (
+    currentTask ? "Save Changes" : "Assign Task"
+  )}
+</button>
+
             </div>
           </div>
         </div>

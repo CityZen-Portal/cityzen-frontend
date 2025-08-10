@@ -90,9 +90,13 @@ import MunicipalJobForm from "views/admin/job-applications/pages/MunicipalJobFor
 import VolunteerJobForm from "views/admin/job-applications/pages/VolunteerJobForm";
 import MunicipalEditForm from "views/admin/job-applications/pages/MunicipalEditForm";
 import VolunteerEditForm from "views/admin/job-applications/pages/VolunteerEditForm";
+import AdminJobDetailsPage from "views/admin/job-applications/pages/AdminJobDetails";
+import AdminVolunteerDetailsPage from "views/admin/job-applications/pages/AdminVolunteerDetailsPage";
+
 import NewsStaffDetails from "views/staff/news/components/NewsStaffDetails";
 import ViewNewsDetails from "views/staff/news/components/ViewNewsDetails";
 import AdminViewNewsDetails from "views/admin/news/components/AdminViewNewsDetails";
+
 
 const routes = [
   // Home
@@ -331,6 +335,19 @@ const routes = [
         layout: "/admin",
         path: "job-application/edit/volunteer/:id",
         component: <VolunteerEditForm />,
+      }
+      ,
+      {
+        name: "Admin job Details view",
+        layout: "/admin",
+        path: "job-application/job-details/:id",
+        component: <AdminJobDetailsPage />,
+      },
+      {
+        name: "Admin volunteer Details view",
+        layout: "/admin",
+        path: "job-application/volunteer-details/:id",
+        component: <AdminVolunteerDetailsPage />,
       },
     ],
   },
@@ -499,7 +516,7 @@ const routes = [
   {
     name: "Profile",
     layout: "/staff",
-    path: " profile",
+    path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <StaffProfile />,
   },

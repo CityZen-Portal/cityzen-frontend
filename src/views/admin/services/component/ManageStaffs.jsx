@@ -26,7 +26,7 @@ const initialNewStaffState = {
   fullAddress: "",
   dob: "",
   aadharNumber: "",
-  gender: "",
+   gender: "",
   profileImage: ""
 };
 
@@ -49,6 +49,9 @@ function ManageStaffs() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [resetRequestStaffIds, setResetRequestStaffIds] = useState([]);
+  const [saving, setSaving] = useState(false);
+
+
 
   useEffect(() => {
     const fetchDepartment = async () => {
@@ -76,7 +79,7 @@ function ManageStaffs() {
         fullAddress: staff.fullAddress || "",
         dob: staff.dob || "",
         aadharNumber: staff.aadharNumber || "",
-        gender: staff.gender || "",
+         gender: staff.gender || "",
         profileImage: staff.profileImage || ""
       });
     } else {
@@ -115,16 +118,10 @@ function ManageStaffs() {
 
   const handleAddOrUpdateStaff = async () => {
     const requiredFields = [
-      "fullName",
-      "department",
-      "designation",
-      "contactNumber",
-      "emailAddress",
-      "fullAddress",
-      "dob",
-      "aadharNumber",
-      "gender"
+      "fullName", "department", "designation", "contactNumber",
+      "emailAddress", "fullAddress", "dob", "aadharNumber", "gender"
     ];
+
     const missing = requiredFields.filter((field) => !newStaff[field]);
     if (missing.length) {
       toast.error(`Please fill all fields: ${missing.join(", ")}`);
@@ -151,7 +148,10 @@ function ManageStaffs() {
       toast.error("DOB cannot be a future date.");
       return;
     }
+
     try {
+      setSaving(true); // ✅ Start loading
+
       if (editId) {
         await axios.put(
           `https://utility-booking-backend.onrender.com/api/staff/${editId}`,
@@ -177,10 +177,13 @@ function ManageStaffs() {
       if (error.response?.data?.statusCode === 409) {
         toast.error("Failed to save staff. Email is Already registered ");
       } else {
-        toast.error(error.response.data.message);
+        toast.error("Failed to save staff. Please try again.");
       }
+    } finally {
+      setSaving(false); // ✅ Stop loading
     }
   };
+
 
   const confirmDeleteStaff = (id) => {
     setDeleteId(id);
@@ -211,6 +214,7 @@ function ManageStaffs() {
         `https://utility-booking-backend.onrender.com/api/staff/resend-password/${encodeURIComponent(email)}`
       );
       toast.success("Password reset link sent.");
+
       setStaffs((prev) =>
         prev.map((staff) =>
           staff.emailAddress === email
@@ -219,6 +223,7 @@ function ManageStaffs() {
         )
       );
     } catch (error) {
+      console.error("Password reset error:", error);
       toast.error("Failed to send reset link.");
     }
   };
@@ -237,7 +242,6 @@ function ManageStaffs() {
     };
     fetchResetPasswordRequests();
   }, []);
-
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -281,6 +285,7 @@ function ManageStaffs() {
       return aPriority - bPriority;
     });
 
+
     setFilteredStaffs(filtered);
     setCurrentPage(1);
   }, [searchText, staffs, selectedDepartment, resetRequestStaffIds]);
@@ -305,33 +310,41 @@ function ManageStaffs() {
           <div>
             <button
               onClick={() => navigate("/admin/services")}
-              className="mb-2 flex items-center gap-2 text-sm text-white transition-colors hover:text-gray-200"
+              className="mb-2 flex items-center gap-2 text-sm text-white dark:text-cyan-500 transition-colors hover:text-gray-200"
             >
               <span>←</span> Back to Services
             </button>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-white ">
               Manage Staff Members
             </h2>
           </div>
           <button
             onClick={() => handleOpen()}
-            className="flex transform items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-blue-600 shadow-md transition-transform hover:scale-105 hover:bg-gray-100"
+            className="flex transform items-center justify-center gap-2 rounded-lg bg-white dark:bg-gray-700  dark:text-white px-5 py-2.5 text-blue-600 shadow-md transition-transform hover:scale-105 hover:bg-gray-100"
           >
             <PlusIcon className="h-5 w-5" />
             <span className="font-semibold">Add New Staff</span>
           </button>
         </div>
         <div className="flex items-center justify-between px-6 pt-6 gap-4">
-          <div className="flex items-center w-full max-w-sm bg-gray-50 border rounded-lg px-3 py-2 dark:bg-navy-700 dark:border-navy-600">
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center w-full max-w-sm 
+                bg-gray-50 dark:bg-navy-700 
+                border dark:border-navy-600 
+                rounded-lg px-3 py-2">
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-300" />
             <input
               type="text"
               value={searchText}
               onChange={handleSearchChange}
-              className="bg-transparent ml-2 w-full outline-none text-gray-700  dark:text-white"
+              className="ml-2 w-full outline-none 
+               text-gray-700 dark:text-white 
+               placeholder-gray-400 dark:placeholder-gray-300
+               bg-transparent appearance-none"
+              style={{ backgroundColor: 'transparent' }}
               placeholder="Search by name, mobile, or email..."
             />
           </div>
+
           <select
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}
@@ -425,13 +438,14 @@ function ManageStaffs() {
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => resetPasswordHandler(staff.emailAddress)}
-                  className="flex-1 text-white py-2 rounded-md"
-                >
-                  Reset Password
-                </button>
+
                 <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
+                  <button
+                    onClick={() => resetPasswordHandler(staff.emailAddress)}
+                    className="flex-1 dark:text-cyan-500 text-red-500 py-2 rounded-md"
+                  >
+                    Reset Password
+                  </button>
                   <button
                     onClick={() => handleOpen(staff)}
                     className="text-yellow-500 transition-colors hover:text-yellow-600"
@@ -492,24 +506,46 @@ function ManageStaffs() {
               <input name="designation" placeholder="Designation" value={newStaff.designation} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="contactNumber" placeholder="Contact Number" value={newStaff.contactNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
               <input name="aadharNumber" placeholder="Aadhaar Number" value={newStaff.aadharNumber} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
-              <input name="dob" type="date" max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]} value={newStaff.dob} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
+
+              <input
+                name="dob"
+                type="date"
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]}
+                value={newStaff.dob}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
+              />
               <input name="emailAddress" placeholder="Email Address" value={newStaff.emailAddress} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
-              <select name="gender" value={newStaff.gender} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
+               <select name="gender" value={newStaff.gender} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
                 <option value="">Select Gender</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="OTHER">Other</option>
               </select>
-              <textarea name="fullAddress" placeholder="Full Address" value={newStaff.fullAddress} onChange={handleInputChange} rows={3} className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white resize-none" />
+              <textarea
+                name="fullAddress"
+                placeholder="Full Address"
+                value={newStaff.fullAddress}
+                onChange={handleInputChange}
+                rows={3}
+                className="col-span-2 w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white resize-none"
+              />
             </div>
             <div className="mt-8 flex justify-end gap-4">
               <button onClick={handleClose} className="rounded-lg border px-5 py-2.5 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700">Cancel</button>
-              <button onClick={handleAddOrUpdateStaff} className="rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700">{editId ? "Update Staff" : "Add Staff"}</button>
+              <button
+                onClick={handleAddOrUpdateStaff}
+                disabled={saving}
+                className={`rounded-lg px-5 py-2.5 font-semibold text-white transition-colors 
+    ${saving ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+              >
+                {saving ? "Saving..." : (editId ? "Update Staff" : "Add Staff")}
+              </button>
+
             </div>
           </div>
         </div>
       )}
-
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
