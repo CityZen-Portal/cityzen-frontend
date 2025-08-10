@@ -56,7 +56,7 @@ const AssignStaff = () => {
     setAssignedStaff('');
   };
 
-  
+  // Fetch Complaint Details
   useEffect(() => {
     setLoading(true);
   
@@ -93,6 +93,7 @@ const AssignStaff = () => {
 
   }, [id, complaint.id, token, email, citizenId])
 
+  // Fetch Department List
   useEffect( () => {
     setLoading(true)
     
@@ -115,6 +116,7 @@ const AssignStaff = () => {
       });
   }, [])
 
+  // Fetch Staff List
   useEffect( () => {
     if(assignedDepartment){
       setLoading(true)

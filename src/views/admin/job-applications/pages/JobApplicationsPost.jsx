@@ -100,7 +100,7 @@ const JobApplicationsPost = () => {
   const email = localStorage.getItem("email")
   const adminId = localStorage.getItem("id")
 
-  const [ loading, setLoading ] = useState(false)
+  const [ loading, setLoading ] = useState(true)
 
   const [jobs, setJobs] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
@@ -387,26 +387,48 @@ const JobApplicationsPost = () => {
       });
   }, [JOB_APPLICATION_API, jobs, volunteers]);
 
-  const handleToggleStatus = useCallback((item) => {
+  const handleToggleStatus = useCallback(async (item) => {
     const isVolunteer = !!item.programTitle;
+    
+    await axios.put(`${JOB_APPLICATION_API}/${isVolunteer ? 'service' : 'jobs'}/${item.id}/${item.isActive ? 'deactivate' : 'activate'}`, null,
+      {
+        headers: {
+          token,
+          email,
+          id: adminId,
+        }
+      }
+    )
+      .then(() => {
+        toast.success(`'${isVolunteer ? item.programTitle : item.title}' is ${item.isActive ? 'deactivated' : 'activated'}!`, {
+          position: "top-right",
+          autoClose: 1000,
+          theme: "colored"
+        });
+      })
+      .catch(err => {
+        toast.error('Server Error! Unable to Deactivate', {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored'
+        });
+        console.error('Error:', err.response?.data || err.message);
+        return;
+      })
+        // .finally(() => setLoading(false));
 
     if (isVolunteer) {
       const updatedVolunteers = volunteers.map(v =>
         v.id === item.id ? { ...v, isActive: !v.isActive } : v
       );
       setVolunteers(updatedVolunteers);
-      // Here you can also add an API call to update the status on the server
-      // For example: axios.put(`${JOB_APPLICATION_API}/service/${item.id}`, { ...item, isActive: !item.isActive });
-      toast.success(`'${item.programTitle}' status updated!`);
     } else {
       const updatedJobs = jobs.map(j =>
         j.id === item.id ? { ...j, isActive: !j.isActive } : j
       );
       setJobs(updatedJobs);
-      // API call to update job status
-      // For example: axios.put(`${JOB_APPLICATION_API}/jobs/${item.id}`, { ...item, isActive: !item.isActive });
-      toast.success(`'${item.title}' status updated!`);
     }
+
   }, [jobs, volunteers]);
 
   // Get counts

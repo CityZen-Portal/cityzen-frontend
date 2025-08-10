@@ -7,37 +7,12 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
   const navigate = useNavigate();
 
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-      {/* Complaint ID */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
-        <div className="font-medium">{complaint.id}</div>
-      </td>
-
-      {/* Issue */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
-        <div className="max-w-32 sm:max-w-48 lg:max-w-none truncate" title={complaint.issue}>
-          {complaint.issue.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}
-        </div>
-      </td>
-
-      {/* Department */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
-        <div className="max-w-24 sm:max-w-32 lg:max-w-none truncate" title={complaint.department}>
-          {complaint.department || <p>N/A</p>}
-        </div>
-      </td>
-
-      {/* Location */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
-        <div className="max-w-24 sm:max-w-32 lg:max-w-none truncate" title={complaint.street}>
-          {complaint.street.length > 25 ?`${complaint.street.slice(0, 25)}...` : complaint.street}
-        </div>
-      </td>
-
-      {/* Date Logged */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
-        <div className="whitespace-nowrap">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</div>
-      </td>
+    <tr className="dark:bg-navy-700 hover:bg-n-50 transition-colors">
+      
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.id}</td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.issue.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}</td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.department ? complaint.department : complaint.category}</td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</td>
 
       {/* Status + Edit Button */}
       <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
