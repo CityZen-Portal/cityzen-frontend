@@ -6,7 +6,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState({
     token: null,
-    username: null,
+    userName: null,
     email: null,
     role: null,
     id: null,
@@ -16,11 +16,14 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     try {
       const token = localStorage.getItem("token");
-      const username = localStorage.getItem("username");
+      const userName = localStorage.getItem("userName");
       const email = localStorage.getItem("email");
       const roleRaw = localStorage.getItem("role");
       const id = localStorage.getItem("id");
-
+      
+      // Remove any lowercase username keys if they exist
+      localStorage.removeItem("username");
+      
       if (token && roleRaw && email) {
         let parsedRole;
         try {
@@ -28,15 +31,13 @@ export const UserProvider = ({ children }) => {
         } catch {
           parsedRole = roleRaw;
         }
-
         setUser({
           token,
-          username,
+          userName,
           email,
           role: parsedRole,
           id,
         });
-
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       }
     } catch {
@@ -46,10 +47,13 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
-  const login = ({ token, username, email, role, id }) => {
-    setUser({ token, username, email, role, id });
+  const login = ({ token, userName, email, role, id }) => {
+    // Remove any lowercase username keys if they exist
+    localStorage.removeItem("username");
+    
+    setUser({ token, userName, email, role, id });
     localStorage.setItem("token", token);
-    localStorage.setItem("username", username);
+    localStorage.setItem("userName", userName);
     localStorage.setItem("email", email);
     localStorage.setItem("role", JSON.stringify(role));
     localStorage.setItem("id", id);
@@ -60,26 +64,19 @@ export const UserProvider = ({ children }) => {
   const logout = () => {
     setUser({
       token: null,
-      username: null,
+      userName: null,
       email: null,
       role: null,
       id: null,
     });
-
-    // Clear only auth-related items
+    // Remove all keys including any lowercase username
     localStorage.removeItem("token");
-    localStorage.removeItem("username");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("username"); // Ensure lowercase is removed too
     localStorage.removeItem("email");
     localStorage.removeItem("role");
     localStorage.removeItem("id");
-
-    // If you want to wipe all localStorage (uncomment next line)
-    // localStorage.clear();
-
-    // Remove default Authorization header
     delete axios.defaults.headers.common["Authorization"];
-
-    // UI can react instantly
     setReady(true);
   };
 

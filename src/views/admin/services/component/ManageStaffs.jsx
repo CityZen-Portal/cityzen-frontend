@@ -26,8 +26,9 @@ const initialNewStaffState = {
   fullAddress: "",
   dob: "",
   aadharNumber: "",
-   gender: "",
-  profileImage: ""
+  gender: "",
+  profileImage: "",
+  requestToResetPassword: ""
 };
 
 const PAGE_SIZE = 6;
@@ -50,8 +51,8 @@ function ManageStaffs() {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [resetRequestStaffIds, setResetRequestStaffIds] = useState([]);
   const [saving, setSaving] = useState(false);
-
-
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState(null);
 
   useEffect(() => {
     const fetchDepartment = async () => {
@@ -79,8 +80,9 @@ function ManageStaffs() {
         fullAddress: staff.fullAddress || "",
         dob: staff.dob || "",
         aadharNumber: staff.aadharNumber || "",
-         gender: staff.gender || "",
-        profileImage: staff.profileImage || ""
+        gender: staff.gender || "",
+        profileImage: staff.profileImage || "",
+        requestToResetPassword: staff.requestToResetPassword || ""
       });
     } else {
       setEditId(null);
@@ -180,7 +182,7 @@ function ManageStaffs() {
         toast.error("Failed to save staff. Please try again.");
       }
     } finally {
-      setSaving(false); // ✅ Stop loading
+      setSaving(false);
     }
   };
 
@@ -207,13 +209,22 @@ function ManageStaffs() {
       setDeleteId(null);
     }
   };
-
-  const resetPasswordHandler = async (email) => {
+  const confirmResetPassword = (staff) => {
+    // console.log(staff)
+    setSelectedStaff(staff);
+    setShowResetModal(true);
+  };
+  const resetPasswordHandler = async (email, id) => {
+    if (!selectedStaff) return;
     try {
       await axios.put(
         `https://utility-booking-backend.onrender.com/api/staff/resend-password/${encodeURIComponent(email)}`
       );
-      toast.success("Password reset link sent.");
+      const response = await axios.put(`https://utility-booking-backend.onrender.com/api/staff/reset-password-request/${id}?isRequestToResetPassword=false`)
+      console.log(response);
+      if (response.status = 200)
+        setShowResetModal(false);
+        toast.success("Password sent successfully");
 
       setStaffs((prev) =>
         prev.map((staff) =>
@@ -228,20 +239,20 @@ function ManageStaffs() {
     }
   };
 
-  useEffect(() => {
-    const fetchResetPasswordRequests = async () => {
-      try {
-        const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/staff/reset-password-request/688b49083f074e456ee154c9?isRequestToResetPassword=true"
-        );
-        const idsWithResetRequests = response.data?.data ?? [];
-        setResetRequestStaffIds(idsWithResetRequests);
-      } catch (error) {
-        setResetRequestStaffIds([]);
-      }
-    };
-    fetchResetPasswordRequests();
-  }, []);
+  // useEffect(() => {
+  //   const fetchResetPasswordRequests = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://utility-booking-backend.onrender.com/api/staff/reset-password-request/688b49083f074e456ee154c9?isRequestToResetPassword=true"
+  //       );
+  //       const idsWithResetRequests = response.data?.data ?? [];
+  //       setResetRequestStaffIds(idsWithResetRequests);
+  //     } catch (error) {
+  //       setResetRequestStaffIds([]);
+  //     }
+  //   };
+  //   fetchResetPasswordRequests();
+  // }, []);
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -387,26 +398,45 @@ function ManageStaffs() {
           ) : (
             Array.isArray(currentStaffs) &&
             currentStaffs.map((staff) => (
+
               <div
                 key={staff.id}
-                className="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-5 shadow-lg dark:border-navy-700 dark:bg-navy-900/50"
+                className={`flex flex-col justify-between rounded-lg border p-5 shadow-lg 
+    ${staff.requestToResetPassword
+                    ? "border-red-500 bg-red-50 shadow-red-200 dark:border-red-400 dark:bg-red-900/50 dark:shadow-red-900"
+                    : "border-gray-200 bg-gray-50 dark:border-navy-700 dark:bg-navy-900/50"
+                  }`}
               >
                 <div>
                   <div className="mb-4 flex items-start justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-navy-700">
-                        <UserIcon className="h-8 w-8 text-blue-500 dark:text-blue-400" />
+                      <div
+                        className={`flex h-14 w-14 items-center justify-center rounded-full 
+            ${staff.requestToResetPassword
+                            ? "bg-red-100 dark:bg-red-800"
+                            : "bg-blue-100 dark:bg-navy-700"
+                          }`}
+                      >
+                        <UserIcon
+                          className={`h-8 w-8 
+              ${staff.requestToResetPassword
+                              ? "text-red-500 dark:text-red-400"
+                              : "text-blue-500 dark:text-blue-400"
+                            }`}
+                        />
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                           {staff.fullName}
-                          {staff.requestToResetPassword && (
-                            <span className="text-xs font-semibold text-red-600 ml-2">
-                              Reset Requested
-                            </span>
-                          )}
+
                         </h3>
-                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                        <p
+                          className={`text-sm font-medium 
+              ${staff.requestToResetPassword
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-blue-600 dark:text-blue-400"
+                            }`}
+                        >
                           {staff.department}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -439,13 +469,16 @@ function ManageStaffs() {
                   </div>
                 </div>
 
+
                 <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 pt-4 dark:border-navy-700">
-                  <button
-                    onClick={() => resetPasswordHandler(staff.emailAddress)}
-                    className="flex-1 dark:text-cyan-500 text-red-500 py-2 rounded-md"
-                  >
-                    Reset Password
-                  </button>
+                  {staff.requestToResetPassword && (
+                    <button
+                      onClick={() => confirmResetPassword(staff)}
+                      className="flex-1 dark:text-cyan-500 text-red-500 py-2 rounded-md"
+                    >
+                      Reset Password
+                    </button>
+                  )}
                   <button
                     onClick={() => handleOpen(staff)}
                     className="text-yellow-500 transition-colors hover:text-yellow-600"
@@ -459,35 +492,37 @@ function ManageStaffs() {
                     <TrashIcon className="h-5 w-5" />
                   </button>
                 </div>
+
               </div>
             ))
           )}
         </div>
-        <div className="flex justify-center items-center my-6 gap-2">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className={`p-2 rounded-lg ${currentPage === 1
-                ? 'bg-gray-200 text-gray-400'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-          >
-            <ChevronLeftIcon className="h-5 w-5" />
-          </button>
-          <span className="mx-2 font-semibold text-gray-700 dark:text-gray-300">
-            Page {currentPage} of {totalPages || 1}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages || totalPages === 0}
-            className={`p-2 rounded-lg ${currentPage === totalPages || totalPages === 0
-                ? 'bg-gray-200 text-gray-400'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-          >
-            <ChevronRightIcon className="h-5 w-5" />
-          </button>
-        </div>
+        {totalPages > 10 &&
+          <div className="flex justify-center items-center my-6 gap-2">
+            <button
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-lg ${currentPage === 1
+                ? 'dark:bg-navy-600  text-gary-200 bg-gray-200'
+                : 'bg-blue-600 text-white hover:bg-blue-700 dark:text-gray-400'
+                }`}
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+            <span className="mx-2 font-semibold text-gray-700 dark:text-gray-300">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className={`p-2 rounded-lg ${currentPage === totalPages || totalPages === 0
+                ? 'dark:bg-navy-600  text-gary-200 bg-gray-200'
+                : 'bg-blue-600 text-white hover:bg-blue-700 dark:text-gray-400'
+                }`}
+            >
+              <ChevronRightIcon className="h-5 w-5" />
+            </button>
+          </div>}
       </div>
       {open && (
         <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-60 backdrop-blur-sm">
@@ -516,7 +551,7 @@ function ManageStaffs() {
                 className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white"
               />
               <input name="emailAddress" placeholder="Email Address" value={newStaff.emailAddress} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white" />
-               <select name="gender" value={newStaff.gender} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
+              <select name="gender" value={newStaff.gender} onChange={handleInputChange} className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 dark:border-navy-600 dark:bg-navy-700 dark:text-white">
                 <option value="">Select Gender</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
@@ -559,6 +594,37 @@ function ManageStaffs() {
           </div>
         </div>
       )}
+      {showResetModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-navy-800 rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4">
+              Confirm Password Reset
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-6 text-center">
+              Are you sure you want to send a new password
+              <span className="font-semibold ms-2">{selectedStaff?.fullName}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowResetModal(false);
+                  setSelectedStaff(null);
+                }}
+                className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-navy-700"
+              >
+                Cancel
+              </button>
+              <button
+               onClick={() => resetPasswordHandler(selectedStaff.emailAddress,selectedStaff.id)}
+                className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
