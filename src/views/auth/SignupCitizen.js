@@ -186,19 +186,18 @@ export default function SignUp() {
       return;
     }
 
-    // Prepare user data for backend
     const userData = {
-      username: formData.name,
+      userName: formData.name,
       email: formData.email,
       password: formData.password,
       aadhaar: parseInt(formData.aadharNumber.replace(/\s/g, "")),
       phoneNumber: formData.phoneNumber,
-      gender: formData.gender, // Added gender to user data
-      role: "CITIZEN", // Default role
+      gender: formData.gender, 
+      role: "CITIZEN", 
     };
 
     try {
-      setIsLoading(true); // Start loading
+      setIsLoading(true); 
       const response = await fetch(`${apiurl}/api/auth/register`, {
         method: "POST",
         headers: {
