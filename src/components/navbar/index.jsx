@@ -149,20 +149,8 @@ const Navbar = (props) => {
         </div>
       </div>
       
-      <div className="relative mt-[3px] flex h-[61px] w-[355px] flex-grow items-center justify-around gap-2 rounded-full bg-gray-50 px-2 py-2 shadow-sm dark:bg-gray-800 md:w-[365px] md:flex-grow-0 md:gap-1 xl:w-[365px] xl:gap-2 transition-all duration-300">
-        {/* Search */}
-        <div className="flex h-full items-center rounded-full bg-white px-4 text-gray-700 dark:bg-gray-700 dark:text-white xl:w-[225px] shadow-sm transition-all duration-300">
-          <p className="pr-2 text-xl">
-            <FiSearch className="h-4 w-4 text-gray-400 dark:text-gray-300" />
-          </p>
-          <input
-            type="text"
-            placeholder="Search..."
-            className="block h-full w-full rounded-full bg-white text-sm font-medium text-gray-700 outline-none placeholder:text-gray-400 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 sm:w-fit transition-all duration-300"
-          />
-        </div>
+      <div className="relative mt-[3px] flex h-[61px] w-[355px] flex-grow items-center justify-around gap-2 rounded-full bg-gray-200 px-2 py-2 shadow-sm dark:bg-gray-800 md:w-[165px] md:flex-grow-0 md:gap-1 xl:w-[165px] xl:gap-2 transition-all duration-300">
         
-        {/* Mobile menu button */}
         <span
           className="flex cursor-pointer text-xl text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 xl:hidden transition-colors duration-300"
           onClick={onOpenSidenav}
@@ -170,91 +158,8 @@ const Navbar = (props) => {
           <FiAlignJustify className="h-5 w-5" />
         </span>
         
-        {/* Notifications */}
-        {newsState && (
-          <Dropdown
-            isOpen={isNotifOpen}
-            setIsOpen={setIsNotifOpen}
-            button={
-              <div
-                className="relative cursor-pointer"
-                onClick={() => {
-                  setNotifKey((prev) => prev + 1);
-                  setHighlightNotif(false);
-                  setIsNotifOpen((prev) => !prev);
-                }}
-              >
-                {highlightNotif && (
-                  <span className="absolute -inset-1 rounded-full animate-ping bg-red-400 opacity-75"></span>
-                )}
-                <div className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
-                  <IoMdNotificationsOutline
-                    className={`h-5 w-5 ${
-                      highlightNotif
-                        ? "text-red-500"
-                        : "text-gray-600 dark:text-gray-300"
-                    }`}
-                  />
-                  {highlightNotif && (
-                    <span className="absolute top-0 right-0 z-10 inline-flex h-2 w-2 rounded-full bg-red-500" />
-                  )}
-                </div>
-              </div>
-            }
-            classNames={"py-2 top-4 -left-[230px] md:-left-[440px] w-max"}
-            children={
-              <motion.div
-                key={notifKey}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="flex w-[360px] flex-col gap-3 rounded-2xl bg-white p-4 shadow-xl dark:bg-gray-800 dark:text-white dark:shadow-2xl sm:w-[460px] border border-gray-100 dark:border-gray-700"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-bold text-gray-800 dark:text-white">
-                    Notifications
-                  </p>
-                  <p className="text-sm font-medium text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">
-                    Mark all read
-                  </p>
-                </div>
-                {breakingNews.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <p>No breaking news</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                    {breakingNews.map((news, idx) => (
-                      <button
-                        key={idx}
-                        className="flex w-full items-center rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all duration-300"
-                        onClick={() =>
-                          handleNotificationClick(
-                            `/citizen/newsupdate/newsdetails/${news.id}`
-                          )
-                        }
-                      >
-                        <div className="ml-2 flex h-full w-full flex-col justify-center text-left">
-                          <p className="mb-1 text-base font-bold text-gray-800 dark:text-white">
-                            {news.title}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                            {news.description || "Breaking news update"}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            }
-          />
-        )}
-        
-        {/* Theme Toggle */}
         <div
-          className="flex items-center justify-center p-2 rounded-full cursor-pointer text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
+          className="flex items-center justify-center p-2 rounded-full cursor-pointer text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
           onClick={toggleTheme}
         >
           {darkmode ? (
@@ -263,8 +168,7 @@ const Navbar = (props) => {
             <RiMoonFill className="h-5 w-5" />
           )}
         </div>
-        
-        {/* Profile Dropdown */}
+    
         <ProfileDropdown
           button={
             <div className="relative">
@@ -285,11 +189,11 @@ const Navbar = (props) => {
                   alt="User Avatar"
                 />
                 <div>
-                  {/* ✅ Dynamic username display */}
+
                   <p className="text-base font-bold text-gray-800 dark:text-white">
                     {getDisplayName()}
                   </p>
-                  {/* ✅ Dynamic role display */}
+
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {formatRole(role)}
                   </p>
