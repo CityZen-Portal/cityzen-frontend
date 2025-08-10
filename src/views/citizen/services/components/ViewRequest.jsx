@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  MdBuild,
+  MdPerson,
+  MdEmail,
+  MdDateRange,
+  MdAccessTime,
+  MdPendingActions,
+} from "react-icons/md";
 
 export default function ViewRequest() {
   const [userData, setUserData] = useState([]);
@@ -49,32 +57,37 @@ export default function ViewRequest() {
           currentItems.map((item, index) => (
             <div
               key={index}
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-lg dark:border-navy-900 dark:bg-navy-700 dark:text-white"
+              className="rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl dark:border-navy-900 dark:bg-navy-700 dark:text-white"
             >
-              <h3 className="mb-2 text-xl font-semibold text-blue-500">
-                {item.services}
+              <h3 className="mb-4 flex items-center gap-2 text-xl font-semibold text-blue-500">
+                <MdBuild className="text-2xl text-blue-500" /> {item.services}
               </h3>
-              <p>
-                <span className="font-medium">Name:</span> {item.name || "N/A"}
+
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <MdPerson className="text-pink-500" /> {item.name || "N/A"}
               </p>
-              <p>
-                <span className="font-medium">Email:</span>{" "}
-                {item.email || "N/A"}
+
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <MdEmail className="text-green-500" /> {item.email || "N/A"}
               </p>
-              <p>
-                <span className="font-medium">Date:</span> {item.date || "N/A"}
+
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <MdDateRange className="text-orange-500" /> {item.date || "N/A"}
               </p>
-              <p>
-                <span className="font-medium">Time:</span> {item.time || "N/A"}
+
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <MdAccessTime className="text-purple-500" />{" "}
+                {item.time || "N/A"}
               </p>
-              <p>
-                <span className="font-medium">Status:</span>{" "}
-                <span className="text-yellow-600">Requested</span>
+
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <MdPendingActions className="text-yellow-500" />
+                <span className="font-medium text-yellow-600">Requested</span>
               </p>
             </div>
           ))
         ) : (
-          <p className="col-span-full text-center text-gray-500">
+          <p className="col-span-full text-center text-gray-500 dark:text-gray-400">
             No requests found.
           </p>
         )}
