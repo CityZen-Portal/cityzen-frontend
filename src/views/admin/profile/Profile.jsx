@@ -134,20 +134,20 @@ export default function ProfileCard() {
         }, 300);
 
         const userRes = await axios.get(
-          `https://auth-backend-2-k3ph.onrender.com/citizen-profiles/${citizenId}`
+          `https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`
         );
         const data = userRes.data?.data || userRes.data || {};
         const userObj = {
           user_name: data.userName || "",
-          citizen_id: data.citizenId || "",
+          citizen_id: data.id || "",
           aadhaar: data.aadhaar || "",
           email: data.email || "",
-          address: data.address || "",
-          city: data.city || "",
-          dob: data.dob || "",
+          address: data.address || "not update",
+          city: data.city || "not update yet",
+          dob: data.dob || "not update yet",
           gender: data.gender || "",
-          pincode: data.pincode || "",
-          state: data.state || "",
+          pincode: data.pincode || "not update yet",
+          state: data.state || "not update yet",
         };
         setUser(userObj);
         setOriginalUser(userObj);
