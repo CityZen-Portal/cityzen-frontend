@@ -20,9 +20,7 @@ import {
 import signupImage from "./assets/undraw_to-do-list_o3jf.svg";
 import loading_gif from "../../assets/gif/loading-gif.gif";
 import axios from "axios";
-
 const apiurl = process.env.REACT_APP_API_UMS_URL;
-
 export default function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -41,7 +39,6 @@ export default function SignUp() {
   const [aadhaarVerified, setAadhaarVerified] = useState(false);
   const [aadhaarSending, setAadhaarSending] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Main loading state
-
   // Theme state
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -53,7 +50,6 @@ export default function SignUp() {
     }
     return false;
   });
-
   // Add useEffect to set favicon and theme
   useEffect(() => {
     // Set favicon
@@ -66,7 +62,6 @@ export default function SignUp() {
       newFavicon.href = "/brand-logo.png";
       document.head.appendChild(newFavicon);
     }
-
     // Apply theme
     if (isDark) {
       document.documentElement.classList.add("dark");
@@ -75,7 +70,6 @@ export default function SignUp() {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
-
     // Cleanup function to reset favicon when component unmounts
     return () => {
       if (favicon) {
@@ -83,7 +77,6 @@ export default function SignUp() {
       }
     };
   }, [isDark]);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -94,7 +87,6 @@ export default function SignUp() {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
-
   const validateEmail = (email) => {
     if (!email.trim()) {
       setErrors((prev) => ({ ...prev, email: "Email is required" }));
@@ -110,11 +102,9 @@ export default function SignUp() {
       return true;
     }
   };
-
   const handleEmailBlur = () => {
     validateEmail(formData.email);
   };
-
   const validateForm = () => {
     const newErrors = {};
     // Name validation
@@ -169,10 +159,8 @@ export default function SignUp() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       // Show first error found
       const firstError = Object.values(errors).find(error => error && typeof error === "string");
@@ -185,7 +173,6 @@ export default function SignUp() {
       }
       return;
     }
-
     const userData = {
       userName: formData.name,
       email: formData.email,
@@ -195,7 +182,6 @@ export default function SignUp() {
       gender: formData.gender, 
       role: "CITIZEN", 
     };
-
     try {
       setIsLoading(true); 
       const response = await fetch(`${apiurl}/api/auth/register`, {
@@ -256,12 +242,10 @@ export default function SignUp() {
       setIsLoading(false); // Stop loading
     }
   };
-
   const formatAadharNumber = (value) => {
     const digits = value.replace(/\D/g, "");
     return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
   };
-
   const handleAadharChange = (e) => {
     const formatted = formatAadharNumber(e.target.value);
     if (formatted.replace(/\s/g, "").length <= 12) {
@@ -276,7 +260,6 @@ export default function SignUp() {
       }
     }
   };
-
   const handleAadhaarVerify = async () => {
     const cleanAadhaar = formData.aadharNumber.replace(/\s/g, "");
     if (!/^\d{12}$/.test(cleanAadhaar)) {
@@ -288,14 +271,11 @@ export default function SignUp() {
     }
     setAadhaarSending(true);
     setErrors((prev) => ({ ...prev, aadharNumber: "" }));
-
     try {
       const response = await axios.post(`${apiurl}/api/auth/verify-aadhaar`, {
         aadhaar: cleanAadhaar,
       });
-
       const result = response.data;
-
       // For verification, we allow it to succeed even if Aadhaar exists
       // The actual "already used" check will happen during account creation
       setAadhaarVerified(true);
@@ -307,7 +287,36 @@ export default function SignUp() {
       
     } catch (error) {
       console.error("Verification error:", error);
-      toast.error("Verification service unavailable. Please try again.", {
+      
+      // Check if error response contains information about invalid Aadhaar
+      let errorMessage = "Verification service unavailable. Please try again.";
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        const errorMsg = error.response.data?.message || error.response.data?.error;
+        
+        if (errorMsg) {
+          // Check if the error message indicates invalid Aadhaar
+          if (errorMsg.toLowerCase().includes("invalid") || 
+              errorMsg.toLowerCase().includes("not found") || 
+              errorMsg.toLowerCase().includes("does not exist") ||
+              errorMsg.toLowerCase().includes("not valid")) {
+            errorMessage = "Aadhaar is invalid";
+          }
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = "Network error. Please check your connection and try again.";
+      }
+      
+      // Set the error message for the Aadhaar field
+      setErrors((prev) => ({
+        ...prev,
+        aadharNumber: errorMessage
+      }));
+      
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
@@ -316,7 +325,6 @@ export default function SignUp() {
       setAadhaarSending(false);
     }
   };
-
   return (
     <div className="relative flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Loading Overlay */}
@@ -329,7 +337,6 @@ export default function SignUp() {
           />
         </div>
       )}
-
       {/* Theme Toggle - Top Right Corner */}
       <button
         onClick={() => setIsDark(!isDark)}
@@ -341,7 +348,6 @@ export default function SignUp() {
           <Moon className="h-5 w-5 text-gray-600" />
         )}
       </button>
-
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
@@ -355,7 +361,6 @@ export default function SignUp() {
         pauseOnHover
         theme="colored"
       />
-
       {/* Left Side - Sign Up Form */}
       <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:max-w-md">
@@ -369,7 +374,6 @@ export default function SignUp() {
               your community
             </p>
           </div>
-
           <form onSubmit={handleSubmit} className="space-y-4" data-form-type="other" autoComplete="off">
             {/* Name Field */}
             <div>
@@ -395,7 +399,6 @@ export default function SignUp() {
                 )}
               </div>
             </div>
-
             {/* Email */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -422,7 +425,6 @@ export default function SignUp() {
                 )}
               </div>
             </div>
-
             {/* Password Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -493,7 +495,6 @@ export default function SignUp() {
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
               )}
             </div>
-
             {/* Confirm Password Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -566,7 +567,6 @@ export default function SignUp() {
                 </p>
               )}
             </div>
-
             {/* Phone Number Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -594,7 +594,6 @@ export default function SignUp() {
                 )}
               </div>
             </div>
-
             {/* Gender Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -625,7 +624,6 @@ export default function SignUp() {
                 )}
               </div>
             </div>
-
             {/* Aadhar Number */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -705,7 +703,6 @@ export default function SignUp() {
                 </p>
               )}
             </div>
-
             {/* Terms */}
             <div className="pt-2">
               <div className="flex items-start space-x-2">
@@ -739,7 +736,6 @@ export default function SignUp() {
                 <p className="ml-6 mt-1 text-sm text-red-600">{errors.terms}</p>
               )}
             </div>
-
             {/* Submit */}
             <button
               type="submit"
@@ -755,7 +751,6 @@ export default function SignUp() {
               {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
-
           {/* Already have account */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -770,13 +765,11 @@ export default function SignUp() {
             </p>
           </div>
         </div>
-
         {/* Footer */}
         {/* <div className="w-full py-4 mt-auto">
           <Footer />
         </div> */}
       </div>
-
       {/* Right Side - Illustration */}
       <div className="relative hidden w-1/2 items-center justify-center overflow-hidden bg-blue-50 dark:bg-gray-800 lg:flex">
         <div className="max-w-lg px-8 text-center">
@@ -788,7 +781,6 @@ export default function SignUp() {
               className="mx-auto w-full max-w-md"
             />
           </div>
-
           <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             <span className="text-blue-600">Join CityZen</span>
           </h1>
@@ -797,7 +789,6 @@ export default function SignUp() {
             issues, and stay connected with your community through our
             comprehensive citizen portal.
           </p>
-
           {/* Feature Checkmarks */}
           <div className="space-y-4 text-left">
             <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
