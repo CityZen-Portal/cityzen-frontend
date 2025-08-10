@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PageNavigator from './PageNavigator';
+import PageNavigator from '../../../citizen/help-desk/components/PageNavigator';
 import Rows from './Rows';
 import { MdArrowUpward, MdArrowDownward, MdUnfoldMore, MdSearch } from 'react-icons/md';
 import {
