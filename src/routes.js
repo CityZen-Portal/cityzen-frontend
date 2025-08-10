@@ -89,7 +89,7 @@ import VolunteerDetailsPage from "views/citizen/job-application/pages/VolunteerD
 import MunicipalJobForm from "views/admin/job-applications/pages/MunicipalJobForm";
 import VolunteerJobForm from "views/admin/job-applications/pages/VolunteerJobForm";
 import MunicipalEditForm from "views/admin/job-applications/pages/MunicipalEditForm";
-import VolunteerEditForm from "views/admin/job-applications/pages/VolunteerEditFo
+import VolunteerEditForm from "views/admin/job-applications/pages/VolunteerEditForm";
 import AdminJobDetailsPage from "views/admin/job-applications/pages/AdminJobDetails";
 import AdminVolunteerDetailsPage from "views/admin/job-applications/pages/AdminVolunteerDetailsPage";
 
