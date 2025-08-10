@@ -343,7 +343,6 @@ const routes = [
         path: "job-application/job-details/:id",
         component: <AdminJobDetailsPage />,
       },
-      ,
       {
         name: "Admin volunteer Details view",
         layout: "/admin",
@@ -517,7 +516,7 @@ const routes = [
   {
     name: "Profile",
     layout: "/staff",
-    path: " profile",
+    path: "profile",
     icon: <MdPerson className="h-6 w-6" />,
     component: <StaffProfile />,
   },
