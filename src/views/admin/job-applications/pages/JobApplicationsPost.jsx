@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import JobCardSkeleton from 'views/citizen/job-application/components/JobSkeletonCard';
 
 // Sample job data
 const sampleJobs = [
@@ -99,6 +100,8 @@ const JobApplicationsPost = () => {
   const email = localStorage.getItem("email")
   const adminId = localStorage.getItem("id")
 
+  const [ loading, setLoading ] = useState(false)
+
   const [jobs, setJobs] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState(jobs);
@@ -110,9 +113,11 @@ const JobApplicationsPost = () => {
 
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
 
+  // Fetch All Posts
   useEffect(() => {
-    // setLoading(true);
+    setLoading(true);
   
+    // Fetch Job Posts 
     axios.get(`${JOB_APPLICATION_API}/jobs`,
       {
         headers:{
@@ -141,11 +146,12 @@ const JobApplicationsPost = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
         
-    // setLoading(true);
+    setLoading(true);
 
+    // Fetch Volunteer Posts
     axios.get(`${JOB_APPLICATION_API}/service`,
       {
         headers:{
@@ -156,26 +162,26 @@ const JobApplicationsPost = () => {
       }
     )
       .then(res => {
-          console.log('Response:', res.data.data);
-          const data = res.data.data
-          // Ensure all volunteers have isDeleted property
-          const volunteersWithDeletedFlag = data ? data.map(volunteer => ({
-            ...volunteer,
-            isDeleted: volunteer.isDeleted || false
-          })) : [];
-          setVolunteers(volunteersWithDeletedFlag)
-        })
-        .catch(err => {
-          toast.error('Server Error!Unable to Fetch Volunteer Post Data', {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored'
-          });
-          console.error('Error:', err.response?.data || err.message);
-        })
-        .finally(() => {
-          // setLoading(false);
+        console.log('Response:', res.data.data);
+        const data = res.data.data
+        // Ensure all volunteers have isDeleted property
+        const volunteersWithDeletedFlag = data ? data.map(volunteer => ({
+          ...volunteer,
+          isDeleted: volunteer.isDeleted || false
+        })) : [];
+        setVolunteers(volunteersWithDeletedFlag)
+      })
+      .catch(err => {
+        toast.error('Server Error!Unable to Fetch Volunteer Post Data', {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored'
         });
+        console.error('Error:', err.response?.data || err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [token, email, adminId, JOB_APPLICATION_API, navigate])
 
   // Filter jobs and volunteers based on search and filter criteria
@@ -273,7 +279,7 @@ const JobApplicationsPost = () => {
   }, [navigate]);
 
   // Handle delete - now marks as deleted instead of removing
-  const handleDeleteClick = useCallback((item) => {
+  const handlePermanentDelete = useCallback((item) => {
     setItemToDelete(item);
     setShowDeleteModal(true);
   }, []);
@@ -343,23 +349,32 @@ const JobApplicationsPost = () => {
   }, [jobs, volunteers]);
 
   // Handle permanent delete
-  const handlePermanentDelete = useCallback((item) => {
+  const handleDeleteClick = useCallback((item) => {
     const isVolunteer = !!item.programTitle;
     const endpoint = isVolunteer ? 'service' : 'jobs';
     
-    axios.delete(`${JOB_APPLICATION_API}/${endpoint}/${item.id}`)
+    axios.delete(`${JOB_APPLICATION_API}/${endpoint}/${item.id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: adminId
+        }
+      }
+    )
       .then(res => {
-        toast.success(`${isVolunteer ? 'Volunteer program' : 'Job'} permanently deleted!`, {
+        toast.success(`${isVolunteer ? 'Volunteer program' : 'Job'} is deleted!`, {
           position: 'top-right',
           autoClose: 3000,
           theme: 'colored'
         });
         
         // Remove from state
+        item.isDeleted = true;
         if (isVolunteer) {
-          setVolunteers(volunteers.filter(v => v.id !== item.id));
+          setVolunteers(volunteers.map(v => (v.id === item.id ? item : v)));
         } else {
-          setJobs(jobs.filter(j => j.id !== item.id));
+          setJobs(jobs.map(j => (j.id === item.id ? item : j)));
         }
       })
       .catch(err => {
@@ -424,29 +439,37 @@ const JobApplicationsPost = () => {
                 Municipal Jobs ({municipalJobs.length})
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {municipalJobs.map((job) => (
-                <div 
-                  key={job.id} 
-                  className="cursor-pointer transform transition-transform hover:scale-105"
-                  onClick={() => handleViewJobDetails(job.id)}
-                >
-                  <JobCard
-                    job={job}
-                    onViewDetails={handleViewJobDetails}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onToggleStatus={handleToggleStatus}
-                    onRestore={handleRestore}
-                    onPermanentDelete={handlePermanentDelete}
-                    isJobExpired={isJobExpired}
-                    formatDate={formatDate}
-                    isAdminView={true}
-                    isDeletedView={activeFilter === 'deleted'}
-                  />
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <JobCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {municipalJobs.map((job) => (
+                  <div 
+                    key={job.id} 
+                    className="cursor-pointer transform transition-transform hover:scale-105"
+                    onClick={() => handleViewJobDetails(job.id)}
+                  >
+                    <JobCard
+                      job={job}
+                      onViewDetails={handleViewJobDetails}
+                      onEdit={handleEdit}
+                      onDelete={handleDeleteClick}
+                      onToggleStatus={handleToggleStatus}
+                      onRestore={handleRestore}
+                      onPermanentDelete={handlePermanentDelete}
+                      isJobExpired={isJobExpired}
+                      formatDate={formatDate}
+                      isAdminView={true}
+                      isDeletedView={activeFilter === 'deleted'}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -459,28 +482,36 @@ const JobApplicationsPost = () => {
                 Volunteer Programs ({volunteerJobs.length})
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {volunteerJobs.map((volunteer) => (
-                <div 
-                  key={volunteer.id} 
-                  className="cursor-pointer transform transition-transform hover:scale-105"
-                  onClick={() => handleViewVolunteerDetails(volunteer.id)}
-                >
-                  <VolunteerCard
-                    volunteer={volunteer}
-                    onViewDetails={handleViewVolunteerDetails}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onToggleStatus={handleToggleStatus}
-                    onRestore={handleRestore}
-                    onPermanentDelete={handlePermanentDelete}
-                    formatDate={formatDate}
-                    isAdminView={true}
-                    isDeletedView={activeFilter === 'deleted'}
-                  />
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <JobCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {volunteerJobs.map((volunteer) => (
+                  <div 
+                    key={volunteer.id} 
+                    className="cursor-pointer transform transition-transform hover:scale-105"
+                    onClick={() => handleViewVolunteerDetails(volunteer.id)}
+                  >
+                    <VolunteerCard
+                      volunteer={volunteer}
+                      onViewDetails={handleViewVolunteerDetails}
+                      onEdit={handleEdit}
+                      onDelete={handleDeleteClick}
+                      onToggleStatus={handleToggleStatus}
+                      onRestore={handleRestore}
+                      onPermanentDelete={handlePermanentDelete}
+                      formatDate={formatDate}
+                      isAdminView={true}
+                      isDeletedView={activeFilter === 'deleted'}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

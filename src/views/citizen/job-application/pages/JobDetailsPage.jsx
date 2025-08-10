@@ -23,6 +23,7 @@ const JobDetailsPage = () => {
   
   const [job, setJob] = useState({})
 
+  // Fetch job Details
   useEffect(() => {
     setLoading(true);
   

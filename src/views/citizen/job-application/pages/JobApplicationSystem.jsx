@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import JobCardSkeleton from '../components/JobSkeletonCard';
 
 // Sample job data
 // const sampleJobs = [
@@ -104,11 +105,12 @@ const JobApplicationSystem = () => {
 
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
 
+  const [loading, setLoading] = useState(false);
   const [jobPosts, setJobPosts] = useState([])
   const [volunteerPosts, setVolunteerPosts] = useState([])
 
   useEffect(() => {
-    // setLoading(true);
+    setLoading(true);
   
     axios.get(`${JOB_APPLICATION_API}/jobs`,
       {
@@ -133,10 +135,10 @@ const JobApplicationSystem = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
         
-    // setLoading(true);
+    setLoading(true);
 
     axios.get(`${JOB_APPLICATION_API}/service`,
       {
@@ -161,7 +163,7 @@ const JobApplicationSystem = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
   }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
 
@@ -398,17 +400,26 @@ const JobApplicationSystem = () => {
                   <Building2 className="text-black-600 dark:text-white" size={28} />
                   Available Municipal Corporation Jobs
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredJobs.map((job) => (
-                    <JobCard 
-                      key={job.id} 
-                      job={job} 
-                      onViewDetails={(id) => handleViewDetails(id, 'municipal')}
-                      isJobExpired={isJobExpired} 
-                      formatDate={formatDate} 
-                    />
-                  ))}
-                </div>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(3)].map((_, i) => (
+                      <JobCardSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredJobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        onViewDetails={(id) => handleViewDetails(id, 'municipal')}
+                        isJobExpired={isJobExpired}
+                        formatDate={formatDate}
+                      />
+                    ))}
+                  </div>
+                )}
+
               </div>
             )}
 
@@ -419,16 +430,24 @@ const JobApplicationSystem = () => {
                   <Heart className="text-black-600 dark:text-white" size={28} />
                   Available Volunteer Opportunities
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredVolunteers.map((volunteer) => (
-                    <VolunteerCard 
-                      key={volunteer.id} 
-                      volunteer={volunteer} 
-                      onViewDetails={(id) => handleViewDetails(id, 'volunteer')}
-                      formatDate={formatDate} 
-                    />
-                  ))}
-                </div>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(3)].map((_, i) => (
+                      <JobCardSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredVolunteers.map((volunteer) => (
+                      <VolunteerCard 
+                        key={volunteer.id} 
+                        volunteer={volunteer} 
+                        onViewDetails={(id) => handleViewDetails(id, 'volunteer')}
+                        formatDate={formatDate} 
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

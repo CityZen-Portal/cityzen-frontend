@@ -59,6 +59,8 @@ const VolunteerEditForm = () => {
 
 
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
+
+  // Fetch Volunteer Post Details
   useEffect(() => {
     // setLoading(true);
   
@@ -87,47 +89,12 @@ const VolunteerEditForm = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
-          setLoading(false);
+          // setLoading(false);
         });
         
     // setLoading(true);
 
   }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
-
-  // Load job data for editing
-  useEffect(() => {
-    // if (id) {
-    //   const savedJobs = localStorage.getItem('jobs');
-    //   if (savedJobs) {
-    //     try {
-    //       const jobs = JSON.parse(savedJobs);
-    //       const jobToEdit = jobs.find(job => job.id.toString() === id.toString() && job.jobType === 'volunteer');
-    //       if (jobToEdit) {
-    //         setFormData({
-    //           programTitle: jobToEdit.programTitle || '',
-    //           programDescription: jobToEdit.programDescription || '',
-    //           location: jobToEdit.location || '',
-    //           programDate: jobToEdit.programDate || '',
-    //           programTime: jobToEdit.programTime || '',
-    //           duration: jobToEdit.duration || '',
-    //           coordinatorName: jobToEdit.coordinatorName || '',
-    //           coordinatorPhone: jobToEdit.coordinatorPhone || '',
-    //           coordinatorEmail: jobToEdit.coordinatorEmail || '',
-    //           coordinatorAddress: jobToEdit.coordinatorAddress || ''
-    //         });
-    //       } else {
-    //         toast.error('Volunteer opportunity not found');
-    //         navigate('/admin/job-applications');
-    //       }
-    //     } catch (error) {
-    //       console.error('Failed to load job data', error);
-    //       toast.error('Failed to load volunteer opportunity data');
-    //       navigate('/admin/job-applications');
-    //     }
-    //   }
-    //   setLoading(false);
-    // }
-  }, [id, navigate]);
 
   // Handle form field changes
   const handleInputChange = (field, value) => {
