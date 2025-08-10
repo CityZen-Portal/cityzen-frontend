@@ -97,7 +97,6 @@ import NewsStaffDetails from "views/staff/news/components/NewsStaffDetails";
 import ViewNewsDetails from "views/staff/news/components/ViewNewsDetails";
 import AdminViewNewsDetails from "views/admin/news/components/AdminViewNewsDetails";
 
-
 const routes = [
   // Home
   {
@@ -238,14 +237,14 @@ const routes = [
 
   // Admin Routes
   {
-    name: "Admin Dashboard",
+    name: "Dashboard",
     layout: "/admin",
     path: "dashboard",
     icon: <MdDashboard className="h-6 w-6" />,
     component: <AdminDashboard />,
   },
   {
-    name: "Admin Services",
+    name: "Services",
     layout: "/admin",
     path: "services",
     icon: <MdBuild className="h-6 w-6" />,
@@ -335,8 +334,7 @@ const routes = [
         layout: "/admin",
         path: "job-application/edit/volunteer/:id",
         component: <VolunteerEditForm />,
-      }
-      ,
+      },
       {
         name: "Admin job Details view",
         layout: "/admin",
@@ -376,7 +374,7 @@ const routes = [
 
   // Staff Routes
   {
-    name: "Staff Dashboard",
+    name: "Dashboard",
     layout: "/staff",
     path: "dashboard",
     icon: <MdAdminPanelSettings className="h-6 w-6" />,
@@ -391,7 +389,7 @@ const routes = [
   },
 
   {
-    name: "Complaint Management",
+    name: "Complaints",
     layout: "/staff",
     path: "complaints",
     icon: <MdBallot className="h-6 w-6" />,
@@ -451,18 +449,18 @@ const routes = [
         path: "news/add/:id",
         component: <AddNews />,
       },
-       {
+      {
         name: "News Details",
         layout: "/staff",
         path: "news/newshomedetails",
-        component: <NewsStaffDetails/>,
+        component: <NewsStaffDetails />,
       },
       {
         name: "View News Details",
         layout: "/staff",
         path: "news/view/:id",
-        component: <ViewNewsDetails/>,
-      }
+        component: <ViewNewsDetails />,
+      },
     ],
   },
   {
@@ -509,7 +507,7 @@ const routes = [
         name: "View News ",
         layout: "/admin",
         path: "news/view/:id",
-        component: <AdminViewNewsDetails/>,
+        component: <AdminViewNewsDetails />,
       },
     ],
   },
