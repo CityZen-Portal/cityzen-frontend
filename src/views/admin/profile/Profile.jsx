@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-// import {
-//   MdCalendarToday,
-//   MdPerson,
-
-// } from "react-icons/md";
-import Cropper from "react-easy-crop";
 import {
   FaEdit,
   FaSave,
   FaTimes,
   FaPen,
-  FaTint,
-  FaLightbulb,
   FaMars,
   FaVenus,
   FaGenderless,
+  FaLightbulb,
 } from "react-icons/fa";
 import {
   MdWork,
@@ -33,39 +26,10 @@ import {
 } from "react-icons/md";
 import avatar from "assets/img/avatars/avatar6.jpg";
 import loading_gif from "../../../assets/gif/loading-gif.gif";
-
-// Crop image helper function
-function getCroppedImg(imageSrc, pixelCrop) {
-  const canvas = document.createElement("canvas");
-  const image = new Image();
-  return new Promise((resolve, reject) => {
-    image.onload = () => {
-      const scaleX = image.naturalWidth / image.width;
-      const scaleY = image.naturalHeight / image.height;
-      canvas.width = pixelCrop.width;
-      canvas.height = pixelCrop.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(
-        image,
-        pixelCrop.x * scaleX,
-        pixelCrop.y * scaleY,
-        pixelCrop.width * scaleX,
-        pixelCrop.height * scaleY,
-        0,
-        0,
-        pixelCrop.width,
-        pixelCrop.height
-      );
-      canvas.toBlob((blob) => {
-        if (!blob) return reject(new Error("Canvas is empty"));
-        const fileUrl = URL.createObjectURL(blob);
-        resolve(fileUrl);
-      }, "image/jpeg");
-    };
-    image.onerror = reject;
-    image.src = imageSrc;
-  });
-}
+import ComplaintCard from "./components/ComplaintCard";
+import BookingCard from "./components/BookingCard";
+import BookingCardHorizon from "./components/BookingCard";
+import BookingCardTailwind from "./components/BookingCard";
 
 // Gender icon helper
 const getGenderIcon = (gender) => {
@@ -99,15 +63,9 @@ export default function ProfileCard() {
   const [complaints, setComplaints] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [originalUser, setOriginalUser] = useState(null);
-  const [originalImage, setOriginalImage] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [croppedImage, setCroppedImage] = useState(null);
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [originalImage, setOriginalImage] = useState(avatar);
+  const [selectedImage, setSelectedImage] = useState(avatar);
 
-  // Effect: Fetch ALL profile data before displaying UI
   useEffect(() => {
     let active = true;
     async function fetchAll() {
@@ -129,7 +87,6 @@ export default function ProfileCard() {
           }),
         ]);
         if (!active) return;
-        // Set User
         const data = userRes.data?.data || userRes.data || {};
         const userObj = {
           user_name: data.userName || "",
@@ -146,8 +103,7 @@ export default function ProfileCard() {
         setUser(userObj);
         setOriginalUser(userObj);
         setOriginalImage(avatar);
-        setCroppedImage(avatar);
-        // Set Bookings & Complaints
+        setSelectedImage(avatar);
         setBookings(bookingsRes.data?.data?.data || []);
         setComplaints(complaintsRes.data?.data || []);
       } catch (err) {
@@ -166,7 +122,7 @@ export default function ProfileCard() {
     };
   }, [token, email, citizenId, HELPDESK_API]);
 
-  // Standard input, image, and modal handlers
+  // Standard input and image handlers
   const handleChange = (field, value) => {
     setUser((prev) => ({ ...prev, [field]: value }));
   };
@@ -178,23 +134,12 @@ export default function ProfileCard() {
     return date.toLocaleDateString("en-US", options);
   };
 
+  // Simple image upload handler (no cropping)
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
-      setCropModalOpen(true);
-    }
-  };
-
-  const showCroppedImage = async () => {
-    try {
-      const cropped = await getCroppedImg(selectedImage, croppedAreaPixels);
-      setCroppedImage(cropped);
-      setCropModalOpen(false);
-      setSelectedImage(null);
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -217,7 +162,6 @@ export default function ProfileCard() {
         payload
       );
       setOriginalUser(user);
-      setUser(user);
       setEditMode(false);
     } catch (error) {
       console.error("Failed to save user:", error);
@@ -268,7 +212,7 @@ export default function ProfileCard() {
         <div className="flex w-full flex-col items-center rounded-2xl bg-blue-600 p-6 shadow-lg lg:w-1/3">
           <div className="relative mb-2">
             <img
-              src={croppedImage || avatar}
+              src={selectedImage || avatar}
               alt="User"
               className="h-56 w-56 rounded-full border-2 border-white object-cover shadow-md"
             />
@@ -301,7 +245,6 @@ export default function ProfileCard() {
               <button
                 onClick={() => {
                   setOriginalUser(user);
-                  setOriginalImage(croppedImage);
                   setEditMode(true);
                 }}
                 className="flex items-center gap-1 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-yellow-500"
@@ -319,8 +262,7 @@ export default function ProfileCard() {
                 <button
                   onClick={() => {
                     setUser(originalUser);
-                    setCroppedImage(originalImage);
-                    setSelectedImage(null);
+                    setSelectedImage(avatar);
                     setEditMode(false);
                   }}
                   className="flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-red-700"
@@ -398,69 +340,6 @@ export default function ProfileCard() {
         </div>
       </div>
 
-      {/* Previous Bookings */}
-      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
-        <h3 className="text-lg font-semibold">Previous Bookings</h3>
-        {bookings.length === 0 ? (
-          <p className="text-gray-500">No previous bookings found.</p>
-        ) : (
-          <ul className="space-y-3">
-            {bookings.map((b, index) => (
-              <li
-                key={index}
-                className="flex flex-col gap-3 rounded-2xl bg-gray-100 p-4 shadow-md transition-colors duration-300 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex min-w-[120px] flex-1 items-center gap-2">
-                  <MdWork className="text-xl text-blue-600" />
-                  <span className="truncate font-semibold text-gray-900 dark:text-white">
-                    {b.serviceName}
-                  </span>
-                </div>
-
-                <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdCalendarToday className="text-xl text-green-600" />
-                  <span>{formatDate(b.requestedDate)}</span>
-                </div>
-
-                {/* Status */}
-                <div className="flex min-w-[90px] flex-1 items-center justify-center gap-2">
-                  <MdCheckCircle
-                    className={`text-xl ${
-                      b.status.toLowerCase() === "completed"
-                        ? "text-green-600"
-                        : b.status.toLowerCase() === "pending"
-                        ? "text-yellow-500"
-                        : "text-gray-600"
-                    }`}
-                  />
-                  <span className={`font-medium ${getStatusClass(b.status)}`}>
-                    {b.status}
-                  </span>
-                </div>
-
-                {/* Staff Name */}
-                <div className="flex min-w-[120px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdPerson className="text-xl text-gray-700 dark:text-gray-300" />
-                  <span className="truncate">{b.staffName}</span>
-                </div>
-
-                {b.completedDate ? (
-                  <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                    <MdCalendarToday className="text-xl text-teal-600" />
-                    <span>{formatDate(b.completedDate)}</span>
-                  </div>
-                ) : (
-                  <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                    <MdCalendarToday className="text-xl text-teal-600" />
-                    <span>Not Completed</span>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
       {/* Previous Complaints */}
       <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
         <h3 className="text-lg font-semibold">Previous Complaints</h3>
@@ -473,31 +352,31 @@ export default function ProfileCard() {
                 key={comp.id}
                 className="rounded-2xl bg-gray-100 p-4 shadow-md dark:bg-gray-800"
               >
-                <div className="flex items-center gap-3">
-                  <FaLightbulb className="flex-shrink-0 text-yellow-500" />
-                  <div>
-                    <div className="font-semibold text-gray-900 dark:text-white">
+                <div className="flex items-start gap-3">
+                  <FaLightbulb className="flex-shrink-0 text-xl text-yellow-500" />
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       {comp.issue || "No Issue"}
-                    </div>
-                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                    </span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
                       {comp.issueDescription || "No description provided"}
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    </span>
+                    <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Date:{" "}
                       {comp.complaintDate
                         ? new Date(comp.complaintDate).toLocaleDateString()
                         : "No Date"}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       Status:{" "}
                       <span className={getStatusClass(comp.status)}>
                         {comp.status || "Unknown"}
                       </span>
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       Category: {comp.category || "N/A"} | Department:{" "}
                       {comp.department || "N/A"}
-                    </div>
+                    </span>
                   </div>
                 </div>
               </li>
@@ -506,53 +385,19 @@ export default function ProfileCard() {
         )}
       </div>
 
-      {/* Crop Modal */}
-      {cropModalOpen && (
-        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-60">
-          <div className="w-[90%] max-w-md rounded-lg bg-white p-4 shadow-lg">
-            <div className="relative h-64 w-full bg-gray-100">
-              <Cropper
-                image={selectedImage}
-                crop={crop}
-                zoom={zoom}
-                aspect={1}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={(_, croppedAreaPixels) =>
-                  setCroppedAreaPixels(croppedAreaPixels)
-                }
-              />
-            </div>
-            <div className="mt-4 flex justify-between">
-              <input
-                type="range"
-                min={1}
-                max={3}
-                step={0.1}
-                value={zoom}
-                onChange={(e) => setZoom(e.target.value)}
-              />
-              <div className="flex gap-4">
-                <button
-                  className="rounded bg-blue-600 px-4 py-2 text-white shadow"
-                  onClick={showCroppedImage}
-                >
-                  Crop
-                </button>
-                <button
-                  className="rounded bg-gray-400 px-4 py-2 text-white shadow"
-                  onClick={() => {
-                    setCropModalOpen(false);
-                    setSelectedImage(null);
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold">Previous Bookings</h3>
+
+        {bookings.length === 0 ? (
+          <p className="text-gray-500">No previous bookings found.</p>
+        ) : (
+          <ul className="space-y-3">
+            {bookings.map((booking, index) => (
+              <BookingCardTailwind key={index} booking={booking} />
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
