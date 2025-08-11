@@ -522,11 +522,13 @@ function CustomCalendar() {
   const [toPeriod, setToPeriod] = useState("AM");
   const [events, setEvents] = useState({});
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
-  const [editingEventIndex, setEditingEventIndex] = useState(null);
+  const [editingEventId, setEditingEventId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeReminders, setActiveReminders] = useState([]);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [currentReminder, setCurrentReminder] = useState(null);
+  const [reminderTime, setReminderTime] = useState("none");
+  const [eventDescription, setEventDescription] = useState("");
 
   // Fetch events from backend
   const fetchEvents = async () => {
@@ -552,7 +554,9 @@ function CustomCalendar() {
           location: event.location,
           startTime: event.startTime,
           endTime: event.endTime,
-          date: event.date
+          date: event.date,
+          description: event.description,
+          reminderTime: event.reminderTime
         });
       });
       
@@ -579,12 +583,13 @@ function CustomCalendar() {
     setToHour("");
     setToMinute("");
     setToPeriod("AM");
-    setEditingEventIndex(null);
+    setEditingEventId(null);
+    setReminderTime("none");
+    setEventDescription("");
   };
 
   const handleDateClick = (date) => {
-    setSelectedDate(date); // This updates the selected date
-    
+    setSelectedDate(date);
   };
 
   useEffect(() => {
@@ -595,9 +600,35 @@ function CustomCalendar() {
       // Check all events for reminders
       Object.entries(events).forEach(([date, eventList]) => {
         eventList.forEach(event => {
-          if (event.reminderTime) {
-            const reminderTime = dayjs(`${date} ${event.reminderTime}`);
-            if (reminderTime.isBefore(now.add(1, 'minute'))) { // Show reminders 1 min before
+          if (event.reminderTime && event.reminderTime !== "none") {
+            // Calculate reminder time based on event start time and reminder setting
+            const [startTime, period] = event.startTime.split(" ");
+            let [hours, minutes] = startTime.split(":").map(Number);
+            
+            // Convert to 24-hour format
+            if (period === "PM" && hours !== 12) hours += 12;
+            if (period === "AM" && hours === 12) hours = 0;
+            
+            const eventDateTime = dayjs(`${date}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`);
+            
+            // Calculate reminder time based on reminder setting
+            let reminderDateTime;
+            switch(event.reminderTime) {
+              case "5min":
+                reminderDateTime = eventDateTime.subtract(5, 'minute');
+                break;
+              case "10min":
+                reminderDateTime = eventDateTime.subtract(10, 'minute');
+                break;
+              case "30min":
+                reminderDateTime = eventDateTime.subtract(30, 'minute');
+                break;
+              default:
+                return;
+            }
+            
+            // Check if reminder should trigger now
+            if (reminderDateTime.isAfter(now.subtract(1, 'minute'))) {
               upcomingReminders.push({
                 ...event,
                 date,
@@ -607,77 +638,82 @@ function CustomCalendar() {
           }
         });
       });
+      
       if (upcomingReminders.length > 0) {
         setActiveReminders(upcomingReminders);
         setCurrentReminder(upcomingReminders[0]);
         setShowReminderModal(true);
       }
     };
-     const interval = setInterval(checkReminders, 30000); // Check every 30 seconds
+    
+    const interval = setInterval(checkReminders, 30000); // Check every 30 seconds
     return () => clearInterval(interval);
   }, [events]);
 
-  
-
   const handleAddEvent = async () => {
-  try {
-
-    
-    const reminderSelect = document.querySelector('select[name="reminder"]');
-    const reminderTime = reminderSelect ? reminderSelect.value : "none";
-    const eventData = {
-      itle: eventText,
-      adminId: adminId,
-      date: selectedDate.format("YYYY-MM-DD"),
-      startTime: `${fromHour}:${fromMinute} ${fromPeriod}`,
-      endTime: `${toHour}:${toMinute} ${toPeriod}`,
-      location: eventLocation,
-      reminderTime: document.querySelector('select[name="reminder"]').value // Add this
-    };
-
-    if (editingEventIndex !== null) {
-      // Update existing event
-      const dateKey = selectedDate.format("YYYY-MM-DD");
-      const eventId = events[dateKey][editingEventIndex].id; // Access the event ID correctly
-      
-      await axios.put(`${API_BASE_URL}/events/${eventId}`, eventData, {
-        headers: {
-          token: localStorage.getItem("token"),
-          email: localStorage.getItem("email"),
-          id: localStorage.getItem("id")
-        }
-      });
-    } else {
-      // Create new event
-      await axios.post(`${API_BASE_URL}/events`, eventData, {
-        headers: {
-          token: localStorage.getItem("token"),
-          email: localStorage.getItem("email"),
-          id: localStorage.getItem("id")
-        }
-      });
+    if (!eventText) {
+      toast.error("Event name is required");
+      return;
     }
+    
+    if (!fromHour || !fromMinute || !toHour || !toMinute) {
+      toast.error("Please enter valid start and end times");
+      return;
+    }
+    
+    try {
+      const eventData = {
+        title: eventText,
+        adminId: adminId,
+        date: selectedDate.format("YYYY-MM-DD"),
+        startTime: `${fromHour}:${fromMinute} ${fromPeriod}`,
+        endTime: `${toHour}:${toMinute} ${toPeriod}`,
+        location: eventLocation,
+        reminderTime: reminderTime,
+        description: eventDescription
+      };
 
-    // Refresh events after update
-    await fetchEvents();
-    resetForm();
-    setShowModal(false);
-    toast.success(editingEventIndex !== null ? 'Event updated!' : 'Event created!');
-  } catch (err) {
-    toast.error('Failed to save event');
-    console.error(err);
-  }
-};
+      if (editingEventId) {
+        // Update existing event
+        await axios.put(`${API_BASE_URL}/events/${editingEventId}`, eventData, {
+          headers: {
+            token: localStorage.getItem("token"),
+            email: localStorage.getItem("email"),
+            id: localStorage.getItem("id")
+          }
+        });
+        toast.success('Event updated successfully!');
+      } else {
+        // Create new event
+        await axios.post(`${API_BASE_URL}/events`, eventData, {
+          headers: {
+            token: localStorage.getItem("token"),
+            email: localStorage.getItem("email"),
+            id: localStorage.getItem("id")
+          }
+        });
+        toast.success('Event created successfully!');
+      }
+
+      // Refresh events after update
+      await fetchEvents();
+      resetForm();
+      setShowModal(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to save event');
+      console.error(err);
+    }
+  };
 
   const ReminderModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="rounded-lg bg-white p-6 shadow-md w-96">
-        <h3 className="text-lg font-semibold mb-4">Reminder</h3>
+      <div className="rounded-lg bg-white p-6 shadow-md w-96 dark:bg-gray-800">
+        <h3 className="text-lg font-semibold mb-4 dark:text-white">Reminder</h3>
         {currentReminder && (
-          <div>
-            <p><strong>Event:</strong> {currentReminder.name}</p>
-            <p><strong>Time:</strong> {currentReminder.startTime}</p>
-            <p><strong>Location:</strong> {currentReminder.location || 'None'}</p>
+          <div className="dark:text-gray-200">
+            <p><strong className="dark:text-white">Event:</strong> {currentReminder.name}</p>
+            <p><strong className="dark:text-white">Time:</strong> {currentReminder.startTime}</p>
+            <p><strong className="dark:text-white">Location:</strong> {currentReminder.location || 'None'}</p>
           </div>
         )}
         <div className="flex justify-between mt-4">
@@ -688,13 +724,13 @@ function CustomCalendar() {
               setCurrentReminder(nextReminders[0] || null);
               if (nextReminders.length === 0) setShowReminderModal(false);
             }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
           >
             Dismiss
           </button>
           <button 
             onClick={() => setShowReminderModal(false)}
-            className="px-4 py-2 bg-gray-300 rounded"
+            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white"
           >
             Snooze (10 min)
           </button>
@@ -702,7 +738,6 @@ function CustomCalendar() {
       </div>
     </div>
   );
-
 
   // Delete event
   const handleDeleteSelectedEvent = async () => {
@@ -721,7 +756,7 @@ function CustomCalendar() {
       // Refresh events after deletion
       await fetchEvents();
       setSelectedEventDetails(null);
-      toast.success('Event deleted!');
+      toast.success('Event deleted successfully!');
     } catch (err) {
       toast.error('Failed to delete event');
       console.error(err);
@@ -740,36 +775,36 @@ function CustomCalendar() {
 
   // Open edit modal for the selected event in the list modal
   const openEditModalFromDetails = () => {
-  if (!selectedEventDetails) return;
+    if (!selectedEventDetails) return;
 
-  const { events, selectedIndex } = selectedEventDetails;
-  const event = events[selectedIndex];
-  
-  // Parse time from existing event
-  const [startTime, startPeriod] = event.startTime.split(" ");
-  const [startHour, startMinute] = startTime.split(":");
-  
-  const [endTime, endPeriod] = event.endTime.split(" ");
-  const [endHour, endMinute] = endTime.split(":");
+    const { events, selectedIndex } = selectedEventDetails;
+    const event = events[selectedIndex];
+    
+    // Parse time from existing event
+    const [startTime, startPeriod] = event.startTime.split(" ");
+    const [startHour, startMinute] = startTime.split(":");
+    
+    const [endTime, endPeriod] = event.endTime.split(" ");
+    const [endHour, endMinute] = endTime.split(":");
 
-  setSelectedDate(dayjs(event.date));
-  setEventText(event.name);
-  setEventLocation(event.location || "");
-  setFromHour(startHour);
-  setFromMinute(startMinute);
-  setFromPeriod(startPeriod);
-  setToHour(endHour);
-  setToMinute(endMinute);
-  setToPeriod(endPeriod);
-  setEditingEventIndex(selectedIndex); // This is correctly set
+    setSelectedDate(dayjs(event.date));
+    setEventText(event.name);
+    setEventLocation(event.location || "");
+    setFromHour(startHour);
+    setFromMinute(startMinute);
+    setFromPeriod(startPeriod);
+    setToHour(endHour);
+    setToMinute(endMinute);
+    setToPeriod(endPeriod);
+    setEditingEventId(event.id);
+    setReminderTime(event.reminderTime || "none");
+    setEventDescription(event.description || "");
 
-  setShowModal(true);
-  setSelectedEventDetails(null);
-};
+    setShowModal(true);
+    setSelectedEventDetails(null);
+  };
 
-  
-
-  // Generate calendar dates (keep your existing implementation)
+  // Generate calendar dates
   const startOfMonth = currentDate.startOf("month");
   const startDay = startOfMonth.day() === 0 ? 6 : startOfMonth.day() - 1;
   const daysInMonth = currentDate.daysInMonth();
@@ -787,13 +822,14 @@ function CustomCalendar() {
       </div>
     );
   }
+
   return (
     <div className="mx-auto w-full max-w-sm">
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <button
           onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
-          className="rounded-full bg-indigo-600 px-2 py-1 text-lg text-white"
+          className="rounded-full bg-indigo-600 px-2 py-1 text-lg text-white hover:bg-indigo-700"
         >
           &lt;
         </button>
@@ -802,7 +838,7 @@ function CustomCalendar() {
         </h2>
         <button
           onClick={() => setCurrentDate(currentDate.add(1, "month"))}
-          className="rounded-full bg-indigo-600 px-2 py-1 text-lg text-white"
+          className="rounded-full bg-indigo-600 px-2 py-1 text-lg text-white hover:bg-indigo-700"
         >
           &gt;
         </button>
@@ -816,7 +852,7 @@ function CustomCalendar() {
       </div>
 
       {/* Days */}
-       <div className="mt-2 grid grid-cols-7 gap-1">
+      <div className="mt-2 grid grid-cols-7 gap-1">
         {days.map((date, idx) => {
           const dateKey = date?.format("YYYY-MM-DD");
           return (
@@ -826,7 +862,7 @@ function CustomCalendar() {
             >
               {date ? (
                 <button
-                  onClick={() => handleDateClick(date)} // Use the new handler
+                  onClick={() => handleDateClick(date)}
                   className={`h-10 w-10 rounded-full transition-all duration-200 ${
                     date.isSame(selectedDate, "day")
                       ? "bg-indigo-600 text-white"
@@ -839,13 +875,13 @@ function CustomCalendar() {
                 <div />
               )}
 
-              {/* Event dots remain the same */}
+              {/* Event dots */}
               {events[dateKey]?.length > 0 &&
                 events[dateKey].map((event, i) => (
                   <button
                     key={i}
                     onClick={() => openEventDetails(dateKey, i)}
-                    className="absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 rounded-full border border-white"
+                    className="absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 rounded-full border border-white dark:border-gray-800"
                     title={event.name}
                   ></button>
                 ))}
@@ -854,13 +890,12 @@ function CustomCalendar() {
         })}
       </div>
 
-{/* Update the Add Event button */}
+      {/* Add Event button */}
       <div className="mt-4 flex justify-center">
         <button
           onClick={() => {
             resetForm();
             setShowModal(true);
-            // Don't reset selectedDate here - use the already selected date
           }}
           className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 transition"
         >
@@ -868,15 +903,15 @@ function CustomCalendar() {
         </button>
       </div>
 
-
-      
+      {/* Reminder Modal */}
+      {showReminderModal && <ReminderModal />}
 
       {/* Add/Edit Event Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="rounded-lg bg-white p-6 shadow-md w-96 max-h-[90vh] overflow-auto">
-            <h3 className="text-lg font-semibold mb-4">
-              {editingEventIndex !== null
+          <div className="rounded-lg bg-white p-6 shadow-md w-96 max-h-[90vh] overflow-auto dark:bg-gray-800">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">
+              {editingEventId
                 ? `Edit Event on ${selectedDate.format("DD MMM YYYY")}`
                 : `Add Event on ${selectedDate.format("DD MMM YYYY")}`}
             </h3>
@@ -886,14 +921,15 @@ function CustomCalendar() {
               value={eventText}
               onChange={(e) => setEventText(e.target.value)}
               placeholder="Enter event name"
-              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300"
+              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              required
             />
 
             {/* From and To Time */}
             <div className="flex gap-2 mb-3">
               {/* From Time */}
               <div className="w-1/2">
-                <label className="block text-sm text-gray-600 mb-1">From</label>
+                <label className="block text-sm text-gray-600 mb-1 dark:text-gray-300">From</label>
                 <div className="flex">
                   <input
                     type="number"
@@ -902,9 +938,9 @@ function CustomCalendar() {
                     placeholder="HH"
                     value={fromHour}
                     onChange={(e) => setFromHour(e.target.value)}
-                    className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+                    className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   />
-                  <span className="px-1 py-2">:</span>
+                  <span className="px-1 py-2 dark:text-gray-300">:</span>
                   <input
                     type="number"
                     min="0"
@@ -912,12 +948,12 @@ function CustomCalendar() {
                     placeholder="MM"
                     value={fromMinute}
                     onChange={(e) => setFromMinute(e.target.value)}
-                    className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+                    className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   />
                   <select
                     value={fromPeriod}
                     onChange={(e) => setFromPeriod(e.target.value)}
-                    className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+                    className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   >
                     <option>AM</option>
                     <option>PM</option>
@@ -927,7 +963,7 @@ function CustomCalendar() {
 
               {/* To Time */}
               <div className="w-1/2">
-                <label className="block text-sm text-gray-600 mb-1">To</label>
+                <label className="block text-sm text-gray-600 mb-1 dark:text-gray-300">To</label>
                 <div className="flex">
                   <input
                     type="number"
@@ -936,9 +972,9 @@ function CustomCalendar() {
                     placeholder="HH"
                     value={toHour}
                     onChange={(e) => setToHour(e.target.value)}
-                    className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+                    className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   />
-                  <span className="px-1 py-2">:</span>
+                  <span className="px-1 py-2 dark:text-gray-300">:</span>
                   <input
                     type="number"
                     min="0"
@@ -946,12 +982,12 @@ function CustomCalendar() {
                     placeholder="MM"
                     value={toMinute}
                     onChange={(e) => setToMinute(e.target.value)}
-                    className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+                    className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   />
                   <select
                     value={toPeriod}
                     onChange={(e) => setToPeriod(e.target.value)}
-                    className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300"
+                    className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   >
                     <option>AM</option>
                     <option>PM</option>
@@ -960,48 +996,34 @@ function CustomCalendar() {
               </div>
             </div>
 
-            {/* Repeat */}
-            <select
-              defaultValue=""
-              className="w-full rounded border px-3 py-2 mb-3 text-gray-500 focus:outline-none focus:ring focus:ring-indigo-300"
-            >
-              <option value="" disabled hidden>
-                Select repeat frequency
-              </option>
-              <option value="none">None</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-
-            {/* Reminder */}
-            <select
-              defaultValue=""
-              className="w-full rounded border px-3 py-2 mb-3 text-gray-500 focus:outline-none focus:ring focus:ring-indigo-300"
-            >
-              <option value="" disabled hidden>
-                Select reminder time
-              </option>
-              <option value="none">None</option>
-              <option value="5min">5 minutes before</option>
-              <option value="10min">10 minutes before</option>
-              <option value="30min">30 minutes before</option>
-            </select>
-
             {/* Location */}
             <input
               type="text"
               value={eventLocation}
               onChange={(e) => setEventLocation(e.target.value)}
               placeholder="Enter location"
-              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300"
+              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
+
+            {/* Reminder */}
+            <select
+              value={reminderTime}
+              onChange={(e) => setReminderTime(e.target.value)}
+              className="w-full rounded border px-3 py-2 mb-3 text-gray-500 focus:outline-none focus:ring focus:ring-indigo-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            >
+              <option value="none">No reminder</option>
+              <option value="5min">5 minutes before</option>
+              <option value="10min">10 minutes before</option>
+              <option value="30min">30 minutes before</option>
+            </select>
 
             {/* Description */}
             <textarea
               rows="2"
+              value={eventDescription}
+              onChange={(e) => setEventDescription(e.target.value)}
               placeholder="Add a short description"
-              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300 resize-none"
+              className="w-full rounded border px-3 py-2 mb-3 focus:outline-none focus:ring focus:ring-indigo-300 resize-none dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
 
             {/* Buttons */}
@@ -1011,7 +1033,7 @@ function CustomCalendar() {
                   resetForm();
                   setShowModal(false);
                 }}
-                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white"
               >
                 Cancel
               </button>
@@ -1019,7 +1041,7 @@ function CustomCalendar() {
                 onClick={handleAddEvent}
                 className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
               >
-                {editingEventIndex !== null ? "Update" : "Save"}
+                {editingEventId ? "Update" : "Save"}
               </button>
             </div>
           </div>
@@ -1029,13 +1051,13 @@ function CustomCalendar() {
       {/* Show Event Details Modal with list */}
       {selectedEventDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="rounded-lg bg-white p-6 shadow-md w-96 max-h-[80vh] overflow-auto">
-            <h3 className="text-lg font-semibold mb-4">
-              Events on {selectedEventDetails.date}
+          <div className="rounded-lg bg-white p-6 shadow-md w-96 max-h-[80vh] overflow-auto dark:bg-gray-800">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">
+              Events on {dayjs(selectedEventDetails.date).format("DD MMM YYYY")}
             </h3>
 
             {/* Event list */}
-            <div className="mb-4 max-h-32 overflow-y-auto border p-2 rounded">
+            <div className="mb-4 max-h-32 overflow-y-auto border p-2 rounded dark:border-gray-600">
               {selectedEventDetails.events.map((ev, idx) => (
                 <button
                   key={idx}
@@ -1048,51 +1070,35 @@ function CustomCalendar() {
                   className={`block w-full text-left px-2 py-1 rounded ${
                     idx === selectedEventDetails.selectedIndex
                       ? "bg-indigo-600 text-white"
-                      : "hover:bg-indigo-100"
+                      : "hover:bg-indigo-100 dark:hover:bg-gray-700 dark:text-gray-200"
                   }`}
                 >
-                  {ev.name}
+                  {ev.name} ({ev.startTime})
                 </button>
               ))}
             </div>
 
             {/* Selected event details */}
-            {(() => {
-              const event =
-                selectedEventDetails.events[selectedEventDetails.selectedIndex];
-              if (!event) return null;
-
-              return (
-                <>
-                  <p>
-                    <strong>Name:</strong> {event.name}
+            {selectedEventDetails.events[selectedEventDetails.selectedIndex] && (
+              <div className="dark:text-gray-200">
+                <p className="mb-2">
+                  <strong className="dark:text-white">Name:</strong> {selectedEventDetails.events[selectedEventDetails.selectedIndex].name}
+                </p>
+                <p className="mb-2">
+                  <strong className="dark:text-white">Time:</strong> {selectedEventDetails.events[selectedEventDetails.selectedIndex].startTime} - {selectedEventDetails.events[selectedEventDetails.selectedIndex].endTime}
+                </p>
+                {selectedEventDetails.events[selectedEventDetails.selectedIndex].location && (
+                  <p className="mb-2">
+                    <strong className="dark:text-white">Location:</strong> {selectedEventDetails.events[selectedEventDetails.selectedIndex].location}
                   </p>
-
-                  {(event.fromHour && event.toHour) ? (
-                    <p>
-                      <strong>Time:</strong>{" "}
-                      {`${event.fromHour.toString().padStart(2, "0")}:${event.fromMinute
-                        .toString()
-                        .padStart(2, "0")} ${event.fromPeriod} - ${event.toHour
-                        .toString()
-                        .padStart(2, "0")}:${event.toMinute
-                        .toString()
-                        .padStart(2, "0")} ${event.toPeriod}`}
-                    </p>
-                  ) : event.time ? (
-                    <p>
-                      <strong>Time:</strong> {event.time}
-                    </p>
-                  ) : null}
-
-                  {event.location && (
-                    <p>
-                      <strong>Location:</strong> {event.location}
-                    </p>
-                  )}
-                </>
-              );
-            })()}
+                )}
+                {selectedEventDetails.events[selectedEventDetails.selectedIndex].description && (
+                  <p className="mb-2">
+                    <strong className="dark:text-white">Description:</strong> {selectedEventDetails.events[selectedEventDetails.selectedIndex].description}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Buttons */}
             <div className="flex justify-end gap-2 mt-4">
@@ -1105,7 +1111,6 @@ function CustomCalendar() {
               <button
                 onClick={() => {
                   handleDeleteSelectedEvent();
-                  setSelectedEventDetails(null);
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
@@ -1113,7 +1118,7 @@ function CustomCalendar() {
               </button>
               <button
                 onClick={() => setSelectedEventDetails(null)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white"
               >
                 Close
               </button>
