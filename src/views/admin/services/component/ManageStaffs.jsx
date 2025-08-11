@@ -179,7 +179,7 @@ function ManageStaffs() {
       if (error.response?.data?.statusCode === 409) {
         toast.error("Failed to save staff. Email is Already registered ");
       } else {
-        toast.error("Failed to save staff. Please try again.");
+        toast.error(error.response.data.message);
       }
     } finally {
       setSaving(false);
@@ -512,7 +512,7 @@ function ManageStaffs() {
             ))
           )}
         </div>
-        {totalPages > 10 &&
+        {/* {totalStaffs > 6 && */}
           <div className="flex justify-center items-center my-6 gap-2">
             <button
               onClick={handlePrev}
@@ -537,7 +537,8 @@ function ManageStaffs() {
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>
-          </div>}
+          </div>
+          {/* } */}
       </div>
       {open && (
         <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-60 backdrop-blur-sm">
