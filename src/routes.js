@@ -370,6 +370,7 @@ const routes = [
     path: "AdminPro",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminPro />,
+    sidebar:false,
   },
 
   // Staff Routes
