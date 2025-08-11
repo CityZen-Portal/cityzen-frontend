@@ -26,6 +26,10 @@ import {
 } from "react-icons/md";
 import avatar from "assets/img/avatars/avatar6.jpg";
 import loading_gif from "../../../assets/gif/loading-gif.gif";
+import ComplaintCard from "./components/ComplaintCard";
+import BookingCard from "./components/BookingCard";
+import BookingCardHorizon from "./components/BookingCard";
+import BookingCardTailwind from "./components/BookingCard";
 
 // Gender icon helper
 const getGenderIcon = (gender) => {
@@ -336,69 +340,6 @@ export default function ProfileCard() {
         </div>
       </div>
 
-      {/* Previous Bookings */}
-      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
-        <h3 className="text-lg font-semibold">Previous Bookings</h3>
-        {bookings.length === 0 ? (
-          <p className="text-gray-500">No previous bookings found.</p>
-        ) : (
-          <ul className="space-y-3">
-            {bookings.map((b, index) => (
-              <li
-                key={index}
-                className="flex flex-col gap-3 rounded-2xl bg-gray-100 p-4 shadow-md transition-colors duration-300 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex min-w-[120px] flex-1 items-center gap-2">
-                  <MdWork className="text-xl text-blue-600" />
-                  <span className="truncate font-semibold text-gray-900 dark:text-white">
-                    {b.serviceName}
-                  </span>
-                </div>
-
-                <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdCalendarToday className="text-xl text-green-600" />
-                  <span>{formatDate(b.requestedDate)}</span>
-                </div>
-
-                {/* Status */}
-                <div className="flex min-w-[90px] flex-1 items-center justify-center gap-2">
-                  <MdCheckCircle
-                    className={`text-xl ${
-                      b.status.toLowerCase() === "completed"
-                        ? "text-green-600"
-                        : b.status.toLowerCase() === "pending"
-                        ? "text-yellow-500"
-                        : "text-gray-600"
-                    }`}
-                  />
-                  <span className={`font-medium ${getStatusClass(b.status)}`}>
-                    {b.status}
-                  </span>
-                </div>
-
-                {/* Staff Name */}
-                <div className="flex min-w-[120px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                  <MdPerson className="text-xl text-gray-700 dark:text-gray-300" />
-                  <span className="truncate">{b.staffName}</span>
-                </div>
-
-                {b.completedDate ? (
-                  <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                    <MdCalendarToday className="text-xl text-teal-600" />
-                    <span>{formatDate(b.completedDate)}</span>
-                  </div>
-                ) : (
-                  <div className="flex min-w-[110px] flex-1 items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
-                    <MdCalendarToday className="text-xl text-teal-600" />
-                    <span>Not Completed</span>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
       {/* Previous Complaints */}
       <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
         <h3 className="text-lg font-semibold">Previous Complaints</h3>
@@ -411,34 +352,48 @@ export default function ProfileCard() {
                 key={comp.id}
                 className="rounded-2xl bg-gray-100 p-4 shadow-md dark:bg-gray-800"
               >
-                <div className="flex items-center gap-3">
-                  <FaLightbulb className="flex-shrink-0 text-yellow-500" />
-                  <div>
-                    <div className="font-semibold text-gray-900 dark:text-white">
+                <div className="flex items-start gap-3">
+                  <FaLightbulb className="flex-shrink-0 text-xl text-yellow-500" />
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       {comp.issue || "No Issue"}
-                    </div>
-                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                    </span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
                       {comp.issueDescription || "No description provided"}
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    </span>
+                    <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Date:{" "}
                       {comp.complaintDate
                         ? new Date(comp.complaintDate).toLocaleDateString()
                         : "No Date"}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       Status:{" "}
                       <span className={getStatusClass(comp.status)}>
                         {comp.status || "Unknown"}
                       </span>
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       Category: {comp.category || "N/A"} | Department:{" "}
                       {comp.department || "N/A"}
-                    </div>
+                    </span>
                   </div>
                 </div>
               </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold">Previous Bookings</h3>
+
+        {bookings.length === 0 ? (
+          <p className="text-gray-500">No previous bookings found.</p>
+        ) : (
+          <ul className="space-y-3">
+            {bookings.map((booking, index) => (
+              <BookingCardTailwind key={index} booking={booking} />
             ))}
           </ul>
         )}
