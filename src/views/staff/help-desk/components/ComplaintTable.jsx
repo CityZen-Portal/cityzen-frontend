@@ -8,7 +8,7 @@ import {
   filterComplaints,
   sortComplaints,
 } from '../../../citizen/help-desk/utils/helpers';
-import SkeletonRow from 'views/citizen/help-desk/components/SkeletonRow';
+import SkeletonRow from 'views/admin/complaints/components/SkeletonRow';
 
 const ComplaintTable = ({ extra, complaints, loading }) => {
   const [statusFilter, setStatusFilter] = useState('');

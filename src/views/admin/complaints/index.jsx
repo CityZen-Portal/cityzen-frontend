@@ -45,17 +45,11 @@ const ComplaintManagement = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 rounded-xl">
       <div className="mb-6 sm:mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Complaint Log</h2>
       </div>
-      {loading ? (
-        <div className="flex justify-center items-center py-16">
-          <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
-        </div>
-      ) : (
-        <ComplaintTable complaints={complaints} />
-      )}
+        <ComplaintTable complaints={complaints} loading={loading} />
       <ToastContainer />
     </div>
   );

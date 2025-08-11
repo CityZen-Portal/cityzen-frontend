@@ -62,7 +62,7 @@ const VolunteerEditForm = () => {
 
   // Fetch Volunteer Post Details
   useEffect(() => {
-    // setLoading(true);
+    setLoading(true);
   
     axios.get(`${JOB_APPLICATION_API}/service/${id}`,
       {
@@ -89,10 +89,9 @@ const VolunteerEditForm = () => {
           console.error('Error:', err.response?.data || err.message);
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
         
-    // setLoading(true);
 
   }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
 
@@ -169,7 +168,7 @@ const VolunteerEditForm = () => {
       return;
     })
     .finally(() => {
-      // setLoadingSubmit(false);
+      setLoading(false);
     });
     
     // if (Object.keys(newErrors).length === 0) {
