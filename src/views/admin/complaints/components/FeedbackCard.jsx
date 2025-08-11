@@ -33,23 +33,28 @@ const FeedbackCard = ({ complaint, getStatusColor = () => '', getStatusText = (s
   };
 
   return (
-    <div className="bg-white dark:bg-navy-700 rounded-lg shadow p-4 mb-4 border">
+    <div className="bg-white dark:bg-navy-700 rounded-lg shadow p-4 mb-4">
       <div className="flex justify-between items-start">
         <div>
-          <div className="text-xs text-gray-500 dark:text-gray-300">
-            Complaint Id : {complaint.id} · {complaint.department || 'General'}
+          <div className="text-gray-800 dark:text-white font-bold">
+            Complaint Id: {complaint.id} · {complaint.department || 'General'}
           </div>
-          <h3 className="font-semibold text-base text-gray-900 dark:text-white mt-1">
+          <h3 className="text-base text-gray-900 dark:text-white mt-1">
             {complaint.issue || 'No title'}
           </h3>
           {complaint.street && (
-            <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              {complaint.street}
-            </div>
+            <>
+              <div className="text-gray-600 dark:text-gray-300 mt-1">
+                Location
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {complaint.street}
+              </div>
+            </>
           )}
         </div>
 
-        <div className="text-right">
+        {/* <div className="text-right">
           {getStatusColor && (
             <div
               className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
@@ -60,26 +65,26 @@ const FeedbackCard = ({ complaint, getStatusColor = () => '', getStatusText = (s
             </div>
           )}
           {dateStr && <div className="text-xs text-gray-400 dark:text-gray-300 mt-1">{dateStr}</div>}
-        </div>
+        </div> */}
       </div>
 
       {/* Resolved + Rating stacked */}
       <div className="mt-3">
         <div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">Resolved</div>
-          <div className="font-medium text-white">{fb.isResolved ? 'Yes' : 'No'}</div>
+          <div className="text-gray-600 dark:text-gray-300">Resolved</div>
+          <div className=" font-medium text-gray-500 dark:text-gray-400 text-xs">{fb.isResolved ? 'Yes' : 'No'}</div>
         </div>
 
         <div className="mt-2">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Rating</div>
-          <div className="flex">{renderStars(fb.rating ?? 0)}</div>
+          <div className="text-gray-500 dark:text-gray-400">Rating</div>
+          <div className="flex text-xl">{renderStars(fb.rating ?? 0)}</div>
         </div>
       </div>
 
       {/* Citizen Description */}
       {description && (
         <div className="mt-3">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Comments</div>
+          <div className="text-gray-600 dark:text-gray-300">Comments</div>
           <div className="text-sm text-gray-700 dark:text-gray-200">{description}</div>
         </div>
       )}
