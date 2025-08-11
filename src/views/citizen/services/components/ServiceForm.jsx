@@ -28,15 +28,21 @@ function ServiceForm() {
   });
 
   useEffect(() => {
+    const email=localStorage.getItem("email");
+    if(email){
+      const response=axios.get(`https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`);
+      console.log(response);
+      const number=response.phone
     setFormData((prev) => ({
       ...prev,
-      name: localStorage.getItem("name") || "John Doe",
+      name: localStorage.getItem("userName") || "John Doe",
       email: localStorage.getItem("email") || "",
-      phone: localStorage.getItem("phone") || "9876543210",
+      phone: number || "9876543210",
     }));
+  }
     // Citizen Id may (optionally) update too
   }, []);
-  console.log(formData);
+  // console.log(formData);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -160,7 +166,7 @@ function ServiceForm() {
                 onChange={handleChange}
                 rows="4"
                 placeholder="Enter your description"
-                className="w-full rounded-md border px-4 py-2 text-sm"
+                className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600"
               />
             </div>
             <div className="m-8">
@@ -173,7 +179,7 @@ function ServiceForm() {
                 onChange={handleChange}
                 rows="4"
                 placeholder="Enter your address"
-                className="w-full rounded-md border px-4 py-2 text-sm"
+                className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600"
               />
             </div>
             <div className="-mx-4 flex flex-wrap">
@@ -188,7 +194,7 @@ function ServiceForm() {
                     value={formData.area}
                     onChange={handleChange}
                     placeholder="Enter area"
-                    className="w-full rounded-md border px-6 py-3"
+                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600"
                   />
                 </div>
               </div>
@@ -203,7 +209,7 @@ function ServiceForm() {
                     value={formData.city}
                     onChange={handleChange}
                     placeholder="Enter city"
-                    className="w-full rounded-md border px-6 py-3"
+                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600"
                   />
                 </div>
               </div>
@@ -218,7 +224,7 @@ function ServiceForm() {
                     value={formData.postcode}
                     onChange={handleChange}
                     placeholder="Post Code"
-                    className="w-full rounded-md border px-6 py-3"
+                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600"
                   />
                 </div>
               </div>
