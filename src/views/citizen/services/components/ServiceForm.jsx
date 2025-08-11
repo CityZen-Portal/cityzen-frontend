@@ -11,7 +11,7 @@ function ServiceForm() {
   const services = location.state?.nameOfService;
   const id = localStorage.getItem("id");
 
-  // Prefill with localStorage OR default phone
+  const [loading, setLoading] = useState(false); // 🔹 Loader state for submit button
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,21 +28,27 @@ function ServiceForm() {
   });
 
   useEffect(() => {
-    const email=localStorage.getItem("email");
-    if(email){
-      const response=axios.get(`https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`);
-      console.log(response);
-      const number=response.phone
-    setFormData((prev) => ({
-      ...prev,
-      name: localStorage.getItem("userName") || "John Doe",
-      email: localStorage.getItem("email") || "",
-      phone: number || "9876543210",
-    }));
-  }
-    // Citizen Id may (optionally) update too
+    const email = localStorage.getItem("email");
+    if (email) {
+      axios
+        .get(
+          `https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`
+        )
+        .then((res) => {
+          const number = res.data?.phone || "9876543210";
+          setFormData((prev) => ({
+            ...prev,
+            name: localStorage.getItem("userName") || "John Doe",
+            email: localStorage.getItem("email") || "",
+            phone: number,
+          }));
+        })
+        .catch((err) => {
+          console.error("Error fetching user info:", err);
+        });
+    }
   }, []);
-  // console.log(formData);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -53,9 +59,11 @@ function ServiceForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // 🔹 Start loader
     const now = new Date();
     const bookingDate = now.toISOString().split("T")[0];
     const bookingTime = now.toTimeString().slice(0, 5);
+
     const errors = [];
     if (!formData.name.trim()) errors.push("Full Name is required.");
     if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone))
@@ -69,6 +77,7 @@ function ServiceForm() {
 
     if (errors.length > 0) {
       errors.forEach(toast.error);
+      setLoading(false); // 🔹 Stop loader if errors found
       return;
     }
 
@@ -84,12 +93,14 @@ function ServiceForm() {
         "https://utility-booking-backend.onrender.com/api/services/request/add",
         payload
       );
-      toast.success("Serivce Booked Successfully!");
+      toast.success("Service Booked Successfully!");
       setTimeout(() => {
         navigate("/citizen/Services");
       }, 2000);
     } catch {
       toast.error("Failed to submit form.");
+    } finally {
+      setLoading(false); // 🔹 Stop loader after request
     }
   };
 
@@ -102,60 +113,14 @@ function ServiceForm() {
               <button
                 type="button"
                 onClick={() => navigate("/citizen/Services")}
-                className="mb-2 flex items-center gap-1 text-blue-500 transition-colors hover:text-blue-600"
+                className="mb-2 flex items-center gap-1 text-blue-500 transition-colors hover:text-blue-600 disabled:opacity-50"
+                disabled={loading} // 🔹 Disable during loading
               >
                 <span>←</span> Back
               </button>
             </div>
-            {/* <div className="m-8 dark:text-white">
-              <label
-                htmlFor="name"
-                className="mb-2 block text-lg font-semibold"
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Full Name"
-                className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
-              />
-            </div>
-            <div className="m-8">
-              <label
-                htmlFor="phone"
-                className="mb-2 block text-lg font-semibold dark:text-white"
-              >
-                Phone Number
-              </label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="Phone Number"
-                className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
-              />
-            </div>
-            <div className="m-8">
-              <label
-                htmlFor="email"
-                className="mb-2 block text-lg font-semibold dark:text-white"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-                className="w-full rounded-md border px-6 py-3 text-base text-[#6B7280]"
-              />
-            </div> */}
 
+            {/* Description */}
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
                 Description
@@ -169,6 +134,8 @@ function ServiceForm() {
                 className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600 dark:text-white"
               />
             </div>
+
+            {/* Address */}
             <div className="m-8">
               <label className="mb-2 block text-lg font-semibold dark:text-white">
                 Address
@@ -182,6 +149,8 @@ function ServiceForm() {
                 className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600 dark:text-white"
               />
             </div>
+
+            {/* Area, City, Postcode */}
             <div className="-mx-4 flex flex-wrap">
               <div className="w-full px-6 sm:w-1/2">
                 <div className="m-4">
@@ -229,12 +198,41 @@ function ServiceForm() {
                 </div>
               </div>
             </div>
+
+            {/* Submit Button */}
             <div className="mb-5 flex justify-center">
               <button
                 type="submit"
-                className="rounded-md bg-[#6A64F1] px-4 py-3 text-base font-semibold text-white"
+                disabled={loading} // 🔹 Disable during loading
+                className="flex items-center justify-center gap-2 rounded-md bg-[#6A64F1] px-4 py-3 text-base font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Book Appointment
+                {loading ? (
+                  <>
+                    <svg
+                      className="h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Booking...
+                  </>
+                ) : (
+                  "Book Appointment"
+                )}
               </button>
             </div>
           </div>
