@@ -166,7 +166,7 @@ function ServiceForm() {
                 onChange={handleChange}
                 rows="4"
                 placeholder="Enter your description"
-                className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600"
+                className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600 dark:text-white"
               />
             </div>
             <div className="m-8">
@@ -179,7 +179,7 @@ function ServiceForm() {
                 onChange={handleChange}
                 rows="4"
                 placeholder="Enter your address"
-                className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600"
+                className="w-full rounded-md border px-4 py-2 text-sm dark:bg-navy-600 dark:text-white"
               />
             </div>
             <div className="-mx-4 flex flex-wrap">
@@ -194,7 +194,7 @@ function ServiceForm() {
                     value={formData.area}
                     onChange={handleChange}
                     placeholder="Enter area"
-                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600"
+                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600 dark:text-white"
                   />
                 </div>
               </div>
@@ -209,7 +209,7 @@ function ServiceForm() {
                     value={formData.city}
                     onChange={handleChange}
                     placeholder="Enter city"
-                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600"
+                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600 dark:text-white"
                   />
                 </div>
               </div>
@@ -224,7 +224,7 @@ function ServiceForm() {
                     value={formData.postcode}
                     onChange={handleChange}
                     placeholder="Post Code"
-                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600"
+                    className="w-full rounded-md border px-6 py-3 dark:bg-navy-600 dark:text-white"
                   />
                 </div>
               </div>
