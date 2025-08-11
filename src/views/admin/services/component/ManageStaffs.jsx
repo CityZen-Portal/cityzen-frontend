@@ -16,7 +16,7 @@ import {
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import loading_gif from "../../../../assets/gif/loading-gif.gif";
 const initialNewStaffState = {
   fullName: "",
   department: "",
@@ -53,7 +53,7 @@ function ManageStaffs() {
   const [saving, setSaving] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
-
+  const [load, setLoad] = useState(false);
   useEffect(() => {
     const fetchDepartment = async () => {
       try {
@@ -179,7 +179,7 @@ function ManageStaffs() {
       if (error.response?.data?.statusCode === 409) {
         toast.error("Failed to save staff. Email is Already registered ");
       } else {
-        toast.error("Failed to save staff. Please try again.");
+        toast.error(error.response.data.message);
       }
     } finally {
       setSaving(false);
@@ -216,6 +216,7 @@ function ManageStaffs() {
   };
   const resetPasswordHandler = async (email, id) => {
     if (!selectedStaff) return;
+    setLoad(true);
     try {
       await axios.put(
         `https://utility-booking-backend.onrender.com/api/staff/resend-password/${encodeURIComponent(email)}`
@@ -224,7 +225,7 @@ function ManageStaffs() {
       console.log(response);
       if (response.status = 200)
         setShowResetModal(false);
-        toast.success("Password sent successfully");
+      toast.success("Password sent successfully");
 
       setStaffs((prev) =>
         prev.map((staff) =>
@@ -233,6 +234,7 @@ function ManageStaffs() {
             : staff
         )
       );
+      setLoad(false);
     } catch (error) {
       console.error("Password reset error:", error);
       toast.error("Failed to send reset link.");
@@ -316,6 +318,19 @@ function ManageStaffs() {
 
   return (
     <div className="mb-8 mt-12 flex flex-col gap-12 px-4 md:px-6">
+      {load && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+          <p className="dark:text-white ms-5">
+            Please don't refresh the page, it may take a while.
+          </p>
+        </div>
+      )}
+
       <div className="rounded-xl bg-white shadow-xl dark:bg-navy-800">
         <div className="flex flex-col justify-between gap-4 rounded-t-xl bg-blue-600 p-6 dark:bg-navy-700 md:flex-row md:items-center">
           <div>
@@ -497,7 +512,7 @@ function ManageStaffs() {
             ))
           )}
         </div>
-        {totalPages > 10 &&
+        {/* {totalStaffs > 6 && */}
           <div className="flex justify-center items-center my-6 gap-2">
             <button
               onClick={handlePrev}
@@ -522,7 +537,8 @@ function ManageStaffs() {
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>
-          </div>}
+          </div>
+          {/* } */}
       </div>
       {open && (
         <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-60 backdrop-blur-sm">
@@ -615,7 +631,7 @@ function ManageStaffs() {
                 Cancel
               </button>
               <button
-               onClick={() => resetPasswordHandler(selectedStaff.emailAddress,selectedStaff.id)}
+                onClick={() => resetPasswordHandler(selectedStaff.emailAddress, selectedStaff.id)}
                 className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
               >
                 Confirm

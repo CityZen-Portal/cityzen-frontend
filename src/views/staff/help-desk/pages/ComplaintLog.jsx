@@ -82,9 +82,9 @@ const ComplaintLog = () => {
   ];
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen p-6">
       {/* Header */}
-      <div className="mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="mb-2 p-4 sm:p-6 rounded-lg shadow-sm">
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <MdTrackChanges className="text-3xl sm:text-4xl text-blue-600" />
@@ -96,7 +96,7 @@ const ComplaintLog = () => {
       {/* Metrics Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {metrics.map(({ key, label, value, color }, index) => {
-          const Icon = iconMap[key];
+          const Icon = iconMap[key.toLowerCase()];
           return (
             <div
               key={index}
@@ -113,15 +113,9 @@ const ComplaintLog = () => {
       </div>
 
       {/* Table */}
-      
-          {loading ? (
-            <div className="flex justify-center items-center py-16">
-              <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
-            </div>
-          ) : (
-            <ComplaintTable extra={"mt-8"} complaints={complaints} />
-          )}
-          <ToastContainer />
+      <ComplaintTable extra={"mt-8"} complaints={complaints} loading={loading} />
+
+      <ToastContainer />
     </div>
   );
 };

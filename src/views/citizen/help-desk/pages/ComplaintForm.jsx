@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import loading_gif from '../../../../assets/gif/loading-gif.gif'
 import FileUpload from '../components/FileUpload';
+import { ArrowLeft } from 'lucide-react';
 
 function ComplaintForm() {
   const token = localStorage.getItem("token")
@@ -103,6 +104,9 @@ function ComplaintForm() {
 
   const [uploadedFile, setUploadedFile] = useState({ fileName: "", filePath: "" });
 
+  const handleBack = () => {
+    navigate('/citizen/help-desk');
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoadingSubmit(true);
@@ -322,8 +326,18 @@ function ComplaintForm() {
           />
         </div>
       )}
-
-      <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
+      <div className="bg-gray-50 dark:bg-navy-900 max-w-4xl w-full p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
+      <div className="flex items-center gap-4 mb-6">
+        <button
+        onClick={handleBack}
+        className="bg-brand-500 text-white text-lg font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
+        title="Back to helpdesk"
+        >
+        Back to Help Desk
+        </button>
+      </div>
+      <div className="bg-gray-50 dark:bg-gray-900 max-w-md sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl w-full p-4 sm:p-6 lg:p-6 rounded-lg sm:rounded-xl shadow-md text-black dark:text-white">
+        
         <h1 className="font-bold text-center text-lg sm:text-xl lg:text-2xl mb-4 sm:mb-6">Complaint Form</h1>
         <form className="space-y-3 sm:space-y-4 lg:space-y-6" onSubmit={handleSubmit}>
           <h2 className="font-bold text-center text-base sm:text-lg lg:text-xl">Location & Address</h2>
@@ -478,6 +492,7 @@ function ComplaintForm() {
         {/* ToastContainer renders the toasts */}
         <ToastContainer />
       </div>
+    </div>
     </div>
   );
 }

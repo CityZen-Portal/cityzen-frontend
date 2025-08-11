@@ -51,8 +51,9 @@ const AdminProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        const email=localStorage.getItem("email");
         const response = await axios.get(
-          "https://utility-booking-backend.onrender.com/api/staff/email/poovarasan936161@gmail.com"
+          `https://utility-booking-backend.onrender.com/api/staff/email/${email}`
         );
 
         console.log("API Response:", response.data);
