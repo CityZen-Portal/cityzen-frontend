@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, MapPin, Calendar, Eye, Edit, Trash2, RotateCcw, Trash } from 'lucide-react';
+import { Building2, MapPin, Calendar, Eye, Edit, Trash2 } from 'lucide-react';
 
 // Small Toggle Switch Component for top right corner
 const SmallToggleSwitch = ({ isActive, onToggle, isDeleted = false }) => (
@@ -67,18 +67,6 @@ const JobCard = ({
                 onToggleStatus(job);
               }}
             />
-          )}
-          {isDeletedView && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleStatus && onToggleStatus(job); // This will be the restore function
-              }}
-              className="text-blue-600 hover:text-blue-700 p-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-              title="Restore"
-            >
-              <RotateCcw size={16} />
-            </button>
           )}
         </div>
 
@@ -165,32 +153,8 @@ const JobCard = ({
         {/* Conditional buttons based on admin view and deleted status */}
         {isAdminView ? (
           <div className="flex gap-3 mt-6">
-            {isDeletedView ? (
-              // Deleted view buttons
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleStatus && onToggleStatus(job); // Restore function
-                  }}
-                  className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <RotateCcw size={16} />
-                  Restore
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete && onDelete(job); // Permanent delete function
-                  }}
-                  className="flex-1 py-3 px-4 rounded-xl transition-colors font-medium text-sm flex items-center gap-2 justify-center bg-red-500 hover:bg-red-700 text-white"
-                >
-                  <Trash size={16} />
-                  Delete Forever
-                </button>
-              </>
-            ) : (
-              // Normal view buttons
+            {/* For deleted view, show no buttons - just the card */}
+            {!isDeletedView && (
               <>
                 <button
                   onClick={(e) => {
@@ -248,4 +212,3 @@ const JobCard = ({
 };
 
 export default JobCard;
-

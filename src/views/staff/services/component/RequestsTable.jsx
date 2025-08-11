@@ -16,7 +16,7 @@ const RequestsTable = ({
   handleViewDetails,
   handleComplete,
   loading,
-  scrollToForm 
+  scrollToForm
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -66,7 +66,7 @@ const RequestsTable = ({
     const startIndex = (currentPage - 1) * itemsPerPage;
     return sortedRequests.slice(startIndex, startIndex + itemsPerPage);
   }, [sortedRequests, currentPage, itemsPerPage]);
-   console.log(paginatedRequests);
+  console.log(paginatedRequests);
   const totalPages = Math.ceil(searchedRequests.length / itemsPerPage);
 
   return (
@@ -80,8 +80,8 @@ const RequestsTable = ({
             {viewMode === 'all'
               ? 'All Service Requests'
               : viewMode === 'pending'
-              ? 'Pending Requests'
-              : 'Completed Requests'}
+                ? 'Pending Requests'
+                : 'Completed Requests'}
           </h5>
         </div>
 
@@ -143,9 +143,9 @@ const RequestsTable = ({
                   { label: 'Status', key: 'taskStatus' },
                   ...(viewMode === 'completed'
                     ? [
-                        { label: 'Completed', key: 'completedDate' },
-                        { label: 'Staff', key: 'staffName' }
-                      ]
+                      { label: 'Completed', key: 'completedDate' },
+                      { label: 'Staff', key: 'staffName' }
+                    ]
                     : [])
                 ].map((col) => (
                   <th
@@ -172,37 +172,67 @@ const RequestsTable = ({
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="100%" className="text-center py-6 text-gray-500">
-                    Loading requests...
-                  </td>
-                </tr>
+                [...Array(itemsPerPage)].map((_, idx) => (
+                  <tr
+                    key={idx}
+                    className={`animate-pulse ${idx % 2 === 0
+                        ? 'bg-white dark:bg-navy-800'
+                        : 'bg-gray-50/50 dark:bg-navy-700/50'
+                      }`}
+                  >
+                    <td className="py-4 px-4">
+                      <div className="h-4 bg-gray-200 dark:bg-navy-700 rounded w-3/4" />
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="h-4 bg-gray-200 dark:bg-navy-700 rounded w-2/3" />
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="h-4 bg-gray-200 dark:bg-navy-700 rounded w-1/2" />
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="h-4 bg-gray-200 dark:bg-navy-700 rounded w-1/3" />
+                    </td>
+
+                    {viewMode === 'completed' && (
+                      <>
+                        <td className="py-4 px-4">
+                          <div className="h-4 bg-gray-200 dark:bg-navy-700 rounded w-1/4" />
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="h-4 bg-gray-200 dark:bg-navy-700 rounded w-2/5" />
+                        </td>
+                      </>
+                    )}
+
+                    <td className="py-4 px-4">
+                      <div className="h-8 bg-gray-200 dark:bg-navy-700 rounded w-14" />
+                    </td>
+                  </tr>
+                ))
               ) : paginatedRequests.length === 0 ? (
                 <tr>
                   <td colSpan="100%" className="text-center py-6 text-gray-500">
-                    No data found.
+                    No Request found.
                   </td>
                 </tr>
               ) : (
                 paginatedRequests.map((request, index) => (
                   <tr
                     key={request.taskId}
-                    className={`border-b hover:bg-gray-50 dark:hover:bg-navy-900 transition-colors ${
-                      index % 2 === 0
+                    className={`border-b hover:bg-gray-50 dark:hover:bg-navy-900 transition-colors ${index % 2 === 0
                         ? 'bg-white dark:bg-navy-800'
                         : 'bg-gray-50/50 dark:bg-navy-700/50'
-                    }`}
+                      }`}
                   >
                     <td className="py-4 px-4">{request.citizenName}</td>
                     <td className="py-4 px-4">{request.description}</td>
                     <td className="py-4 px-4">{request.requested_Date}</td>
                     <td className="py-4 px-4">
                       <span
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${
-                          request.taskStatus === 'PENDING'
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${request.taskStatus === 'PENDING'
                             ? 'bg-yellow-100 text-yellow-800'
                             : 'bg-green-100 text-green-800'
-                        }`}
+                          }`}
                       >
                         {request.taskStatus === 'PENDING' ? (
                           <>
