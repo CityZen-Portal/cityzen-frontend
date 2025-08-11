@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-// import {
-//   MdCalendarToday,
-//   MdPerson,
-
-// } from "react-icons/md";
-import Cropper from "react-easy-crop";
 import {
   FaEdit,
   FaSave,
   FaTimes,
   FaPen,
-  FaTint,
-  FaLightbulb,
   FaMars,
   FaVenus,
   FaGenderless,
+  FaLightbulb,
 } from "react-icons/fa";
 import {
   MdWork,
@@ -33,39 +26,6 @@ import {
 } from "react-icons/md";
 import avatar from "assets/img/avatars/avatar6.jpg";
 import loading_gif from "../../../assets/gif/loading-gif.gif";
-
-// Crop image helper function
-function getCroppedImg(imageSrc, pixelCrop) {
-  const canvas = document.createElement("canvas");
-  const image = new Image();
-  return new Promise((resolve, reject) => {
-    image.onload = () => {
-      const scaleX = image.naturalWidth / image.width;
-      const scaleY = image.naturalHeight / image.height;
-      canvas.width = pixelCrop.width;
-      canvas.height = pixelCrop.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(
-        image,
-        pixelCrop.x * scaleX,
-        pixelCrop.y * scaleY,
-        pixelCrop.width * scaleX,
-        pixelCrop.height * scaleY,
-        0,
-        0,
-        pixelCrop.width,
-        pixelCrop.height
-      );
-      canvas.toBlob((blob) => {
-        if (!blob) return reject(new Error("Canvas is empty"));
-        const fileUrl = URL.createObjectURL(blob);
-        resolve(fileUrl);
-      }, "image/jpeg");
-    };
-    image.onerror = reject;
-    image.src = imageSrc;
-  });
-}
 
 // Gender icon helper
 const getGenderIcon = (gender) => {
@@ -99,15 +59,9 @@ export default function ProfileCard() {
   const [complaints, setComplaints] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [originalUser, setOriginalUser] = useState(null);
-  const [originalImage, setOriginalImage] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [croppedImage, setCroppedImage] = useState(null);
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [originalImage, setOriginalImage] = useState(avatar);
+  const [selectedImage, setSelectedImage] = useState(avatar);
 
-  // Effect: Fetch ALL profile data before displaying UI
   useEffect(() => {
     let active = true;
     async function fetchAll() {
@@ -129,7 +83,6 @@ export default function ProfileCard() {
           }),
         ]);
         if (!active) return;
-        // Set User
         const data = userRes.data?.data || userRes.data || {};
         const userObj = {
           user_name: data.userName || "",
@@ -146,8 +99,7 @@ export default function ProfileCard() {
         setUser(userObj);
         setOriginalUser(userObj);
         setOriginalImage(avatar);
-        setCroppedImage(avatar);
-        // Set Bookings & Complaints
+        setSelectedImage(avatar);
         setBookings(bookingsRes.data?.data?.data || []);
         setComplaints(complaintsRes.data?.data || []);
       } catch (err) {
@@ -166,7 +118,7 @@ export default function ProfileCard() {
     };
   }, [token, email, citizenId, HELPDESK_API]);
 
-  // Standard input, image, and modal handlers
+  // Standard input and image handlers
   const handleChange = (field, value) => {
     setUser((prev) => ({ ...prev, [field]: value }));
   };
@@ -178,23 +130,12 @@ export default function ProfileCard() {
     return date.toLocaleDateString("en-US", options);
   };
 
+  // Simple image upload handler (no cropping)
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
-      setCropModalOpen(true);
-    }
-  };
-
-  const showCroppedImage = async () => {
-    try {
-      const cropped = await getCroppedImg(selectedImage, croppedAreaPixels);
-      setCroppedImage(cropped);
-      setCropModalOpen(false);
-      setSelectedImage(null);
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -217,7 +158,6 @@ export default function ProfileCard() {
         payload
       );
       setOriginalUser(user);
-      setUser(user);
       setEditMode(false);
     } catch (error) {
       console.error("Failed to save user:", error);
@@ -268,7 +208,7 @@ export default function ProfileCard() {
         <div className="flex w-full flex-col items-center rounded-2xl bg-blue-600 p-6 shadow-lg lg:w-1/3">
           <div className="relative mb-2">
             <img
-              src={croppedImage || avatar}
+              src={selectedImage || avatar}
               alt="User"
               className="h-56 w-56 rounded-full border-2 border-white object-cover shadow-md"
             />
@@ -301,7 +241,6 @@ export default function ProfileCard() {
               <button
                 onClick={() => {
                   setOriginalUser(user);
-                  setOriginalImage(croppedImage);
                   setEditMode(true);
                 }}
                 className="flex items-center gap-1 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-yellow-500"
@@ -319,8 +258,7 @@ export default function ProfileCard() {
                 <button
                   onClick={() => {
                     setUser(originalUser);
-                    setCroppedImage(originalImage);
-                    setSelectedImage(null);
+                    setSelectedImage(avatar);
                     setEditMode(false);
                   }}
                   className="flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-red-700"
@@ -505,54 +443,6 @@ export default function ProfileCard() {
           </ul>
         )}
       </div>
-
-      {/* Crop Modal */}
-      {cropModalOpen && (
-        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-60">
-          <div className="w-[90%] max-w-md rounded-lg bg-white p-4 shadow-lg">
-            <div className="relative h-64 w-full bg-gray-100">
-              <Cropper
-                image={selectedImage}
-                crop={crop}
-                zoom={zoom}
-                aspect={1}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={(_, croppedAreaPixels) =>
-                  setCroppedAreaPixels(croppedAreaPixels)
-                }
-              />
-            </div>
-            <div className="mt-4 flex justify-between">
-              <input
-                type="range"
-                min={1}
-                max={3}
-                step={0.1}
-                value={zoom}
-                onChange={(e) => setZoom(e.target.value)}
-              />
-              <div className="flex gap-4">
-                <button
-                  className="rounded bg-blue-600 px-4 py-2 text-white shadow"
-                  onClick={showCroppedImage}
-                >
-                  Crop
-                </button>
-                <button
-                  className="rounded bg-gray-400 px-4 py-2 text-white shadow"
-                  onClick={() => {
-                    setCropModalOpen(false);
-                    setSelectedImage(null);
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
