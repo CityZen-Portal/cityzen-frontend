@@ -41,27 +41,25 @@ function ViewTasks() {
 
   const itemsPerPage = 6;
 
-useEffect(() => {
-  const fetchRequest = async () => {
-    setLoading(true); // ✅ Start loading
-    try {
-      const response = await axios.get(
-        "https://utility-booking-backend.onrender.com/api/services/request/all"
-      );
-      const visibleRequests = response.data.data.filter(
-        (request) => request.show === false
-      );
-      setBookingRequests(visibleRequests);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false); // ✅ Stop loading
-    }
-  };
-  fetchRequest();
-}, []);
-
-  
+  useEffect(() => {
+    const fetchRequest = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          "https://utility-booking-backend.onrender.com/api/services/request/all"
+        );
+        const visibleRequests = response.data.data.filter(
+          (request) => request.show === false
+        );
+        setBookingRequests(visibleRequests);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRequest();
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -95,85 +93,83 @@ useEffect(() => {
   };
 
   const handleBookingSelect = async (bookingId) => {
-  setSelectedBooking(bookingId);
-  const selected = bookingRequests.find((b) => b.id === bookingId);
-  if (!selected) return;
+    setSelectedBooking(bookingId);
+    const selected = bookingRequests.find((b) => b.id === bookingId);
+    if (!selected) return;
 
-  setSelectedBookingData(selected);
-  setNewTask((prev) => ({
-    ...prev,
-    title: selected.serviceName || selected.services,
-    date: selected.date,
-    time: selected.time,
-    address: selected.address,
-    description: `Booking by ${selected.name}: ${selected.note}`,
-  }));
+    setSelectedBookingData(selected);
+    setNewTask((prev) => ({
+      ...prev,
+      title: selected.serviceName || selected.services,
+      address: selected.address,
+      description: `Booking by ${selected.name}: ${selected.note}`,
+    }));
 
-  try {
-    const res = await axios.get(
-      `https://utility-booking-backend.onrender.com/api/staff/department/${encodeURIComponent(selected.services)}`
-    );
-    
-    const fetchedStaff = res.data?.data?.data || [];
-
-    const filteredStaff = fetchedStaff.filter((staff) => staff.delete === false);
-
-    setStaffList(filteredStaff.map((staff) => ({
-      name: staff.fullName,
-      id: staff.id
-    })));
-    
-  } catch (error) {
-    console.error("Error fetching staff list:", error);
-    setStaffList([]);
-  }
-};
-
+    try {
+      const res = await axios.get(
+        `https://utility-booking-backend.onrender.com/api/staff/department/${encodeURIComponent(selected.services)}`
+      );
+      const fetchedStaff = res.data?.data?.data || [];
+      const filteredStaff = fetchedStaff.filter((staff) => staff.delete === false);
+      setStaffList(filteredStaff.map((staff) => ({
+        name: staff.fullName,
+        id: staff.id
+      })));
+    } catch (error) {
+      console.error("Error fetching staff list:", error);
+      setStaffList([]);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewTask((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSaveTask = async () => {
-  if (!newTask.title || !newTask.staff || !newTask.date || !newTask.time || !newTask.address) {
-    toast.error("Please fill in all required fields.");
-    return;
-  }
-
-  try {
-    setAssigning(true); // start loader
-
-    const selectedStaff = staffList.find((s) => s.name === newTask.staff);
-    if (!selectedStaff || !selectedBookingData) {
-      toast.error("Invalid staff or booking request selection.");
-      setAssigning(false);
+  const handleSaveTask = async () => {
+    if (!newTask.title || !newTask.staff || !newTask.address) {
+      toast.error("Please fill in all required fields.");
       return;
     }
 
-    const taskPayload = {
-      serviceId: selectedBookingData.id,
-      citizenId: selectedBookingData.citizenId || "1",
-      staffId: selectedStaff.id,
-      status: "PENDING",
-    };
+    try {
+      setAssigning(true);
 
-    await axios.post("https://utility-booking-backend.onrender.com/api/task/add", taskPayload);
-    await axios.put(`https://utility-booking-backend.onrender.com/api/services/request/${selectedBookingData.id}`, {
-      ...selectedBookingData,
-      show: true,
-    });
+      const selectedStaff = staffList.find((s) => s.name === newTask.staff);
+      if (!selectedStaff || !selectedBookingData) {
+        toast.error("Invalid staff or booking request selection.");
+        setAssigning(false);
+        return;
+      }
 
-    toast.success("Task assigned successfully!");
-    handleClose();
-  } catch (error) {
-    console.error("Error saving task:", error);
-    toast.error("Failed to assign task.");
-  } finally {
-    setAssigning(false); // stop loader
-  }
-};
+      const now = new Date();
+      const currentDate = now.toISOString().split("T")[0];
+      const currentTime = now.toTimeString().slice(0, 5);
 
+      const taskPayload = {
+        serviceId: selectedBookingData.id,
+        citizenId: selectedBookingData.citizenId || "1",
+        staffId: selectedStaff.id,
+        status: "PENDING",
+        date: currentDate,
+        time: currentTime,
+      };
+
+      await axios.post("https://utility-booking-backend.onrender.com/api/task/add", taskPayload);
+      await axios.put(`https://utility-booking-backend.onrender.com/api/services/request/${selectedBookingData.id}`, {
+        ...selectedBookingData,
+        show: true,
+      });
+
+      toast.success("Task assigned successfully!");
+      handleClose();
+    } catch (error) {
+      console.error("Error saving task:", error);
+      toast.error("Failed to assign task.");
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12 px-4 md:px-6">
@@ -201,13 +197,13 @@ const handleSaveTask = async () => {
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-200">
             User Booking Requests
           </h3>
-         {bookingRequests.length === 0 ? (
-  <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
-    {[...Array(6)].map((_, idx) => (
-      <SkeletonCard key={idx} />
-    ))}
-  </div>
-) : (
+          {bookingRequests.length === 0 ? (
+            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
+              {[...Array(6)].map((_, idx) => (
+                <SkeletonCard key={idx} />
+              ))}
+            </div>
+          ) : (
             <>
               <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
                 {currentRequests.map((req) => (
@@ -319,22 +315,6 @@ const handleSaveTask = async () => {
                   </option>
                 ))}
               </select>
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="date"
-                  name="date"
-                  value={newTask.date}
-                  onChange={handleInputChange}
-                  className="border px-4 py-2.5 rounded-lg w-full bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700"
-                />
-                <input
-                  type="time"
-                  name="time"
-                  value={newTask.time}
-                  onChange={handleInputChange}
-                  className="border px-4 py-2.5 rounded-lg w-full bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700"
-                />
-              </div>
               <input
                 type="text"
                 name="address"
@@ -351,40 +331,39 @@ const handleSaveTask = async () => {
               >
                 Cancel
               </button>
-<button
-  onClick={handleSaveTask}
-  disabled={assigning}
-  className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600 font-semibold flex items-center justify-center gap-2"
->
-  {assigning ? (
-    <>
-      <svg
-        className="animate-spin h-5 w-5 text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
-        ></path>
-      </svg>
-      Assigning...
-    </>
-  ) : (
-    currentTask ? "Save Changes" : "Assign Task"
-  )}
-</button>
-
+              <button
+                onClick={handleSaveTask}
+                disabled={assigning}
+                className="px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600 font-semibold flex items-center justify-center gap-2"
+              >
+                {assigning ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                      ></path>
+                    </svg>
+                    Assigning...
+                  </>
+                ) : (
+                  currentTask ? "Save Changes" : "Assign Task"
+                )}
+              </button>
             </div>
           </div>
         </div>
