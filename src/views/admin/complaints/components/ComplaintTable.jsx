@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PageNavigator from './PageNavigator';
+import FeedbackList from './FeedbackList';
 import Rows from './Rows';
 import { MdArrowUpward, MdArrowDownward, MdUnfoldMore, MdSearch } from 'react-icons/md';
 import {
@@ -26,6 +27,15 @@ const ComplaintTable = ({ complaints }) => {
       (currentPage - 1) * rowsPerPage,
       currentPage * rowsPerPage
     );
+
+    const complaintsWithFeedback = filteredComplaints.filter((c) =>
+  Boolean(
+    c.feedback
+    || (Array.isArray(c.feedbacks) && c.feedbacks.length > 0)
+    || c.feedbackSubmitted // if backend just sends a boolean flag
+    || (c.feedbackComments || c.feedbackRating || c.rating) // fallback properties
+  )
+);
   
     const handlePageChange = (page) => {
       if (page >= 1 && page <= totalPages) {
@@ -177,7 +187,11 @@ const ComplaintTable = ({ complaints }) => {
           </div>
         </div>
       </div>
-
+      <FeedbackList
+  complaintsWithFeedback={complaintsWithFeedback}
+  getStatusColor={getStatusColor}
+  getStatusText={getStatusText}
+/>
       {/* Pagination Controls */}
       <PageNavigator
         filteredComplaints={filteredComplaints}

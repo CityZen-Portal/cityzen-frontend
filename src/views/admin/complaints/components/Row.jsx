@@ -7,6 +7,7 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
   const navigate = useNavigate();
 
   return (
+    <>
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
       {/* Complaint ID */}
       <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-navy-900 dark:text-white">
@@ -75,7 +76,21 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
           <span className="hidden sm:inline ml-1">View</span>
         </button>
       </td>
+            {/* Feedback Button */}
+      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-xs sm:text-sm text-navy-900 dark:text-white">
+        <button
+          onClick={() => navigate(`/admin/complaints/feedback/${complaint.id}`)}
+          disabled={complaint.feedbackSubmitted}
+          className={`px-2 py-1 rounded-md text-xs sm:text-sm transition-colors duration-200
+            ${complaint.feedbackSubmitted
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-green-600 text-white hover:bg-green-700"}`}
+        >
+          {complaint.feedbackSubmitted ? "Feedback Given" : "Give Feedback"}
+        </button>
+      </td>
     </tr>
+    </>
   );
 };
 
