@@ -10,6 +10,7 @@ const Rows = ({ complaints, getStatusColor, getStatusText}) => {
           complaint={complaint}
           getStatusColor={getStatusColor}
           getStatusText={getStatusText}
+          
         />
       ))}
     </>
