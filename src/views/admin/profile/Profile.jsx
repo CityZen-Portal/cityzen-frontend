@@ -11,8 +11,6 @@ import {
   FaLightbulb,
 } from "react-icons/fa";
 import {
-  MdWork,
-  MdCheckCircle,
   MdPerson,
   MdBadge,
   MdEmail,
@@ -26,12 +24,9 @@ import {
 } from "react-icons/md";
 import avatar from "assets/img/avatars/avatar6.jpg";
 import loading_gif from "../../../assets/gif/loading-gif.gif";
-import ComplaintCard from "./components/ComplaintCard";
-import BookingCard from "./components/BookingCard";
-import BookingCardHorizon from "./components/BookingCard";
 import BookingCardTailwind from "./components/BookingCard";
 
-// Gender icon helper
+// --- Gender icon helper ---
 const getGenderIcon = (gender) => {
   if (!gender) return <FaGenderless />;
   const g = gender.toLowerCase();
@@ -66,54 +61,104 @@ export default function ProfileCard() {
   const [originalImage, setOriginalImage] = useState(avatar);
   const [selectedImage, setSelectedImage] = useState(avatar);
 
+  // --- Fetch user data ---
+  async function fetchUser(email) {
+    try {
+      const userRes = await axios.get(
+        `https://auth-backend-2-k3ph.onrender.com/citizen-profiles/CIT${citizenId}`,
+        { headers: { token } }
+      );
+      const data = userRes.data || {};
+      return {
+        user_name: data.userName || "",
+        citizen_id: data.citizenId || "",
+        aadhaar: data.aadhaar || "",
+        email: data.email || "",
+        address: data.address || "not update",
+        city: data.city || "not update yet",
+        dob: data.dob || "not update yet",
+        gender: data.gender || "",
+        pincode: data.pincode || "not update yet",
+        state: data.state || "not update yet",
+      };
+    } catch (err) {
+      if (err.response?.status === 404) {
+        console.warn("User not found (404)");
+      } else {
+        console.error("User fetch error:", err);
+      }
+      return {
+        user_name: "N/A",
+        citizen_id: "",
+        aadhaar: "",
+        email,
+        address: "N/A",
+        city: "N/A",
+        dob: "N/A",
+        gender: "",
+        pincode: "",
+        state: "",
+      };
+    }
+  }
+  async function fetchBookings(citizenId) {
+    try {
+      const res = await axios.get(
+        `https://utility-booking-backend.onrender.com/api/task/dto/${citizenId}`
+      );
+      return Array.isArray(res.data?.data?.data) ? res.data.data.data : [];
+    } catch (err) {
+      if (err.response?.status === 404) {
+        console.warn("No bookings found (404)");
+      } else {
+        console.error("Bookings fetch error:", err);
+      }
+      return [];
+    }
+  }
+
+  // --- Fetch complaints ---
+  async function fetchComplaints(HELPDESK_API, token, email, citizenId) {
+    try {
+      const res = await axios.get(`${HELPDESK_API}/citizen/complaints`, {
+        headers: { token, email, id: citizenId },
+      });
+      return Array.isArray(res.data?.data) ? res.data.data : [];
+    } catch (err) {
+      if (err.response?.status === 404) {
+        console.warn("No complaints found (404)");
+      } else {
+        console.error("Complaints fetch error:", err);
+      }
+      return [];
+    }
+  }
+
   useEffect(() => {
     let active = true;
-    async function fetchAll() {
+    async function loadProfileData() {
       setLoading(true);
-      try {
-        const [userRes, bookingsRes, complaintsRes] = await Promise.all([
-          axios.get(
-            `https://auth-backend-2-k3ph.onrender.com/api/auth/getUser/${email}`
-          ),
-          axios.get(
-            `https://utility-booking-backend.onrender.com/api/task/dto/${citizenId}`
-          ),
-          axios.get(`${HELPDESK_API}/citizen/complaints`, {
-            headers: {
-              token,
-              email,
-              id: citizenId,
-            },
-          }),
-        ]);
-        if (!active) return;
-        const data = userRes.data?.data || userRes.data || {};
-        const userObj = {
-          user_name: data.userName || "",
-          citizen_id: data.id || "",
-          aadhaar: data.aadhaar || "",
-          email: data.email || "",
-          address: data.address || "not update",
-          city: data.city || "not update yet",
-          dob: data.dob || "not update yet",
-          gender: data.gender || "",
-          pincode: data.pincode || "not update yet",
-          state: data.state || "not update yet",
-        };
-        setUser(userObj);
-        setOriginalUser(userObj);
-        setOriginalImage(avatar);
-        setSelectedImage(avatar);
-        setBookings(bookingsRes.data?.data?.data || []);
-        setComplaints(complaintsRes.data?.data || []);
-      } catch (err) {
-        console.error("Failed to fetch initial data:", err);
-      } finally {
-        if (active) setLoading(false);
-      }
+      const userData = await fetchUser(email);
+      const bookingsData = await fetchBookings(citizenId);
+
+      const complaintsData = await fetchComplaints(
+        HELPDESK_API,
+        token,
+        email,
+        citizenId
+      );
+
+      if (!active) return;
+      setUser(userData);
+      setOriginalUser(userData);
+      setOriginalImage(avatar);
+      setSelectedImage(avatar);
+      setBookings(bookingsData);
+      setComplaints(complaintsData);
+      setLoading(false);
     }
     if (token && email && citizenId && HELPDESK_API) {
-      fetchAll();
+      loadProfileData();
     } else {
       setLoading(false);
     }
@@ -122,7 +167,6 @@ export default function ProfileCard() {
     };
   }, [token, email, citizenId, HELPDESK_API]);
 
-  // Standard input and image handlers
   const handleChange = (field, value) => {
     setUser((prev) => ({ ...prev, [field]: value }));
   };
@@ -130,16 +174,13 @@ export default function ProfileCard() {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const options = { year: "numeric", month: "short", day: "numeric" };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", options);
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
-  // Simple image upload handler (no cropping)
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);
+      setSelectedImage(URL.createObjectURL(file));
     }
   };
 
@@ -191,7 +232,6 @@ export default function ProfileCard() {
     ["state", "State", <MdLocationOn />],
   ];
 
-  // --- Loader page ---
   if (loading) {
     return (
       <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm">
@@ -204,11 +244,10 @@ export default function ProfileCard() {
     );
   }
 
-  // --- Main profile page ---
   return (
     <div className="space-y-6 p-6 font-sans">
+      {/* --- Profile Header --- */}
       <div className="flex flex-col gap-6 lg:flex-row">
-        {/* Profile Picture */}
         <div className="flex w-full flex-col items-center rounded-2xl bg-blue-600 p-6 shadow-lg lg:w-1/3">
           <div className="relative mb-2">
             <img
@@ -284,22 +323,14 @@ export default function ProfileCard() {
                     {key === "dob" ? (
                       <input
                         type="date"
-                        className={`w-full rounded border p-2 ${
-                          isReadOnly
-                            ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
-                            : "border border-gray-400 bg-white text-gray-900 dark:border-gray-200 dark:bg-[#0b1331] dark:text-white"
-                        }`}
+                        className="w-full rounded border border-gray-400 p-2 dark:border-gray-200 dark:bg-[#0b1331]"
                         value={user[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
                         readOnly={isReadOnly}
                       />
                     ) : key === "gender" ? (
                       <select
-                        className={`w-full rounded border p-2 ${
-                          isReadOnly
-                            ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
-                            : "border border-gray-400 bg-white text-gray-900 dark:border-gray-200 dark:bg-[#0b1331] dark:text-white"
-                        }`}
+                        className="w-full rounded border border-gray-400 p-2 dark:border-gray-200 dark:bg-[#0b1331]"
                         value={user[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
                         disabled={isReadOnly}
@@ -311,11 +342,7 @@ export default function ProfileCard() {
                     ) : (
                       <input
                         type="text"
-                        className={`w-full rounded border p-2 ${
-                          isReadOnly
-                            ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800"
-                            : "border border-gray-400 bg-white text-gray-900 dark:border-gray-200 dark:bg-[#0b1331] dark:text-white"
-                        }`}
+                        className="w-full rounded border border-gray-400 p-2 dark:border-gray-200 dark:bg-[#0b1331]"
                         value={user[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
                         readOnly={isReadOnly}
@@ -340,12 +367,10 @@ export default function ProfileCard() {
         </div>
       </div>
 
-      {/* Previous Complaints */}
+      {/* --- Complaints List --- */}
       <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
         <h3 className="text-lg font-semibold">Previous Complaints</h3>
-        {complaints.length === 0 ? (
-          <p className="text-gray-500">No previous complaints found.</p>
-        ) : (
+        {Array.isArray(complaints) && complaints.length > 0 ? (
           <ul className="space-y-3">
             {complaints.map((comp) => (
               <li
@@ -368,8 +393,9 @@ export default function ProfileCard() {
                         : "No Date"}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      Status:{" "}
+                      Status:
                       <span className={getStatusClass(comp.status)}>
+                        {" "}
                         {comp.status || "Unknown"}
                       </span>
                     </span>
@@ -382,20 +408,21 @@ export default function ProfileCard() {
               </li>
             ))}
           </ul>
+        ) : (
+          <p className="text-gray-500">No previous complaints found.</p>
         )}
       </div>
 
       <div className="space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900 dark:text-white">
         <h3 className="text-lg font-semibold">Previous Bookings</h3>
-
-        {bookings.length === 0 ? (
-          <p className="text-gray-500">No previous bookings found.</p>
-        ) : (
+        {Array.isArray(bookings) && bookings.length > 0 ? (
           <ul className="space-y-3">
             {bookings.map((booking, index) => (
               <BookingCardTailwind key={index} booking={booking} />
             ))}
           </ul>
+        ) : (
+          <p className="text-gray-500">No previous bookings found.</p>
         )}
       </div>
     </div>
