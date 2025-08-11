@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  Heart, MapPin, Calendar, Clock, Users, User, Phone, Mail, FileText, CheckCircle, Share2, Check, AlertTriangle
+  Heart, MapPin, Calendar, Clock, Users, User, Phone, Mail, FileText, CheckCircle, Share2, Check, AlertTriangle, ArrowLeft
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -107,7 +107,9 @@ const VolunteerDetailsPage = () => {
       year: 'numeric'
     });
   };
-
+  const handleBack = () => {
+    navigate('/citizen/job-application');
+  };
   const handleShare = useCallback(() => {
     if (navigator.share && volunteer) {
       navigator.share({
@@ -145,6 +147,13 @@ const VolunteerDetailsPage = () => {
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <button
+                onClick={handleBack}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                title="Back to jobs"
+              >
+                <ArrowLeft className="text-gray-600 dark:text-gray-400" size={20} />
+              </button>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">Program Details</h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Volunteer Opportunity</p>

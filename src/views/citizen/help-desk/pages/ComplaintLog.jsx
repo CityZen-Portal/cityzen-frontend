@@ -3,18 +3,22 @@ import ComplaintTable from '../components/ComplaintTable.jsx';
 import loading_gif from '../../../../assets/img/loading/loading_gif.gif'
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ComplaintLog = () => {
   const token = localStorage.getItem("token")
   const email = localStorage.getItem("email")
   const citizenId = localStorage.getItem("id")
+  const navigate = useNavigate();
 
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
   
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const handleBack = () => {
+    navigate('/citizen/help-desk');
+  };
   // Fetch Complaint
   useEffect( () => {
     setLoading(true);
@@ -47,6 +51,15 @@ const ComplaintLog = () => {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl">
+      <div className="flex items-center gap-4 mb-6">
+        <button
+        onClick={handleBack}
+        className="bg-brand-500 text-white text-lg font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
+        title="Back to helpdesk"
+        >
+        Back to Help Desk
+        </button>
+      </div>
       <div>
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 text-center sm:text-left">Complaint Log</h1>
