@@ -76,7 +76,6 @@ const ComplaintTable = ({ complaints, loading }) => {
               <option value="">All</option>
               <option value="pending">Pending</option>
               <option value="under-review">Under Review</option>
-              <option value="assigned">Assigned</option>
               <option value="in-progress">In Progress</option>
               <option value="on-hold">On Hold</option>
               <option value="resolved">Resolved</option>

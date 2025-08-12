@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Building2, Heart, AlertTriangle, Search, Filter, Briefcase, TrendingUp
+  Building2, Heart, Search, Filter, Briefcase, TrendingUp
 } from 'lucide-react';
 import JobCard from '../components/JobCard';
 import VolunteerCard from '../components/VolunteerCard';
@@ -101,13 +101,11 @@ const JobApplicationSystem = () => {
   const [filteredVolunteers, setFilteredVolunteers] = useState(volunteers);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
+  // const [bookmarkedJobs, setBookmarkedJobs] = useState(new Set());
 
   const JOB_APPLICATION_API = process.env.REACT_APP_API_JOB_APPLICATION_URL;
 
   const [loading, setLoading] = useState(false);
-  const [jobPosts, setJobPosts] = useState([])
-  const [volunteerPosts, setVolunteerPosts] = useState([])
 
   useEffect(() => {
     setLoading(true);
@@ -127,7 +125,7 @@ const JobApplicationSystem = () => {
           setJobs(data ? data : [])
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Job Posts Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -155,7 +153,7 @@ const JobApplicationSystem = () => {
           setVolunteers(data ? data : [])
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Volunteer Post Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Volunteer Post Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -231,15 +229,15 @@ const JobApplicationSystem = () => {
   }, [navigate]);
 
   // Handle bookmark toggle
-  const handleBookmark = useCallback((jobId) => {
-    const newBookmarks = new Set(bookmarkedJobs);
-    if (newBookmarks.has(jobId)) {
-      newBookmarks.delete(jobId);
-    } else {
-      newBookmarks.add(jobId);
-    }
-    setBookmarkedJobs(newBookmarks);
-  }, [bookmarkedJobs]);
+  // const handleBookmark = useCallback((jobId) => {
+  //   const newBookmarks = new Set(bookmarkedJobs);
+  //   if (newBookmarks.has(jobId)) {
+  //     newBookmarks.delete(jobId);
+  //   } else {
+  //     newBookmarks.add(jobId);
+  //   }
+  //   setBookmarkedJobs(newBookmarks);
+  // }, [bookmarkedJobs]);
 
   // Get counts
   const activeJobs = jobs.filter(job => job.isActive);

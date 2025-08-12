@@ -53,7 +53,7 @@ const AdminJobDetailsPage = () => {
           err.message ||                    // JS Error message
           'Something went wrong';
 
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored',

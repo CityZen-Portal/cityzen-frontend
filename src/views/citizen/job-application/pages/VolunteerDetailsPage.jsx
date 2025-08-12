@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  Heart, MapPin, Calendar, Clock, Users, User, Phone, Mail, FileText, CheckCircle, Share2, Check, AlertTriangle, ArrowLeft
+  Heart, MapPin, Calendar, Clock, Users, User, Phone, Mail, FileText, Share2, Check, ArrowLeft
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -77,24 +77,19 @@ const VolunteerDetailsPage = () => {
       })
       .catch(err => {
         const backendError = err.response?.data;
-        const errorMessage =
-          backendError?.message ||          // ApiResponse.message
-          backendError?.data?.message ||    // ErrorDetails.message
-          err.message ||                    // JS Error message
-          'Something went wrong';
 
-          toast.error('Server Error!Unable to Fetch Data', {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored',
-            onClose: () => navigate("/citizen/job-application")
-          });
-
-          console.error('Error:', backendError || err);
-        })
-        .finally(() => {
-          // setLoading(false);
+        toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Data', {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored',
+          onClose: () => navigate("/citizen/job-application")
         });
+
+        console.error('Error:', backendError || err);
+      })
+      .finally(() => {
+        // setLoading(false);
+      });
         
   }, [id, token, email, citizenId, JOB_APPLICATION_API, navigate])
 
