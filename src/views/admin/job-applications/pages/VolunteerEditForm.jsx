@@ -104,28 +104,96 @@ const VolunteerEditForm = () => {
     }
   };
 
-  // Validate form
+  // Enhanced Validate form with additional validation rules
   const validateForm = useCallback(() => {
     const newErrors = {};
-    if (!formData.programTitle.trim()) newErrors.programTitle = 'Program programTitle is required';
-    if (!formData.programDescription.trim()) newErrors.programDescription = 'Program programDescription is required';
-    if (!formData.location.trim()) newErrors.location = 'Location is required';
-    if (!formData.programDate) newErrors.programDate = 'Program date is required';
-    if (!formData.coordinatorName.trim()) newErrors.coordinatorName = 'Contact name is required';
-    if (!formData.coordinatorPhone.trim()) newErrors.coordinatorPhone = 'Contact phone is required';
-    if (!formData.coordinatorEmail.trim()) newErrors.coordinatorEmail = 'Contact email is required';
-    if (!formData.coordinatorAddress.trim()) newErrors.coordinatorAddress = 'Contact address is required';
     
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.coordinatorEmail.trim() && !emailRegex.test(formData.coordinatorEmail.trim())) {
-      newErrors.coordinatorEmail = 'Please enter a valid email address';
+    // Program Title validation
+    if (!formData.programTitle.trim()) {
+      newErrors.programTitle = 'Program title is required';
+    } else if (formData.programTitle.trim().length < 3) {
+      newErrors.programTitle = 'Program title must be at least 3 characters long';
+    } else if (formData.programTitle.trim().length > 100) {
+      newErrors.programTitle = 'Program title must not exceed 100 characters';
     }
     
-    // Phone validation
-    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-    if (formData.coordinatorPhone.trim() && !phoneRegex.test(formData.coordinatorPhone.trim())) {
-      newErrors.coordinatorPhone = 'Please enter a valid phone number';
+    // Program Description validation
+    if (!formData.programDescription.trim()) {
+      newErrors.programDescription = 'Program description is required';
+    } else if (formData.programDescription.trim().length < 20) {
+      newErrors.programDescription = 'Program description must be at least 20 characters long';
+    } else if (formData.programDescription.trim().length > 2000) {
+      newErrors.programDescription = 'Program description must not exceed 2000 characters';
+    }
+    
+    // Location validation
+    if (!formData.location.trim()) {
+      newErrors.location = 'Location is required';
+    } else if (formData.location.trim().length < 3) {
+      newErrors.location = 'Location must be at least 3 characters long';
+    } else if (formData.location.trim().length > 200) {
+      newErrors.location = 'Location must not exceed 200 characters';
+    }
+    
+    // Program Date validation
+    if (!formData.programDate) {
+      newErrors.programDate = 'Program date is required';
+    } else {
+      const selectedDate = new Date(formData.programDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        newErrors.programDate = 'Program date must be in the future';
+      }
+    }
+    
+    // Coordinator Name validation
+    if (!formData.coordinatorName.trim()) {
+      newErrors.coordinatorName = 'Contact name is required';
+    } else if (formData.coordinatorName.trim().length < 2) {
+      newErrors.coordinatorName = 'Contact name must be at least 2 characters long';
+    } else if (formData.coordinatorName.trim().length > 100) {
+      newErrors.coordinatorName = 'Contact name must not exceed 100 characters';
+    } else if (!/^[a-zA-Z\s.]+$/.test(formData.coordinatorName.trim())) {
+      newErrors.coordinatorName = 'Contact name can only contain letters, spaces, and periods';
+    }
+    
+    // Coordinator Phone validation
+    if (!formData.coordinatorPhone.trim()) {
+      newErrors.coordinatorPhone = 'Contact phone is required';
+    } else {
+      const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+      if (!phoneRegex.test(formData.coordinatorPhone.trim())) {
+        newErrors.coordinatorPhone = 'Please enter a valid phone number (minimum 10 digits)';
+      } else if (formData.coordinatorPhone.trim().replace(/[^\d]/g, '').length < 10) {
+        newErrors.coordinatorPhone = 'Phone number must contain at least 10 digits';
+      }
+    }
+    
+    // Coordinator Email validation
+    if (!formData.coordinatorEmail.trim()) {
+      newErrors.coordinatorEmail = 'Contact email is required';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.coordinatorEmail.trim())) {
+        newErrors.coordinatorEmail = 'Please enter a valid email address';
+      } else if (formData.coordinatorEmail.trim().length > 254) {
+        newErrors.coordinatorEmail = 'Email address must not exceed 254 characters';
+      }
+    }
+    
+    // Coordinator Address validation
+    if (!formData.coordinatorAddress.trim()) {
+      newErrors.coordinatorAddress = 'Contact address is required';
+    } else if (formData.coordinatorAddress.trim().length < 10) {
+      newErrors.coordinatorAddress = 'Contact address must be at least 10 characters long';
+    } else if (formData.coordinatorAddress.trim().length > 500) {
+      newErrors.coordinatorAddress = 'Contact address must not exceed 500 characters';
+    }
+    
+    // Duration validation (optional but if provided, should be valid)
+    if (formData.duration.trim() && formData.duration.trim().length > 100) {
+      newErrors.duration = 'Duration must not exceed 100 characters';
     }
     
     return newErrors;
@@ -134,6 +202,13 @@ const VolunteerEditForm = () => {
   // Handle form submission
   const handleSubmit = useCallback(() => {
     const newErrors = validateForm();
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      const errorCount = Object.keys(newErrors).length;
+      toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
+      return;
+    }
 
     const putData = {
       ...formData,
@@ -170,48 +245,7 @@ const VolunteerEditForm = () => {
     .finally(() => {
       setLoading(false);
     });
-    
-    // if (Object.keys(newErrors).length === 0) {
-    //   // Prepare job data
-    //   const jobData = {
-    //     ...formData,
-    //     jobType: 'volunteer',
-    //     department: 'Community Service',
-    //     requirements: 'Community service mindset and willingness to help'
-    //   };
-
-    //   // Get existing jobs
-    //   const savedJobs = localStorage.getItem('jobs');
-    //   let jobs = [];
-    //   if (savedJobs) {
-    //     try {
-    //       jobs = JSON.parse(savedJobs);
-    //     } catch (error) {
-    //       console.error('Failed to parse jobs', error);
-    //     }
-    //   }
-
-    //   // Update existing job
-    //   const updatedJobs = jobs.map(job => 
-    //     job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
-    //   );
-    //   localStorage.setItem('jobs', JSON.stringify(updatedJobs));
-
-    //   // Show success message
-    //   setShowSuccess(true);
-    //   toast.success('Volunteer opportunity updated successfully!');
-      
-    //   // Navigate back after delay
-    //   setTimeout(() => {
-    //     setShowSuccess(false);
-    //     navigate('/admin/job-applications');
-    //   }, 2000);
-    // } else {
-    //   setErrors(newErrors);
-    //   const errorCount = Object.keys(newErrors).length;
-    //   toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
-    // }
-  }, [validateForm, formData, id, navigate]);
+  }, [validateForm, formData, id, navigate, JOB_APPLICATION_API, token, email, citizenId]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
@@ -297,10 +331,10 @@ const VolunteerEditForm = () => {
             </div>
             
             <div className="space-y-6">
-              {/* Program programTitle */}
+              {/* Program Title */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Program programTitle <span className="text-red-500">*</span>
+                  Program Title <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MdFavorite className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -322,10 +356,10 @@ const VolunteerEditForm = () => {
                 )}
               </div>
               
-              {/* Program programDescription */}
+              {/* Program Description */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Program programDescription <span className="text-red-500">*</span>
+                  Program Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.programDescription}
@@ -413,7 +447,7 @@ const VolunteerEditForm = () => {
                 <div className="relative">
                   <MdAccessTime className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
-                    type="text"
+                    type="time"
                     value={formData.programTime}
                     onChange={(e) => handleInputChange('programTime', e.target.value)}
                     placeholder="e.g., 9:00 AM - 5:00 PM"
@@ -436,12 +470,12 @@ const VolunteerEditForm = () => {
                   Duration
                 </label>
                 <div className="relative">
-                  <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdAccessTime className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
                     value={formData.duration}
                     onChange={(e) => handleInputChange('duration', e.target.value)}
-                    placeholder="e.g., 1 week, ongoing"
+                    placeholder="e.g., 4 hours"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.duration ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -461,16 +495,16 @@ const VolunteerEditForm = () => {
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <MdPerson  className="text-blue-600 dark:text-blue-400" size={20} />
+                <MdPerson className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Coordinator Information</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Contact Name */}
+              {/* Coordinator Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Contact Person <span className="text-red-500">*</span>
+                  Coordinator Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -478,7 +512,7 @@ const VolunteerEditForm = () => {
                     type="text"
                     value={formData.coordinatorName}
                     onChange={(e) => handleInputChange('coordinatorName', e.target.value)}
-                    placeholder="e.g., Sarah Johnson"
+                    placeholder="e.g., Ms. Priya Sharma"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.coordinatorName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -492,10 +526,10 @@ const VolunteerEditForm = () => {
                 )}
               </div>
               
-              {/* Contact Phone */}
+              {/* Coordinator Phone */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Phone Number <span className="text-red-500">*</span>
+                  Coordinator Phone <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MdPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -503,7 +537,7 @@ const VolunteerEditForm = () => {
                     type="tel"
                     value={formData.coordinatorPhone}
                     onChange={(e) => handleInputChange('coordinatorPhone', e.target.value)}
-                    placeholder="e.g., +91 98765 43211"
+                    placeholder="e.g., +91 98765 43210"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.coordinatorPhone ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -517,10 +551,10 @@ const VolunteerEditForm = () => {
                 )}
               </div>
               
-              {/* Contact Email */}
+              {/* Coordinator Email */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Email Address <span className="text-red-500">*</span>
+                  Coordinator Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -528,7 +562,7 @@ const VolunteerEditForm = () => {
                     type="email"
                     value={formData.coordinatorEmail}
                     onChange={(e) => handleInputChange('coordinatorEmail', e.target.value)}
-                    placeholder="e.g., volunteer@municipality.gov.in"
+                    placeholder="e.g., priya.sharma@volunteer.org"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.coordinatorEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -541,46 +575,48 @@ const VolunteerEditForm = () => {
                   </div>
                 )}
               </div>
-              
-              {/* Contact Address */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Office Address <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  value={formData.coordinatorAddress}
-                  onChange={(e) => handleInputChange('coordinatorAddress', e.target.value)}
-                  placeholder="e.g., Ward Office, R.S. Puram, Coimbatore - 641002"
-                  rows={3}
-                  className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                    errors.coordinatorAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                  }`}
-                />
-                {errors.coordinatorAddress && (
-                  <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <MdErrorOutline size={16} />
-                    {errors.coordinatorAddress}
-                  </div>
-                )}
-              </div>
+            </div>
+            
+            {/* Coordinator Address */}
+            <div className="mt-6 space-y-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Coordinator Address <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={formData.coordinatorAddress}
+                onChange={(e) => handleInputChange('coordinatorAddress', e.target.value)}
+                placeholder="e.g., Community Service Center, Ward 8, Gandhipuram, Coimbatore - 641012"
+                rows={3}
+                className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
+                  errors.coordinatorAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                }`}
+              />
+              {errors.coordinatorAddress && (
+                <div className="flex items-center gap-2 text-red-600 text-sm">
+                  <MdErrorOutline size={16} />
+                  {errors.coordinatorAddress}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-6">
+          <div className="flex gap-4 justify-end">
             <button
-              onClick={handleSubmit}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
-            >
-              <MdSave size={20} />
-              Update Volunteer Opportunity
-            </button>
-            <button
+              type="button"
               onClick={handleCancel}
-              className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+              className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
             >
               <X size={20} />
               Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors flex items-center gap-2"
+            >
+              <MdSave size={20} />
+              Update Program
             </button>
           </div>
         </div>
