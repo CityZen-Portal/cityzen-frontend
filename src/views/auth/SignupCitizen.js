@@ -378,7 +378,7 @@ export default function SignUp() {
             {/* Name Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Full Name*
+                Full Name
               </label>
               <div className="relative">
                 <input
@@ -402,7 +402,7 @@ export default function SignUp() {
             {/* Email */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email*
+                Email
               </label>
               <div className="relative">
                 <input
@@ -428,7 +428,7 @@ export default function SignUp() {
             {/* Password Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Password*
+                Password
               </label>
               <div className="relative">
                 <input
@@ -498,7 +498,7 @@ export default function SignUp() {
             {/* Confirm Password Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Confirm Password*
+                Confirm Password
               </label>
               <div className="relative">
                 <input
@@ -570,7 +570,7 @@ export default function SignUp() {
             {/* Phone Number Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Phone Number*
+                Phone Number
               </label>
               <div className="relative">
                 <input
@@ -597,7 +597,7 @@ export default function SignUp() {
             {/* Gender Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Gender*
+                Gender
               </label>
               <div className="relative">
                 <select
@@ -627,7 +627,7 @@ export default function SignUp() {
             {/* Aadhar Number */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Aadhaar Number*
+                Aadhaar Number
               </label>
               <div className="relative">
                 <input
