@@ -6,7 +6,8 @@ import brandLight from "../../assets/img/dashboards/brand-logo.png";
 import brandDark from "../../assets/img/dashboards/dark-logo.png";
 
 const AdminSidebar = ({ open, onClose }) => {
-  const adminRoutes = routes.filter(route => route.layout === "/admin");
+  const adminRoutes = routes.filter(
+  route => route.layout === "/admin" && route.sidebar !== false);
   const sidebarRef = useRef();
   const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem("theme") === "dark");
 

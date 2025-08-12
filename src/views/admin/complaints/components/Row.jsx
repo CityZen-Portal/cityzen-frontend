@@ -7,7 +7,8 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
   const navigate = useNavigate();
 
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+    <>
+    <tr className="transition-colors">
       {/* Complaint ID */}
       <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-navy-900 dark:text-white">
         <div className="font-medium">{complaint.id}</div>
@@ -24,13 +25,6 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
       <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-navy-900 dark:text-white">
         <div className="max-w-24 sm:max-w-32 lg:max-w-none truncate" title={complaint.department}>
           {complaint.department || <p>N/A</p>}
-        </div>
-      </td>
-
-      {/* Location */}
-      <td className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-navy-900 dark:text-white">
-        <div className="max-w-24 sm:max-w-32 lg:max-w-none truncate" title={complaint.street}>
-          {complaint.street?.length > 25 ?`${complaint.street.slice(0, 25)}...` : complaint.street}
         </div>
       </td>
 
@@ -76,6 +70,7 @@ const Row = ({ complaint, getStatusColor, getStatusText }) => {
         </button>
       </td>
     </tr>
+    </>
   );
 };
 

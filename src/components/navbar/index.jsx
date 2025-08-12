@@ -3,9 +3,8 @@ import Dropdown from "components/dropdown";
 import { FiAlignJustify } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
-import avatar from "assets/img/avatars/avatar4.png";
+import avatar from "assets/img/avatars/avatar6.jpg";
 import ProfileDropdown from "../dropdown/ProfileDropdown";
-import axios from "axios";
 import { useUser } from "contexts/UserContext";
 
 const Navbar = (props) => {
@@ -65,43 +64,6 @@ const Navbar = (props) => {
       localStorage.setItem("theme", "light");
     }
   }, [darkmode]);
-
-  // News fetching (not modified)
-  const [news, setNews] = useState(null);
-  const [breakingNews, setBreakingNews] = useState([]);
-
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const response = await axios.get(
-          "https://city-news-alert-backend-new.onrender.com/api/news/get-all"
-        );
-        const records = response.data.data.records;
-        const now = new Date();
-        const eightHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
-        const filteredBreakingNews = records.filter((item) => {
-          const createdDate = new Date(item.created_date);
-          return item.breaking && createdDate >= eightHoursAgo;
-        });
-        setBreakingNews(filteredBreakingNews);
-        setNews(records);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchNews();
-  }, []);
-
-  const [notifKey, setNotifKey] = useState(0);
-  const [highlightNotif, setHighlightNotif] = useState(true);
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
-
-  const handleNotificationClick = (path) => {
-    setIsNotifOpen(false);
-    setTimeout(() => {
-      navigate(path);
-    }, 0);
-  };
 
   const toggleTheme = () => {
     setDarkmode(!darkmode);

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+
+import FeedbackList from './FeedbackList';
 import PageNavigator from '../../../citizen/help-desk/components/PageNavigator';
 import Rows from './Rows';
 import { MdArrowUpward, MdArrowDownward, MdUnfoldMore, MdSearch } from 'react-icons/md';
@@ -8,9 +10,10 @@ import {
   filterComplaints,
   sortComplaints,
 } from '../../../citizen/help-desk/utils/helpers';
+import SkeletonRow from './SkeletonRow';
 
 
-const ComplaintTable = ({ complaints }) => {
+const ComplaintTable = ({ complaints, loading }) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,6 +29,15 @@ const ComplaintTable = ({ complaints }) => {
       (currentPage - 1) * rowsPerPage,
       currentPage * rowsPerPage
     );
+
+    const complaintsWithFeedback = filteredComplaints.filter((c) =>
+  Boolean(
+    c.feedback
+    || (Array.isArray(c.feedbacks) && c.feedbacks.length > 0)
+    || c.feedbackSubmitted // if backend just sends a boolean flag
+    || (c.feedbackComments || c.feedbackRating || c.rating) // fallback properties
+  )
+);
   
     const handlePageChange = (page) => {
       if (page >= 1 && page <= totalPages) {
@@ -43,7 +55,7 @@ const ComplaintTable = ({ complaints }) => {
     const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="bg-white dark:bg-navy-800 rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
+    <div className="rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
       {/* Filter & Search */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className='flex gap-4'>
@@ -123,7 +135,6 @@ const ComplaintTable = ({ complaints }) => {
                     { label: 'ID', key: 'id' },
                     { label: 'Issue', key: 'issue' },
                     { label: 'Department', key: 'department' },
-                    { label: 'Location', key: 'street' },
                     { label: 'Date', key: 'complaintDate' },
                     { label: 'Status', key: 'status' },
                     { label: 'Actions', key: '' },
@@ -157,27 +168,34 @@ const ComplaintTable = ({ complaints }) => {
               </thead>
 
               <tbody className="bg-white dark:bg-navy-800 divide-y divide-gray-200 dark:divide-gray-600">
-                <Rows 
-                  complaints={paginatedComplaints}
-                  getStatusColor={getStatusColor}
-                  getStatusText={getStatusText}
-                />
-                {paginatedComplaints.length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="text-center py-8 px-4 text-gray-500 dark:text-gray-300">
-                      <div className="flex flex-col items-center space-y-2">
-                        <div className="text-4xl"><MdSearch /></div>
-                        <div className="text-sm font-medium">No complaints found</div>
-                      </div>
-                    </td>
-                  </tr>
+                {loading ? (
+                  Array.from({ length: rowsPerPage }).map((_, index) => (
+                    <SkeletonRow key={index} />
+                  ))
+                ) : (
+                  <>
+                    <Rows 
+                      complaints={paginatedComplaints}
+                      getStatusColor={getStatusColor}
+                      getStatusText={getStatusText}
+                    />
+                    {paginatedComplaints.length === 0 && (
+                      <tr>
+                        <td colSpan="7" className="text-center py-8 px-4 text-gray-500 dark:text-gray-300">
+                          <div className="flex flex-col items-center space-y-2">
+                            <div className="text-4xl"><MdSearch /></div>
+                            <div className="text-sm font-medium">No complaints found</div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
-
       {/* Pagination Controls */}
       <PageNavigator
         filteredComplaints={filteredComplaints}
@@ -186,6 +204,12 @@ const ComplaintTable = ({ complaints }) => {
         totalPages={totalPages}
         handlePageChange={handlePageChange}
         pageNumbers={pageNumbers}
+      />
+
+      <FeedbackList
+        complaintsWithFeedback={complaintsWithFeedback}
+        getStatusColor={getStatusColor}
+        getStatusText={getStatusText}
       />
     </div>
   );
