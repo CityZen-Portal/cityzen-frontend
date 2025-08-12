@@ -32,7 +32,7 @@ const ComplaintManagement = () => {
           setComplaints(data);
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'

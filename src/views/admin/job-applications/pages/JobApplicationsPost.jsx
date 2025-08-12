@@ -138,7 +138,7 @@ const JobApplicationsPost = () => {
           setJobs(jobsWithDeletedFlag)
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Job Posts Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -172,7 +172,7 @@ const JobApplicationsPost = () => {
         setVolunteers(volunteersWithDeletedFlag)
       })
       .catch(err => {
-        toast.error('Server Error!Unable to Fetch Volunteer Post Data', {
+        toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Volunteer Post Data', {
           position: 'top-right',
           autoClose: 3000,
           theme: 'colored'
@@ -378,7 +378,7 @@ const JobApplicationsPost = () => {
         }
       })
       .catch(err => {
-        toast.error('Error permanently deleting item!', {
+        toast.error(err.response?.data?.message || 'Error permanently deleting item!', {
           position: 'top-right',
           autoClose: 3000,
           theme: 'colored'
@@ -407,7 +407,7 @@ const JobApplicationsPost = () => {
         });
       })
       .catch(err => {
-        toast.error('Server Error! Unable to Deactivate', {
+        toast.error(err.response?.data?.message || 'Server Error! Unable to Deactivate', {
           position: 'top-right',
           autoClose: 3000,
           theme: 'colored'

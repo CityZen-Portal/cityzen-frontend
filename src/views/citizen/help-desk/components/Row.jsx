@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
+import RateButton from './RateButton';
 
 const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
   const navigate = useNavigate()
@@ -11,9 +12,9 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.id}</td>
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.issue.length > 25 ? `${complaint.issue.slice(0, 25)}...` : complaint.issue}</td>
         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.department ? complaint.department : complaint.category}</td>
-        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</td>
-        <td className="px-6 py-4">
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(complaint.status)}`}>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white max-w-max w-max">{complaint.complaintDate && complaint.complaintDate.split('T')[0]}</td>
+        <td className="flex justify-center px-6 py-4">
+          <span className={`flex justify-center text-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(complaint.status)}`}>
             {getStatusText(complaint.status)}
           </span>
         </td>
@@ -27,21 +28,12 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
           </button>
         </td>
 
-        <td className="px-6 py-4">
-          <button
-            onClick={() => {
-              navigate(link);
-              window.scrollTo(0, 0);
-            }}
-            disabled={!((complaint.status).toLowerCase() === 'resolved' && complaint.feedback === null)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-              (complaint.status).toLowerCase() === 'resolved' && complaint?.feedback === null
-                ? 'bg-brand-500 text-white hover:bg-brand-600'
-                : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            {!complaint?.feedback?.isSubmitted ? "Give Feedback" : "Submitted"}
-          </button>
+        <td className="flex justify-center px-6 py-4">
+          <RateButton
+            feedback={complaint.feedback}
+            status={complaint.status}
+            link={link}
+            />
         </td>
       </tr>
 
@@ -88,20 +80,11 @@ const Row = ({ complaint, getStatusColor, getStatusText, link }) => {
                 <FaEye className="mr-2 text-xs" /> View Details
               </button>
               
-              <button
-                onClick={() => {
-                  navigate(link);
-                  window.scrollTo(0, 0);
-                }}
-                disabled={(complaint.status).toLowerCase() === 'resolved' && !complaint.feedback === null}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  (complaint.status).toLowerCase() === 'resolved' && !complaint?.feedback?.isSubmitted
-                    ? 'bg-brand-500 text-white hover:bg-brand-600'
-                    : 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {!complaint?.feedback?.isSubmitted ? "Give Feedback" : "Submitted"}
-              </button>
+              <RateButton
+                feedback={complaint.feedback}
+                status={complaint.status}
+                link={link}
+                />
             </div>
           </div>
         </td>

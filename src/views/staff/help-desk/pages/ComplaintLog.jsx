@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ComplaintTable from '../components/ComplaintTable';
 import { MdTrackChanges, MdPendingActions, MdAssignment, MdCheckCircleOutline, MdListAlt } from 'react-icons/md';
-import loading_gif from '../../../../assets/img/loading/loading_gif.gif'
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -35,7 +34,7 @@ const ComplaintLog = () => {
           setComplaints(data);
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'

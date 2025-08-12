@@ -103,7 +103,7 @@ const MunicipalEditForm = () => {
           }
         })
         .catch(err => {
-          toast.error('Server Error! Unable to Fetch Job Posts Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -312,7 +312,7 @@ const MunicipalEditForm = () => {
     })
     .catch(err => {
       console.error('Error:', err?.response?.data || err?.message);
-      toast.error('Server Error! Unable to update job post', {
+      toast.error(err.response?.data?.message || 'Server Error!Unable to Submit Post', {
         position: 'top-right',
         autoClose: 3000,
         theme: 'colored'

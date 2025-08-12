@@ -14,21 +14,20 @@ import {
   getStatusColor
 }
 from '../../../citizen/help-desk/utils/helpers';
-import { use } from 'react';
 
 
-const deptList = [
-  { id: 1, name: 'Sanitation' },
-  { id: 2, name: 'Water Supply' },
-  { id: 3, name: 'Electricity' },
-  { id: 4, name: 'Roads & Infrastructure' },
-  { id: 5, name: 'Seweage' },
-  { id: 6, name: 'Urban Planning' },
-  { id: 7, name: 'Parks & Horticulture' },
-  { id: 8, name: 'Pollution Control' },
-  { id: 9, name: 'Transport' },
-  { id: 10, name: 'Public Health' },
-];
+// const deptList = [
+//   { id: 1, name: 'Sanitation' },
+//   { id: 2, name: 'Water Supply' },
+//   { id: 3, name: 'Electricity' },
+//   { id: 4, name: 'Roads & Infrastructure' },
+//   { id: 5, name: 'Seweage' },
+//   { id: 6, name: 'Urban Planning' },
+//   { id: 7, name: 'Parks & Horticulture' },
+//   { id: 8, name: 'Pollution Control' },
+//   { id: 9, name: 'Transport' },
+//   { id: 10, name: 'Public Health' },
+// ];
 
 const AssignStaff = () => {
   const token = localStorage.getItem("token")
@@ -77,7 +76,7 @@ const AssignStaff = () => {
           // setAssignedStaff(data.assignedStaff)
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Complaint Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Complaint Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored',
@@ -104,7 +103,7 @@ const AssignStaff = () => {
         setDepartment(data ? data : [])
       })
       .catch(err => {
-        toast.error('Server Error!Unable to Fetch Department Data', {
+        toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Department Data', {
           position: 'top-right',
           autoClose: 3000,
           theme: 'colored'
@@ -128,7 +127,7 @@ const AssignStaff = () => {
           setStaff(data ? data : [])
         })
         .catch(err => {
-          toast.error('Server Error!Unable to Fetch Staff Data', {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Staff Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -193,7 +192,7 @@ const AssignStaff = () => {
           return;
         })
         .catch(err => {
-          toast.error('Server Error! Unable to Assign Staff', {
+          toast.error(err.response?.data?.message || 'Server Error! Unable to Assign Staff', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -204,136 +203,142 @@ const AssignStaff = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-navy-900 py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
-      {loading ? (
-        <div className="flex justify-center items-center py-16">
-          <img src={loading_gif} alt="Loading..." className="w-10 h-10" />
-        </div>
-      ) : (
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <TitleCard 
-            title={`Complaint #${complaint.id}`}
-            Icon={MdError}
-            complaintStatus={complaint.status?.toLowerCase()}
-            getStatusColor={getStatusColor}
-            getStatusText={getStatusText}
+    <div 
+      className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
+      style={{ overflow: loading ? 'hidden' : 'auto' }}
+    >
+      {loading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
           />
+        </div>
+      )}
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <TitleCard 
+          title={`Complaint #${complaint.id}`}
+          Icon={MdError}
+          complaintStatus={complaint.status?.toLowerCase()}
+          getStatusColor={getStatusColor}
+          getStatusText={getStatusText}
+        />
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
-            {/* Left Section */}
-            <div className="lg:col-span-2 flex flex-col h-full">
-              <div className="flex-grow space-y-6 sm:space-y-8 h-full">
-                <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6 h-full">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 h-full">
-                    {/* Location Details */}
-                  <DetailsList
-                    key={1}
-                    title={'Location Details'}
-                    Icon={MdLocationOn}
-                    complaintData={complaint}
-                    fields={['citizenName', 'street', 'wardNumber', 'pincode', 'citizenEmail']}
-                  />
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
+          {/* Left Section */}
+          <div className="lg:col-span-2 flex flex-col h-full">
+            <div className="flex-grow space-y-6 sm:space-y-8 h-full">
+              <div className="bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 h-full">
+                  {/* Location Details */}
+                <DetailsList
+                  key={1}
+                  title={'Location Details'}
+                  Icon={MdLocationOn}
+                  complaintData={complaint}
+                  fields={['citizenName', 'street', 'wardNumber', 'pincode', 'citizenEmail']}
+                />
 
-                  {/* Complaint Details */}
-                  <DetailsList
-                    key={2}
-                    title={'Complaint Details'}
-                    Icon={MdError}
-                    complaintData={complaint}
-                    fields={['category','department', 'issue', 'issueDescription', 'attachment']}
-                  />
+                {/* Complaint Details */}
+                <DetailsList
+                  key={2}
+                  title={'Complaint Details'}
+                  Icon={MdError}
+                  complaintData={complaint}
+                  fields={['category','department', 'issue', 'issueDescription', 'attachment']}
+                />
 
-                  </div>
                 </div>
               </div>
             </div>
-              
-            {/* Right Sidebar */}
-            <div className="flex flex-col h-full">
-              {/* Response & Resolution */}
-              <div className="flex-grow bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6 h-full">
-                <form onSubmit={handleSubmit} className="h-full flex flex-col">
-                  <div className="space-y-4 sm:space-y-6 flex-grow">
-                      <h2 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-800 dark:text-gray-100">Staff Assignment</h2>
+          </div>
+            
+          {/* Right Sidebar */}
+          <div className="flex flex-col h-full">
+            {/* Response & Resolution */}
+            <div className="flex-grow bg-white dark:bg-navy-800 rounded-xl shadow-sm p-4 sm:p-6 h-full">
+              <form onSubmit={handleSubmit} className="h-full flex flex-col">
+                <div className="space-y-4 sm:space-y-6 flex-grow">
+                    <h2 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-800 dark:text-gray-100">Staff Assignment</h2>
 
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Department</label>
+                      <select
+                        value={assignedDepartment}
+                        onChange={handleAssignDept}
+                        className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white"
+                      >
+                        <option value="" disabled>-- Select department --</option>
+                        {department.map((dept) => (
+                          <option key={dept.id} value={dept.serviceName}>{dept.serviceName}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {assignedDepartment && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Department</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Staff</label>
                         <select
-                          value={assignedDepartment}
-                          onChange={handleAssignDept}
+                          value={assignedStaff}
+                          onChange={handleAssign}
                           className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white"
                         >
-                          <option value="" disabled>-- Select department --</option>
-                          {department.map((dept) => (
-                            <option key={dept.id} value={dept.serviceName}>{dept.serviceName}</option>
+                          <option value="" disabled>-- Select staff --</option>
+                          {staff.map((staff) => (
+                            <option key={staff.emailAddress} value={staff.emailAddress}>{staff.fullName}</option>
                           ))}
                         </select>
                       </div>
+                    )}
+                  </div>
 
-                      {assignedDepartment && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Staff</label>
-                          <select
-                            value={assignedStaff}
-                            onChange={handleAssign}
-                            className="w-full px-4 py-2 rounded-md border dark:border-gray-700 bg-white text-gray-800 dark:bg-navy-700 dark:text-white"
-                          >
-                            <option value="" disabled>-- Select staff --</option>
-                            {staff.map((staff) => (
-                              <option key={staff.emailAddress} value={staff.emailAddress}>{staff.fullName}</option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-center pt-10">
-                      <button
-                        type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
-                      >
-                        Assign Staff
-                      </button>
-                    </div>
-                  </form>
-                </div>
-            </div>
-          </div>
-
-          {/* Staff */}
-          {/* <StaffCard 
-            extra={"mt-8"}
-            complaintData={complaint}
-            fields={['staffName', 'department', 'role']}
-            /> */}
-
-          {/* Response & Resolutions */}
-          <ResponseCard 
-            extra={'mt-8'}
-            responses={complaint.responses}
-            />
-
-          <StatusHistory
-              extra="mt-8"
-              statusHistory={complaint.complaintHistory}
-            />
-
-          {/* Back Button */}
-          <div className="mt-8">
-            <button
-              onClick={() => {
-                navigate(`/admin/complaints/`)
-                window.scrollTo(0,0)
-              }}
-              className="bg-blue-600 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
-            >
-              Back to Complaint Log
-            </button>
+                  <div className="text-center pt-10">
+                    <button
+                      type="submit"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
+                    >
+                      Assign Staff
+                    </button>
+                  </div>
+                </form>
+              </div>
           </div>
         </div>
-      )}
+
+        {/* Staff */}
+        {/* <StaffCard 
+          extra={"mt-8"}
+          complaintData={complaint}
+          fields={['staffName', 'department', 'role']}
+          /> */}
+
+        {/* Response & Resolutions */}
+        <ResponseCard 
+          extra={'mt-8'}
+          responses={complaint.responses}
+          />
+
+        <StatusHistory
+            extra="mt-8"
+            statusHistory={complaint.complaintHistory}
+          />
+
+        {/* Back Button */}
+        <div className="mt-8">
+          <button
+            onClick={() => {
+              navigate(`/admin/complaints/`)
+              window.scrollTo(0,0)
+            }}
+            className="bg-blue-600 text-white font-bold px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-navy-500"
+          >
+            Back to Complaint Log
+          </button>
+        </div>
+      </div>
       {/* Toast Container */}
       <ToastContainer />
     </div>

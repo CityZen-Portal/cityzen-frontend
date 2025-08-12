@@ -1,18 +1,52 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import loading_gif from "../../../../assets/img/loading/loading_gif.gif";
 import axios from "axios";
+import { MdCheck, MdStar } from "react-icons/md";
 
 const FeedbackForm = () => {
   const token = localStorage.getItem("token");
   const email = localStorage.getItem("email");
   const citizenId = localStorage.getItem("id");
 
+  const [complaint, setComplaint] = useState({})
+
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
   const { id } = useParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setLoading(true);
+  
+    axios.get(`${HELPDESK_API}/citizen/complaints/${id}`,
+      {
+        headers:{
+          token,
+          email,
+          id: citizenId
+        }
+      }
+    )
+      .then(res => {
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          setComplaint(data)
+        })
+        .catch(err => {
+          toast.error(err.response?.data?.message || "Server error! Unable to Fetch Data", {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored',
+            onClose: () => navigate("/citizen/help-desk/complaint/log"),
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+  }, [id, complaint.id, token, email, citizenId, HELPDESK_API, navigate])
 
   const [formData, setFormData] = useState({
     isResolved: "",
@@ -28,6 +62,8 @@ const FeedbackForm = () => {
       [name]: value,
     }));
   };
+
+  const [hoverRating, setHoverRating] = useState(0);
 
   const handleRating = (rate) => {
     setFormData((prev) => ({ ...prev, rating: rate }));
@@ -83,7 +119,7 @@ const FeedbackForm = () => {
       });
     } catch (err) {
       console.error("Error submitting feedback:", err.response?.data || err);
-      toast.error("Server Error! Unable to Submit Feedback", {
+      toast.error(err.response?.data?.message || "Server Error! Unable to Submit Feedback", {
         position: "top-right",
         autoClose: 3000,
         theme: "colored",
@@ -93,11 +129,18 @@ const FeedbackForm = () => {
     }
   };
 
+  const InfoBlock = ({ label, value }) => (
+    <div>
+      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</dt>
+      <dd className="mt-1 text-md text-gray-900 dark:text-gray-100">{value}</dd>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      {/* Loading overlay */}
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen w-full flex items-center justify-center p-4">
+      
       {loading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
           <img
             src={loading_gif}
             alt="Loading..."
@@ -106,102 +149,111 @@ const FeedbackForm = () => {
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white dark:bg-navy-700 rounded-lg shadow-lg p-6 w-[95vw] max-w-md sm:max-w-lg lg:max-w-2xl"
-      >
-        <h2 className="text-center font-semibold text-lg mb-6 text-black dark:text-white">
-          Feedback Form
-        </h2>
-
-        {/* Complaint ID (read-only) */}
-        <div className="mb-6">
-          <label className="block mb-1 font-medium text-sm text-black dark:text-white">
-            Complaint ID
-          </label>
-          <input
-            type="text"
-            name="complaintId"
-            value={id}
-            disabled
-            className="w-full dark:bg-navy-700 dark:text-white rounded px-3 py-2 text-base"
-          />
-        </div>
-
-        {/* Resolution radio */}
-        <div className="mb-6">
-          <label className="block mb-2 font-medium text-sm text-black dark:text-white">
-            Was the issue resolved?
-          </label>
-          <div className="flex space-x-6">
-            {["Yes", "No"].map((opt) => (
-              <label key={opt} className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="isResolved"
-                  value={opt}
-                  checked={formData.isResolved === opt}
-                  onChange={handleChange}
-                  className="accent-black dark:accent-white"
-                />
-                <span className="text-black dark:text-white">{opt}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Rating (only if Yes) */}
-        {formData.isResolved === "Yes" && (
-          <div className="mb-6">
-            <label className="block mb-2 font-medium text-sm text-black dark:text-white">
-              Rating
-            </label>
-            <div className="flex space-x-2 text-4xl">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span
-                  key={star}
-                  onClick={() => handleRating(star)}
-                  className={`cursor-pointer ${
-                    formData.rating >= star
-                      ? "text-yellow-500"
-                      : "text-gray-400"
-                  }`}
-                >
-                  ★
-                </span>
-              ))}
+      <div className="w-full max-w-5xl mx-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl grid grid-cols-1 lg:grid-cols-5 overflow-hidden">
+          
+          {/* --- Left Column: Information Panel --- */}
+          <div className="lg:col-span-2 bg-gray-50 dark:bg-gray-900/40 p-8 flex flex-col justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Feedback Details</h2>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                Please review the complaint details before sharing your experience.
+              </p>
+              <dl className="mt-8 space-y-6">
+                <InfoBlock label="Complaint ID" value={id} />
+                <InfoBlock label="Issue" value={complaint.issue} />
+                <InfoBlock label="Resolved By" value={complaint.staffName} />
+              </dl>
             </div>
+            <p className="mt-8 text-xs text-center text-gray-400 dark:text-gray-500">
+              Your feedback is confidential and helps us improve.
+            </p>
           </div>
-        )}
 
-        {/* Comments (always optional) */}
-        <div className="mb-6">
-          <label className="block mb-2 font-medium text-sm text-black dark:text-white">
-            Comments (Optional)
-          </label>
-          <textarea
-            name="comments"
-            rows="4"
-            placeholder="Enter Comments"
-            value={formData.comments}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-700 dark:bg-navy-800 dark:text-white rounded px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+          {/* --- Right Column: Interactive Form --- */}
+          <form onSubmit={handleSubmit} className="lg:col-span-3 p-8 space-y-6">
+            {/* Resolution Radio Buttons */}
+            <div>
+              <label className="block mb-2 text-md font-semibold text-gray-800 dark:text-white">
+                Was the issue resolved to your satisfaction?
+              </label>
+              <div className="flex items-center space-x-4">
+                {["Yes", "No"].map((opt) => (
+                  <label key={opt} className="flex-1">
+                    <input
+                      type="radio"
+                      name="isResolved"
+                      value={opt}
+                      checked={formData.isResolved === opt}
+                      onChange={handleChange}
+                      className="sr-only peer"
+                    />
+                    <div className="flex items-center justify-center gap-x-2 w-full text-center px-4 py-3 rounded-lg border cursor-pointer transition-all duration-200 peer-checked:border-blue-500 peer-checked:ring-1 peer-checked:ring-blue-500 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        {opt}
+                        {formData.isResolved === opt && <MdCheck />}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Conditional Star Rating */}
+            {formData.isResolved === 'Yes' && (
+              <div className="animate-in fade-in duration-500">
+                <label className="block mb-2 text-md font-semibold text-gray-800 dark:text-white">
+                  How would you rate our service?
+                </label>
+                <div
+                  className="flex items-center space-x-1 sm:space-x-2"
+                  onMouseLeave={() => setHoverRating(0)}
+                >
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <MdStar
+                      key={star}
+                      onClick={() => handleRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      className={`w-10 h-10 cursor-pointer transition-colors duration-200 ${
+                        star <= (hoverRating || formData.rating)
+                          ? "text-amber-400"
+                          : "text-gray-300 dark:text-gray-600"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Comments Textarea */}
+            <div>
+              <label htmlFor="comments" className="block mb-2 text-md font-semibold text-gray-800 dark:text-white">
+                Additional Comments (Optional)
+              </label>
+              <textarea
+                id="comments" name="comments" rows="4"
+                placeholder="What did we do well? What could we improve?"
+                value={formData.comments} onChange={handleChange}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-base placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            {/* Submit Button */}
+            <div className="pt-4 flex justify-end">
+              <button
+                type="submit" disabled={loading}
+                className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-md transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                Submit Feedback
+              </button>
+            </div>
+          </form>
         </div>
-
-        {/* Submit */}
-        <div className="text-center pt-2 sm:pt-4">
-            <button
-              type="submit"
-              className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-md transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
-            >
-              Submit
-            </button>
-          </div>
-      </form>
-
-      <ToastContainer />
+      </div>
+      
+      <ToastContainer
+        position="bottom-right" theme="colored" autoClose={4000}
+      />
     </div>
+
   );
 };
 

@@ -5,7 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import loading_gif from '../../../../assets/gif/loading-gif.gif'
 import FileUpload from '../components/FileUpload';
-import { ArrowLeft } from 'lucide-react';
 
 function ComplaintForm() {
   const token = localStorage.getItem("token")
@@ -187,28 +186,16 @@ function ComplaintForm() {
           toast.error('Only PDF or Image files are allowed.');
           return;
       }
+
+      const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+      if (file.size > maxSize) {
+          setLoadingSubmit(false);
+          toast.error('File size should not exceed 5 MB.');
+          return;
+      }
     }
 
     let uploadedFile = { fileName: "", filePath: "" };
-
-    // Axios Post File
-    if (file) {
-      if (!(file instanceof File)) {
-        setLoadingSubmit(false);
-        toast.error('Invalid file input.');
-        return;
-      }
-
-      const isImage = file.type.startsWith('image/');
-      const isPdf = file.type === 'application/pdf';
-
-      if (!isImage && !isPdf) {
-        setLoadingSubmit(false);
-        toast.error('Only PDF or Image files are allowed.');
-        return;
-      }
-    }
-
     let filePath = "";
 
     if (file && !uploadedFile.filePath) {
@@ -265,7 +252,7 @@ function ComplaintForm() {
       state,
       pincode,
       wardNumber,
-      category: complaintType ? complaintType : others,
+      category: complaintType !== "Other" ? complaintType : others,
       issue,
       issueDescription: description,
       attachment: filePath ? filePath : null,
@@ -295,7 +282,7 @@ function ComplaintForm() {
     })
     .catch(err => {
       console.error('Error:', err.response?.data || err.message);
-      toast.error('Server Error!Unable to Submit Complaint', {
+      toast.error(err.response?.data?.message || 'Server Error!Unable to Submit Complaint', {
         position: 'top-right',
         autoClose: 3000,
         theme: 'colored'
@@ -314,9 +301,7 @@ function ComplaintForm() {
 
   return (
     <div 
-      className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
-      style={{ overflow: loadingSubmit ? 'hidden' : 'auto' }}
-    >
+      className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
       {loadingSubmit && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
           <img
