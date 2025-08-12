@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import { ToastContainer, toast } from 'react-toastify';
-
+import { FaTools, FaUser, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaRegStickyNote } from 'react-icons/fa';
 const initialNewTaskState = {
   title: "",
   staff: "",
@@ -207,33 +207,48 @@ function ViewTasks() {
             <>
               <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-6 px-4">
                 {currentRequests.map((req) => (
-                  <div
-                    key={req.id}
-                    className="bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 shadow-2xl rounded-3xl
-                    md:p-8 border-2 border-blue-200 dark:border-gray-700 hover:shadow-2xl hover:border-pink-300
-                    transition duration-300 min-h-[260px] w-full md:max-w-[420px] flex flex-col justify-between"
-                  >
-                    <h4 className="text-base md:text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">
-                      Requested by: <span className="font-semibold">{req.name}</span>
-                    </h4>
-                    <div className="flex items-center text-sm md:text-base text-gray-800 dark:text-gray-200 mb-2">
-                      <span className="mr-2 text-blue-400 text-lg md:text-xl">📅</span>
-                      <span>{req.date}</span>
-                      <span className="mx-2 text-pink-400 text-lg md:text-xl">⏰</span>
-                      <span>{req.time}</span>
-                    </div>
-                    <div className="flex items-start text-sm md:text-base text-gray-700 dark:text-gray-300 mb-2">
-                      <span className="mr-2 pt-1 text-red-400 text-lg md:text-xl">📍</span>
-                      <div className="whitespace-pre-line break-words font-medium max-h-[96px] overflow-auto custom-scrollbar">
-                        {req.address}
-                      </div>
-                    </div>
-                    {req.note && (
-                      <p className="mt-2 text-xs md:text-sm italic text-gray-500 dark:text-gray-400">
-                        {req.note}
-                      </p>
-                    )}
-                  </div>
+<div
+  key={req.id}
+  className="bg-gradient-to-br from-blue-50 via-white to-pink-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
+             shadow-xl rounded-3xl border border-blue-200 dark:border-gray-700
+             hover:shadow-2xl hover:border-pink-300 transition-all duration-300 ease-in-out
+             min-h-[290px] w-full md:max-w-[420px] flex flex-col justify-between p-6 md:p-8"
+>
+  <div className="flex items-center gap-2 mb-3">
+    <FaTools className="text-blue-500 text-xl" />
+    <span className="text-lg md:text-xl font-bold text-blue-700 dark:text-blue-300">{req.services}</span>
+  </div>
+
+  <div className="mb-4">
+    <div className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+      <FaUser className="text-indigo-500 text-lg" />
+            {req.name}
+    </div>
+  </div>
+
+  <div className="flex items-center text-gray-800 dark:text-gray-200 text-sm md:text-base mb-3 gap-3">
+    <FaCalendarAlt className="text-blue-500" />
+    <span>{req.date}</span>
+    <FaClock className="text-pink-500" />
+    <span>{req.time}</span>
+  </div>
+
+  <div className="flex items-start text-gray-700 dark:text-gray-300 text-sm md:text-base mb-3 gap-2">
+    <FaMapMarkerAlt className="text-red-500 mt-1" />
+    <div className="whitespace-pre-line break-words font-medium max-h-[96px] overflow-auto custom-scrollbar">
+      {req.address}
+    </div>
+  </div>
+
+  {req.description && (
+    <div className="mt-auto flex items-center gap-2 bg-white/50 dark:bg-gray-700/40 p-3 rounded-xl border border-gray-200 dark:border-gray-600">
+      <FaRegStickyNote className="text-yellow-500 text-lg" />
+      <p className="text-xs md:text-sm italic text-gray-600 dark:text-gray-400">
+        {req.description}
+      </p>
+    </div>
+  )}
+</div>
                 ))}
               </div>
               <div className="flex justify-center items-center gap-2 mt-4">
@@ -248,11 +263,10 @@ function ViewTasks() {
                   <button
                     key={index}
                     onClick={() => setCurrentPage(index + 1)}
-                    className={`px-3 py-1 rounded text-sm ${
-                      currentPage === index + 1
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 dark:bg-gray-600"
-                    }`}
+                    className={`px-3 py-1 rounded text-sm ${currentPage === index + 1
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 dark:bg-gray-600"
+                      }`}
                   >
                     {index + 1}
                   </button>
