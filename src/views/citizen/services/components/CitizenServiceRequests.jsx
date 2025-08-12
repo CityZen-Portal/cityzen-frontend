@@ -61,11 +61,11 @@ const CitizenServiceRequests = () => {
     if (statusFilter === "ALL") return data;
     return data.filter(
       (request) =>
-        request.taskStatus &&
-        request.taskStatus.toUpperCase().trim() === statusFilter.toUpperCase()
+        request.status &&
+        request.status === statusFilter.toUpperCase()
     );
   }, [data, statusFilter]);
-
+  // console.log(filteredData);
   const sortedRequests = useMemo(() => {
     return [...filteredData].sort((a, b) => {
       let aVal = a[sortField];
@@ -121,7 +121,7 @@ const CitizenServiceRequests = () => {
                 : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
             }`}
           >
-            {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+            {status}
           </button>
         ))}
       </div>
