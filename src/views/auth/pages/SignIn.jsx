@@ -299,7 +299,7 @@ export default function SignIn() {
             {/* Email Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email*
+                Email
               </label>
               <div className="relative">
                 <input
@@ -326,7 +326,7 @@ export default function SignIn() {
             {/* Password Field */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Password*
+                Password
               </label>
               <div className="relative">
                 <input

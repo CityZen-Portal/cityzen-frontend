@@ -21,7 +21,7 @@ import ManageStaffs from "views/admin/services/component/ManageStaffs";
 import ViewTasks from "views/admin/services/component/ViewTasks";
 import ViewSchedule from "views/admin/services/component/ViewSchedule";
 import AdminAnalytics from "views/admin/services/component/analytics";
-import { MdMiscellaneousServices } from "react-icons/md";
+import { MdBook, MdMiscellaneousServices } from "react-icons/md";
 import { MdBarChart } from "react-icons/md";
 import AdminPro from "views/admin/services/component/AdminPro";
 
@@ -370,7 +370,7 @@ const routes = [
     path: "AdminPro",
     icon: <MdPerson className="h-6 w-6" />,
     component: <AdminPro />,
-    sidebar:false,
+    sidebar: false,
   },
 
   // Staff Routes
@@ -468,7 +468,7 @@ const routes = [
     name: "News Update",
     layout: "/citizen",
     path: "newsupdate",
-    icon: <MdLock className="h-6 w-6" />,
+    icon: <MdBook className="h-6 w-6" />,
     component: <NewsUpdate />,
     children: [
       {
