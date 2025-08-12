@@ -57,7 +57,7 @@ const PageNavigator = ({
         <button
           onClick={() => handlePageChange(1)}
           disabled={currentPage === 1}
-          className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+          className="flex h-8 w-10 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
         >
           First
         </button>
@@ -93,7 +93,7 @@ const PageNavigator = ({
         <button
           onClick={() => handlePageChange(totalPages)}
           disabled={currentPage === totalPages}
-          className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+          className="flex h-8 w-10 items-center justify-center rounded bg-gray-200 px-2 py-1 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
         >
           Last
         </button>
@@ -132,6 +132,7 @@ export default function AdminDashboard() {
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(`${HELPDESK_API}/admin/complaints`, {
         headers: {
@@ -153,7 +154,9 @@ export default function AdminDashboard() {
         });
         console.error("Error:", err.response?.data || err.message);
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -163,6 +166,7 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const root = window.document.documentElement;
     if (theme === "dark") {
@@ -236,26 +240,41 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentComplaints.map((item, i) => (
-                      <tr
-                        key={i}
-                        className="border-t border-gray-200 dark:border-gray-700"
-                      >
-                        <td className="text-black truncate py-3 pr-2 font-medium dark:text-white">
-                          {item.category}
-                        </td>
-                        <td className="text-black flex items-center gap-2 truncate py-3 pr-2 dark:text-white">
-                          {item.icon}{" "}
-                          {item.status
-                            .replace(/([A-Z])/g, " $1")
-                            .replace(/^./, (str) => str.toUpperCase())}
-                        </td>
-                        <td className="text-black truncate py-3 dark:text-white">
-                          {item.complaintDate.split("T")[0]}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
+  {loading ? (
+    // Show 5 skeleton rows when loading
+    Array.from({ length: 5 }).map((_, i) => (
+      <tr key={`skeleton-${i}`} className="border-t border-gray-200 dark:border-gray-700">
+        <td className="py-3 pr-2">
+          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
+        </td>
+        <td className="py-3 pr-2">
+          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
+        </td>
+        <td className="py-3">
+          <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
+        </td>
+      </tr>
+    ))
+  ) : (
+    // Show actual data when not loading
+    currentComplaints.map((item, i) => (
+      <tr key={i} className="border-t border-gray-200 dark:border-gray-700">
+        <td className="text-black truncate py-3 pr-2 font-medium dark:text-white">
+          {item.category}
+        </td>
+        <td className="text-black flex items-center gap-2 truncate py-3 pr-2 dark:text-white">
+          {item.icon}{" "}
+          {item.status
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())}
+        </td>
+        <td className="text-black truncate py-3 dark:text-white">
+          {item.complaintDate.split("T")[0]}
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
                 </table>
                 <PageNavigator
                   filteredComplaints={complaints}
