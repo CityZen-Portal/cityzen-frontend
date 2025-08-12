@@ -6,53 +6,84 @@ import NewsCardSkeleton from "components/placeholder/NewsCardSkeleton";
 export default function NewsCard() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true); 
-    const [error, setError] = useState(null); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+
   const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchNews = async () => {
-       setLoading(true);
+      setLoading(true);
       setError(null);
       try {
         const response = await axios.get(
           "https://city-news-alert-backend-new.onrender.com/api/news/get-all"
         );
-        setData(response.data.data.records);
+        const records = response.data.data.records || [];
+        setData(records);
+        setFilteredData(records); 
       } catch (err) {
         console.log(err);
-         setError("Failed to load news. Please try again later.");
-      }finally {
+        setError("Failed to load news. Please try again later.");
+      } finally {
         setLoading(false);
       }
     };
     fetchNews();
   }, []);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const paginatedData = data.slice(
+  useEffect(() => {
+    if (categoryFilter === "ALL") {
+      setFilteredData(data);
+    } else {
+      setFilteredData(data.filter((item) => item.category === categoryFilter));
+    }
+    setCurrentPage(1); 
+  }, [categoryFilter, data]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  const categories = ["ALL", ...new Set(data.map((item) => item.category))];
+
   return (
-    <div className=" bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
+    <div className="bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
+      <div className="mb-6 flex justify-end">
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="border px-3 py-2 rounded-md dark:bg-navy-900"
+        >
+          {categories.map((cat, i) => (
+            <option key={i} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {loading && (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-                {Array.from({ length: itemsPerPage }).map((_, index) => (
-                  <NewsCardSkeleton key={index} />
-                ))}
-              </div>
-            )}
-            {error && !loading && (
-              <div className="text-center py-16 text-red-500 font-medium">
-                {error}
-              </div>
-            )}
-      {!loading && !error && data.length> 0 && (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {Array.from({ length: itemsPerPage }).map((_, index) => (
+            <NewsCardSkeleton key={index} />
+          ))}
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="text-center py-16 text-red-500 font-medium">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && filteredData.length > 0 && (
         <>
-      
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
             {paginatedData.map((news, index) => (
               <div
@@ -71,12 +102,8 @@ export default function NewsCard() {
                   <button
                     onClick={() =>
                       navigate(
-                        `/citizen/newsupdate/newsdetails/${encodeURIComponent(
-                          news.id
-                        )}`,
-                        {
-                          state: news,
-                        }
+                        `/citizen/newsupdate/newsdetails/${encodeURIComponent(news.id)}`,
+                        { state: news }
                       )
                     }
                     className="font-medium text-blue-600 hover:underline dark:text-cyan-500"
@@ -88,40 +115,39 @@ export default function NewsCard() {
             ))}
           </div>
 
-          {/* Pagination Controls */}
-          {totalPages>10&& 
-          <div className="mt-8 flex justify-center items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center items-center space-x-2">
               <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === i + 1
-                    ? "bg-blue-600 text-white"
-                    : "border text-gray-700 dark:text-white"
-                }`}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border rounded disabled:opacity-50"
               >
-                {i + 1}
+                Previous
               </button>
-            ))}
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-           }
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white"
+                      : "border text-gray-700 dark:text-white"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
