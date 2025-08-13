@@ -122,7 +122,12 @@ const JobApplicationSystem = () => {
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
-          setJobs(data ? data : [])
+          if(data){
+            setJobs(data.filter((job) => !job.isDeleted && job.isActive))
+          }
+          else{
+            setJobs([])
+          }
         })
         .catch(err => {
           toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
@@ -150,7 +155,12 @@ const JobApplicationSystem = () => {
       .then(res => {
           console.log('Response:', res.data.data);
           const data = res.data.data
-          setVolunteers(data ? data : [])
+          if(data){
+            setVolunteers(data.filter((volunteer) => !volunteer.isDeleted && volunteer.isActive))
+          }
+          else{
+            setVolunteers([])
+          }
         })
         .catch(err => {
           toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Volunteer Post Data', {
@@ -365,7 +375,7 @@ const JobApplicationSystem = () => {
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mt-4">
             <Filter size={16} />
             <span className="text-sm">
-              Showing {filteredJobs.length + filteredVolunteers.length} of {municipalCount + volunteerCount} opportunity{municipalCount + volunteerCount !== 1 ? 's' : ''}
+              Showing {filteredJobs.length + filteredVolunteers.length} of {municipalCount + volunteerCount} opportunit{municipalCount + volunteerCount !== 1 ? 'ies' : 'y'}
               {searchTerm && ` matching "${searchTerm}"`}
             </span>
           </div>

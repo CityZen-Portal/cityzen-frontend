@@ -6,12 +6,12 @@ const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
   
   return (
     <div
-      className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+      className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer flex flex-col"
       onClick={() => onViewDetails(job.id)}
     >
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-start justify-between mb-4">
-          <h3 className={`text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400`}>
+          <h3 className="text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400">
             {job.title}
           </h3>
           {/* {expired && (
@@ -22,11 +22,11 @@ const JobCard = ({ job, onViewDetails, isJobExpired, formatDate }) => {
           )} */}
         </div>
 
-        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-6">
+        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-6 min-h-[40px]">
           {job.description}
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex-grow">
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <Building2 size={16} />

@@ -64,10 +64,11 @@ const MunicipalEditForm = () => {
   const [newRequirement, setNewRequirement] = useState('');
   const [errors, setErrors] = useState({});
 
-  const formatDate = (date) => {
-  return date instanceof Date
-    ? date.toISOString().split('T')[0]
-    : date;
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0];
   };
 
   const isValidDeadline = (dateStr) => {
@@ -93,25 +94,33 @@ const MunicipalEditForm = () => {
       }
     )
       .then(res => {
-        console.log('Response:', res.data.data);
-        const data = res.data.data
-        if(data){
-          setFormData(data)
-        }
-      })
-      .catch(err => {
-        toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
-          position: 'top-right',
-          autoClose: 3000,
-          theme: 'colored'
+          console.log('Response:', res.data.data);
+          const data = res.data.data
+          if(data){
+            setFormData({
+              ...data,
+              deadline: formatDateForInput(data.deadline)
+            })
+          }
+        })
+        .catch(err => {
+          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
+            position: 'top-right',
+            autoClose: 3000,
+            theme: 'colored'
+          });
+          console.error('Error:', err.response?.data || err.message);
+        })
+        .finally(() => {
+          setLoading(false);
         });
         console.error('Error:', err.response?.data || err.message);
       })
       .finally(() => {
         setLoading(false);
       });
-        
-  }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
+
+  }, [token, email, citizenId, JOB_APPLICATION_API, id, navigate])
 
   // Handle form field changes
   const handleInputChange = (field, value) => {
@@ -133,9 +142,8 @@ const MunicipalEditForm = () => {
       if (errors.requirements) {
         setErrors(prev => ({ ...prev, requirements: '' }));
       }
-      toast.success('Requirement added successfully!');
     } else if (formData.requirements.includes(newRequirement.trim())) {
-      toast.warning('This requirement already exists!');
+      // Removed toast.warning for duplicate requirement
     }
   }, [newRequirement, formData.requirements, errors.requirements]);
 
@@ -145,7 +153,6 @@ const MunicipalEditForm = () => {
       ...prev,
       requirements: prev.requirements.filter((_, i) => i !== index)
     }));
-    toast.info('Requirement removed');
   }, []);
 
   // Handle requirement key press
@@ -156,53 +163,139 @@ const MunicipalEditForm = () => {
     }
   }, [addRequirement]);
 
-  // Validate form
+  // Enhanced Validate form with additional validation rules
   const validateForm = useCallback(() => {
-      const newErrors = {};
-      if (!formData.title.trim()) newErrors.title = 'Job title is required';
-      if (!formData.department.trim()) newErrors.department = 'Department is required';
-      if (!formData.description.trim()) newErrors.description = 'Job description is required';
-      if (!formData.location.trim()) newErrors.location = 'Location is required';
-      if (formData.requirements.length === 0) newErrors.requirements = 'At least one requirement is needed';
-      if (!isValidDeadline(formData.deadline)) newErrors.deadline = 'Application deadline is required';
-      if (!formData.contactPersonName.trim()) newErrors.contactPersonName = 'Contact name is required';
-      if (!formData.contactPhoneNumber.trim()) newErrors.contactPhoneNumber = 'Contact phone is required';
-      if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
-      if (!formData.contactAddress.trim()) newErrors.contactAddress = 'Contact address is required';
-      
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (formData.contactEmail.trim() && !emailRegex.test(formData.contactEmail.trim())) {
-        newErrors.contactEmail = 'Please enter a valid email address';
-      }
-      
-      // Phone validation
+    const newErrors = {};
+    
+    // Title validation
+    if (!formData.title.trim()) {
+      newErrors.title = 'Job title is required';
+    } else if (formData.title.trim().length < 3) {
+      newErrors.title = 'Job title must be at least 3 characters long';
+    } else if (formData.title.trim().length > 100) {
+      newErrors.title = 'Job title must not exceed 100 characters';
+    }
+    
+    // Department validation
+    if (!formData.department.trim()) {
+      newErrors.department = 'Department is required';
+    } else if (formData.department.trim().length < 3) {
+      newErrors.department = 'Department must be at least 3 characters long';
+    } else if (formData.department.trim().length > 100) {
+      newErrors.department = 'Department must not exceed 100 characters';
+    }
+    
+    // Description validation
+    if (!formData.description.trim()) {
+      newErrors.description = 'Job description is required';
+    } else if (formData.description.trim().length < 20) {
+      newErrors.description = 'Job description must be at least 20 characters long';
+    } else if (formData.description.trim().length > 2000) {
+      newErrors.description = 'Job description must not exceed 2000 characters';
+    }
+    
+    // Location validation
+    if (!formData.location.trim()) {
+      newErrors.location = 'Location is required';
+    } else if (formData.location.trim().length < 3) {
+      newErrors.location = 'Location must be at least 3 characters long';
+    } else if (formData.location.trim().length > 200) {
+      newErrors.location = 'Location must not exceed 200 characters';
+    }
+    
+    // Requirements validation
+    if (formData.requirements.length === 0) {
+      newErrors.requirements = 'At least one requirement is needed';
+    } else if (formData.requirements.some(req => req.trim().length < 5)) {
+      newErrors.requirements = 'Each requirement must be at least 5 characters long';
+    }
+    
+    // Deadline validation
+    if (!formData.deadline) {
+      newErrors.deadline = 'Application deadline is required';
+    } else if (!isValidDeadline(formData.deadline)) {
+      newErrors.deadline = 'Application deadline must be at least 3 days from today';
+    }
+    
+    // Contact Person Name validation
+    if (!formData.contactPersonName.trim()) {
+      newErrors.contactPersonName = 'Contact name is required';
+    } else if (formData.contactPersonName.trim().length < 2) {
+      newErrors.contactPersonName = 'Contact name must be at least 2 characters long';
+    } else if (formData.contactPersonName.trim().length > 100) {
+      newErrors.contactPersonName = 'Contact name must not exceed 100 characters';
+    } else if (!/^[a-zA-Z\s.]+$/.test(formData.contactPersonName.trim())) {
+      newErrors.contactPersonName = 'Contact name can only contain letters, spaces, and periods';
+    }
+    
+    // Contact Phone validation
+    if (!formData.contactPhoneNumber.trim()) {
+      newErrors.contactPhoneNumber = 'Contact phone is required';
+    } else {
       const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-      if (formData.contactPhoneNumber.trim() && !phoneRegex.test(formData.contactPhoneNumber.trim())) {
-        newErrors.contactPhoneNumber = 'Please enter a valid phone number';
+      if (!phoneRegex.test(formData.contactPhoneNumber.trim())) {
+        newErrors.contactPhoneNumber = 'Please enter a valid phone number (minimum 10 digits)';
+      } else if (formData.contactPhoneNumber.trim().replace(/[^\d]/g, '').length < 10) {
+        newErrors.contactPhoneNumber = 'Phone number must contain at least 10 digits';
       }
-      
-      // Date validation - ensure date is in the future
-      if (formData.deadline) {
-        const selectedDate = new Date(formData.deadline);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (selectedDate < today) {
-          newErrors.deadline = 'Application deadline must be in the future';
-        }
+    }
+    
+    // Contact Email validation
+    if (!formData.contactEmail.trim()) {
+      newErrors.contactEmail = 'Contact email is required';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.contactEmail.trim())) {
+        newErrors.contactEmail = 'Please enter a valid email address';
+      } else if (formData.contactEmail.trim().length > 254) {
+        newErrors.contactEmail = 'Email address must not exceed 254 characters';
       }
-      
-      return newErrors;
-    }, [formData]);
+    }
+    
+    // Contact Address validation
+    if (!formData.contactAddress.trim()) {
+      newErrors.contactAddress = 'Contact address is required';
+    } else if (formData.contactAddress.trim().length < 10) {
+      newErrors.contactAddress = 'Contact address must be at least 10 characters long';
+    } else if (formData.contactAddress.trim().length > 500) {
+      newErrors.contactAddress = 'Contact address must not exceed 500 characters';
+    }
+    
+    // Date validation - ensure date is in the future
+    if (formData.deadline) {
+      const selectedDate = new Date(formData.deadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        newErrors.deadline = 'Application deadline must be in the future';
+      }
+    }
+    
+    return newErrors;
+  }, [formData]);
 
   // Handle form submission
   const handleSubmit = useCallback(() => {
     setLoading(true)
     const newErrors = validateForm();
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      
+      // Show specific error messages for each field
+      Object.entries(newErrors).forEach(([field, message]) => {
+        toast.error(message, {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored'
+        });
+      });
+      return;
+    }
 
     const putData = {
       ...formData,
-      deadline: new Date()
+      deadline: new Date(formData.deadline)
     }
   
     axios.put(`${JOB_APPLICATION_API}/jobs/${id}`, putData,
@@ -216,7 +309,7 @@ const MunicipalEditForm = () => {
     )
     .then(res => {
       console.log('Response:', res.data);
-      toast.success('Job Vacancy Post posted successfully!', {
+      toast.success('Municipal Job updated successfully!', {
         position: 'top-right',
         autoClose: 1000,
         theme: 'colored',
@@ -235,64 +328,24 @@ const MunicipalEditForm = () => {
     .finally(() => {
       setLoading(false);
     });
-    
-    // if (Object.keys(newErrors).length === 0) {
-    //   // Prepare job data
-    //   const jobData = {
-    //     ...formData,
-    //     jobType: 'municipal',
-    //     requirements: formData.requirements.join('; '),
-    //     department: formData.department || 'General'
-    //   };
 
-    //   // Get existing jobs
-    //   const savedJobs = localStorage.getItem('jobs');
-    //   let jobs = [];
-    //   if (savedJobs) {
-    //     try {
-    //       jobs = JSON.parse(savedJobs);
-    //     } catch (error) {
-    //       console.error('Failed to parse jobs', error);
-    //     }
-    //   }
-
-    //   // Update existing job
-    //   const updatedJobs = jobs.map(job => 
-    //     job.id.toString() === id.toString() ? { ...jobData, id: id, isActive: job.isActive } : job
-    //   );
-    //   localStorage.setItem('jobs', JSON.stringify(updatedJobs));
-
-    //   // Show success message
-    //   setShowSuccess(true);
-    //   toast.success('Municipal job updated successfully!');
-      
-    //   // Navigate back after delay
-    //   setTimeout(() => {
-    //     setShowSuccess(false);
-    //     navigate('/admin/job-applications');
-    //   }, 2000);
-    // } else {
-    //   setErrors(newErrors);
-    //   const errorCount = Object.keys(newErrors).length;
-    //   toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
-    // }
-  }, [validateForm, formData, id, navigate]);
+  }, [validateForm, formData, id, navigate, JOB_APPLICATION_API, token, email, citizenId]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
     navigate('/admin/job-application');
   }, [navigate]);
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-  //         <p className="text-gray-600 dark:text-gray-400">Loading job data...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading job data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
@@ -377,7 +430,7 @@ const MunicipalEditForm = () => {
                   Job Title <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdBusiness className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdBusiness className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
                   <input
                     type="text"
                     value={formData.title}
@@ -402,7 +455,7 @@ const MunicipalEditForm = () => {
                   Department <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdBusiness className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdBusiness className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
                   <input
                     type="text"
                     value={formData.department}
@@ -461,7 +514,7 @@ const MunicipalEditForm = () => {
                   Work Location <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdLocationOn className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdLocationOn className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
                   <input
                     type="text"
                     value={formData.location}
@@ -486,11 +539,12 @@ const MunicipalEditForm = () => {
                   Application Deadline <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdCalendarToday className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdCalendarToday className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
                   <input
                     type="date"
                     value={formData.deadline}
                     onChange={(e) => handleInputChange('deadline', e.target.value)}
+                    min={new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.deadline ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -524,42 +578,44 @@ const MunicipalEditForm = () => {
                     value={newRequirement}
                     onChange={(e) => setNewRequirement(e.target.value)}
                     onKeyPress={handleRequirementKeyPress}
-                    placeholder="Enter a job requirement..."
+                    placeholder="e.g., Bachelor's degree in Civil Engineering"
                     className="w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   />
                 </div>
                 <button
+                  type="button"
                   onClick={addRequirement}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium flex items-center gap-2"
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors flex items-center gap-2"
                 >
-                  <MdAdd size={16} />
+                  <MdAdd size={20} />
                   Add
                 </button>
               </div>
               
               {/* Requirements List */}
               {formData.requirements.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Requirements:</h3>
-                  <div className="space-y-2">
-                    {formData.requirements.map((requirement, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <span className="flex-1 text-gray-900 dark:text-gray-100">{requirement}</span>
-                        <button
-                          onClick={() => removeRequirement(index)}
-                          className="p-1 text-red-600 hover:text-red-700 transition-colors"
-                        >
-                          <MdDelete size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Added Requirements:
+                  </h3>
+                  {formData.requirements.map((requirement, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <span className="flex-1 text-gray-700 dark:text-gray-300">{requirement}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeRequirement(index)}
+                        className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <MdDelete size={18} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
               
               {errors.requirements && (
                 <div className="flex items-center gap-2 text-red-600 text-sm">
-                  <AlertCircle size={16} />
+                  <MdErrorOutline size={16} />
                   {errors.requirements}
                 </div>
               )}
@@ -570,24 +626,24 @@ const MunicipalEditForm = () => {
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <User className="text-blue-600 dark:text-blue-400" size={20} />
+                <MdPerson className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Contact Name */}
+              {/* Contact Person Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Contact Person <span className="text-red-500">*</span>
+                  Contact Person Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
                   <input
                     type="text"
                     value={formData.contactPersonName}
                     onChange={(e) => handleInputChange('contactPersonName', e.target.value)}
-                    placeholder="e.g., John Smith"
+                    placeholder="e.g., Dr. Rajesh Kumar"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.contactPersonName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -604,10 +660,10 @@ const MunicipalEditForm = () => {
               {/* Contact Phone */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Phone Number <span className="text-red-500">*</span>
+                  Contact Phone <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
                   <input
                     type="tel"
                     value={formData.contactPhoneNumber}
@@ -629,15 +685,15 @@ const MunicipalEditForm = () => {
               {/* Contact Email */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Email Address <span className="text-red-500">*</span>
+                  Contact Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
                   <input
                     type="email"
                     value={formData.contactEmail}
                     onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                    placeholder="e.g., hr@municipality.gov.in"
+                    placeholder="e.g., rajesh.kumar@coimbatore.gov.in"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.contactEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -650,46 +706,48 @@ const MunicipalEditForm = () => {
                   </div>
                 )}
               </div>
-              
-              {/* Contact Address */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Office Address <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  value={formData.contactAddress}
-                  onChange={(e) => handleInputChange('contactAddress', e.target.value)}
-                  placeholder="e.g., Coimbatore Municipal Corporation, Town Hall Road, Coimbatore - 641001"
-                  rows={3}
-                  className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                    errors.contactAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                  }`}
-                />
-                {errors.contactAddress && (
-                  <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <MdErrorOutline size={16} />
-                    {errors.contactAddress}
-                  </div>
-                )}
-              </div>
+            </div>
+            
+            {/* Contact Address */}
+            <div className="mt-6 space-y-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Contact Address <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={formData.contactAddress}
+                onChange={(e) => handleInputChange('contactAddress', e.target.value)}
+                placeholder="e.g., Public Works Department, Coimbatore Municipal Corporation, Town Hall, Coimbatore - 641001"
+                rows={3}
+                className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
+                  errors.contactAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                }`}
+              />
+              {errors.contactAddress && (
+                <div className="flex items-center gap-2 text-red-600 text-sm">
+                  <MdErrorOutline size={16} />
+                  {errors.contactAddress}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-6">
+          <div className="flex gap-4 justify-end">
             <button
-              onClick={handleSubmit}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2 shadow-lg"
-            >
-              <MdSave size={20} />
-              Update Municipal Job
-            </button>
-            <button
+              type="button"
               onClick={handleCancel}
-              className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 py-4 px-6 rounded-xl transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+              className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
             >
               <MdClose size={20} />
               Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors flex items-center gap-2"
+            >
+              <MdSave size={20} />
+              Update Job
             </button>
           </div>
         </div>
@@ -699,4 +757,3 @@ const MunicipalEditForm = () => {
 };
 
 export default MunicipalEditForm;
-

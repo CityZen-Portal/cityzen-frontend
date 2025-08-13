@@ -32,7 +32,7 @@ function Servicelist() {
   // Calculate page data
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = list.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = list.slice(indexOfFirstItem, indexOfLastItem);console.log(currentItems[0]?.imagePath);
   const totalPages = Math.ceil(list.length / itemsPerPage);
 
   return (
@@ -101,7 +101,11 @@ function Servicelist() {
                   <button
                     onClick={() =>
                       navigate(`/citizen/Services/form/${item.serviceName}`, {
-                        state: { nameOfService: item.nameOfService },
+                        state: { nameOfService: item.nameOfService,
+                           imagePath: item.imagePath,
+
+                         },
+                       
                       })
                     }
                     className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
