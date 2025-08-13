@@ -44,7 +44,6 @@ export default function DocumentCard({
         </div>
       </div>
 
-      {/* Icon Buttons */}
       <div className="flex justify-between gap-3">
         <IconButton
           onClick={onView}

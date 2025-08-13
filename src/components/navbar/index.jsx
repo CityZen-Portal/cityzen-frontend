@@ -6,14 +6,36 @@ import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import avatar from "assets/img/avatars/avatar6.jpg";
 import ProfileDropdown from "../dropdown/ProfileDropdown";
 import { useUser } from "contexts/UserContext";
+import axios from "axios";
+import { set } from "date-fns";
 
 const Navbar = (props) => {
   const { onOpenSidenav, brandText } = props;
   const { logout, userName, role, email } = useUser();
 
   const navigate = useNavigate();
+  const [url, setUrl] = useState(avatar);
+  const userId = localStorage.getItem("id");
 
-  // Safely parse role array from localStorage
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const res = await axios.get(
+          `https://auth-backend-2-k3ph.onrender.com/citizen-profiles/CIT${userId}`
+        );
+        setUrl(res.data.profileUrl || avatar);
+        console.log(res.data.profileUrl);
+        console.log(res);
+      } catch (err) {
+        console.error("Failed to fetch profile image:", err);
+        setUrl(avatar);
+      }
+    };
+    if (userId) {
+      fetchProfileImage();
+    }
+  }, [userId]);
+
   let userRoleArr = [];
   try {
     const userRoleLocal = localStorage.getItem("role");
@@ -24,7 +46,6 @@ const Navbar = (props) => {
 
   const firstRole = userRoleArr.length > 0 ? userRoleArr[0] : null;
 
-  // Dark mode state with localStorage and system preference fallback
   const [darkmode, setDarkmode] = useState(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme");
@@ -36,7 +57,6 @@ const Navbar = (props) => {
     return false;
   });
 
-  // Favicon setup
   useEffect(() => {
     const favicon = document.querySelector("link[rel='icon']");
     if (favicon) {
@@ -143,7 +163,7 @@ const Navbar = (props) => {
             <div className="relative">
               <img
                 className="border-transparent h-10 w-10 cursor-pointer rounded-full border-2 transition-all duration-300 hover:border-blue-500"
-                src={avatar}
+                src={url}
                 alt="User Avatar"
               />
               <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500 dark:border-gray-800"></span>
@@ -154,7 +174,7 @@ const Navbar = (props) => {
               <div className="flex items-center gap-3 border-b border-gray-100 pb-4 dark:border-gray-700">
                 <img
                   className="h-12 w-12 rounded-full"
-                  src={avatar}
+                  src={url || avatar}
                   alt="User Avatar"
                 />
                 <div>

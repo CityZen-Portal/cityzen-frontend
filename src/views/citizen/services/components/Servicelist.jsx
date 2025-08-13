@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import img1 from "../../../../assets/img/service/govimg-4.jpg";
+import img1 from "../../../../assets/img/service/Picture1.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ViewRequest from "./ViewRequest";
@@ -9,7 +9,7 @@ function Servicelist() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Pagination states
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -29,7 +29,7 @@ function Servicelist() {
     fetchData();
   }, []);
 
-  // Calculate page data
+  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = list.slice(indexOfFirstItem, indexOfLastItem);
@@ -37,45 +37,31 @@ function Servicelist() {
 
   return (
     <>
+      {/* Hero Section */}
+{/* Hero Section */}
 <div className="relative md:h-72 w-full overflow-hidden">
   {/* Background Image */}
   <img
     src={img1}
     alt="Background"
-    className="w-full h-full object-cover absolute inset-0 z-0"
+    className="w-full h-full object-cover absolute inset-0 z-0 transform scale-105 transition-transform duration-700 hover:scale-110"
   />
 
-  {/* Colorful Gradient Overlay (gives depth & style) */}
-  <div className="absolute inset-0 bg-gradient-to-br from-[#243a6c] via-[#4078c1] to-[#244357] opacity-80 mix-blend-multiply z-10"></div>
-
-  {/* Extra Dark Overlay for strong contrast */}
-  <div className="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
-
-  {/* Text Content */}
-  <div className="relative z-20 flex flex-col items-center justify-center h-full text-center px-4">
-    <h1 className="text-4xl md:text-5xl font-extrabold drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)] mb-3 text-white bg-gradient-to-r from-[#fff] to-[#92c7f7] bg-clip-text text-transparent">
-      Services
-    </h1>
-    <p className="max-w-3xl text-base md:text-lg font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] leading-relaxed text-white backdrop-blur-sm p-4 rounded-lg bg-black/30 shadow-lg">
-      Municipality services include water supply, waste management, road maintenance,
-      street lighting, sanitation, public health, and infrastructure development —
-      ensuring essential civic amenities and improving the quality of life in urban and rural areas.
-    </p>
-  </div>
 </div>
 
 
-
-      <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2 md:p-10">
+      {/* Service Cards */}
+      <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
         {loading
-          ? [...Array(4)].map((_, idx) => (
+          ? [...Array(6)].map((_, idx) => (
               <div
                 key={idx}
-                className="border-r-lg mt-6 animate-pulse overflow-hidden rounded border bg-white shadow-lg dark:border-navy-900 dark:bg-navy-700 dark:text-white md:max-w-lg"
+                className="rounded-xl border border-gray-200 dark:border-navy-900 bg-white dark:bg-navy-700 shadow-lg animate-pulse"
               >
-                <div className="h-60 w-full bg-gray-300 dark:bg-gray-600"></div>
+                <div className="h-48 w-full bg-gray-300 dark:bg-gray-600 rounded-t-xl"></div>
                 <div className="px-6 py-4">
-                  <div className="mx-auto mb-2 h-6 w-2/3 bg-gray-300 dark:bg-gray-600"></div>
+                  <div className="h-6 w-2/3 bg-gray-300 dark:bg-gray-600 mb-3 rounded"></div>
+                  <div className="h-4 w-1/2 bg-gray-300 dark:bg-gray-600 rounded"></div>
                 </div>
                 <div className="flex justify-center pb-4">
                   <div className="h-10 w-32 rounded-full bg-gray-300 dark:bg-gray-600"></div>
@@ -85,41 +71,53 @@ function Servicelist() {
           : currentItems.map((item, index) => (
               <div
                 key={index}
-                className="border-r-lg mt-6 overflow-hidden rounded border bg-white shadow-lg dark:border-navy-900 dark:bg-navy-700 dark:text-white md:max-w-lg"
+                className="group relative rounded-xl border border-gray-200 dark:border-navy-900 bg-white dark:bg-navy-700 shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden"
               >
-                <img
-                  src={item.imagePath}
-                  alt={item.imageName}
-                  className="h-60 w-full transform object-cover transition-transform duration-500 hover:scale-110"
-                />
+                {/* Image */}
+                <div className="relative h-48 w-full overflow-hidden">
+                  <img
+                    src={item.imagePath}
+                    alt={item.imageName}
+                    className="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                  />
+                  {/* Overlay on hover */}
+              
+                </div>
+
+                {/* Content */}
                 <div className="px-6 py-4">
-                  <div className="flex justify-center text-xl font-bold">
+                  <div className="text-center text-lg font-bold text-gray-800 dark:text-white">
                     {item.serviceName}
                   </div>
                 </div>
+
+                {/* Button */}
                 <div className="flex justify-center pb-4">
                   <button
                     onClick={() =>
                       navigate(`/citizen/Services/form/${item.serviceName}`, {
-                        state: { nameOfService: item.nameOfService },
+                        state: {
+                          nameOfService: item.nameOfService,
+                          imagePath: item.imagePath,
+                        },
                       })
                     }
-                    className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    className="rounded-full bg-blue-500 px-6 py-2 font-semibold text-white shadow-md hover:bg-blue-600 hover:shadow-lg transition-all duration-300"
                   >
-                    Get service
+                    Get Service
                   </button>
                 </div>
               </div>
             ))}
       </div>
 
-      {/* Pagination controls */}
+      {/* Pagination */}
       {!loading && totalPages > 1 && (
-        <div className="mt-6 flex justify-center space-x-2">
+        <div className="mt-8 flex justify-center space-x-2">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+            className="rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Prev
           </button>
@@ -128,9 +126,9 @@ function Servicelist() {
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`rounded px-3 py-1 ${
+              className={`rounded-lg px-4 py-2 transition ${
                 currentPage === i + 1
-                  ? "bg-blue-500 text-white"
+                  ? "bg-blue-500 text-white shadow-md"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
@@ -143,13 +141,14 @@ function Servicelist() {
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages}
-            className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+            className="rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Next
           </button>
         </div>
       )}
 
+      {/* Requests Section */}
       <ViewRequest />
     </>
   );
