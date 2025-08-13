@@ -22,7 +22,6 @@ const Dashboard = () => {
   const HELPDESK_API = process.env.REACT_APP_API_HELPDESK_URL;
   const SERVICE_API = "https://utility-booking-backend.onrender.com/api/task/service/count";
 
-  // Fetch jobs and volunteers data
   useEffect(() => {
     const fetchData = async () => {
       try {
