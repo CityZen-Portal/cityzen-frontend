@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import image from "../../../../assets/img/news/image.png";
 import NewsCardSkeleton from "components/placeholder/NewsCardSkeleton";
+import ErrorAnimation from "components/error";
 
 
 
@@ -43,7 +44,7 @@ export default function NewsHome() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
+    <div className=" bg-gray-50 p-8 dark:bg-navy-700 dark:text-white">
       {/* <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
         News
       </h1> */}
@@ -57,9 +58,7 @@ export default function NewsHome() {
         </div>
       )}
       {error && !loading && (
-        <div className="text-center py-16 text-red-500 font-medium">
-          {error}
-        </div>
+        <ErrorAnimation/>
       )}
 
       {/* Data Display */}

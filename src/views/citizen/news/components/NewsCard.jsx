@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import NewsCardSkeleton from "components/placeholder/NewsCardSkeleton";
-
+import ErrorAnimation from "../../../../components/error/index";
 export default function NewsCard() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -81,9 +81,7 @@ export default function NewsCard() {
       )}
 
       {error && !loading && (
-        <div className="text-center py-16 text-red-500 font-medium">
-          {error}
-        </div>
+        <ErrorAnimation/>
       )}
 
       {!loading && !error && filteredData.length > 0 && (
