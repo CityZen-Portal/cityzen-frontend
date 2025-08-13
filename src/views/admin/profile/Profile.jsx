@@ -54,18 +54,22 @@ export default function ProfileCard() {
     gender: "",
     pincode: "",
     state: "",
+    profileUrl: "",
   });
   const [complaints, setComplaints] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [originalUser, setOriginalUser] = useState(null);
   const [originalImage, setOriginalImage] = useState(avatar);
+
   const [selectedImage, setSelectedImage] = useState(avatar);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // --- Fetch user data ---
   async function fetchUser(email) {
     try {
       const userRes = await axios.get(
         `https://auth-backend-2-k3ph.onrender.com/citizen-profiles/CIT${citizenId}`,
+        // `http://localhost:8081/citizen-profiles/CIT${citizenId}`,
         { headers: { token } }
       );
       const data = userRes.data || {};
@@ -80,6 +84,7 @@ export default function ProfileCard() {
         gender: data.gender || "",
         pincode: data.pincode || "not update yet",
         state: data.state || "not update yet",
+        profileUrl: data.profileUrl,
       };
     } catch (err) {
       if (err.response?.status === 404) {
@@ -181,11 +186,28 @@ export default function ProfileCard() {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(URL.createObjectURL(file));
+      setSelectedFile(file);
     }
   };
 
   const handleSave = async () => {
     try {
+      const formData = new FormData();
+      formData.append("name", "User");
+      formData.append("imageFile", selectedFile);
+      console.log(formData);
+      const mediaApiRes = await axios.post(
+        "https://media-api-service-hzx2.onrender.com/api/images/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log(mediaApiRes.data.data.path);
+
       const payload = {
         citizenId: user.citizen_id,
         userName: user.user_name,
@@ -197,11 +219,16 @@ export default function ProfileCard() {
         state: user.state,
         pincode: user.pincode,
         dob: user.dob,
+        profileUrl: mediaApiRes.data.data.path,
       };
+
+
       await axios.put(
         `https://auth-backend-2-k3ph.onrender.com/citizen-profiles/${user.citizen_id}`,
         payload
       );
+
+
       setOriginalUser(user);
       setEditMode(false);
     } catch (error) {
@@ -251,7 +278,7 @@ export default function ProfileCard() {
         <div className="flex w-full flex-col items-center rounded-2xl bg-blue-600 p-6 shadow-lg lg:w-1/3">
           <div className="relative mb-2">
             <img
-              src={selectedImage || avatar}
+              src={user.profileUrl || avatar}
               alt="User"
               className="h-56 w-56 rounded-full border-2 border-white object-cover shadow-md"
             />
