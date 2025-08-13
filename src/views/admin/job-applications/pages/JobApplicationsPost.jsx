@@ -108,6 +108,8 @@ const JobApplicationsPost = () => {
   const [filteredVolunteers, setFilteredVolunteers] = useState(volunteers);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  
+  // Simple delete confirmation modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
 
@@ -278,52 +280,57 @@ const JobApplicationsPost = () => {
     navigate(`/admin/job-application/volunteer-details/${volunteerId}`);
   }, [navigate]);
 
-  // Handle delete - now marks as deleted instead of removing
-  const handlePermanentDelete = useCallback((item) => {
+  // Handle delete with confirmation modal
+  const handleDeleteClick = useCallback((item) => {
     setItemToDelete(item);
     setShowDeleteModal(true);
   }, []);
 
+  // Confirm delete function
   const confirmDelete = useCallback(() => {
-    if (itemToDelete) {
-      const isVolunteer = itemToDelete.programTitle ? true : false;
-      
-      // Mark as deleted instead of actually deleting
-      if (isVolunteer) {
-        const updatedVolunteers = volunteers.map(v =>
-          v.id === itemToDelete.id ? { ...v, isDeleted: true, isActive: false } : v
-        );
-        setVolunteers(updatedVolunteers);
-        toast.success('Volunteer program moved to deleted!', {
-          position: 'top-right',
-          autoClose: 3000,
-          theme: 'colored'
-        });
-      } else {
-        const updatedJobs = jobs.map(j =>
-          j.id === itemToDelete.id ? { ...j, isDeleted: true, isActive: false } : j
-        );
-        setJobs(updatedJobs);
-        toast.success('Job moved to deleted!', {
-          position: 'top-right',
-          autoClose: 3000,
-          theme: 'colored'
-        });
+    if (!itemToDelete) return;
+    
+    const isVolunteer = !!itemToDelete.programTitle;
+    const endpoint = isVolunteer ? 'service' : 'jobs';
+    const itemName = isVolunteer ? itemToDelete.programTitle : itemToDelete.title;
+    
+    axios.delete(`${JOB_APPLICATION_API}/${endpoint}/${itemToDelete.id}`, {
+      headers: {
+        token,
+        email,
+        id: adminId
       }
+    })
+    .then(res => {
+      toast.success(`${isVolunteer ? 'Volunteer program' : 'Job'} deleted successfully!`, {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored'
+      });
       
-      // Optional: You can also make an API call to update the server
-      // const endpoint = isVolunteer ? 'service' : 'jobs';
-      // axios.put(`${JOB_APPLICATION_API}/${endpoint}/${itemToDelete.id}`, {
-      //   ...itemToDelete,
-      //   isDeleted: true,
-      //   isActive: false
-      // });
-      
+      // Remove from state by marking as deleted
+      if (isVolunteer) {
+        setVolunteers(volunteers.map(v => (v.id === itemToDelete.id ? { ...v, isDeleted: true } : v)));
+      } else {
+        setJobs(jobs.map(j => (j.id === itemToDelete.id ? { ...j, isDeleted: true } : j)));
+      }
+    })
+    .catch(err => {
+      toast.error(err.response?.data?.message || 'Error deleting item!', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'colored'
+      });
+      console.error('Delete error:', err.response?.data || err.message);
+    })
+    .finally(() => {
+      // Close modal and reset state
       setShowDeleteModal(false);
       setItemToDelete(null);
-    }
-  }, [itemToDelete, jobs, volunteers]);
+    });
+  }, [itemToDelete, JOB_APPLICATION_API, jobs, volunteers, token, email, adminId]);
 
+  // Cancel delete function
   const cancelDelete = useCallback(() => {
     setShowDeleteModal(false);
     setItemToDelete(null);
@@ -347,45 +354,6 @@ const JobApplicationsPost = () => {
       toast.success(`'${item.title}' restored successfully!`);
     }
   }, [jobs, volunteers]);
-
-  // Handle permanent delete
-  const handleDeleteClick = useCallback((item) => {
-    const isVolunteer = !!item.programTitle;
-    const endpoint = isVolunteer ? 'service' : 'jobs';
-    
-    axios.delete(`${JOB_APPLICATION_API}/${endpoint}/${item.id}`,
-      {
-        headers:{
-          token,
-          email,
-          id: adminId
-        }
-      }
-    )
-      .then(res => {
-        toast.success(`${isVolunteer ? 'Volunteer program' : 'Job'} is deleted!`, {
-          position: 'top-right',
-          autoClose: 3000,
-          theme: 'colored'
-        });
-        
-        // Remove from state
-        item.isDeleted = true;
-        if (isVolunteer) {
-          setVolunteers(volunteers.map(v => (v.id === item.id ? item : v)));
-        } else {
-          setJobs(jobs.map(j => (j.id === item.id ? item : j)));
-        }
-      })
-      .catch(err => {
-        toast.error(err.response?.data?.message || 'Error permanently deleting item!', {
-          position: 'top-right',
-          autoClose: 3000,
-          theme: 'colored'
-        });
-        console.error('Delete error:', err.response?.data || err.message);
-      });
-  }, [JOB_APPLICATION_API, jobs, volunteers]);
 
   const handleToggleStatus = useCallback(async (item) => {
     const isVolunteer = !!item.programTitle;
@@ -415,7 +383,6 @@ const JobApplicationsPost = () => {
         console.error('Error:', err.response?.data || err.message);
         return;
       })
-        // .finally(() => setLoading(false));
 
     if (isVolunteer) {
       const updatedVolunteers = volunteers.map(v =>
@@ -429,7 +396,7 @@ const JobApplicationsPost = () => {
       setJobs(updatedJobs);
     }
 
-  }, [jobs, volunteers]);
+  }, [jobs, volunteers, JOB_APPLICATION_API, token, email, adminId]);
 
   // Get counts
   const allJobs = jobs?.filter(job => !job.isDeleted).length;
@@ -482,7 +449,6 @@ const JobApplicationsPost = () => {
                       onDelete={handleDeleteClick}
                       onToggleStatus={handleToggleStatus}
                       onRestore={handleRestore}
-                      onPermanentDelete={handlePermanentDelete}
                       isJobExpired={isJobExpired}
                       formatDate={formatDate}
                       isAdminView={true}
@@ -525,7 +491,6 @@ const JobApplicationsPost = () => {
                       onDelete={handleDeleteClick}
                       onToggleStatus={handleToggleStatus}
                       onRestore={handleRestore}
-                      onPermanentDelete={handlePermanentDelete}
                       formatDate={formatDate}
                       isAdminView={true}
                       isDeletedView={activeFilter === 'deleted'}
@@ -726,22 +691,21 @@ const JobApplicationsPost = () => {
             </div>
             
             <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Are you sure you want to delete "{itemToDelete?.title || itemToDelete?.programTitle}"? 
-              This will move it to the deleted items section.
+              Are you sure you want to delete "{itemToDelete?.title || itemToDelete?.programTitle}"?
             </p>
             
             <div className="flex gap-3 justify-end">
               <button
                 onClick={cancelDelete}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="px-6 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
               >
-                Cancel
+                No
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
               >
-                Delete
+                Yes, Delete
               </button>
             </div>
           </div>

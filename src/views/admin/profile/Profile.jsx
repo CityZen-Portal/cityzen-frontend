@@ -43,6 +43,9 @@ export default function ProfileCard() {
 
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+
   const [user, setUser] = useState({
     user_name: "",
     citizen_id: "",
@@ -54,12 +57,15 @@ export default function ProfileCard() {
     gender: "",
     pincode: "",
     state: "",
+    profileUrl: "",
   });
   const [complaints, setComplaints] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [originalUser, setOriginalUser] = useState(null);
   const [originalImage, setOriginalImage] = useState(avatar);
+
   const [selectedImage, setSelectedImage] = useState(avatar);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // --- Fetch user data ---
   async function fetchUser(email) {
@@ -80,6 +86,7 @@ export default function ProfileCard() {
         gender: data.gender || "",
         pincode: data.pincode || "not update yet",
         state: data.state || "not update yet",
+        profileUrl: data.profileUrl,
       };
     } catch (err) {
       if (err.response?.status === 404) {
@@ -101,6 +108,7 @@ export default function ProfileCard() {
       };
     }
   }
+
   async function fetchBookings(citizenId) {
     try {
       const res = await axios.get(
@@ -140,7 +148,6 @@ export default function ProfileCard() {
       setLoading(true);
       const userData = await fetchUser(email);
       const bookingsData = await fetchBookings(citizenId);
-
       const complaintsData = await fetchComplaints(
         HELPDESK_API,
         token,
@@ -181,11 +188,35 @@ export default function ProfileCard() {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(URL.createObjectURL(file));
+      setSelectedFile(file);
     }
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     try {
+      let uploadedPath = user.profileUrl;
+
+      // Upload image only if a new file is selected
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("name", "User");
+        formData.append("imageFile", selectedFile);
+
+        const mediaApiRes = await axios.post(
+          "https://media-api-service-hzx2.onrender.com/api/images/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        uploadedPath = mediaApiRes?.data?.data?.path || uploadedPath;
+      }
+
       const payload = {
         citizenId: user.citizen_id,
         userName: user.user_name,
@@ -197,15 +228,37 @@ export default function ProfileCard() {
         state: user.state,
         pincode: user.pincode,
         dob: user.dob,
+        profileUrl: uploadedPath,
       };
+
       await axios.put(
         `https://auth-backend-2-k3ph.onrender.com/citizen-profiles/${user.citizen_id}`,
         payload
       );
-      setOriginalUser(user);
+
+      setUser((prev) => ({ ...prev, profileUrl: uploadedPath }));
+      setOriginalUser({ ...user, profileUrl: uploadedPath });
       setEditMode(false);
     } catch (error) {
       console.error("Failed to save user:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (isCancelling) return;
+    setIsCancelling(true);
+    try {
+      // Simulate minimal async to show loader if needed, or keep sync
+      // await new Promise((r) => setTimeout(r, 300));
+      setUser(originalUser);
+      setSelectedImage(originalImage);
+      setEditMode(false);
+    } catch (e) {
+      console.error("Cancel failed:", e);
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -232,6 +285,13 @@ export default function ProfileCard() {
     ["state", "State", <MdLocationOn />],
   ];
 
+  // Simple inline spinner
+  const Spinner = ({ size = "h-4 w-4", color = "border-white" }) => (
+    <span
+      className={`inline-block ${size} border-t-transparent animate-spin rounded-full border-2 ${color}`}
+    />
+  );
+
   if (loading) {
     return (
       <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm">
@@ -251,7 +311,7 @@ export default function ProfileCard() {
         <div className="flex w-full flex-col items-center rounded-2xl bg-blue-600 p-6 shadow-lg lg:w-1/3">
           <div className="relative mb-2">
             <img
-              src={selectedImage || avatar}
+              src={user.profileUrl || avatar}
               alt="User"
               className="h-56 w-56 rounded-full border-2 border-white object-cover shadow-md"
             />
@@ -286,7 +346,7 @@ export default function ProfileCard() {
                   setOriginalUser(user);
                   setEditMode(true);
                 }}
-                className="flex items-center gap-1 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-yellow-500"
+                className="flex items-center gap-2 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-yellow-500"
               >
                 <FaEdit /> Edit
               </button>
@@ -294,19 +354,27 @@ export default function ProfileCard() {
               <>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-1 rounded-full bg-green-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-green-700"
+                  disabled={isSaving}
+                  className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white shadow ${
+                    isSaving
+                      ? "cursor-not-allowed bg-green-400"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
                 >
-                  <FaSave /> Save
+                  {isSaving ? <Spinner /> : <FaSave />}
+                  {isSaving ? "Saving..." : "Save"}
                 </button>
                 <button
-                  onClick={() => {
-                    setUser(originalUser);
-                    setSelectedImage(avatar);
-                    setEditMode(false);
-                  }}
-                  className="flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-red-700"
+                  onClick={handleCancel}
+                  disabled={isCancelling}
+                  className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white shadow ${
+                    isCancelling
+                      ? "cursor-not-allowed bg-red-400"
+                      : "bg-red-600 hover:bg-red-700"
+                  }`}
                 >
-                  <FaTimes /> Cancel
+                  {isCancelling ? <Spinner /> : <FaTimes />}
+                  {isCancelling ? "Cancelling..." : "Cancel"}
                 </button>
               </>
             )}
@@ -357,6 +425,8 @@ export default function ProfileCard() {
                     <p className="text-sm font-medium">
                       {key === "aadhaar"
                         ? `**** **** ${user[key]?.slice(-4)}`
+                        : key === "dob"
+                        ? formatDate(user[key])
                         : user[key]}
                     </p>
                   </div>

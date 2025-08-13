@@ -4,21 +4,21 @@ import { Heart, MapPin, Calendar, Clock, Users, Eye } from 'lucide-react';
 const VolunteerCard = ({ volunteer, onViewDetails, formatDate }) => {
   return (
     <div
-      className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+      className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer flex flex-col"
       onClick={() => onViewDetails(volunteer.id)}
     >
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-start justify-between mb-4">
           <h3 className="text-xl font-bold line-clamp-2 flex-1 text-blue-600 dark:text-blue-400">
             {volunteer.programTitle}
           </h3>
         </div>
 
-        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-6">
+        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-6 min-h-[40px]">
           {volunteer.programDescription}
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex-grow">
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <Heart size={16} />

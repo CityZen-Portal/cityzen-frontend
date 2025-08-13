@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import axios from "axios";
 import Pagination from "components/pagination";
 import { MdArrowUpward, MdArrowDownward, MdSort } from "react-icons/md";
-import { useNavigate } from "react-router-dom"; // Add this at the top
+import { useNavigate } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
 import {
   FaTools,
   FaCalendarAlt,
@@ -25,6 +24,7 @@ const CitizenServiceRequests = () => {
   const itemsPerPage = 5;
   const [data, setData] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const detailsRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,28 +61,25 @@ const CitizenServiceRequests = () => {
     if (statusFilter === "ALL") return data;
     return data.filter(
       (request) =>
-        request.status &&
-        request.status === statusFilter.toUpperCase()
+        request.taskStatus &&
+        request.taskStatus.toUpperCase().trim() === statusFilter.toUpperCase()
     );
   }, [data, statusFilter]);
-  // console.log(filteredData);
+
   const sortedRequests = useMemo(() => {
     return [...filteredData].sort((a, b) => {
       let aVal = a[sortField];
       let bVal = b[sortField];
-
       if (sortField.toLowerCase().includes("date")) {
         aVal = aVal ? new Date(aVal) : new Date(0);
         bVal = bVal ? new Date(bVal) : new Date(0);
         return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
       }
-
       if (typeof aVal === "string" && typeof bVal === "string") {
         return sortDirection === "asc"
           ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-
       return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
     });
   }, [filteredData, sortField, sortDirection]);
@@ -103,7 +100,16 @@ const CitizenServiceRequests = () => {
     }
     setCurrentPage(1);
   };
+
   const navigate = useNavigate();
+
+  const handleViewClick = (request) => {
+    setViewingDetails(request);
+    setTimeout(() => {
+      detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
   return (
     <div className="text-slate-800 dark:text-slate-100 rounded-2xl bg-white p-6 dark:bg-navy-800">
       <div className="mb-4 flex gap-4">
@@ -121,7 +127,7 @@ const CitizenServiceRequests = () => {
                 : "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
             }`}
           >
-            {status}
+            {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
           </button>
         ))}
       </div>
@@ -225,7 +231,7 @@ const CitizenServiceRequests = () => {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => setViewingDetails(request)}
+                      onClick={() => handleViewClick(request)}
                       className="rounded-lg bg-indigo-100 px-4 py-1.5 text-xs font-medium text-indigo-700 transition-all hover:bg-indigo-200 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-500"
                     >
                       View
@@ -258,39 +264,34 @@ const CitizenServiceRequests = () => {
       )}
 
       {viewingDetails && (
-        <div className="mt-8 rounded-xl border border-gray-200 p-6 shadow-md dark:border-navy-600 dark:bg-navy-700 dark:text-white">
+        <div
+          ref={detailsRef}
+          className="mt-8 rounded-xl border border-gray-200 p-6 shadow-md dark:border-navy-600 dark:bg-navy-700 dark:text-white"
+        >
           <h2 className="mb-6 text-xl font-semibold text-indigo-700 dark:text-indigo-400">
             Service Request Details
           </h2>
-
           <p className="flex items-center gap-3 text-lg">
             <FaTools className="text-blue-500" /> {viewingDetails.serviceName}
           </p>
-
           <p className="flex items-center gap-3 text-lg">
             <FaCalendarAlt className="text-orange-500" />{" "}
             {viewingDetails.requestedDate}
           </p>
-
           <p className="flex items-center gap-3 text-lg">
             <FaUser className="text-pink-500" /> {viewingDetails.citizenName}
           </p>
-
           <p className="flex items-center gap-3 text-lg">
             <FaUserTie className="text-yellow-500" /> {viewingDetails.staffName}
           </p>
-
           <p className="flex items-center gap-3 text-lg">
             <FaCheckCircle className="text-green-500" />{" "}
             {formatDate(viewingDetails.completedDate) || "N/A"}
           </p>
-
           <p className="flex items-center gap-3 text-lg">
             <FaInfoCircle className="text-purple-500" />{" "}
             {viewingDetails.description || "N/A"}
           </p>
-
-          {/* Conditional Action Buttons */}
           <div className="mt-6 flex flex-wrap gap-3">
             {viewingDetails.status.toLowerCase() === "pending" && (
               <button

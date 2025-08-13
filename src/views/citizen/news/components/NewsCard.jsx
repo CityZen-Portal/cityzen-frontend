@@ -23,6 +23,10 @@ export default function NewsCard() {
           "https://city-news-alert-backend-new.onrender.com/api/news/get-all"
         );
         const records = response.data.data.records || [];
+         records.sort((a, b) => {
+        if (a.breaking === b.breaking) return 0;
+        return a.breaking ? -1 : 1;
+      });
         setData(records);
         setFilteredData(records); 
       } catch (err) {
@@ -96,6 +100,11 @@ export default function NewsCard() {
                   className="h-48 w-full object-cover"
                 />
                 <div className="p-4">
+                  {/* {news.breaking && (
+              <span className="inline-block bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full dark:bg-red-900/30 dark:text-red-400">
+                🔥 Important
+              </span>
+            )} */}
                   <h2 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white">
                     {news.title}
                   </h2>
