@@ -81,7 +81,7 @@ const VolunteerEditForm = () => {
           }
         })
         .catch(err => {
-          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
+          toast.error('Server Error!Unable to Fetch Job Posts Data', {
             position: 'top-right',
             autoClose: 3000,
             theme: 'colored'
@@ -235,7 +235,7 @@ const VolunteerEditForm = () => {
     })
     .catch(err => {
       console.error('Error:', err?.response?.data || err?.message);
-      toast.error(err.response?.data?.message || 'Server Error!Unable to Submit Post', {
+      toast.error('Server Error!Unable to Submit Post', {
         position: 'top-right',
         autoClose: 3000,
         theme: 'colored'
@@ -421,7 +421,7 @@ const VolunteerEditForm = () => {
                   Program Date <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MdCalendarToday className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <MdCalendarToday className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-100" size={20} />
                   <input
                     type="date"
                     value={formData.programDate}
