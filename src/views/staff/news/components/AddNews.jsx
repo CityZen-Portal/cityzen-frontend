@@ -346,7 +346,7 @@ const AddNews = () => {
           </div>
         </div>
 
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="flex items-center space-x-2 text-sm dark:text-white">
             <input
               type="checkbox"
@@ -357,7 +357,7 @@ const AddNews = () => {
             />
             <span>Breaking News</span>
           </label>
-        </div>
+        </div> */}
 
         <div className="mt-4 flex justify-end gap-3">
           <button

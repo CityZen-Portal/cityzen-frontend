@@ -132,11 +132,11 @@ export default function NewsDetails() {
             <span className="text-sm text-gray-500 dark:text-gray-300">
               Published: {formatDate(newsItem.created_date)}
             </span>
-            {newsItem.breaking && (
+            {/* {newsItem.breaking && (
               <span className="inline-block bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full dark:bg-red-900/30 dark:text-red-400">
                 🔥 Breaking News
               </span>
-            )}
+            )} */}
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold text-navy-900 dark:text-white mb-4 leading-tight">
