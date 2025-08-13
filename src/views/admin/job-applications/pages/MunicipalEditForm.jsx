@@ -33,6 +33,7 @@ import {
   MdDescription,
   MdBusiness
 } from 'react-icons/md';
+import loading_gif from '../../../../assets/gif/loading-gif.gif'
 
 import axios from 'axios';
 
@@ -80,7 +81,7 @@ const MunicipalEditForm = () => {
 
   // Fetch Job Post Details
   useEffect(() => {
-    // setLoading(true);
+    setLoading(true);
   
     axios.get(`${JOB_APPLICATION_API}/jobs/${id}`,
       {
@@ -92,26 +93,24 @@ const MunicipalEditForm = () => {
       }
     )
       .then(res => {
-          console.log('Response:', res.data.data);
-          const data = res.data.data
-          if(data){
-            setFormData(data)
-          }
-        })
-        .catch(err => {
-          toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
-            position: 'top-right',
-            autoClose: 3000,
-            theme: 'colored'
-          });
-          console.error('Error:', err.response?.data || err.message);
-        })
-        .finally(() => {
-          // setLoading(false);
+        console.log('Response:', res.data.data);
+        const data = res.data.data
+        if(data){
+          setFormData(data)
+        }
+      })
+      .catch(err => {
+        toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Job Posts Data', {
+          position: 'top-right',
+          autoClose: 3000,
+          theme: 'colored'
         });
+        console.error('Error:', err.response?.data || err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
         
-    // setLoading(true);
-
   }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
 
   // Handle form field changes
@@ -198,6 +197,7 @@ const MunicipalEditForm = () => {
 
   // Handle form submission
   const handleSubmit = useCallback(() => {
+    setLoading(true)
     const newErrors = validateForm();
 
     const putData = {
@@ -233,7 +233,7 @@ const MunicipalEditForm = () => {
       return;
     })
     .finally(() => {
-      // setLoadingSubmit(false);
+      setLoading(false);
     });
     
     // if (Object.keys(newErrors).length === 0) {
@@ -296,6 +296,15 @@ const MunicipalEditForm = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
+      {loading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm h-full">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
       {/* Toast Container */}
       <ToastContainer
         position="top-right"

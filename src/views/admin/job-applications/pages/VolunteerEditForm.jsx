@@ -28,6 +28,7 @@ import {
   MdEmail,
   MdSave
 } from 'react-icons/md';
+import loading_gif from '../../../../assets/gif/loading-gif.gif'
 import axios from 'axios';
 
 
@@ -133,14 +134,15 @@ const VolunteerEditForm = () => {
 
   // Handle form submission
   const handleSubmit = useCallback(() => {
+    setLoading(true)
     const newErrors = validateForm();
 
     const putData = {
       ...formData,
-      programTime: `${formData.programTime}:00`
+      programTime: `${formData.programTime}`
     }
 
-    axios.put(`${JOB_APPLICATION_API}/service`, putData,
+    axios.put(`${JOB_APPLICATION_API}/service/${id}`, putData,
       {
         headers:{
           token,
@@ -218,19 +220,28 @@ const VolunteerEditForm = () => {
     navigate('/admin/job-application');
   }, [navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading volunteer opportunity data...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+  //         <p className="text-gray-600 dark:text-gray-400">Loading volunteer opportunity data...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
+      {loading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm h-full">
+          <img
+            src={loading_gif}
+            alt="Loading..."
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+        </div>
+      )}
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
