@@ -120,7 +120,7 @@ const MunicipalEditForm = () => {
         setLoading(false);
       });
 
-  }, [token, email, citizenId, JOB_APPLICATION_API, id, navigate])
+  }, [token, email, citizenId, JOB_APPLICATION_API, navigate])
 
   // Handle form field changes
   const handleInputChange = (field, value) => {
