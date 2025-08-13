@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { FaMapMarkerAlt } from "react-icons/fa";
+import loading_gif from "../../../../../assets/gif/loading-gif.gif";
+
 const CustomCalendar = () => {
   const API_BASE_URL = "https://auth-backend-2-k3ph.onrender.com/api";
   const adminId = "ADM007";
@@ -11,21 +14,11 @@ const CustomCalendar = () => {
   const [showModal, setShowModal] = useState(false);
   const [eventText, setEventText] = useState("");
   const [eventLocation, setEventLocation] = useState("");
-  const [fromHour, setFromHour] = useState("");
-  const [fromMinute, setFromMinute] = useState("");
-  const [fromPeriod, setFromPeriod] = useState("AM");
-  const [toHour, setToHour] = useState("");
-  const [toMinute, setToMinute] = useState("");
-  const [toPeriod, setToPeriod] = useState("AM");
+  const [eventDescription, setEventDescription] = useState("");
   const [events, setEvents] = useState({});
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);
   const [editingEventId, setEditingEventId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [activeReminders, setActiveReminders] = useState([]);
-  const [showReminderModal, setShowReminderModal] = useState(false);
-  const [currentReminder, setCurrentReminder] = useState(null);
-  const [reminderTime, setReminderTime] = useState("none");
-  const [eventDescription, setEventDescription] = useState("");
 
   const fetchEvents = async () => {
     try {
@@ -51,11 +44,8 @@ const CustomCalendar = () => {
           id: event.id,
           name: event.title,
           location: event.location,
-          startTime: event.startTime,
-          endTime: event.endTime,
           date: event.date,
           description: event.description,
-          reminderTime: event.reminderTime,
         });
       });
 
@@ -76,14 +66,7 @@ const CustomCalendar = () => {
   const resetForm = () => {
     setEventText("");
     setEventLocation("");
-    setFromHour("");
-    setFromMinute("");
-    setFromPeriod("AM");
-    setToHour("");
-    setToMinute("");
-    setToPeriod("AM");
     setEditingEventId(null);
-    setReminderTime("none");
     setEventDescription("");
   };
 
@@ -91,87 +74,19 @@ const CustomCalendar = () => {
     setSelectedDate(date);
   };
 
-  useEffect(() => {
-    const checkReminders = () => {
-      const now = dayjs();
-      const upcomingReminders = [];
-
-      // Check all events for reminders
-      Object.entries(events).forEach(([date, eventList]) => {
-        eventList.forEach((event) => {
-          if (event.reminderTime && event.reminderTime !== "none") {
-            // Calculate reminder time based on event start time and reminder setting
-            const [startTime, period] = event.startTime.split(" ");
-            let [hours, minutes] = startTime.split(":").map(Number);
-
-            // Convert to 24-hour format
-            if (period === "PM" && hours !== 12) hours += 12;
-            if (period === "AM" && hours === 12) hours = 0;
-
-            const eventDateTime = dayjs(
-              `${date}T${hours.toString().padStart(2, "0")}:${minutes
-                .toString()
-                .padStart(2, "0")}:00`
-            );
-
-            // Calculate reminder time based on reminder setting
-            let reminderDateTime;
-            switch (event.reminderTime) {
-              case "5min":
-                reminderDateTime = eventDateTime.subtract(5, "minute");
-                break;
-              case "10min":
-                reminderDateTime = eventDateTime.subtract(10, "minute");
-                break;
-              case "30min":
-                reminderDateTime = eventDateTime.subtract(30, "minute");
-                break;
-              default:
-                return;
-            }
-
-            if (reminderDateTime.isAfter(now.subtract(1, "minute"))) {
-              upcomingReminders.push({
-                ...event,
-                date,
-                reminderTime: event.reminderTime,
-              });
-            }
-          }
-        });
-      });
-
-      if (upcomingReminders.length > 0) {
-        setActiveReminders(upcomingReminders);
-        setCurrentReminder(upcomingReminders[0]);
-        setShowReminderModal(true);
-      }
-    };
-
-    const interval = setInterval(checkReminders, 30000);
-    return () => clearInterval(interval);
-  }, [events]);
-
   const handleAddEvent = async () => {
-    if (!eventText) {
+    if (!eventText.trim()) {
       toast.error("Event name is required");
       return;
     }
 
-    if (!fromHour || !fromMinute || !toHour || !toMinute) {
-      toast.error("Please enter valid start and end times");
-      return;
-    }
-
+    setLoading(true);
     try {
       const eventData = {
         title: eventText,
         adminId: adminId,
         date: selectedDate.format("YYYY-MM-DD"),
-        startTime: `${fromHour}:${fromMinute} ${fromPeriod}`,
-        endTime: `${toHour}:${toMinute} ${toPeriod}`,
         location: eventLocation,
-        reminderTime: reminderTime,
         description: eventDescription,
       };
 
@@ -201,55 +116,15 @@ const CustomCalendar = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save event");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
-
-  const ReminderModal = () => (
-    <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40">
-      <div className="w-96 rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
-        <h3 className="mb-4 text-lg font-semibold dark:text-white">Reminder</h3>
-        {currentReminder && (
-          <div className="dark:text-gray-200">
-            <p>
-              <strong className="dark:text-white">Event:</strong>{" "}
-              {currentReminder.name}
-            </p>
-            <p>
-              <strong className="dark:text-white">Time:</strong>{" "}
-              {currentReminder.startTime}
-            </p>
-            <p>
-              <strong className="dark:text-white">Location:</strong>{" "}
-              {currentReminder.location || "None"}
-            </p>
-          </div>
-        )}
-        <div className="mt-4 flex justify-between">
-          <button
-            onClick={() => {
-              const nextReminders = activeReminders.slice(1);
-              setActiveReminders(nextReminders);
-              setCurrentReminder(nextReminders[0] || null);
-              if (nextReminders.length === 0) setShowReminderModal(false);
-            }}
-            className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-          >
-            Dismiss
-          </button>
-          <button
-            onClick={() => setShowReminderModal(false)}
-            className="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-700"
-          >
-            Snooze (10 min)
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   const handleDeleteSelectedEvent = async () => {
     if (!selectedEventDetails) return;
 
+    setLoading(true);
     try {
       const eventId =
         selectedEventDetails.events[selectedEventDetails.selectedIndex].id;
@@ -261,13 +136,14 @@ const CustomCalendar = () => {
         },
       });
 
-      // Refresh events after deletion
       await fetchEvents();
       setSelectedEventDetails(null);
       toast.success("Event deleted successfully!");
     } catch (err) {
       toast.error("Failed to delete event");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -286,24 +162,10 @@ const CustomCalendar = () => {
     const { events, selectedIndex } = selectedEventDetails;
     const event = events[selectedIndex];
 
-    // Parse time from existing event
-    const [startTime, startPeriod] = event.startTime.split(" ");
-    const [startHour, startMinute] = startTime.split(":");
-
-    const [endTime, endPeriod] = event.endTime.split(" ");
-    const [endHour, endMinute] = endTime.split(":");
-
     setSelectedDate(dayjs(event.date));
     setEventText(event.name);
     setEventLocation(event.location || "");
-    setFromHour(startHour);
-    setFromMinute(startMinute);
-    setFromPeriod(startPeriod);
-    setToHour(endHour);
-    setToMinute(endMinute);
-    setToPeriod(endPeriod);
     setEditingEventId(event.id);
-    setReminderTime(event.reminderTime || "none");
     setEventDescription(event.description || "");
 
     setShowModal(true);
@@ -321,7 +183,7 @@ const CustomCalendar = () => {
 
   const weekdays = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-  if (loading) {
+  if (loading && !showModal && !selectedEventDetails) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
@@ -331,10 +193,12 @@ const CustomCalendar = () => {
 
   return (
     <div className="mx-auto w-full max-w-sm">
+      {/* Month navigation */}
       <div className="mb-3 flex items-center justify-between">
         <button
           onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
           className="rounded-full bg-indigo-600 px-2 py-1 text-lg text-white hover:bg-indigo-700"
+          disabled={loading}
         >
           &lt;
         </button>
@@ -344,17 +208,20 @@ const CustomCalendar = () => {
         <button
           onClick={() => setCurrentDate(currentDate.add(1, "month"))}
           className="rounded-full bg-indigo-600 px-2 py-1 text-lg text-white hover:bg-indigo-700"
+          disabled={loading}
         >
           &gt;
         </button>
       </div>
 
+      {/* Weekdays */}
       <div className="grid grid-cols-7 gap-1 text-center text-sm font-semibold text-gray-600 dark:text-gray-300">
         {weekdays.map((day) => (
           <div key={day}>{day}</div>
         ))}
       </div>
 
+      {/* Days */}
       <div className="mt-2 grid grid-cols-7 gap-1">
         {days.map((date, idx) => {
           const dateKey = date?.format("YYYY-MM-DD");
@@ -371,6 +238,7 @@ const CustomCalendar = () => {
                       ? "bg-indigo-600 text-white"
                       : "text-gray-800 hover:bg-gray-200 dark:text-gray-100 dark:hover:bg-gray-700"
                   }`}
+                  disabled={loading}
                 >
                   {date.date()}
                 </button>
@@ -386,6 +254,7 @@ const CustomCalendar = () => {
                     onClick={() => openEventDetails(dateKey, i)}
                     className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border border-white bg-green-500 dark:border-gray-800"
                     title={event.name}
+                    disabled={loading}
                   ></button>
                 ))}
             </div>
@@ -401,170 +270,159 @@ const CustomCalendar = () => {
             setShowModal(true);
           }}
           className="rounded bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+          disabled={loading}
         >
           + Add Event
         </button>
       </div>
 
-      {/* Reminder Modal */}
-      {showReminderModal && <ReminderModal />}
-
       {/* Add/Edit Event Modal */}
       {showModal && (
-        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40">
-          <div className="max-h-[90vh] w-96 overflow-auto rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
-            <h3 className="mb-4 text-lg font-semibold dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-all duration-300">
+          <div className="relative max-h-[90vh] w-96 overflow-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800 animate-modalDrop">
+
+            {/* Loading Overlay inside modal */}
+            {loading && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm rounded-2xl">
+                <img
+                  src={loading_gif}
+                  alt="Loading..."
+                  className="w-12 h-12 sm:w-16 sm:h-16"
+                />
+              </div>
+            )}
+
+            {/* Close Icon */}
+            <button
+              onClick={() => {
+                if (loading) return;
+                resetForm();
+                setShowModal(false);
+              }}
+              disabled={loading}
+              className={`absolute right-4 top-4 text-gray-400 hover:text-red-500 transition-colors duration-200 ${
+                loading ? "cursor-not-allowed opacity-50" : ""
+              }`}
+            >
+              ✕
+            </button>
+
+            {/* Heading */}
+            <h3 className="mb-5 text-xl font-bold text-gray-800 dark:text-white text-center border-b pb-3">
               {editingEventId
                 ? `Edit Event on ${selectedDate.format("DD MMM YYYY")}`
                 : `Add Event on ${selectedDate.format("DD MMM YYYY")}`}
             </h3>
 
+            {/* Event Name */}
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Event Name <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={eventText}
               onChange={(e) => setEventText(e.target.value)}
               placeholder="Enter event name"
-              className="mb-3 w-full rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white transition-all"
               required
+              disabled={loading}
             />
 
-            {/* From and To Time */}
-            <div className="mb-3 flex gap-2">
-              {/* From Time */}
-              <div className="w-1/2">
-                <label className="mb-1 block text-sm text-gray-600 dark:text-gray-300">
-                  From
-                </label>
-                <div className="flex">
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    placeholder="HH"
-                    value={fromHour}
-                    onChange={(e) => setFromHour(e.target.value)}
-                    className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  />
-                  <span className="px-1 py-2 dark:text-gray-300">:</span>
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    placeholder="MM"
-                    value={fromMinute}
-                    onChange={(e) => setFromMinute(e.target.value)}
-                    className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  />
-                  <select
-                    value={fromPeriod}
-                    onChange={(e) => setFromPeriod(e.target.value)}
-                    className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option>AM</option>
-                    <option>PM</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* To Time */}
-              <div className="w-1/2">
-                <label className="mb-1 block text-sm text-gray-600 dark:text-gray-300">
-                  To
-                </label>
-                <div className="flex">
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    placeholder="HH"
-                    value={toHour}
-                    onChange={(e) => setToHour(e.target.value)}
-                    className="w-1/3 rounded-l border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  />
-                  <span className="px-1 py-2 dark:text-gray-300">:</span>
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    placeholder="MM"
-                    value={toMinute}
-                    onChange={(e) => setToMinute(e.target.value)}
-                    className="w-1/3 border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  />
-                  <select
-                    value={toPeriod}
-                    onChange={(e) => setToPeriod(e.target.value)}
-                    className="w-1/3 rounded-r border px-2 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option>AM</option>
-                    <option>PM</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
             {/* Location */}
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Location
+            </label>
             <input
               type="text"
               value={eventLocation}
               onChange={(e) => setEventLocation(e.target.value)}
               placeholder="Enter location"
-              className="mb-3 w-full rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white transition-all"
+              disabled={loading}
             />
 
-            {/* Reminder */}
-            <select
-              value={reminderTime}
-              onChange={(e) => setReminderTime(e.target.value)}
-              className="mb-3 w-full rounded border px-3 py-2 text-gray-500 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="none">No reminder</option>
-              <option value="5min">5 minutes before</option>
-              <option value="10min">10 minutes before</option>
-              <option value="30min">30 minutes before</option>
-            </select>
-
             {/* Description */}
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
             <textarea
-              rows="2"
+              rows="3"
               value={eventDescription}
               onChange={(e) => setEventDescription(e.target.value)}
               placeholder="Add a short description"
-              className="mb-3 w-full resize-none rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              className="mb-6 w-full resize-none rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white transition-all"
+              disabled={loading}
             />
 
             {/* Buttons */}
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-3">
               <button
                 onClick={() => {
+                  if (loading) return;
                   resetForm();
                   setShowModal(false);
                 }}
-                className="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-700"
+                disabled={loading}
+                className={`rounded-lg border border-gray-300 bg-white px-5 py-2 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 transition-all ${
+                  loading ? "cursor-not-allowed opacity-50" : ""
+                }`}
               >
                 Cancel
               </button>
               <button
-                onClick={handleAddEvent}
-                className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+                onClick={() => {
+                  if (loading) return;
+                  handleAddEvent();
+                }}
+                disabled={loading}
+                className={`rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2 text-white font-medium shadow-md hover:opacity-90 transition-all ${
+                  loading ? "cursor-not-allowed opacity-50 hover:opacity-50" : ""
+                }`}
               >
-                {editingEventId ? "Update" : "Save"}
+                {loading ? (editingEventId ? "Updating..." : "Adding...") : editingEventId ? "Update" : "Add"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Show Event Details Modal with list */}
+      {/* Event Details Modal */}
       {selectedEventDetails && (
-        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-40">
-          <div className="max-h-[80vh] w-96 overflow-auto rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
-            <h3 className="mb-4 text-lg font-semibold dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-all duration-300">
+          <div className="relative max-h-[80vh] w-96 overflow-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800 animate-modalDrop">
+
+            {/* Loading Overlay inside modal */}
+            {loading && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm rounded-2xl">
+                <img
+                  src={loading_gif}
+                  alt="Loading..."
+                  className="w-12 h-12 sm:w-16 sm:h-16"
+                />
+              </div>
+            )}
+
+            {/* Close Icon */}
+            <button
+              onClick={() => {
+                if (loading) return;
+                setSelectedEventDetails(null);
+              }}
+              disabled={loading}
+              className={`absolute right-4 top-4 text-gray-400 hover:text-red-500 transition-colors duration-200 ${
+                loading ? "cursor-not-allowed opacity-50" : ""
+              }`}
+            >
+              ✕
+            </button>
+
+            {/* Heading */}
+            <h3 className="mb-5 text-xl font-bold text-gray-800 dark:text-white text-center border-b pb-3">
               Events on {dayjs(selectedEventDetails.date).format("DD MMM YYYY")}
             </h3>
 
-            {/* Event list */}
-            <div className="mb-4 max-h-32 overflow-y-auto rounded border p-2 dark:border-gray-600">
+            {/* Event List */}
+            <div className="mb-5 max-h-32 overflow-y-auto rounded-lg border border-gray-300 bg-gray-50 p-2 dark:border-gray-600 dark:bg-gray-700">
               {selectedEventDetails.events.map((ev, idx) => (
                 <button
                   key={idx}
@@ -574,88 +432,87 @@ const CustomCalendar = () => {
                       selectedIndex: idx,
                     }))
                   }
-                  className={`block w-full rounded px-2 py-1 text-left ${
+                  disabled={loading}
+                  className={`block w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
                     idx === selectedEventDetails.selectedIndex
-                      ? "bg-indigo-600 text-white"
-                      : "hover:bg-indigo-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                      ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md"
+                      : "hover:bg-indigo-100 dark:text-gray-200 dark:hover:bg-gray-600"
                   }`}
                 >
-                  {ev.name} ({ev.startTime})
+                  {ev.name}
                 </button>
               ))}
             </div>
 
-            {/* Selected event details */}
-            {selectedEventDetails.events[
-              selectedEventDetails.selectedIndex
-            ] && (
-              <div className="dark:text-gray-200">
-                <p className="mb-2">
-                  <strong className="dark:text-white">Name:</strong>{" "}
-                  {
-                    selectedEventDetails.events[
-                      selectedEventDetails.selectedIndex
-                    ].name
-                  }
+            {/* Selected Event Details */}
+            {selectedEventDetails.events[selectedEventDetails.selectedIndex] && (
+              <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 space-y-2">
+
+                {/* Name */}
+                <p className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 font-semibold dark:text-white">
+                    📌 Name:
+                  </span>
+                  <span>
+                    {selectedEventDetails.events[selectedEventDetails.selectedIndex].name}
+                  </span>
                 </p>
-                <p className="mb-2">
-                  <strong className="dark:text-white">Time:</strong>{" "}
-                  {
-                    selectedEventDetails.events[
-                      selectedEventDetails.selectedIndex
-                    ].startTime
-                  }{" "}
-                  -{" "}
-                  {
-                    selectedEventDetails.events[
-                      selectedEventDetails.selectedIndex
-                    ].endTime
-                  }
-                </p>
-                {selectedEventDetails.events[selectedEventDetails.selectedIndex]
-                  .location && (
-                  <p className="mb-2">
-                    <strong className="dark:text-white">Location:</strong>{" "}
-                    {
-                      selectedEventDetails.events[
-                        selectedEventDetails.selectedIndex
-                      ].location
-                    }
+
+                {/* Location */}
+                {selectedEventDetails.events[selectedEventDetails.selectedIndex].location && (
+                  <p className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 font-semibold dark:text-white">
+                      <FaMapMarkerAlt className="text-red-500" />
+                      Location:
+                    </span>
+                    <span>
+                      {selectedEventDetails.events[selectedEventDetails.selectedIndex].location}
+                    </span>
                   </p>
                 )}
-                {selectedEventDetails.events[selectedEventDetails.selectedIndex]
-                  .description && (
-                  <p className="mb-2">
-                    <strong className="dark:text-white">Description:</strong>{" "}
-                    {
-                      selectedEventDetails.events[
-                        selectedEventDetails.selectedIndex
-                      ].description
-                    }
+
+                {/* Description */}
+                {selectedEventDetails.events[selectedEventDetails.selectedIndex].description && (
+                  <p className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 font-semibold dark:text-white">
+                      📝 Description:
+                    </span>
+                    <span>
+                      {selectedEventDetails.events[selectedEventDetails.selectedIndex].description}
+                    </span>
                   </p>
                 )}
+
               </div>
             )}
 
             {/* Buttons */}
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="mt-5 flex justify-end gap-3">
               <button
                 onClick={openEditModalFromDetails}
-                className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+                disabled={loading}
+                className={`rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2 text-white font-medium shadow-md hover:opacity-90 transition-all ${
+                  loading ? "cursor-not-allowed opacity-50 hover:opacity-50" : ""
+                }`}
               >
                 Edit
               </button>
               <button
-                onClick={() => {
-                  handleDeleteSelectedEvent();
-                }}
-                className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                onClick={handleDeleteSelectedEvent}
+                disabled={loading}
+                className={`rounded-lg bg-gradient-to-r from-red-500 to-pink-500 px-5 py-2 text-white font-medium shadow-md hover:opacity-90 transition-all ${
+                  loading ? "cursor-not-allowed opacity-50 hover:opacity-50" : ""
+                }`}
               >
                 Delete
               </button>
               <button
-                onClick={() => setSelectedEventDetails(null)}
-                className="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-700"
+                onClick={() => {
+                  if (loading) return;
+                  setSelectedEventDetails(null);
+                }}
+                disabled={loading}
+                className="rounded-lg border border-gray-300 bg-white px-5 py-2 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 transition-all"
               >
                 Close
               </button>
@@ -666,4 +523,5 @@ const CustomCalendar = () => {
     </div>
   );
 };
+
 export default CustomCalendar;
