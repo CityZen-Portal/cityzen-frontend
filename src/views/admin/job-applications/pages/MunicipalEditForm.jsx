@@ -97,7 +97,12 @@ const MunicipalEditForm = () => {
         console.log('Response:', res.data.data);
         const data = res.data.data
         if(data){
-          setFormData(data)
+          // Fix deadline formatting issue
+          const formattedData = {
+            ...data,
+            deadline: data.deadline ? formatDateForInput(data.deadline) : ''
+          };
+          setFormData(formattedData);
         }
       })
       .catch(err => {
@@ -135,7 +140,11 @@ const MunicipalEditForm = () => {
         setErrors(prev => ({ ...prev, requirements: '' }));
       }
     } else if (formData.requirements.includes(newRequirement.trim())) {
-      // Removed toast.warning for duplicate requirement
+      toast.warning('This requirement already exists', {
+        position: 'top-right',
+        autoClose: 2000,
+        theme: 'colored'
+      });
     }
   }, [newRequirement, formData.requirements, errors.requirements]);
 
@@ -268,7 +277,7 @@ const MunicipalEditForm = () => {
 
   // Handle form submission
   const handleSubmit = useCallback(() => {
-    setLoading(true)
+    setLoading(true);
     const newErrors = validateForm();
     
     if (Object.keys(newErrors).length > 0) {
@@ -282,6 +291,9 @@ const MunicipalEditForm = () => {
           theme: 'colored'
         });
       });
+      
+      // FIXED: Set loading to false when validation fails
+      setLoading(false);
       return;
     }
 
@@ -315,7 +327,6 @@ const MunicipalEditForm = () => {
         autoClose: 3000,
         theme: 'colored'
       });
-      return;
     })
     .finally(() => {
       setLoading(false);
@@ -466,20 +477,23 @@ const MunicipalEditForm = () => {
               </div>
             </div>
             
-            {/* Job Description */}
-            <div className="mt-6 space-y-2">
+            {/* Description */}
+            <div className="space-y-2 mt-6">
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Job Description <span className="text-red-500">*</span>
               </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Provide a detailed description of the job responsibilities and duties..."
-                rows={4}
-                className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                  errors.description ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                }`}
-              />
+              <div className="relative">
+                <MdDescription className="absolute left-3 top-3 text-gray-400 dark:text-white" size={20} />
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Provide a detailed description of the job responsibilities, qualifications, and expectations..."
+                  rows={6}
+                  className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
+                    errors.description ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                  }`}
+                />
+              </div>
               {errors.description && (
                 <div className="flex items-center gap-2 text-red-600 text-sm">
                   <MdErrorOutline size={16} />
@@ -487,22 +501,13 @@ const MunicipalEditForm = () => {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Location & Timeline */}
-          <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <MdLocationOn className="text-blue-600 dark:text-blue-400" size={20} />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Location & Timeline</h2>
-            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Work Location */}
+            {/* Location and Deadline */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              {/* Location */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Work Location <span className="text-red-500">*</span>
+                  Location <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <MdLocationOn className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
@@ -510,7 +515,7 @@ const MunicipalEditForm = () => {
                     type="text"
                     value={formData.location}
                     onChange={(e) => handleInputChange('location', e.target.value)}
-                    placeholder="e.g., Coimbatore Municipal Corporation HQ"
+                    placeholder="e.g., City Hall, Downtown"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.location ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -551,11 +556,11 @@ const MunicipalEditForm = () => {
             </div>
           </div>
 
-          {/* Requirements */}
+          {/* Requirements Section */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <MdDescription className="text-blue-600 dark:text-blue-400" size={20} />
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                <MdDescription className="text-green-600 dark:text-green-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Job Requirements</h2>
             </div>
@@ -569,12 +574,11 @@ const MunicipalEditForm = () => {
                     value={newRequirement}
                     onChange={(e) => setNewRequirement(e.target.value)}
                     onKeyPress={handleRequirementKeyPress}
-                    placeholder="e.g., Bachelor's degree in Civil Engineering"
+                    placeholder="Enter a job requirement..."
                     className="w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   />
                 </div>
                 <button
-                  type="button"
                   onClick={addRequirement}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors flex items-center gap-2"
                 >
@@ -583,31 +587,37 @@ const MunicipalEditForm = () => {
                 </button>
               </div>
               
-              {/* Requirements List */}
-              {formData.requirements.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Added Requirements:
-                  </h3>
-                  {formData.requirements.map((requirement, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <span className="flex-1 text-gray-700 dark:text-gray-300">{requirement}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeRequirement(index)}
-                        className="p-1 text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <MdDelete size={18} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
               {errors.requirements && (
                 <div className="flex items-center gap-2 text-red-600 text-sm">
                   <MdErrorOutline size={16} />
                   {errors.requirements}
+                </div>
+              )}
+              
+              {/* Requirements List */}
+              {formData.requirements.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Current Requirements ({formData.requirements.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {formData.requirements.map((requirement, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-navy-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                      >
+                        <span className="text-gray-700 dark:text-gray-300 flex-1">
+                          {index + 1}. {requirement}
+                        </span>
+                        <button
+                          onClick={() => removeRequirement(index)}
+                          className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
+                        >
+                          <MdDelete size={18} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -616,8 +626,8 @@ const MunicipalEditForm = () => {
           {/* Contact Information */}
           <div className="bg-white dark:bg-navy-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <MdPerson className="text-blue-600 dark:text-blue-400" size={20} />
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                <MdPerson className="text-purple-600 dark:text-purple-400" size={20} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
             </div>
@@ -634,7 +644,7 @@ const MunicipalEditForm = () => {
                     type="text"
                     value={formData.contactPersonName}
                     onChange={(e) => handleInputChange('contactPersonName', e.target.value)}
-                    placeholder="e.g., Dr. Rajesh Kumar"
+                    placeholder="e.g., John Smith"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.contactPersonName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -659,7 +669,7 @@ const MunicipalEditForm = () => {
                     type="tel"
                     value={formData.contactPhoneNumber}
                     onChange={(e) => handleInputChange('contactPhoneNumber', e.target.value)}
-                    placeholder="e.g., +91 98765 43210"
+                    placeholder="e.g., +1 (555) 123-4567"
                     className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                       errors.contactPhoneNumber ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                     }`}
@@ -672,47 +682,50 @@ const MunicipalEditForm = () => {
                   </div>
                 )}
               </div>
-              
-              {/* Contact Email */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Contact Email <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
-                  <input
-                    type="email"
-                    value={formData.contactEmail}
-                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                    placeholder="e.g., rajesh.kumar@coimbatore.gov.in"
-                    className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                      errors.contactEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                    }`}
-                  />
-                </div>
-                {errors.contactEmail && (
-                  <div className="flex items-center gap-2 text-red-600 text-sm">
-                    <MdErrorOutline size={16} />
-                    {errors.contactEmail}
-                  </div>
-                )}
+            </div>
+            
+            {/* Contact Email */}
+            <div className="space-y-2 mt-6">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Contact Email <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white" size={20} />
+                <input
+                  type="email"
+                  value={formData.contactEmail}
+                  onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                  placeholder="e.g., hr@municipality.gov"
+                  className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                    errors.contactEmail ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                  }`}
+                />
               </div>
+              {errors.contactEmail && (
+                <div className="flex items-center gap-2 text-red-600 text-sm">
+                  <MdErrorOutline size={16} />
+                  {errors.contactEmail}
+                </div>
+              )}
             </div>
             
             {/* Contact Address */}
-            <div className="mt-6 space-y-2">
+            <div className="space-y-2 mt-6">
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Contact Address <span className="text-red-500">*</span>
               </label>
-              <textarea
-                value={formData.contactAddress}
-                onChange={(e) => handleInputChange('contactAddress', e.target.value)}
-                placeholder="e.g., Public Works Department, Coimbatore Municipal Corporation, Town Hall, Coimbatore - 641001"
-                rows={3}
-                className={`w-full px-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                  errors.contactAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                }`}
-              />
+              <div className="relative">
+                <MdLocationOn className="absolute left-3 top-3 text-gray-400 dark:text-white" size={20} />
+                <textarea
+                  value={formData.contactAddress}
+                  onChange={(e) => handleInputChange('contactAddress', e.target.value)}
+                  placeholder="Enter the complete contact address..."
+                  rows={3}
+                  className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-navy-800 dark:text-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
+                    errors.contactAddress ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
+                  }`}
+                />
+              </div>
               {errors.contactAddress && (
                 <div className="flex items-center gap-2 text-red-600 text-sm">
                   <MdErrorOutline size={16} />
@@ -723,22 +736,21 @@ const MunicipalEditForm = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 justify-end">
+          <div className="flex flex-col sm:flex-row gap-4 justify-end">
             <button
-              type="button"
               onClick={handleCancel}
-              className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+              className="px-8 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <MdClose size={20} />
               Cancel
             </button>
             <button
-              type="button"
               onClick={handleSubmit}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors flex items-center gap-2"
+              disabled={loading}
+              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <MdSave size={20} />
-              Update Job
+              {loading ? 'Updating...' : 'Update Job'}
             </button>
           </div>
         </div>
@@ -748,3 +760,4 @@ const MunicipalEditForm = () => {
 };
 
 export default MunicipalEditForm;
+
