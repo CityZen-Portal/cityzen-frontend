@@ -315,7 +315,7 @@ function ComplaintForm() {
       <div className="flex items-center gap-4 mb-6">
         <button
         onClick={handleBack}
-        className="bg-brand-500 text-white text-lg font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
+        className="bg-brand-500 text-white font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
         title="Back to helpdesk"
         >
         Back to Help Desk
