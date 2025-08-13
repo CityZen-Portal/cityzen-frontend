@@ -155,7 +155,7 @@ function ViewSchedule() {
                             <td className="px-4 py-3">
                               <span
                                 className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                                  task.taskStatus === "Completed"
+                                  task.taskStatus === "COMPLETED"
                                     ? "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300"
                                     : "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300"
                                 }`}
