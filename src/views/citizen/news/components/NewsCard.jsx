@@ -100,11 +100,11 @@ export default function NewsCard() {
                   className="h-48 w-full object-cover"
                 />
                 <div className="p-4">
-                  {news.breaking && (
+                  {/* {news.breaking && (
               <span className="inline-block bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full dark:bg-red-900/30 dark:text-red-400">
-                🔥 Breaking News
+                🔥 Important
               </span>
-            )}
+            )} */}
                   <h2 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white">
                     {news.title}
                   </h2>
