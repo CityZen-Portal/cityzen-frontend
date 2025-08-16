@@ -111,7 +111,6 @@ const UpdateComplaintDetails = () => {
     'in-progress',
     'on-hold',
     'resolved',
-    'closed',
     'rejected',
   ];
 
@@ -272,6 +271,7 @@ const UpdateComplaintDetails = () => {
         <ResponseCard 
           extra={'mt-8'}
           responses={complaint.responses}
+          staffName={complaint.staffName}
           />
 
         <StatusHistory

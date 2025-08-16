@@ -1,7 +1,7 @@
 import React from 'react'
 import { MdSend } from 'react-icons/md'
 
-const ResponseCard = ({extra, responses = []}) => {
+const ResponseCard = ({extra, responses = [], staffName}) => {
   const toLocalTime = (time) => {
     if(!time) return null;
 
@@ -38,9 +38,9 @@ const ResponseCard = ({extra, responses = []}) => {
             </div>
             {/* Resolution */}
             <div className="my-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
-                Resolution
-            </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
+                    Resolution
+                </label>
                 {responses.length === 0 && <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>N/A</p>}
                 {responses.map((response, index) => (
                     response.resolutionDetails && (
@@ -51,7 +51,7 @@ const ResponseCard = ({extra, responses = []}) => {
                             <div>
                                 <p className="text-md font-medium text-gray-900 dark:text-white">{response.resolutionDetails}</p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">{toLocalTime(response.respondedDate)}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{`Responded By ${response.respondedBy}`}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{`Responded By ${staffName}`}</p>
                             </div>
                         </div>
                     )

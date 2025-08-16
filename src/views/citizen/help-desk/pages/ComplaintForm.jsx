@@ -30,10 +30,9 @@ function ComplaintForm() {
   const [street, setStreet] = useState('');
   const [wardNumber, setWardNumber] = useState('');
 
-  const setLocationDetails = (street) => {
-    const details = street.split(",");
+  const setLocationDetails = (address) => {
 
-    if(details.length <= 5){
+    if(address.length <= 5){
       toast.error("Received unexpected response", {
         position: 'top-right',
         autoClose: 3000,
@@ -42,18 +41,11 @@ function ComplaintForm() {
       return;
     }
 
-    const response_pincode = details[details.length - 2].trim();
-    const response_state = details[details.length - 3].trim();
-    const response_district = details[details.length - 4].trim();
-    const response_taluk = details[details.length - 5].trim();
-
-    const response_localAddress = details.slice(0, details.length - 5).join(",").trim();
-
-    setStreet(response_localAddress)
-    setTaluk(response_taluk)
-    setDistrict(response_district)
-    setState(response_state)
-    setPincode(Number(response_pincode))
+    setStreet(address.road)
+    setTaluk(address.suburb)
+    setDistrict(address.state_district)
+    setState(address.state)
+    setPincode( Number(address.postcode))
   };
 
   const options = {method: 'GET', headers: {accept: 'application/json'}};
@@ -72,9 +64,11 @@ function ComplaintForm() {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
           const data = await response.json();
-          console.log(data); // Entire response
-          const fullAddress = data.display_name;
-          setLocationDetails(fullAddress); // Setting the Location details
+          
+          console.log(data);
+          const address = data.address;
+
+          setLocationDetails(address); // Setting the Location details
         } catch (error) {
           console.error("Error fetching location:", error);
           toast.error("Unable to fetch Location", {
@@ -106,6 +100,7 @@ function ComplaintForm() {
   const handleBack = () => {
     navigate('/citizen/help-desk');
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoadingSubmit(true);

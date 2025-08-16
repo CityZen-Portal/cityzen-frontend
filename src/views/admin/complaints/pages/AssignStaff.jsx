@@ -90,7 +90,7 @@ const AssignStaff = () => {
         });
       
 
-  }, [id, complaint.id, token, email, citizenId])
+  }, [id, complaint.id, token, email, citizenId, UTILITY_URL, HELPDESK_API, navigate])
 
   // Fetch Department List
   useEffect( () => {
@@ -113,7 +113,7 @@ const AssignStaff = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [])
+  }, [UTILITY_URL, HELPDESK_API])
 
   // Fetch Staff List
   useEffect( () => {
@@ -138,7 +138,7 @@ const AssignStaff = () => {
           setLoading(false);
         });
       }
-  }, [assignedDepartment])
+  }, [assignedDepartment, UTILITY_URL, HELPDESK_API])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -319,6 +319,7 @@ const AssignStaff = () => {
         <ResponseCard 
           extra={'mt-8'}
           responses={complaint.responses}
+          staffName={complaint.staffName}
           />
 
         <StatusHistory

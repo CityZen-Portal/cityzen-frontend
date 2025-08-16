@@ -110,6 +110,7 @@ const ComplaintDetails = () => {
               <ResponseCard 
                 extra={'mt-8'}
                 responses={complaint.responses}
+                staffName={complaint.staffName}
                 />
           </div>
 
