@@ -292,8 +292,7 @@ const MunicipalEditForm = () => {
         });
       });
       
-      // FIXED: Set loading to false when validation fails
-      setLoading(false);
+      setLoading(false)
       return;
     }
 
@@ -350,7 +349,9 @@ const MunicipalEditForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900"
+      style={{ overflow: loading ? 'hidden' : 'auto' }}
+    >
       {loading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm h-full">
           <img

@@ -209,6 +209,7 @@ const VolunteerEditForm = () => {
       setErrors(newErrors);
       const errorCount = Object.keys(newErrors).length;
       toast.error(`Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''} before submitting.`);
+      setLoading(false)
       return;
     }
 
@@ -242,7 +243,6 @@ const VolunteerEditForm = () => {
         autoClose: 3000,
         theme: 'colored'
       });
-      return;
     })
     .finally(() => {
       setLoading(false);
@@ -266,7 +266,9 @@ const VolunteerEditForm = () => {
   // }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900"
+      style={{ overflow: loading ? 'hidden' : 'auto' }}
+    >
       {loading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm h-full">
           <img

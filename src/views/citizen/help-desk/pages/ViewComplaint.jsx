@@ -12,8 +12,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import loading_gif from '../../../../assets/gif/loading-gif.gif';
 
+const ViewComplaint = ({User}) => {
+  const complaintLogNav = User === 'citizen' ? '/citizen/help-desk/complaint/log'
+                          : User === 'staff' ? '/staff/complaints'
+                            : User === 'admin' ? '/admin/complaints' : -1;
 
-const ComplaintDetails = () => {
   const navigate = useNavigate();
   
   const token = localStorage.getItem("token")
@@ -26,11 +29,28 @@ const ComplaintDetails = () => {
   const [loading, setLoading] = useState(false);
   const [complaint, setComplaint] = useState({});
 
+   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+
+    if (loading) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [loading, User]);
+
   // Fetch Complaint details
   useEffect(() => {
     setLoading(true);
   
-    axios.get(`${HELPDESK_API}/citizen/complaints/${id}`,
+    axios.get(`${HELPDESK_API}/${User}/complaints/${id}`,
       {
         headers:{
           token,
@@ -56,15 +76,16 @@ const ComplaintDetails = () => {
         .finally(() => {
           setLoading(false);
         });
-  }, [id, complaint.id, token, email, citizenId, HELPDESK_API, navigate])
+  }, [id, token, email, citizenId, HELPDESK_API, navigate, User])
 
   return (
     <div 
       className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
       style={{ overflow: loading ? 'hidden' : 'auto' }}
     >
-      {loading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+      {/* Loading */}
+      { loading && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
           <img
             src={loading_gif}
             alt="Loading..."
@@ -110,6 +131,7 @@ const ComplaintDetails = () => {
               <ResponseCard 
                 extra={'mt-8'}
                 responses={complaint.responses}
+                staffName={complaint.staffName}
                 />
           </div>
 
@@ -137,7 +159,7 @@ const ComplaintDetails = () => {
         <div className="mt-8">
           <button
             onClick={() => {
-              navigate(-1)  
+              navigate(complaintLogNav)  
               window.scrollTo(0,0)
             }}
             className="bg-brand-500 text-white font-bold px-4 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-full sm:w-auto outline-none focus:ring-2 focus:ring-brand-600"
@@ -151,4 +173,4 @@ const ComplaintDetails = () => {
   );
 };
 
-export default ComplaintDetails;
+export default ViewComplaint;

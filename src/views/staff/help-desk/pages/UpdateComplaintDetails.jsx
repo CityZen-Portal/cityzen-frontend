@@ -56,6 +56,23 @@ const UpdateComplaintDetails = () => {
   const [resolution, setResolution] = useState("")
   const [status, setStatus] = useState("")
 
+  
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+    
+    if (loading) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [loading]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -111,7 +128,6 @@ const UpdateComplaintDetails = () => {
     'in-progress',
     'on-hold',
     'resolved',
-    'closed',
     'rejected',
   ];
 
@@ -151,8 +167,9 @@ const UpdateComplaintDetails = () => {
       className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
       style={{ overflow: loading ? 'hidden' : 'auto' }}
     >
-      {loading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+      {/* Loading */}
+      { loading && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
           <img
             src={loading_gif}
             alt="Loading..."
@@ -272,6 +289,7 @@ const UpdateComplaintDetails = () => {
         <ResponseCard 
           extra={'mt-8'}
           responses={complaint.responses}
+          staffName={complaint.staffName}
           />
 
         <StatusHistory

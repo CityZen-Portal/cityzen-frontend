@@ -55,6 +55,24 @@ const AssignStaff = () => {
     setAssignedStaff('');
   };
 
+  
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+    
+    if (loading) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [loading]);
+
   // Fetch Complaint Details
   useEffect(() => {
     setLoading(true);
@@ -72,8 +90,10 @@ const AssignStaff = () => {
           console.log('Complaint:', res.data.data);
           const data = res.data.data
           setComplaint(data ? data : {})
-          // setAssignedDepartment(data.assignedDepartment)
-          // setAssignedStaff(data.assignedStaff)
+          
+          console.log(res)
+          setAssignedDepartment(data.assignedDepartment)
+          setAssignedStaff(data.assignedStaff)
         })
         .catch(err => {
           toast.error(err.response?.data?.message || 'Server Error!Unable to Fetch Complaint Data', {
@@ -90,12 +110,13 @@ const AssignStaff = () => {
         });
       
 
-  }, [id, complaint.id, token, email, citizenId])
+  }, [id, complaint.id, token, email, citizenId, UTILITY_URL, HELPDESK_API, navigate])
 
   // Fetch Department List
   useEffect( () => {
     setLoading(true)
     
+    // Fetch Department
     axios.get(`${UTILITY_URL}/api/service/all`)
     .then(res => {
         console.log('Department:', res.data.data);
@@ -113,7 +134,7 @@ const AssignStaff = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [])
+  }, [UTILITY_URL, HELPDESK_API])
 
   // Fetch Staff List
   useEffect( () => {
@@ -138,7 +159,7 @@ const AssignStaff = () => {
           setLoading(false);
         });
       }
-  }, [assignedDepartment])
+  }, [assignedDepartment, UTILITY_URL, HELPDESK_API])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -207,8 +228,9 @@ const AssignStaff = () => {
       className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
       style={{ overflow: loading ? 'hidden' : 'auto' }}
     >
-      {loading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+      {/* Loading */}
+      { loading && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
           <img
             src={loading_gif}
             alt="Loading..."
@@ -319,6 +341,7 @@ const AssignStaff = () => {
         <ResponseCard 
           extra={'mt-8'}
           responses={complaint.responses}
+          staffName={complaint.staffName}
           />
 
         <StatusHistory
