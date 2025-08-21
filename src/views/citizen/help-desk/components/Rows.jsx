@@ -1,16 +1,14 @@
-import React from 'react';
 import Row from './Row';
+import React from 'react';
 
-const Rows = ({ complaints, getStatusColor, getStatusText}) => {
+const Rows = ({ complaints, userRole }) => {
   return (
     <>
       {complaints.map((complaint) => (
-        <Row 
+        <Row
           key={complaint.id}
+          userRole={userRole}
           complaint={complaint}
-          getStatusColor={getStatusColor}
-          getStatusText={getStatusText}
-          link={`/citizen/help-desk/complaint/feedback/${complaint.id}`}
         />
       ))}
     </>

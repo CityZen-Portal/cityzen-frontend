@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import ComplaintTable from '../components/ComplaintTable';
+// import ComplaintTable from '../components/ComplaintTable';
 import { MdTrackChanges, MdPendingActions, MdAssignment, MdCheckCircleOutline, MdListAlt } from 'react-icons/md';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ComplaintTable from 'views/citizen/help-desk/components/ComplaintTable';
 
 const ComplaintLog = () => {
   const token = localStorage.getItem("token")
@@ -112,7 +113,7 @@ const ComplaintLog = () => {
       </div>
 
       {/* Table */}
-      <ComplaintTable extra={"mt-8"} complaints={complaints} loading={loading} />
+      <ComplaintTable extra={"mt-8"} userRole='staff' complaints={complaints} loading={loading} />
 
       <ToastContainer />
     </div>

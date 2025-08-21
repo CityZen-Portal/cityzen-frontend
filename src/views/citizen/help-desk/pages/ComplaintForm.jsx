@@ -296,9 +296,12 @@ function ComplaintForm() {
 
   return (
     <div 
-      className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8">
-      {loadingSubmit && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+      className="relative flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-10 px-4 sm:px-2 lg:px-8"
+      style={{ overflow: loadingSubmit ? 'hidden' : 'auto' }}
+    >
+      {/* Loading */}
+      { loadingSubmit && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
           <img
             src={loading_gif}
             alt="Loading..."
@@ -461,6 +464,7 @@ function ComplaintForm() {
 
           <div className="text-center pt-2 sm:pt-4">
             <button
+              disabled={loadingSubmit}
               type="submit"
               className="bg-brand-500 text-white font-bold px-9 py-2 rounded-md hover:bg-brand-600 text-sm transition-colors duration-200 w-max sm:w-auto outline-none focus:ring-2 focus:ring-brand-500"
             >

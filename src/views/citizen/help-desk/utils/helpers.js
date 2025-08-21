@@ -1,5 +1,14 @@
 // utils.js
 
+export const statusOptions = [
+  'pending',
+  'under-review',
+  'in-progress',
+  'on-hold',
+  'resolved',
+  'rejected',
+];
+
 export const statusPriority = {
   pending:       1,
   "under-review": 2,

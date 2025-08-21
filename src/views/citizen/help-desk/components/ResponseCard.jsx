@@ -30,7 +30,7 @@ const ResponseCard = ({extra, responses = [], staffName}) => {
                         <div>
                         <p className="text-md font-medium text-gray-900 dark:text-white">{response.responseDetails}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{toLocalTime(response.respondedDate)}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{`Responded By ${response.respondedBy}`}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{`Responded By ${staffName}`}</p>
                         </div>
                     </div>
                 ))}

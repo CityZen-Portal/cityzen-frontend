@@ -10,7 +10,8 @@ import HelpDesk from "views/citizen/help-desk";
 import ComplaintForm from "views/citizen/help-desk/pages/ComplaintForm";
 import ComplaintLog from "views/citizen/help-desk/pages/ComplaintLog";
 import ComplaintFeedback from "views/citizen/help-desk/pages/ComplaintFeedback";
-import ComplaintDetails from "views/citizen/help-desk/pages/ComplaintDetails";
+import ViewComplaint from "views/citizen/help-desk/pages/ViewComplaint";
+import ComplaintTable from "views/citizen/help-desk/components/ComplaintTable";
 
 // Admin Views
 import AdminDashboard from "views/admin/dashboard/index";
@@ -28,7 +29,6 @@ import AdminPro from "views/admin/services/component/AdminPro";
 import FeedbackManage from "views/admin/services/component/FeedbackManage";
 import ComplaintManagement from "views/admin/complaints";
 import AssignStaff from "views/admin/complaints/pages/AssignStaff";
-import ViewComplaint from "views/admin/complaints/pages/ViewComplaint";
 
 // Staff Views
 import StaffDashboard from "views/staff/dashboard";
@@ -37,7 +37,6 @@ import CityNews from "views/staff/news";
 import StaffService from "views/staff/services";
 import ComplaintTracker from "views/staff/help-desk";
 import UpdateComplaintDetails from "views/staff/help-desk/pages/UpdateComplaintDetails";
-import ComplaintInfo from "views/staff/help-desk/pages/ComplaintInfo";
 import AddNews from "views/staff/news/components/AddNews";
 import ViewNews from "views/staff/news/components/ViewNews";
 import NewsUpdate from "views/citizen/news/components/NewsUpdate";
@@ -68,8 +67,6 @@ import {
   MdBuild,
   MdWork,
 } from "react-icons/md";
-
-import JobApplicationPage from "views/citizen/job-application";
 
 import ReportForm from "views/citizen/services/components/ReportForm";
 import { layout } from "@chakra-ui/system";
@@ -179,6 +176,27 @@ const routes = [
       },
     ],
   },
+  {
+    name: "Job Application",
+    layout: "/citizen",
+    path: "job-application",
+    icon: <MdWork className="h-6 w-6" />,
+    component: <JobApplicationSystem />,
+    children: [
+      {
+        name: "Job Details",
+        layout: "/citizen",
+        path: "job-application/job/:id",
+        component: <JobDetailsPage />,
+      },
+      {
+        name: "Volunteer Details",
+        layout: "/citizen",
+        path: "job-application/volunteer/:id",
+        component: <VolunteerDetailsPage />,
+      },
+    ],
+  },
 
   {
     name: "Help Desk",
@@ -208,29 +226,14 @@ const routes = [
       {
         name: "View Complaint",
         layout: "/citizen",
-        path: "help-desk/complaint/view/:id",
-        component: <ComplaintDetails />,
-      },
-    ],
-  },
-  {
-    name: "Job Application",
-    layout: "/citizen",
-    path: "job-application",
-    icon: <MdWork className="h-6 w-6" />,
-    component: <JobApplicationSystem />,
-    children: [
-      {
-        name: "Job Details",
-        layout: "/citizen",
-        path: "job-application/job/:id",
-        component: <JobDetailsPage />,
+        path: "help-desk/complaint/:id",
+        component: <ViewComplaint User={'citizen'}/>,
       },
       {
-        name: "Volunteer Details",
+        name: "Complaint Table",
         layout: "/citizen",
-        path: "job-application/volunteer/:id",
-        component: <VolunteerDetailsPage />,
+        path: "help-desk/complaint/table",
+        component: <ComplaintTable />,
       },
     ],
   },
@@ -282,27 +285,6 @@ const routes = [
       },
     ],
   },
-  {
-    name: "Complaint Management",
-    layout: "/admin",
-    path: "complaints",
-    icon: <MdAssignment className="h-6 w-6" />,
-    component: <ComplaintManagement />,
-    children: [
-      {
-        name: "View Complaint",
-        layout: "/admin",
-        path: "complaints/view/:id",
-        component: <ComplaintDetails />,
-      },
-      {
-        name: "Edit Staff Assignment",
-        layout: "/admin",
-        path: "complaints/update/:id",
-        component: <AssignStaff />,
-      },
-    ],
-  },
 
   {
     name: "Job Applications",
@@ -346,6 +328,27 @@ const routes = [
         layout: "/admin",
         path: "job-application/volunteer-details/:id",
         component: <AdminVolunteerDetailsPage />,
+      },
+    ],
+  },
+  {
+    name: "Complaint Management",
+    layout: "/admin",
+    path: "complaints",
+    icon: <MdAssignment className="h-6 w-6" />,
+    component: <ComplaintManagement />,
+    children: [
+      {
+        name: "View Complaint",
+        layout: "/admin",
+        path: "complaints/view/:id",
+        component: <ViewComplaint User={'admin'} />,
+      },
+      {
+        name: "Edit Staff Assignment",
+        layout: "/admin",
+        path: "complaints/update/:id",
+        component: <AssignStaff />,
       },
     ],
   },
@@ -406,31 +409,10 @@ const routes = [
         name: "View Complaint Details",
         layout: "/staff",
         path: "complaints/view-details/:id",
-        component: <ComplaintDetails />,
+        component: <ViewComplaint User={'staff'} />,
       },
     ],
   },
-  // {
-  //   name: "Job Application",
-  //   layout: "/staff",
-  //   path: "job-application",
-  //   icon: <MdWork className="h-6 w-6" />,
-  //   component: <JobApplicationSystem/>,
-  //   children: [
-  //     {
-  //       name: "Job Details",
-  //       layout: "/staff",
-  //       path: "job-application/job/:id",
-  //       component: <JobDetailsPage />,
-  //     },
-  //     {
-  //       name: "Volunteer Details",
-  //       layout: "/staff",
-  //       path: "job-application/volunteer/:id",
-  //       component: <VolunteerDetailsPage />,
-  //     },
-  //   ],
-  // },
   {
     name: "City News & Alerts",
     layout: "/staff",
